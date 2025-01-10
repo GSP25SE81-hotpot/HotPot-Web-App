@@ -1,0 +1,38 @@
+.demo-logo-vertical {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  z-index: 0;
+}
+
+:where(
+    .css-dev-only-do-not-override-42nv3w
+  ).ant-menu-light.ant-menu-root.ant-menu-inline,
+:where(.css-dev-only-do-not-override-42nv3w).ant-menu-light
+  > .ant-menu.ant-menu-root.ant-menu-inline,
+:where(
+    .css-dev-only-do-not-override-42nv3w
+  ).ant-menu-light.ant-menu-root.ant-menu-vertical,
+:where(.css-dev-only-do-not-override-42nv3w).ant-menu-light
+  > .ant-menu.ant-menu-root.ant-menu-vertical {
+  border-inline-end: none !important;
+}
+
+
+.layout-admin {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; // Ensures the layout takes at least the full viewport height
+}
+
+.content {
+  flex: 1; // Allows the content to expand and push the footer to the bottom
+  background: var(--color-bg-container);
+  border-radius: var(--border-radius-lg);
+}
+
+.footer {
+  text-align: center;
+  font-size: 25px;
+}
