@@ -10,6 +10,7 @@ import ManageRentals from "../pages/ManageRentals/ManageRentals";
 // import RequireAuth from "./RequireAuth";
 // import { Role } from "./Roles";
 import ManageRentalStatus from '../pages/ManageRentals/ManageRentalStatus';
+import EquipmentAvailability from "../pages/ManageRentals/EquipmentAvailability";
 
 const AppRoute: React.FC = () => {
   return (
@@ -18,6 +19,8 @@ const AppRoute: React.FC = () => {
         <Route key="home" path={config.routes.home} element={<Home />} />
         <Route path={config.routes.manageRentals} element={<ManageRentals />} />
         <Route path={config.routes.manageRentalStatus} element= {<ManageRentalStatus/>} />
+        <Route path={config.routes.equipmentAvailability} element= {<EquipmentAvailability/>} />
+
 
       </Route>
     </Routes>
