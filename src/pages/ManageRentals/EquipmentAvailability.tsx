@@ -15,7 +15,6 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import BuildIcon from "@mui/icons-material/Build";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LocalDiningIcon from '@mui/icons-material/LocalDining'; // New icon for hotpot equipment
-import EngineeringIcon from '@mui/icons-material/Engineering';
 
 // Custom theme with updated typography
 const theme = createTheme({
@@ -135,7 +134,7 @@ const EquipmentAvailability: React.FC = () => {
     <ThemeProvider theme={theme}>
       <Box sx={{ 
         p: 3, 
-        backgroundColor: customColors.powderblue,
+        backgroundColor: customColors.ivory,
         minHeight: '100vh',
       }}>
         <Stack spacing={4}>

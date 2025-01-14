@@ -3,6 +3,7 @@ export const routes = {
   manageRentals: "/manage-rentals",
   manageRentalStatus:"/manage-rental-status",
   equipmentAvailability:"/equipment-availability", 
+  checkDevice:"/check-device",
   contractHistory: "/contract-history",
   manageOrders: "/manage-orders",
   feedback: "/feedback",

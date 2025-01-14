@@ -81,7 +81,7 @@ const ActionButton = styled(Button)(({ theme }) => ({
 }));
 
 const DashboardContainer = styled(Box)({
-  backgroundColor: customColors.powderblue,
+  backgroundColor: customColors.ivory,
   minHeight: "100vh",
   padding: "32px",
 });

@@ -6,36 +6,71 @@ const Footer: React.FC = () => {
   return (
     <footer>
       <div className="footer-container">
+        {/* About Section */}
         <div className="column">
-          <h3>VỀ CHÚNG TÔI</h3>
+          <h3>ABOUT US</h3>
           <ul>
             <li>
-              <Link to="/about-us">Giới thiệu SMMMS</Link>
-            </li>
-            <li>Liên hệ</li>
-            <li>
-              <Link to="/privacy-policy">
-                Chính sách bảo mật thông tin cá nhân
-              </Link>
+              <Link to="/about-us">Our Story</Link>
             </li>
             <li>
-              <Link to="/terms-of-service">Điều khoản sử dụng</Link>
+              <Link to="/contact">Contact Us</Link>
+            </li>
+            <li>
+              <Link to="/privacy-policy">Privacy Policy</Link>
+            </li>
+            <li>
+              <Link to="/terms-of-service">Terms of Service</Link>
             </li>
           </ul>
         </div>
+
+        {/* Support Section */}
         <div className="column">
-          <h3>HỖ TRỢ KHÁCH HÀNG</h3>
+          <h3>CUSTOMER SUPPORT</h3>
           <ul>
-            <li>Chính sách vận chuyển, giao nhận</li>
-            <li>Quy định và hình thức thanh toán</li>
-            <li>Chính sách bảo hành, đổi trả</li>
-            <li>Chính sách đổi, trả & hoàn tiền</li>
-            <li>Chính sách giải quyết khiếu nại</li>
+            <li>
+              <Link to="/shipping-policy">Shipping & Delivery</Link>
+            </li>
+            <li>
+              <Link to="/payment-methods">Payment Methods</Link>
+            </li>
+            <li>
+              <Link to="/warranty-policy">Warranty & Returns</Link>
+            </li>
+            <li>
+              <Link to="/refund-policy">Refund Policy</Link>
+            </li>
+            <li>
+              <Link to="/complaint-policy">Complaint Handling</Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Quick Links Section */}
+        <div className="column">
+          <h3>STAFF QUICK LINKS</h3>
+          <ul>
+            <li>
+              <Link to="/dashboard">Dashboard</Link>
+            </li>
+            <li>
+              <Link to="/manage-contracts">Manage Contracts</Link>
+            </li>
+            <li>
+              <Link to="/equipment-status">Equipment Status</Link>
+            </li>
+            <li>
+              <Link to="/maintenance-schedule">Maintenance Schedule</Link>
+            </li>
+            <li>
+              <Link to="/feedback">Customer Feedback</Link>
+            </li>
           </ul>
         </div>
       </div>
       <div className="copyright">
-        &copy; 2024 Công Ty Cổ Phần SMMMS. All rights reserved.
+        &copy; 2024 Hotpot Rental Co. All rights reserved.
       </div>
     </footer>
   );

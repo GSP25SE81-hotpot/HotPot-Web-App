@@ -24,7 +24,7 @@ const RightMenu: React.FC = () => {
                 to={config.routes.home}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                <Button variant="outlined">Đăng nhập/Đăng kí</Button>
+                <Button variant="outlined">Đăng nhập</Button>
               </Link>
             </>
           )}
