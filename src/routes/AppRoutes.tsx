@@ -7,6 +7,7 @@ import ManageRentals from "../pages/ManageRentals/ManageRentals";
 import ManageRentalStatus from '../pages/ManageRentals/ManageRentalStatus';
 import EquipmentAvailability from "../pages/ManageRentals/EquipmentAvailability";
 import CheckDeviceAfterReturn from "../pages/CheckDeviceAfterReturn/CheckDeviceAfterReturn";
+import ManageOrder from "../pages/ManageOrder/ManageOrder";
 
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
@@ -21,6 +22,8 @@ const AppRoute: React.FC = () => {
         <Route path={config.routes.manageRentalStatus} element= {<ManageRentalStatus/>} />
         <Route path={config.routes.equipmentAvailability} element= {<EquipmentAvailability/>} />
         <Route path={config.routes.checkDevice} element= {<CheckDeviceAfterReturn/>} />
+        <Route path={config.routes.manageOrders} element= {<ManageOrder/>} />
+
 
       </Route>
     </Routes>
