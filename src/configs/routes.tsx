@@ -5,6 +5,7 @@ export const routes = {
   equipmentAvailability:"/equipment-availability", 
   checkDevice:"/check-device",
   contractHistory: "/contract-history",
+  workAssignment:"/work-assignment",
   manageOrders: "/manage-orders",
   feedback: "/feedback",
 };
