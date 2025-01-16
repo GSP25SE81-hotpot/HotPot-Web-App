@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import {
   Box,
@@ -12,7 +13,6 @@ import {
   createTheme,
   Chip,
   Tooltip,
-  SelectChangeEvent,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -135,7 +135,7 @@ const getStatusIcon = (status: string) => {
     case 'Completed':
       return <DoneAllIcon sx={{ color: customColors.maroon }} />;
     default:
-      return null;
+      return <DoneAllIcon sx={{ color: customColors.maroon }} />;
   }
 };
 
@@ -240,7 +240,7 @@ const ManageHotpotRentals: React.FC = () => {
 
                   <StyledSelect
                     value={rental.status}
-                    onChange={(e: SelectChangeEvent) =>
+                    onChange={(e: any) =>
                       handleStatusChange(rental.id, e.target.value)
                     }
                   >

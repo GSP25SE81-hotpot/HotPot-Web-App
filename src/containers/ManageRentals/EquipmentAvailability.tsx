@@ -112,7 +112,7 @@ const getStatusIcon = (status: string) => {
     case 'Rented':
       return <BuildIcon sx={{ color: customColors.maroon }} />;
     default:
-      return null;
+      return <BuildIcon sx={{ color: customColors.maroon }} />;;
   }
 };
 
