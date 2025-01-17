@@ -9,8 +9,6 @@ import {
   Select,
   Button,
   Stack,
-  ThemeProvider,
-  createTheme,
   Chip,
   Tooltip,
   Dialog,
@@ -22,30 +20,6 @@ import { styled } from "@mui/material/styles";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
-
-// Custom theme with updated typography
-const theme = createTheme({
-  typography: {
-    fontFamily: [
-      'Inter',
-      '-apple-system',
-      'BlinkMacSystemFont',
-      '"Segoe UI"',
-      'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
-      'sans-serif'
-    ].join(','),
-    h4: {
-      fontWeight: 600,
-      letterSpacing: '-0.02em',
-    },
-    h6: {
-      fontWeight: 600,
-      letterSpacing: '-0.01em',
-    },
-  },
-});
 
 // Custom colors
 const customColors = {
@@ -152,7 +126,7 @@ const getStatusChipColor = (status: string) => {
   }
 };
 
-const ManageHotpotRentals: React.FC = () => {
+const ManageRentalStatus: React.FC = () => {
   const [rentals, setRentals] = useState<HotpotRental[]>(initialRentals);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRental, setSelectedRental] = useState<HotpotRental | null>(null);
@@ -181,7 +155,7 @@ const ManageHotpotRentals: React.FC = () => {
   };
 
   return (
-    <ThemeProvider theme={theme}>
+   
       <Box sx={{ 
         flexGrow: 1, 
         p: 3, 
@@ -273,8 +247,7 @@ const ManageHotpotRentals: React.FC = () => {
           </DialogActions>
         </Dialog>
       </Box>
-    </ThemeProvider>
   );
 };
 
-export default ManageHotpotRentals;
+export default ManageRentalStatus;

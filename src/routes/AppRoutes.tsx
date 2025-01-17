@@ -6,7 +6,7 @@ import StaffLayout from "../layouts/StaffLayout/StaffLayout";
 import { ManageRentalsPage } from "../pages/Staff/ManageRentals/ManageRentalsPage";
 import { ManageRentalStatusPage } from "../pages/Staff/ManageRentals/ManageRentalStatusPage";
 import { EquipmentAvailabilityPage } from "../pages/Staff/ManageRentals/EquipmentAvailabilityPage";
-import { CheckDevicePage } from "../pages/Staff/CheckDeviceAfterReturn/CheckDevicePage";
+import { CheckDeviceAfterReturnPage } from "../pages/Staff/CheckDeviceAfterReturn/CheckDeviceAfterReturnPage";
 import { ManageOrderPage } from "../pages/Staff/ManageOrder/ManageOrderPage";
 import { WorkAssignmentSchedulePage } from "../pages/Staff/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
 
@@ -23,7 +23,7 @@ const AppRoute: React.FC = () => {
         <Route path={config.routes.manageRentals} element={<ManageRentalsPage />} />
         <Route path={config.routes.manageRentalStatus} element= {<ManageRentalStatusPage/>} />
         <Route path={config.routes.equipmentAvailability} element= {<EquipmentAvailabilityPage/>} />
-        <Route path={config.routes.checkDevice} element= {<CheckDevicePage/>} />
+        <Route path={config.routes.checkDevice} element= {<CheckDeviceAfterReturnPage/>} />
         <Route path={config.routes.manageOrders} element= {<ManageOrderPage/>} />
         <Route path={config.routes.workAssignment} element= {<WorkAssignmentSchedulePage/>} />
       </Route>

@@ -8,10 +8,26 @@ const theme = createTheme({
     h2: {
       fontWeight: 600,
     },
-    body1: {
+    h4: { 
+      fontWeight: 600, 
+      letterSpacing: "-0.02em" 
+    },
+    h6: { 
+      fontWeight: 600, 
+      letterSpacing: "-0.01em" 
+    },
+    body1: { 
+      letterSpacing: "-0.01em", 
+      lineHeight: 1.5,
       fontWeight: 600,
     },
-    button: { textTransform: "none" },
+    body2: { 
+      letterSpacing: "0", 
+      lineHeight: 1.6 
+    },
+    button: { 
+      textTransform: "none" 
+    },
   },
 });
 

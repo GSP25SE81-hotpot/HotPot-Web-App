@@ -1,10 +1,13 @@
 import { Box } from "@mui/material";
-import ManageHotpotOrders from "../../../containers/ManageOrder/ManageOrder";
+import ManageOrder from "../../../containers/ManageOrder/ManageOrder";
+import OverrideMuiTheme from "../../../theme/override";
 
 export const ManageOrderPage = () => {
   return (
+    <OverrideMuiTheme>
     <Box>
-        <ManageHotpotOrders/>
+        <ManageOrder/>
     </Box>
+    </OverrideMuiTheme>
   )
 }

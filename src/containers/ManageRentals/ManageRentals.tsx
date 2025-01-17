@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Card,
   CardContent,
@@ -10,8 +9,6 @@ import {
   LinearProgress,
   Tooltip,
   Chip,
-  ThemeProvider,
-  createTheme,
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -21,25 +18,7 @@ import Grid2 from "@mui/material/Grid2";
 import { useNavigate } from "react-router-dom";
 import { styled } from "@mui/material/styles";
 
-// Custom theme
-const theme = createTheme({
-  typography: {
-    fontFamily: [
-      "Inter",
-      "-apple-system",
-      "BlinkMacSystemFont",
-      '"Segoe UI"',
-      "Roboto",
-      '"Helvetica Neue"',
-      "Arial",
-      "sans-serif",
-    ].join(","),
-    h4: { fontWeight: 600, letterSpacing: "-0.02em" },
-    h6: { fontWeight: 600, letterSpacing: "-0.01em" },
-    body1: { letterSpacing: "-0.01em", lineHeight: 1.5 },
-    body2: { letterSpacing: "0", lineHeight: 1.6 },
-  },
-});
+
 
 // Custom palette
 const customColors = {
@@ -98,7 +77,7 @@ const ManageRentals = () => {
   };
 
   return (
-    <ThemeProvider theme={theme}>
+    
       <DashboardContainer>
         <Box sx={{ maxWidth: "xl", margin: "0 auto" }}>
           <Grid2 container spacing={4}>
@@ -223,7 +202,7 @@ const ManageRentals = () => {
           </Grid2>
         </Box>
       </DashboardContainer>
-    </ThemeProvider>
+   
   );
 };
 

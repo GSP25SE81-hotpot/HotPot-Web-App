@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   Box,
   Typography,
@@ -24,37 +23,7 @@ const customColors = {
   black: "#000000",
 };
 
-// Custom theme
-const theme = createTheme({
-  typography: {
-    fontFamily: [
-      "Inter",
-      "-apple-system",
-      "BlinkMacSystemFont",
-      '"Segoe UI"',
-      "Roboto",
-      '"Helvetica Neue"',
-      "Arial",
-      "sans-serif",
-    ].join(","),
-    h4: { fontWeight: 600, letterSpacing: "-0.02em" },
-    h6: { fontWeight: 600, letterSpacing: "-0.01em" },
-    body1: { letterSpacing: "-0.01em", lineHeight: 1.5 },
-    body2: { letterSpacing: "0", lineHeight: 1.6 },
-  },
-  palette: {
-    background: {
-      default: customColors.ivory,
-      paper: customColors.ivory,
-    },
-    primary: { main: customColors.maroon },
-    secondary: { main: customColors.palegoldenrod },
-    info: { main: customColors.powderblue },
-    text: { primary: customColors.black },
-  },
-});
-
-const CheckHotpotEquipment: React.FC = () => {
+const CheckDeviceAfterReturn: React.FC = () => {
   const [equipment, setEquipment] = useState([
     { id: 1, name: "Electric Cooker", status: "Pending Inspection", issues: "" },
     { id: 2, name: "Pot Lid", status: "Pending Inspection", issues: "" },
@@ -76,15 +45,14 @@ const CheckHotpotEquipment: React.FC = () => {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Box sx={{ p: 3, bgcolor: "background.default" }}>
+      <Box sx={{ p: 3, bgcolor: customColors.ivory }}>
         <Typography variant="h4" component="h1" mb={3} color="primary">
           Check Hotpot Equipment After Return
         </Typography>
-        <TableContainer component={Paper} sx={{ bgcolor: "background.paper" }}>
+        <TableContainer component={Paper} sx={{ bgcolor: customColors.ivory }}>
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: "secondary.main" }}>
+              <TableRow sx={{ bgcolor: customColors.palegoldenrod }}>
                 <TableCell>Equipment Name</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Issues Logged</TableCell>
@@ -105,7 +73,7 @@ const CheckHotpotEquipment: React.FC = () => {
                       onChange={(e) => handleLogIssues(item.id, e.target.value)}
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          bgcolor: "background.paper",
+                          bgcolor: customColors.ivory,
                         },
                       }}
                     />
@@ -114,7 +82,7 @@ const CheckHotpotEquipment: React.FC = () => {
                     <Stack direction="row" spacing={1}>
                       <Button
                         variant="contained"
-                        sx={{ bgcolor: "info.main", color: "text.primary" }}
+                        sx={{ bgcolor: customColors.powderblue, color: customColors.maroon }}
                         onClick={() => handleStatusUpdate(item.id, "Cleaned")}
                       >
                         Mark Cleaned
@@ -122,8 +90,8 @@ const CheckHotpotEquipment: React.FC = () => {
                       <Button
                         variant="contained"
                         sx={{
-                          bgcolor: "secondary.main",
-                          color: "text.primary",
+                          bgcolor: customColors.palegoldenrod,
+                          color: customColors.maroon,
                         }}
                         onClick={() =>
                           handleStatusUpdate(item.id, "Needs Cleaning")
@@ -139,8 +107,7 @@ const CheckHotpotEquipment: React.FC = () => {
           </Table>
         </TableContainer>
       </Box>
-    </ThemeProvider>
   );
 };
 
-export default CheckHotpotEquipment;
+export default CheckDeviceAfterReturn;

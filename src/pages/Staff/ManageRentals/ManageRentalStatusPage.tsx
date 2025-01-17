@@ -1,10 +1,13 @@
 import { Box } from "@mui/material";
-import ManageHotpotRentals from "../../../containers/ManageRentals/ManageRentalStatus";
+import ManageRentalStatus from "../../../containers/ManageRentals/ManageRentalStatus";
+import OverrideMuiTheme from "../../../theme/override";
 
 export const ManageRentalStatusPage = () => {
   return (
+    <OverrideMuiTheme>
     <Box>
-        <ManageHotpotRentals/>
+        <ManageRentalStatus/>
     </Box>
+    </OverrideMuiTheme>
   )
 }

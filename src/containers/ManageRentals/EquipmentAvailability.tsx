@@ -6,8 +6,6 @@ import {
   Card,
   CardContent,
   Chip,
-  ThemeProvider,
-  createTheme,
   Tooltip,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -15,30 +13,6 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import BuildIcon from "@mui/icons-material/Build";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LocalDiningIcon from '@mui/icons-material/LocalDining'; // New icon for hotpot equipment
-
-// Custom theme with updated typography
-const theme = createTheme({
-  typography: {
-    fontFamily: [
-      'Inter',
-      '-apple-system',
-      'BlinkMacSystemFont',
-      '"Segoe UI"',
-      'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
-      'sans-serif',
-    ].join(','),
-    h4: {
-      fontWeight: 600,
-      letterSpacing: '-0.02em',
-    },
-    h6: {
-      fontWeight: 600,
-      letterSpacing: '-0.01em',
-    },
-  },
-});
 
 // Custom colors
 const customColors = {
@@ -131,7 +105,7 @@ const EquipmentAvailability: React.FC = () => {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   return (
-    <ThemeProvider theme={theme}>
+   
       <Box sx={{ 
         p: 3, 
         backgroundColor: customColors.ivory,
@@ -232,7 +206,6 @@ const EquipmentAvailability: React.FC = () => {
           </Stack>
         </Stack>
       </Box>
-    </ThemeProvider>
   );
 };
 

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   Box,
   Typography,
@@ -25,43 +24,6 @@ const customColors = {
   black: "#000000",
 };
 
-// Custom theme definition
-const theme = createTheme({
-  typography: {
-    fontFamily: [
-      "Inter",
-      "-apple-system",
-      "BlinkMacSystemFont",
-      '"Segoe UI"',
-      "Roboto",
-      '"Helvetica Neue"',
-      "Arial",
-      "sans-serif",
-    ].join(","),
-    h4: { fontWeight: 600, letterSpacing: "-0.02em" },
-    h6: { fontWeight: 600, letterSpacing: "-0.01em" },
-    body1: { letterSpacing: "-0.01em", lineHeight: 1.5 },
-    body2: { letterSpacing: "0", lineHeight: 1.6 },
-  },
-  palette: {
-    background: {
-      default: customColors.ivory,
-      paper: customColors.ivory,
-    },
-    primary: {
-      main: customColors.maroon,
-    },
-    secondary: {
-      main: customColors.palegoldenrod,
-    },
-    info: {
-      main: customColors.powderblue,
-    },
-    text: {
-      primary: customColors.black,
-    },
-  },
-});
 
 const WorkAssignmentSchedule: React.FC = () => {
   const [schedules, setSchedules] = useState([
@@ -108,15 +70,14 @@ const WorkAssignmentSchedule: React.FC = () => {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Box sx={{ p: 3, bgcolor: "background.default" }}>
+      <Box sx={{ p: 3, bgcolor: customColors.ivory }}>
         <Typography variant="h4" component="h1" mb={3} color="primary">
           Work Assignment Schedule
         </Typography>
-        <TableContainer component={Paper} sx={{ bgcolor: "background.paper" }}>
+        <TableContainer component={Paper} sx={{ bgcolor: customColors.ivory }}>
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: "secondary.main" }}>
+              <TableRow sx={{ bgcolor: customColors.palegoldenrod }}>
                 <TableCell sx={{ fontWeight: 600 }}>Staff Name</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Shift</TableCell>
@@ -148,16 +109,16 @@ const WorkAssignmentSchedule: React.FC = () => {
                       sx={{
                         width: "140px",
                         "& .MuiOutlinedInput-root": {
-                          bgcolor: "background.paper",
+                          bgcolor: customColors.ivory,
                           "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "primary.main",
+                            borderColor: customColors.maroon,
                           },
                         },
                         "& .MuiInputLabel-root": {
-                          color: "text.primary",
+                          color: customColors.black,
                         },
                         "& .MuiSelect-select": {
-                          color: "text.primary",
+                          color: customColors.black,
                         },
                       }}
                     >
@@ -181,7 +142,6 @@ const WorkAssignmentSchedule: React.FC = () => {
           </Table>
         </TableContainer>
       </Box>
-    </ThemeProvider>
   );
 };
 

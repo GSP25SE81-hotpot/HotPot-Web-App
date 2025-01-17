@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   Box,
   Typography,
@@ -24,43 +23,7 @@ const customColors = {
   black: "#000000",
 };
 
-// Create theme using customColors
-const theme = createTheme({
-  palette: {
-    background: {
-      default: customColors.ivory,
-      paper: customColors.ivory,
-    },
-    primary: {
-      main: customColors.maroon,
-    },
-    secondary: {
-      main: customColors.palegoldenrod,
-    },
-    text: {
-      primary: customColors.black,
-      secondary: customColors.powderblue,
-    },
-  },
-  typography: {
-    fontFamily: [
-      "Inter",
-      "-apple-system",
-      "BlinkMacSystemFont",
-      '"Segoe UI"',
-      "Roboto",
-      '"Helvetica Neue"',
-      "Arial",
-      "sans-serif",
-    ].join(","),
-    h4: { fontWeight: 600, letterSpacing: "-0.02em" },
-    h6: { fontWeight: 600, letterSpacing: "-0.01em" },
-    body1: { letterSpacing: "-0.01em", lineHeight: 1.5 },
-    body2: { letterSpacing: "0", lineHeight: 1.6 },
-  },
-});
-
-const ManageHotpotOrders: React.FC = () => {
+const ManageOrder: React.FC = () => {
   const [orders, setOrders] = useState([
     {
       id: 1,
@@ -106,15 +69,14 @@ const ManageHotpotOrders: React.FC = () => {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Box sx={{ p: 3, bgcolor: "background.default" }}>
+      <Box sx={{ p: 3, bgcolor: customColors.ivory }}>
         <Typography variant="h4" component="h1" mb={3} color="primary">
           Manage Hotpot Orders
         </Typography>
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: "secondary.main" }}>
+              <TableRow sx={{ bgcolor: customColors.palegoldenrod }}>
                 <TableCell sx={{ fontWeight: 600 }}>Customer Name</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Hotpot & Add-Ons</TableCell>
                 <TableCell sx={{ fontWeight: 600 }}>Order Status</TableCell>
@@ -129,7 +91,7 @@ const ManageHotpotOrders: React.FC = () => {
                     <Stack spacing={2}>
                       {order.items.map((item, index) => (
                         <Stack direction="row" spacing={2} key={index} alignItems="center">
-                          <Typography sx={{ color: "text.primary", minWidth: 150 }}>
+                          <Typography sx={{ color: customColors.black, minWidth: 150 }}>
                             {item.name}:
                           </Typography>
                           <TextField
@@ -146,12 +108,12 @@ const ManageHotpotOrders: React.FC = () => {
                             sx={{
                               width: "80px",
                               "& .MuiOutlinedInput-root": {
-                                bgcolor: "background.paper",
+                                bgcolor: customColors.ivory,
                                 "& fieldset": {
-                                  borderColor: "primary.main",
+                                  borderColor: customColors.maroon,
                                 },
                                 "&:hover fieldset": {
-                                  borderColor: "secondary.main",
+                                  borderColor: customColors.palegoldenrod,
                                 },
                               },
                             }}
@@ -178,8 +140,8 @@ const ManageHotpotOrders: React.FC = () => {
                       <Button
                         variant="contained"
                         sx={{
-                          bgcolor: "primary.main",
-                          color: "background.default",
+                          bgcolor: customColors.maroon,
+                          color: customColors.ivory,
                           "&:hover": {
                             bgcolor: customColors.powderblue,
                           },
@@ -192,10 +154,10 @@ const ManageHotpotOrders: React.FC = () => {
                         variant="contained"
                         sx={{
                           bgcolor: customColors.palegoldenrod,
-                          color: "text.primary",
+                          color: customColors.black,
                           "&:hover": {
                             bgcolor: customColors.black,
-                            color: "background.default",
+                            color: customColors.ivory,
                           },
                         }}
                         onClick={() => handleUpdateStatus(order.id, "Cancelled")}
@@ -210,8 +172,7 @@ const ManageHotpotOrders: React.FC = () => {
           </Table>
         </TableContainer>
       </Box>
-    </ThemeProvider>
   );
 };
 
-export default ManageHotpotOrders;
+export default ManageOrder;
