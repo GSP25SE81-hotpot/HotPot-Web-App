@@ -9,7 +9,7 @@ import { EquipmentAvailabilityPage } from "../pages/Staff/ManageRentals/Equipmen
 import { CheckDeviceAfterReturnPage } from "../pages/Staff/CheckDeviceAfterReturn/CheckDeviceAfterReturnPage";
 import { ManageOrderPage } from "../pages/Staff/ManageOrder/ManageOrderPage";
 import { WorkAssignmentSchedulePage } from "../pages/Staff/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
-
+import { DeliveryOrderPage } from "../pages/Staff/DeliveryOrder/DeliveryOrderPage";
 
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
@@ -20,12 +20,38 @@ const AppRoute: React.FC = () => {
     <Routes>
       <Route key="layout" path={config.routes.home} element={<StaffLayout />}>
         <Route key="home" path={config.routes.home} element={<Home />} />
-        <Route path={config.routes.manageRentals} element={<ManageRentalsPage />} />
-        <Route path={config.routes.manageRentalStatus} element= {<ManageRentalStatusPage/>} />
-        <Route path={config.routes.equipmentAvailability} element= {<EquipmentAvailabilityPage/>} />
-        <Route path={config.routes.checkDevice} element= {<CheckDeviceAfterReturnPage/>} />
-        <Route path={config.routes.manageOrders} element= {<ManageOrderPage/>} />
-        <Route path={config.routes.workAssignment} element= {<WorkAssignmentSchedulePage/>} />
+        <Route
+          path={config.routes.manageRentals}
+          element={<ManageRentalsPage />}
+        />
+        <Route
+          path={config.routes.manageRentalStatus}
+          element={<ManageRentalStatusPage />}
+        />
+        <Route
+          path={config.routes.equipmentAvailability}
+          element={<EquipmentAvailabilityPage />}
+        />
+        <Route
+          path={config.routes.checkDevice}
+          element={<CheckDeviceAfterReturnPage />}
+        />
+        <Route
+          path={config.routes.manageOrders}
+          element={<ManageOrderPage />}
+        />
+        <Route
+          path={config.routes.workAssignment}
+          element={<WorkAssignmentSchedulePage />}
+        />
+        <Route
+          path={config.routes.workAssignment}
+          element={<WorkAssignmentSchedulePage />}
+        />
+        <Route
+          path={config.routes.deliveryOrder}
+          element={<DeliveryOrderPage />}
+        />
       </Route>
     </Routes>
   );

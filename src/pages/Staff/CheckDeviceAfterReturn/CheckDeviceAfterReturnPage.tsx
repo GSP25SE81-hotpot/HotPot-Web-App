@@ -5,9 +5,9 @@ import OverrideMuiTheme from "../../../theme/override";
 export const CheckDeviceAfterReturnPage = () => {
   return (
     <OverrideMuiTheme>
-    <Box>
-        <CheckDeviceAfterReturn/>
-    </Box>
+      <Box>
+        <CheckDeviceAfterReturn />
+      </Box>
     </OverrideMuiTheme>
-  )
-}
+  );
+};

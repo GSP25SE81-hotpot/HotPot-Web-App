@@ -1,11 +1,12 @@
 export const routes = {
   home: "/",
   manageRentals: "/manage-rentals",
-  manageRentalStatus:"/manage-rental-status",
-  equipmentAvailability:"/equipment-availability", 
-  checkDevice:"/check-device",
+  manageRentalStatus: "/manage-rental-status",
+  equipmentAvailability: "/equipment-availability",
+  checkDevice: "/check-device",
   contractHistory: "/contract-history",
-  workAssignment:"/work-assignment",
+  workAssignment: "/work-assignment",
+  deliveryOrder: "/delivery-order",
   manageOrders: "/manage-orders",
   feedback: "/feedback",
 };
