@@ -10,6 +10,7 @@ import { CheckDeviceAfterReturnPage } from "../pages/Staff/CheckDeviceAfterRetur
 import { ManageOrderPage } from "../pages/Staff/ManageOrder/ManageOrderPage";
 import { WorkAssignmentSchedulePage } from "../pages/Staff/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
 import { DeliveryOrderPage } from "../pages/Staff/DeliveryOrder/DeliveryOrderPage";
+import { ChatWithCustomerPage } from "../pages/Staff/ChatWithCustomer/ChatWithCustomerPage";
 
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
@@ -51,6 +52,10 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.routes.deliveryOrder}
           element={<DeliveryOrderPage />}
+        />
+        <Route
+          path={config.routes.customerChat}
+          element={<ChatWithCustomerPage />}
         />
       </Route>
     </Routes>

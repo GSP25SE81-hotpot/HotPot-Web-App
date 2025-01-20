@@ -8,6 +8,7 @@ export const routes = {
   workAssignment: "/work-assignment",
   deliveryOrder: "/delivery-order",
   manageOrders: "/manage-orders",
+  customerChat: "/chat",
   feedback: "/feedback",
 };
 
