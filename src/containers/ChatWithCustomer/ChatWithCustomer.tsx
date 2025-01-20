@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   List,
@@ -6,93 +6,214 @@ import {
   TextField,
   Button,
   Typography,
+  Paper,
+  IconButton,
+  Fade,
+  Divider,
+  Avatar,
 } from "@mui/material";
+import { Send, Warning } from "@mui/icons-material";
 
-const ChatWithCustomer = () => {
-  const [messages, setMessages] = useState([]);
+interface Message {
+  sender: string;
+  text: string;
+  timestamp: Date;
+}
+
+const ChatWithCustomer: React.FC = () => {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSend = () => {
     if (input.trim()) {
-      setMessages([...messages, { sender: "Staff", text: input }]);
+      setMessages([
+        ...messages,
+        { sender: "Staff", text: input, timestamp: new Date() },
+      ]);
       setInput("");
     }
   };
 
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLDivElement | HTMLTextAreaElement>
+  ) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   const handleEscalate = () => {
-    // Logic to escalate the issue
     alert("The issue has been escalated to higher support.");
   };
 
   return (
-    <Box
+    <Paper
+      elevation={3}
       sx={{
         width: "400px",
         height: "500px",
-        border: "1px solid #ccc",
-        borderRadius: "8px",
+        borderRadius: "16px",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
-        p: 2,
+        overflow: "hidden",
+        bgcolor: "background.paper",
       }}
     >
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        Chat with Customer
-      </Typography>
+      {/* Header */}
+      <Box
+        sx={{
+          p: 2,
+          borderBottom: "1px solid",
+          borderColor: "divider",
+          bgcolor: (theme) => theme.palette.primary.main,
+          color: "white",
+        }}
+      >
+        <Typography variant="h6" fontWeight="500">
+          Customer Support
+        </Typography>
+        <Typography variant="caption" sx={{ opacity: 0.8 }}>
+          Responding typically within 5 minutes
+        </Typography>
+      </Box>
+
+      {/* Messages */}
       <List
         sx={{
           flex: 1,
           overflowY: "auto",
-          mb: 2,
-          border: "1px solid #eee",
-          borderRadius: "8px",
-          padding: 1,
+          p: 2,
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
         }}
       >
         {messages.map((msg, index) => (
-          <ListItem
-            key={index}
-            sx={{
-              display: "flex",
-              justifyContent:
-                msg.sender === "Staff" ? "flex-end" : "flex-start",
-            }}
-          >
-            <Box
+          <Fade in key={index}>
+            <ListItem
               sx={{
-                maxWidth: "70%",
-                padding: "8px 12px",
-                borderRadius: "12px",
-                backgroundColor: msg.sender === "Staff" ? "#e0f7fa" : "#f1f8e9",
+                display: "flex",
+                justifyContent:
+                  msg.sender === "Staff" ? "flex-end" : "flex-start",
+                p: 0,
               }}
             >
-              {msg.text}
-            </Box>
-          </ListItem>
+              {msg.sender !== "Staff" && (
+                <Avatar
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    mr: 1,
+                    bgcolor: "primary.main",
+                  }}
+                >
+                  C
+                </Avatar>
+              )}
+              <Box
+                sx={{
+                  maxWidth: "70%",
+                  p: "12px 16px",
+                  borderRadius:
+                    msg.sender === "Staff"
+                      ? "20px 20px 4px 20px"
+                      : "20px 20px 20px 4px",
+                  bgcolor: msg.sender === "Staff" ? "primary.main" : "grey.100",
+                  color: msg.sender === "Staff" ? "white" : "text.primary",
+                  boxShadow: 1,
+                }}
+              >
+                <Typography variant="body1">{msg.text}</Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: "block",
+                    mt: 0.5,
+                    opacity: 0.7,
+                  }}
+                >
+                  {msg.timestamp.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Typography>
+              </Box>
+            </ListItem>
+          </Fade>
         ))}
+        <div ref={messagesEndRef} />
       </List>
-      <Box sx={{ display: "flex", gap: 1 }}>
-        <TextField
-          fullWidth
+
+      <Divider />
+
+      {/* Input Area */}
+      <Box
+        sx={{
+          p: 2,
+          bgcolor: "background.default",
+        }}
+      >
+        <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
+          <TextField
+            fullWidth
+            multiline
+            maxRows={4}
+            size="small"
+            placeholder="Type your message..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown} // Updated to use onKeyDown
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "24px",
+                bgcolor: "background.paper",
+              },
+            }}
+          />
+          <IconButton
+            color="primary"
+            onClick={handleSend}
+            disabled={!input.trim()}
+            sx={{
+              bgcolor: "primary.main",
+              color: "white",
+              "&:hover": {
+                bgcolor: "primary.dark",
+              },
+              "&.Mui-disabled": {
+                bgcolor: "action.disabledBackground",
+                color: "action.disabled",
+              },
+            }}
+          >
+            <Send />
+          </IconButton>
+        </Box>
+        <Button
+          variant="outlined"
+          color="error"
+          startIcon={<Warning />}
+          onClick={handleEscalate}
           size="small"
-          placeholder="Type a message..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <Button variant="contained" color="primary" onClick={handleSend}>
-          Send
+          sx={{
+            borderRadius: "20px",
+            textTransform: "none",
+          }}
+        >
+          Escalate Issue
         </Button>
       </Box>
-      <Button
-        variant="outlined"
-        color="secondary"
-        sx={{ mt: 2 }}
-        onClick={handleEscalate}
-      >
-        Escalate
-      </Button>
-    </Box>
+    </Paper>
   );
 };
 
