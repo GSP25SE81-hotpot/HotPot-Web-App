@@ -1,24 +1,22 @@
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import WarningIcon from "@mui/icons-material/Warning";
 import {
+  Box,
+  Button,
   Card,
   CardContent,
-  Typography,
-  Button,
-  Box,
-  IconButton,
-  Stack,
-  LinearProgress,
-  Tooltip,
   Chip,
+  IconButton,
+  LinearProgress,
+  Stack,
+  Tooltip,
+  Typography,
 } from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import WarningIcon from "@mui/icons-material/Warning";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import Grid2 from "@mui/material/Grid2";
-import { useNavigate } from "react-router-dom";
+import Grid from "@mui/material/Grid2";
 import { styled } from "@mui/material/styles";
-
-
+import { useNavigate } from "react-router-dom";
 
 // Custom palette
 const customColors = {
@@ -77,132 +75,146 @@ const ManageRentals = () => {
   };
 
   return (
-    
-      <DashboardContainer>
-        <Box sx={{ maxWidth: "xl", margin: "0 auto" }}>
-          <Grid2 container spacing={4}>
-            {/* Title */}
-            <Grid2 size={{xs:12}}>
-              <Stack direction="row" justifyContent="space-between" mb={4}>
-                <Typography variant="h4" component="h1" sx={{ color: customColors.black }}>
-                  Manage Rentals and Equipment
-                </Typography>
-              </Stack>
-            </Grid2>
+    <DashboardContainer>
+      <Box sx={{ maxWidth: "xl", margin: "0 auto" }}>
+        <Grid container spacing={4}>
+          {/* Title */}
+          <Grid size={{ xs: 12 }}>
+            <Stack direction="row" justifyContent="space-between" mb={4}>
+              <Typography
+                variant="h4"
+                component="h1"
+                sx={{ color: customColors.black }}
+              >
+                Manage Rentals and Equipment
+              </Typography>
+            </Stack>
+          </Grid>
 
-            {/* Active Rentals */}
-            <Grid2 size={{xs:12, md:6}}>
-              <StyledCard>
-                <CardContent>
-                  <Stack spacing={3}>
-                    <Box>
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        sx={{ fontWeight: "bold", color: customColors.black }}
-                      >
-                        Active Rentals
+          {/* Active Rentals */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <StyledCard>
+              <CardContent>
+                <Stack spacing={3}>
+                  <Box>
+                    <Typography
+                      variant="h6"
+                      component="h2"
+                      sx={{ fontWeight: "bold", color: customColors.black }}
+                    >
+                      Active Rentals
+                    </Typography>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Typography sx={{ color: customColors.maroon }}>
+                        {stats.activeRentals} Rentals Currently Active
                       </Typography>
-                      <Stack direction="row" spacing={2} alignItems="center">
-                        <Typography sx={{ color: customColors.maroon }}>
-                          {stats.activeRentals} Rentals Currently Active
-                        </Typography>
-                        {stats.overdueReturns > 0 && (
-                          <Tooltip title={`Overdue returns: ${stats.overdueReturns}`}>
-                            <WarningIcon sx={{ color: customColors.maroon }} />
-                          </Tooltip>
-                        )}
-                      </Stack>
-                    </Box>
+                      {stats.overdueReturns > 0 && (
+                        <Tooltip
+                          title={`Overdue returns: ${stats.overdueReturns}`}
+                        >
+                          <WarningIcon sx={{ color: customColors.maroon }} />
+                        </Tooltip>
+                      )}
+                    </Stack>
+                  </Box>
+                  <Box>
+                    <Typography sx={{ mb: 1, color: customColors.black }}>
+                      Equipment Utilization
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={stats.utilization}
+                      sx={{
+                        height: 8,
+                        bgcolor: customColors.powderblue,
+                        "& .MuiLinearProgress-bar": {
+                          bgcolor: customColors.maroon,
+                        },
+                      }}
+                    />
+                    <Typography sx={{ mt: 1, color: customColors.black }}>
+                      {stats.utilization}% of total equipment in use
+                    </Typography>
+                  </Box>
+                  <Stack direction="row" spacing={2}>
+                    <ActionButton
+                      onClick={() => navigate("/manage-rental-status")}
+                      endIcon={<ArrowForwardIcon />}
+                    >
+                      View Details
+                    </ActionButton>
+                    <Tooltip title="Rental Notifications">
+                      <StyledIconButton aria-label="Rental Notifications">
+                        <NotificationsIcon />
+                      </StyledIconButton>
+                    </Tooltip>
+                  </Stack>
+                </Stack>
+              </CardContent>
+            </StyledCard>
+          </Grid>
+
+          {/* Equipment Availability */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <StyledCard>
+              <CardContent>
+                <Stack spacing={3}>
+                  <Box>
+                    <Typography
+                      variant="h6"
+                      component="h2"
+                      sx={{ fontWeight: "bold", color: customColors.black }}
+                    >
+                      Equipment Availability
+                    </Typography>
+                    <Stack direction="row" spacing={2}>
+                      <Typography sx={{ color: customColors.maroon }}>
+                        {stats.maintenanceItems} Items Under Maintenance
+                      </Typography>
+                      <Chip
+                        size="small"
+                        icon={<CheckCircleIcon />}
+                        label={`${
+                          stats.totalEquipment - stats.maintenanceItems
+                        } Available`}
+                        sx={{
+                          bgcolor: customColors.palegoldenrod,
+                          color: customColors.black,
+                        }}
+                      />
+                    </Stack>
                     <Box>
-                      <Typography sx={{ mb: 1, color: customColors.black }}>Equipment Utilization</Typography>
+                      <Typography sx={{ mb: 1, color: customColors.black }}>
+                        Maintenance Progress
+                      </Typography>
                       <LinearProgress
                         variant="determinate"
-                        value={stats.utilization}
+                        value={
+                          (stats.maintenanceItems / stats.totalEquipment) * 100
+                        }
                         sx={{
                           height: 8,
                           bgcolor: customColors.powderblue,
-                          "& .MuiLinearProgress-bar": { bgcolor: customColors.maroon },
+                          "& .MuiLinearProgress-bar": {
+                            bgcolor: customColors.maroon,
+                          },
                         }}
                       />
-                      <Typography sx={{ mt: 1, color: customColors.black }}>
-                        {stats.utilization}% of total equipment in use
-                      </Typography>
                     </Box>
-                    <Stack direction="row" spacing={2}>
-                      <ActionButton
-                        onClick={() => navigate("/manage-rental-status")}
-                        endIcon={<ArrowForwardIcon />}
-                      >
-                        View Details
-                      </ActionButton>
-                      <Tooltip title="Rental Notifications">
-                        <StyledIconButton aria-label="Rental Notifications">
-                          <NotificationsIcon />
-                        </StyledIconButton>
-                      </Tooltip>
-                    </Stack>
-                  </Stack>
-                </CardContent>
-              </StyledCard>
-            </Grid2>
-
-            {/* Equipment Availability */}
-            <Grid2 size={{xs:12, md:6}}>
-              <StyledCard>
-                <CardContent>
-                  <Stack spacing={3}>
-                    <Box>
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        sx={{ fontWeight: "bold", color: customColors.black }}
-                      >
-                        Equipment Availability
-                      </Typography>
-                      <Stack direction="row" spacing={2}>
-                        <Typography sx={{ color: customColors.maroon }}>
-                          {stats.maintenanceItems} Items Under Maintenance
-                        </Typography>
-                        <Chip
-                          size="small"
-                          icon={<CheckCircleIcon />}
-                          label={`${stats.totalEquipment - stats.maintenanceItems} Available`}
-                          sx={{
-                            bgcolor: customColors.palegoldenrod,
-                            color: customColors.black,
-                          }}
-                        />
-                      </Stack>
-                      <Box>
-                        <Typography sx={{ mb: 1, color: customColors.black }}>
-                          Maintenance Progress
-                        </Typography>
-                        <LinearProgress
-                          variant="determinate"
-                          value={(stats.maintenanceItems / stats.totalEquipment) * 100}
-                          sx={{
-                            height: 8,
-                            bgcolor: customColors.powderblue,
-                            "& .MuiLinearProgress-bar": { bgcolor: customColors.maroon },
-                          }}
-                        />
-                      </Box>
-                    </Box>
-                    <ActionButton
-                      onClick={() => navigate("/equipment-availability")}
-                      endIcon={<ArrowForwardIcon />}
-                    >
-                      View Equipment
-                    </ActionButton>
-                  </Stack>
-                </CardContent>
-              </StyledCard>
-            </Grid2>
-          </Grid2>
-        </Box>
-      </DashboardContainer>
-   
+                  </Box>
+                  <ActionButton
+                    onClick={() => navigate("/equipment-availability")}
+                    endIcon={<ArrowForwardIcon />}
+                  >
+                    View Equipment
+                  </ActionButton>
+                </Stack>
+              </CardContent>
+            </StyledCard>
+          </Grid>
+        </Grid>
+      </Box>
+    </DashboardContainer>
   );
 };
 

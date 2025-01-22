@@ -1,30 +1,30 @@
-import { useState } from "react";
 import {
+  CheckCircleOutline,
+  Close,
+  ErrorOutline,
+  Search,
+  Visibility,
+} from "@mui/icons-material";
+import {
+  Alert,
+  Box,
+  Button,
   Card,
   CardContent,
   CardHeader,
-  Typography,
-  Button,
-  Alert,
-  TextField,
+  IconButton,
   MenuItem,
+  Modal,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  IconButton,
-  Modal,
-  Box,
+  TextField,
+  Typography,
 } from "@mui/material";
-import {
-  CheckCircleOutline,
-  Close,
-  Search,
-  ErrorOutline,
-  Visibility,
-} from "@mui/icons-material";
+import { useState } from "react";
 
 type DepositDetails = {
   id: string;

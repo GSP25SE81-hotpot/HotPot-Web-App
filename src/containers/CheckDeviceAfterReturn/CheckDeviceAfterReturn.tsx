@@ -1,7 +1,7 @@
-import React, { useState } from "react";
 import {
   Box,
-  Typography,
+  Button,
+  Paper,
   Stack,
   Table,
   TableBody,
@@ -9,10 +9,10 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Button,
   TextField,
-  Paper,
+  Typography,
 } from "@mui/material";
+import React, { useState } from "react";
 
 // Custom colors for hotpot rental
 const customColors = {
@@ -25,9 +25,19 @@ const customColors = {
 
 const CheckDeviceAfterReturn: React.FC = () => {
   const [equipment, setEquipment] = useState([
-    { id: 1, name: "Electric Cooker", status: "Pending Inspection", issues: "" },
+    {
+      id: 1,
+      name: "Electric Cooker",
+      status: "Pending Inspection",
+      issues: "",
+    },
     { id: 2, name: "Pot Lid", status: "Pending Inspection", issues: "" },
-    { id: 3, name: "Serving Utensils", status: "Pending Inspection", issues: "" },
+    {
+      id: 3,
+      name: "Serving Utensils",
+      status: "Pending Inspection",
+      issues: "",
+    },
   ]);
 
   const handleStatusUpdate = (id: number, newStatus: string) => {
@@ -45,68 +55,71 @@ const CheckDeviceAfterReturn: React.FC = () => {
   };
 
   return (
-      <Box sx={{ p: 3, bgcolor: customColors.ivory }}>
-        <Typography variant="h4" component="h1" mb={3} color="primary">
-          Check Hotpot Equipment After Return
-        </Typography>
-        <TableContainer component={Paper} sx={{ bgcolor: customColors.ivory }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: customColors.palegoldenrod }}>
-                <TableCell>Equipment Name</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Issues Logged</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {equipment.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.status}</TableCell>
-                  <TableCell>
-                    <TextField
-                      size="small"
-                      variant="outlined"
-                      placeholder="Log issues"
-                      value={item.issues}
-                      onChange={(e) => handleLogIssues(item.id, e.target.value)}
+    <Box sx={{ p: 3, bgcolor: customColors.ivory }}>
+      <Typography variant="h4" component="h1" mb={3} color="primary">
+        Check Hotpot Equipment After Return
+      </Typography>
+      <TableContainer component={Paper} sx={{ bgcolor: customColors.ivory }}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ bgcolor: customColors.palegoldenrod }}>
+              <TableCell>Equipment Name</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Issues Logged</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {equipment.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>{item.name}</TableCell>
+                <TableCell>{item.status}</TableCell>
+                <TableCell>
+                  <TextField
+                    size="small"
+                    variant="outlined"
+                    placeholder="Log issues"
+                    value={item.issues}
+                    onChange={(e) => handleLogIssues(item.id, e.target.value)}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        bgcolor: customColors.ivory,
+                      },
+                    }}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      variant="contained"
                       sx={{
-                        "& .MuiOutlinedInput-root": {
-                          bgcolor: customColors.ivory,
-                        },
+                        bgcolor: customColors.powderblue,
+                        color: customColors.maroon,
                       }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Stack direction="row" spacing={1}>
-                      <Button
-                        variant="contained"
-                        sx={{ bgcolor: customColors.powderblue, color: customColors.maroon }}
-                        onClick={() => handleStatusUpdate(item.id, "Cleaned")}
-                      >
-                        Mark Cleaned
-                      </Button>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          bgcolor: customColors.palegoldenrod,
-                          color: customColors.maroon,
-                        }}
-                        onClick={() =>
-                          handleStatusUpdate(item.id, "Needs Cleaning")
-                        }
-                      >
-                        Mark Needs Cleaning
-                      </Button>
-                    </Stack>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
+                      onClick={() => handleStatusUpdate(item.id, "Cleaned")}
+                    >
+                      Mark Cleaned
+                    </Button>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        bgcolor: customColors.palegoldenrod,
+                        color: customColors.maroon,
+                      }}
+                      onClick={() =>
+                        handleStatusUpdate(item.id, "Needs Cleaning")
+                      }
+                    >
+                      Mark Needs Cleaning
+                    </Button>
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 };
 

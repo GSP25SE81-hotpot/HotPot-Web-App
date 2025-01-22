@@ -1,18 +1,18 @@
-import React, { useState, useRef, useEffect } from "react";
+import { Send, Warning } from "@mui/icons-material";
 import {
+  Avatar,
   Box,
+  Button,
+  Divider,
+  Fade,
+  IconButton,
   List,
   ListItem,
-  TextField,
-  Button,
-  Typography,
   Paper,
-  IconButton,
-  Fade,
-  Divider,
-  Avatar,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { Send, Warning } from "@mui/icons-material";
+import React, { useEffect, useRef, useState } from "react";
 
 interface Message {
   sender: string;

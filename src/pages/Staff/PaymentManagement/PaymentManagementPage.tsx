@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
-import ChatWithCustomer from "../../../containers/ChatWithCustomer/ChatWithCustomer";
+import PaymentManagement from "../../../containers/PaymentManagement/PaymentManagement";
 import OverrideMuiTheme from "../../../theme/override";
 
-export const ChatWithCustomerPage = () => {
+export const PaymentManagementPage = () => {
   return (
     <OverrideMuiTheme>
       <Box>
-        <ChatWithCustomer />
+        <PaymentManagement />
       </Box>
     </OverrideMuiTheme>
   );

@@ -11,6 +11,7 @@ export const routes = {
   depositConfirmation: "/deposit-confirmation",
   customerChat: "/chat",
   feedback: "/feedback",
+  paymentManagement: "/payment-management",
 };
 
 export const adminRoutes = {
