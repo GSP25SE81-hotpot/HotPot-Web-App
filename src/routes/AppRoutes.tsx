@@ -11,6 +11,7 @@ import { ManageOrderPage } from "../pages/Staff/ManageOrder/ManageOrderPage";
 import { WorkAssignmentSchedulePage } from "../pages/Staff/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
 import { DeliveryOrderPage } from "../pages/Staff/DeliveryOrder/DeliveryOrderPage";
 import { ChatWithCustomerPage } from "../pages/Staff/ChatWithCustomer/ChatWithCustomerPage";
+import { DepositConfirmationPage } from "../pages/Staff/DepositConfirmation/DepositConfirmationPage";
 
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
@@ -56,6 +57,10 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.routes.customerChat}
           element={<ChatWithCustomerPage />}
+        />
+        <Route
+          path={config.routes.depositConfirmation}
+          element={<DepositConfirmationPage />}
         />
       </Route>
     </Routes>
