@@ -63,13 +63,13 @@ const DeliveryOrder = () => {
         return (
           <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle1" sx={{ mb: 2 }}>
-              Order Details:
+              Chi tiết đơn hàng:
             </Typography>
             <Typography variant="body2" sx={{ mb: 1 }}>
-              Customer: {orderDetails.customerName}
+              Khách hàng: {orderDetails.customerName}
             </Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
-              Items:
+              Vật phẩm:
               {orderDetails.orderItems.map((item) => (
                 <Box key={item.id} sx={{ pl: 2 }}>
                   • {item.name} x{item.quantity}
@@ -115,7 +115,7 @@ const DeliveryOrder = () => {
                 !deliveryDate || !deliveryTime || !shippingAddress.trim()
               }
             >
-              Schedule Delivery
+              Lịch trình giao hàng
             </Button>
           </Box>
         );
@@ -124,11 +124,11 @@ const DeliveryOrder = () => {
         return (
           <Box sx={{ mt: 2 }}>
             <Alert severity="info" sx={{ mb: 2 }}>
-              Delivery scheduled for: {`${deliveryDate} ${deliveryTime}`}
+              Ngày dự kiến giao hàng: {`${deliveryDate} ${deliveryTime}`}
             </Alert>
 
             <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>Select Shipper</InputLabel>
+              <InputLabel>Chọn Shipper</InputLabel>
               <Select
                 value={shipper}
                 label="Select Shipper"
@@ -148,7 +148,7 @@ const DeliveryOrder = () => {
               onClick={handleShipperAssignment}
               disabled={!shipper}
             >
-              Assign Shipper
+              Chỉ định Shipper
             </Button>
           </Box>
         );
@@ -157,21 +157,21 @@ const DeliveryOrder = () => {
         return (
           <Box sx={{ mt: 2 }}>
             <Alert severity="success" sx={{ mb: 2 }}>
-              Status: {orderStatus}
+              Trạng thái: {orderStatus}
             </Alert>
 
             <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
               <Typography variant="subtitle2" gutterBottom>
-                Delivery Details
+                Chi tiết giao hàng
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                Scheduled for: {`${deliveryDate} ${deliveryTime}`}
+                Đã lên lịch cho: {`${deliveryDate} ${deliveryTime}`}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                Address: {shippingAddress}
+                Địa chỉ: {shippingAddress}
               </Typography>
               <Typography variant="body2">
-                Assigned Shipper: {shipper}
+                Shipper được chỉ định: {shipper}
               </Typography>
             </Paper>
 
@@ -181,14 +181,14 @@ const DeliveryOrder = () => {
               onClick={() => setOrderStatus("IN TRANSIT")}
               sx={{ mr: 1 }}
             >
-              Mark as In Transit
+              Đánh dấu là Đang vận chuyển
             </Button>
             <Button
               variant="outlined"
               color="success"
               onClick={() => setOrderStatus("DELIVERED")}
             >
-              Mark as Delivered
+              Đánh dấu là Đã giao hàng
             </Button>
           </Box>
         );
@@ -201,7 +201,7 @@ const DeliveryOrder = () => {
   return (
     <Paper sx={{ p: 3, maxWidth: 800, mx: "auto" }}>
       <Typography variant="h5" gutterBottom>
-        Delivery Management - Order #{orderDetails.id}
+        Quản lý giao hàng - Đơn hàng #{orderDetails.id}
       </Typography>
 
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>

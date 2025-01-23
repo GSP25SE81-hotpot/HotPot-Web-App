@@ -122,7 +122,7 @@ const EquipmentAvailability: React.FC = () => {
               mb: 2,
             }}
           >
-            Hotpot Rental Availability
+            Dịch vụ cho thuê lẩu sẵn có
           </Typography>
           <Typography
             variant="body1"
@@ -132,7 +132,7 @@ const EquipmentAvailability: React.FC = () => {
             }}
           >
             {equipmentData.filter((e) => e.status === "Available").length} of{" "}
-            {equipmentData.length} items available for rent
+            {equipmentData.length} mặt hàng có sẵn để cho thuê
           </Typography>
         </Box>
 

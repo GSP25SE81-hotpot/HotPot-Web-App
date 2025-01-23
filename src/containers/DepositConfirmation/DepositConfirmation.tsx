@@ -101,7 +101,7 @@ const DepositConfirmation = () => {
         <CardHeader
           title={
             <Typography variant="h5" fontWeight="bold">
-              Deposit Management
+              Quản lý tiền
             </Typography>
           }
         />
@@ -126,7 +126,7 @@ const DepositConfirmation = () => {
                 onChange={(e) => setFilterStatus(e.target.value)}
                 label="Status"
               >
-                <MenuItem value="all">All Status</MenuItem>
+                <MenuItem value="all">Trạng thái</MenuItem>
                 <MenuItem value="pending">Pending</MenuItem>
                 <MenuItem value="verified">Verified</MenuItem>
                 <MenuItem value="rejected">Rejected</MenuItem>
@@ -142,11 +142,11 @@ const DepositConfirmation = () => {
               <TableHead>
                 <TableRow>
                   <TableCell>ID</TableCell>
-                  <TableCell>Customer</TableCell>
-                  <TableCell>Items</TableCell>
-                  <TableCell>Amount</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Date</TableCell>
+                  <TableCell>Khách hàng</TableCell>
+                  <TableCell>Mặt hàng</TableCell>
+                  <TableCell>Số lượng</TableCell>
+                  <TableCell>Trạng thái</TableCell>
+                  <TableCell>Ngày</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -229,22 +229,22 @@ const DepositConfirmation = () => {
             </Typography>
             <Box sx={{ mt: 2 }}>
               <Typography>
-                <strong>Customer Name:</strong> {selectedDeposit.customer}
+                <strong>Tên khách hàng:</strong> {selectedDeposit.customer}
               </Typography>
               <Typography>
-                <strong>Contact Number:</strong> {selectedDeposit.phone}
+                <strong>Số điện thoại:</strong> {selectedDeposit.phone}
               </Typography>
               <Typography>
-                <strong>Rental Items:</strong> {selectedDeposit.items}
+                <strong>Vật phẩm cho thuê:</strong> {selectedDeposit.items}
               </Typography>
               <Typography>
-                <strong>Deposit Amount:</strong> ${selectedDeposit.amount}
+                <strong>Số tiền:</strong> ${selectedDeposit.amount}
               </Typography>
             </Box>
             <Alert severity="warning" sx={{ mt: 2 }}>
               <ErrorOutline sx={{ mr: 1 }} />
-              Please verify the customer's ID and payment before confirming the
-              deposit.
+              Vui lòng xác minh ID của khách hàng và thanh toán trước khi xác
+              nhận tiền đặt cọc.
             </Alert>
             <Box
               sx={{
@@ -258,7 +258,7 @@ const DepositConfirmation = () => {
                 variant="outlined"
                 onClick={() => setSelectedDeposit(null)}
               >
-                Close
+                Đóng
               </Button>
               {selectedDeposit.status === "pending" && (
                 <>
@@ -269,7 +269,7 @@ const DepositConfirmation = () => {
                       setSelectedDeposit(null);
                     }}
                   >
-                    Reject
+                    Từ chối
                   </Button>
                   <Button
                     color="success"
@@ -278,7 +278,7 @@ const DepositConfirmation = () => {
                       setSelectedDeposit(null);
                     }}
                   >
-                    Verify Deposit
+                    Xác minh tiền gửi
                   </Button>
                 </>
               )}

@@ -173,7 +173,7 @@ const ManageRentalStatus: React.FC = () => {
           mb: 4,
         }}
       >
-        Manage Hotpot Rentals
+        Quản lý cho thuê lẩu
       </Typography>
       <Stack spacing={3}>
         {rentals.map((rental) => (
@@ -193,7 +193,7 @@ const ManageRentalStatus: React.FC = () => {
                     variant="body2"
                     sx={{ color: customColors.black }}
                   >
-                    Customer: {rental.customerName}
+                    Khách hàng: {rental.customerName}
                   </Typography>
                   <Stack direction="row" spacing={2} alignItems="center">
                     <Tooltip title="Last Updated">
@@ -235,16 +235,16 @@ const ManageRentalStatus: React.FC = () => {
       </Stack>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Confirm Status Change</DialogTitle>
+        <DialogTitle>Xác nhận thay đổi trạng thái</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to change the status of{" "}
-            {selectedRental?.hotpotName} to {tempStatus}?
+            Bạn có chắc chắn muốn thay đổi trạng thái của{" "}
+            {selectedRental?.hotpotName} về {tempStatus}?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <ActionButton onClick={handleConfirmStatus}>Confirm</ActionButton>
+          <Button onClick={() => setOpenDialog(false)}>Hủy</Button>
+          <ActionButton onClick={handleConfirmStatus}>Xác nhận</ActionButton>
         </DialogActions>
       </Dialog>
     </Box>

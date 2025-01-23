@@ -86,7 +86,7 @@ const ManageRentals = () => {
                 component="h1"
                 sx={{ color: customColors.black }}
               >
-                Manage Rentals and Equipment
+                Quản lý cho thuê và thiết bị
               </Typography>
             </Stack>
           </Grid>
@@ -102,11 +102,11 @@ const ManageRentals = () => {
                       component="h2"
                       sx={{ fontWeight: "bold", color: customColors.black }}
                     >
-                      Active Rentals
+                      Đồ cho thuê
                     </Typography>
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Typography sx={{ color: customColors.maroon }}>
-                        {stats.activeRentals} Rentals Currently Active
+                        {stats.activeRentals} đồ cho thuê còn sẵn
                       </Typography>
                       {stats.overdueReturns > 0 && (
                         <Tooltip
@@ -119,7 +119,7 @@ const ManageRentals = () => {
                   </Box>
                   <Box>
                     <Typography sx={{ mb: 1, color: customColors.black }}>
-                      Equipment Utilization
+                      Thiết bị sử dụng
                     </Typography>
                     <LinearProgress
                       variant="determinate"
@@ -133,7 +133,7 @@ const ManageRentals = () => {
                       }}
                     />
                     <Typography sx={{ mt: 1, color: customColors.black }}>
-                      {stats.utilization}% of total equipment in use
+                      {stats.utilization}% tổng số thiết bị đang sử dụng
                     </Typography>
                   </Box>
                   <Stack direction="row" spacing={2}>
@@ -141,7 +141,7 @@ const ManageRentals = () => {
                       onClick={() => navigate("/manage-rental-status")}
                       endIcon={<ArrowForwardIcon />}
                     >
-                      View Details
+                      Xem chi tiết
                     </ActionButton>
                     <Tooltip title="Rental Notifications">
                       <StyledIconButton aria-label="Rental Notifications">
@@ -165,11 +165,11 @@ const ManageRentals = () => {
                       component="h2"
                       sx={{ fontWeight: "bold", color: customColors.black }}
                     >
-                      Equipment Availability
+                      Thiết bị sẵn có
                     </Typography>
                     <Stack direction="row" spacing={2}>
                       <Typography sx={{ color: customColors.maroon }}>
-                        {stats.maintenanceItems} Items Under Maintenance
+                        {stats.maintenanceItems} các món đang bảo dưỡng
                       </Typography>
                       <Chip
                         size="small"
@@ -185,7 +185,7 @@ const ManageRentals = () => {
                     </Stack>
                     <Box>
                       <Typography sx={{ mb: 1, color: customColors.black }}>
-                        Maintenance Progress
+                        Quá trình bảo dưỡng
                       </Typography>
                       <LinearProgress
                         variant="determinate"
@@ -206,7 +206,7 @@ const ManageRentals = () => {
                     onClick={() => navigate("/equipment-availability")}
                     endIcon={<ArrowForwardIcon />}
                   >
-                    View Equipment
+                    Xem Thiết bị
                   </ActionButton>
                 </Stack>
               </CardContent>

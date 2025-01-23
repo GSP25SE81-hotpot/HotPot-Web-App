@@ -167,17 +167,17 @@ const PaymentManagement: React.FC = () => {
       >
         <CardContent>
           <Typography variant="h6" gutterBottom>
-            Process New Payment
+            Thanh toán mới
           </Typography>
           <Box component="form" sx={{ mt: 2 }}>
             <Grid container spacing={2}>
               <Grid size={{ xs: 12 }}>
                 <FormControl fullWidth>
-                  <InputLabel>Transaction Type</InputLabel>
+                  <InputLabel>Loại giao dịch</InputLabel>
                   <Select defaultValue="rental" label="Transaction Type">
-                    <MenuItem value="rental">Rental Payment</MenuItem>
-                    <MenuItem value="purchase">Purchase Payment</MenuItem>
-                    <MenuItem value="deposit">Deposit Payment</MenuItem>
+                    <MenuItem value="rental">Thanh toán tiền thuê</MenuItem>
+                    <MenuItem value="purchase">Thanh toán mua hàng</MenuItem>
+                    <MenuItem value="deposit">Thanh toán tiền cọc</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -196,11 +196,13 @@ const PaymentManagement: React.FC = () => {
               </Grid>
               <Grid size={{ xs: 12 }}>
                 <FormControl fullWidth>
-                  <InputLabel>Payment Method</InputLabel>
+                  <InputLabel>Phương thức thanh toán</InputLabel>
                   <Select defaultValue="credit_card" label="Payment Method">
-                    <MenuItem value="credit_card">Credit Card</MenuItem>
-                    <MenuItem value="cash">Cash</MenuItem>
-                    <MenuItem value="bank_transfer">Bank Transfer</MenuItem>
+                    <MenuItem value="credit_card">Thẻ tín dụng</MenuItem>
+                    <MenuItem value="cash">Tiền mặt</MenuItem>
+                    <MenuItem value="bank_transfer">
+                      Chuyển khoản ngân hàng
+                    </MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -220,10 +222,10 @@ const PaymentManagement: React.FC = () => {
                 variant="outlined"
                 onClick={() => setShowNewPayment(false)}
               >
-                Cancel
+                Hủy bỏ
               </Button>
               <Button variant="contained" color="primary">
-                Process Payment
+                Quy trình thanh toán
               </Button>
             </Box>
           </Box>
@@ -246,12 +248,12 @@ const PaymentManagement: React.FC = () => {
       <Card sx={{ maxWidth: 600, width: "100%" }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
-            Transaction Details - {selectedTransaction?.id}
+            Chi tiết giao dịch - {selectedTransaction?.id}
           </Typography>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid size={{ xs: 6 }}>
               <Typography color="textSecondary" variant="body2">
-                Customer Name
+                Tên khách hàng
               </Typography>
               <Typography variant="body1">
                 {selectedTransaction?.customerName}
@@ -259,7 +261,7 @@ const PaymentManagement: React.FC = () => {
             </Grid>
             <Grid size={{ xs: 6 }}>
               <Typography color="textSecondary" variant="body2">
-                Transaction Type
+                Loại giao dịch
               </Typography>
               <Typography variant="body1" sx={{ textTransform: "capitalize" }}>
                 {selectedTransaction?.type}
@@ -267,7 +269,7 @@ const PaymentManagement: React.FC = () => {
             </Grid>
             <Grid size={{ xs: 12 }}>
               <Typography color="textSecondary" variant="body2">
-                Items
+                Mặt hàng
               </Typography>
               <Typography variant="body1">
                 {selectedTransaction?.items}
@@ -275,7 +277,7 @@ const PaymentManagement: React.FC = () => {
             </Grid>
             <Grid size={{ xs: 6 }}>
               <Typography color="textSecondary" variant="body2">
-                Amount
+                Số lượng
               </Typography>
               <Typography variant="body1">
                 ${selectedTransaction?.amount.toFixed(2)}
@@ -284,7 +286,7 @@ const PaymentManagement: React.FC = () => {
             {selectedTransaction && selectedTransaction.deposit > 0 && (
               <Grid size={{ xs: 6 }}>
                 <Typography color="textSecondary" variant="body2">
-                  Deposit
+                  Tiền gửi
                 </Typography>
                 <Typography variant="body1">
                   ${selectedTransaction.deposit.toFixed(2)}
@@ -295,8 +297,8 @@ const PaymentManagement: React.FC = () => {
 
           {selectedTransaction?.status === "pending" && (
             <Alert severity="warning" sx={{ mt: 2 }}>
-              This transaction is pending. Please verify payment details before
-              processing.
+              Giao dịch này đang chờ xử lý. Vui lòng xác minh thông tin thanh
+              toán trước khi xử lý.
             </Alert>
           )}
 
@@ -307,7 +309,7 @@ const PaymentManagement: React.FC = () => {
               variant="outlined"
               onClick={() => setSelectedTransaction(null)}
             >
-              Close
+              Đóng
             </Button>
             {selectedTransaction?.status === "pending" && (
               <Button variant="contained" color="success">
@@ -315,7 +317,7 @@ const PaymentManagement: React.FC = () => {
               </Button>
             )}
             {selectedTransaction?.status === "completed" && (
-              <Button variant="outlined">Print Receipt</Button>
+              <Button variant="outlined">In Biên lai</Button>
             )}
           </Box>
         </CardContent>
@@ -371,7 +373,7 @@ const PaymentManagement: React.FC = () => {
               color="primary"
               onClick={() => setShowNewPayment(true)}
             >
-              New Payment
+              Thanh toán mới
             </Button>
           </Box>
 
@@ -392,7 +394,7 @@ const PaymentManagement: React.FC = () => {
             <FormControl size="small" sx={{ minWidth: 120 }}>
               <InputLabel>Type</InputLabel>
               <Select label="Type" defaultValue="all">
-                <MenuItem value="all">All Types</MenuItem>
+                <MenuItem value="all">Tất cả các loại</MenuItem>
                 <MenuItem value="rental">Rental</MenuItem>
                 <MenuItem value="purchase">Purchase</MenuItem>
                 <MenuItem value="deposit">Deposit</MenuItem>
@@ -401,7 +403,7 @@ const PaymentManagement: React.FC = () => {
             <FormControl size="small" sx={{ minWidth: 120 }}>
               <InputLabel>Status</InputLabel>
               <Select label="Status" defaultValue="all">
-                <MenuItem value="all">All Status</MenuItem>
+                <MenuItem value="all">Trạng thái</MenuItem>
                 <MenuItem value="pending">Pending</MenuItem>
                 <MenuItem value="completed">Completed</MenuItem>
                 <MenuItem value="refunded">Refunded</MenuItem>
@@ -422,12 +424,12 @@ const PaymentManagement: React.FC = () => {
               <TableHead>
                 <TableRow>
                   <TableCell>ID</TableCell>
-                  <TableCell>Customer</TableCell>
-                  <TableCell>Type</TableCell>
+                  <TableCell>Khách hàng</TableCell>
+                  <TableCell>Loại</TableCell>
                   <TableCell>Items</TableCell>
-                  <TableCell>Amount</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Date</TableCell>
+                  <TableCell>Số lượng</TableCell>
+                  <TableCell>Trạng thái</TableCell>
+                  <TableCell>Ngày</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -475,7 +477,7 @@ const PaymentManagement: React.FC = () => {
                         size="small"
                         onClick={() => setSelectedTransaction(transaction)}
                       >
-                        View Details
+                        Xem chi tiết
                       </Button>
                     </TableCell>
                   </TableRow>

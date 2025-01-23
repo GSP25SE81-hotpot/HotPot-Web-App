@@ -158,7 +158,7 @@ const WorkScheduleTable: React.FC<{ schedules?: StaffSchedule[] }> = ({
             color="primary"
             sx={{ fontSize: "2rem" }}
           >
-            Staff Weekly Schedule
+            Lịch hàng tuần
           </Typography>
         </Box>
         <TableContainer
@@ -175,11 +175,10 @@ const WorkScheduleTable: React.FC<{ schedules?: StaffSchedule[] }> = ({
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", p: 2 }}>
                   {" "}
-                  {/* Increase font size and padding */}
-                  Employee Name
+                  Tên nhân viên
                 </TableCell>
                 <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", p: 2 }}>
-                  Week
+                  Tuần
                 </TableCell>
                 {days.map((day) => (
                   <TableCell

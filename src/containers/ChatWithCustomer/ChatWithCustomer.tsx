@@ -80,10 +80,10 @@ const ChatWithCustomer: React.FC = () => {
         }}
       >
         <Typography variant="h6" fontWeight="500">
-          Customer Support
+          Hỗ trợ khách hàng
         </Typography>
         <Typography variant="caption" sx={{ opacity: 0.8 }}>
-          Responding typically within 5 minutes
+          Trả lời thường trong vòng 5 phút
         </Typography>
       </Box>
 

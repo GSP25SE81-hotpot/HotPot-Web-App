@@ -57,16 +57,16 @@ const CheckDeviceAfterReturn: React.FC = () => {
   return (
     <Box sx={{ p: 3, bgcolor: customColors.ivory }}>
       <Typography variant="h4" component="h1" mb={3} color="primary">
-        Check Hotpot Equipment After Return
+        Kiểm tra thiết bị lẩu sau khi trả lại
       </Typography>
       <TableContainer component={Paper} sx={{ bgcolor: customColors.ivory }}>
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: customColors.palegoldenrod }}>
-              <TableCell>Equipment Name</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Issues Logged</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell>Tên thiết bị</TableCell>
+              <TableCell>Trạng thái</TableCell>
+              <TableCell>Vấn đề</TableCell>
+              <TableCell>Hành động</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -98,7 +98,7 @@ const CheckDeviceAfterReturn: React.FC = () => {
                       }}
                       onClick={() => handleStatusUpdate(item.id, "Cleaned")}
                     >
-                      Mark Cleaned
+                      Đánh dấu đã được làm sạch
                     </Button>
                     <Button
                       variant="contained"
@@ -110,7 +110,7 @@ const CheckDeviceAfterReturn: React.FC = () => {
                         handleStatusUpdate(item.id, "Needs Cleaning")
                       }
                     >
-                      Mark Needs Cleaning
+                      Đánh dấu cần được vệ sinh
                     </Button>
                   </Stack>
                 </TableCell>

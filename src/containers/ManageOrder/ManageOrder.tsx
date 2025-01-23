@@ -75,15 +75,17 @@ const ManageOrder: React.FC = () => {
   return (
     <Box sx={{ p: 3, bgcolor: customColors.ivory }}>
       <Typography variant="h4" component="h1" mb={3} color="primary">
-        Manage Hotpot Orders
+        Quản lý đơn hàng lẩu
       </Typography>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: customColors.palegoldenrod }}>
-              <TableCell sx={{ fontWeight: 600 }}>Customer Name</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Hotpot & Add-Ons</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Order Status</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Tên khách hàng</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Lẩu & Thêm vào</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>
+                Trạng thái đơn hàng
+              </TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -159,7 +161,7 @@ const ManageOrder: React.FC = () => {
                       }}
                       onClick={() => handleUpdateStatus(order.id, "Confirmed")}
                     >
-                      Confirm Order
+                      Xác nhận đơn hàng
                     </Button>
                     <Button
                       variant="contained"
@@ -173,7 +175,7 @@ const ManageOrder: React.FC = () => {
                       }}
                       onClick={() => handleUpdateStatus(order.id, "Cancelled")}
                     >
-                      Cancel Order
+                      Hủy đơn hàng
                     </Button>
                   </Stack>
                 </TableCell>
