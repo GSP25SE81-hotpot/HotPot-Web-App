@@ -12,6 +12,7 @@ export const routes = {
   customerChat: "/chat",
   feedback: "/feedback",
   paymentManagement: "/payment-management",
+  repairRequests: "/repair-request",
 };
 
 export const adminRoutes = {
