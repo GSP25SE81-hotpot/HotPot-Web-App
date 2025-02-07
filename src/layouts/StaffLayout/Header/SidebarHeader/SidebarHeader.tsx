@@ -23,9 +23,11 @@ import {
   useTheme,
 } from "@mui/material";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import LogoContainer from "../../../../components/Logo/Logo";
+import { routes } from "../../../../configs/routes";
 
-export const drawerWidth = 240;
+export const drawerWidth = 260;
 
 interface SidebarHeaderProps {
   open: boolean;
@@ -33,48 +35,100 @@ interface SidebarHeaderProps {
 }
 
 const features = [
-  { id: "FE-01", text: "Login/Logout", icon: <HomeIcon /> },
+  { id: "FE-01", text: "Login/Logout", icon: <HomeIcon />, route: routes.home },
   {
     id: "FE-02",
-    text: "Manage Status of Rentals and Equipment",
+    text: "Rentals and Equipment Status",
     icon: <ListAltIcon />,
+    route: routes.manageRentalStatus,
   },
-  { id: "FE-03", text: "Check Device After Return", icon: <CheckCircleIcon /> },
-  { id: "FE-04", text: "Manage Order", icon: <ListAltIcon /> },
+  {
+    id: "FE-03",
+    text: "Check Device After Return",
+    icon: <CheckCircleIcon />,
+    route: routes.checkDevice,
+  },
+  {
+    id: "FE-04",
+    text: "Manage Order",
+    icon: <ListAltIcon />,
+    route: routes.manageOrders,
+  },
   {
     id: "FE-05",
     text: "Deliver Order to Shipper",
     icon: <LocalShippingIcon />,
+    route: routes.deliveryOrder,
   },
-  { id: "FE-06", text: "Confirm Deposits", icon: <PaymentIcon /> },
-  { id: "FE-07", text: "Manage Payment", icon: <PaymentIcon /> },
-  { id: "FE-08", text: "Chat with Customer", icon: <ChatIcon /> },
+  {
+    id: "FE-06",
+    text: "Confirm Deposits",
+    icon: <PaymentIcon />,
+    route: routes.depositConfirmation,
+  },
+  {
+    id: "FE-07",
+    text: "Manage Payment",
+    icon: <PaymentIcon />,
+    route: routes.paymentManagement,
+  },
+  {
+    id: "FE-08",
+    text: "Chat with Customer",
+    icon: <ChatIcon />,
+    route: routes.customerChat,
+  },
   {
     id: "FE-09",
-    text: "Resolve Customer Requests When Equipment Fails",
+    text: "Equipment Failure Reports",
     icon: <BuildIcon />,
+    route: routes.repairRequests,
   },
-  { id: "FE-10", text: "Log Equipment Conditions", icon: <AssignmentIcon /> },
+  {
+    id: "FE-10",
+    text: "Log Equipment Conditions",
+    icon: <AssignmentIcon />,
+    route: routes.equipmentConditionLog,
+  },
   {
     id: "FE-11",
-    text: "Report on the Status of Equipment in Stock",
+    text: "Equipment stock status",
     icon: <AssignmentIcon />,
+    route: routes.equipmentStatusReport,
   },
-  { id: "FE-12", text: "View Feedback", icon: <FeedbackIcon /> },
-  { id: "FE-13", text: "View Order History", icon: <ListAltIcon /> },
+  {
+    id: "FE-12",
+    text: "View Feedback",
+    icon: <FeedbackIcon />,
+    route: routes.feedback,
+  },
+  {
+    id: "FE-13",
+    text: "View Order History",
+    icon: <ListAltIcon />,
+    route: routes.contractHistory,
+  },
   {
     id: "FE-14",
-    text: "View Work Schedule at the Store",
+    text: "Work Schedule",
     icon: <ScheduleIcon />,
+    route: routes.workAssignment,
   },
 ];
 
 const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const navigate = useNavigate();
 
   // Use "temporary" drawer on mobile so it overlays the content
   const drawerVariant = isMobile ? "temporary" : "persistent";
+
+  // Handle navigation
+  const handleNavigation = (route: string) => {
+    navigate(route);
+    if (isMobile) setOpen(false);
+  };
 
   return (
     <>
@@ -117,7 +171,10 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
         <Toolbar />
         <List>
           {features.map((feature) => (
-            <ListItemButton key={feature.id}>
+            <ListItemButton
+              key={feature.id}
+              onClick={() => handleNavigation(feature.route)}
+            >
               <ListItemIcon>{feature.icon}</ListItemIcon>
               <ListItemText primary={feature.text} />
             </ListItemButton>

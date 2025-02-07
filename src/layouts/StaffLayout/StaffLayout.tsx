@@ -9,7 +9,7 @@ import SidebarHeader, {
 import "./Layout.scss";
 
 const StaffLayout: React.FC = () => {
-  const [open, setOpen] = useState(false); //track drawer
+  const [open, setOpen] = useState(true); //track drawer
   return (
     <div className="staff-layout">
       {/* Pass `open` and `setOpen` to SidebarHeader */}

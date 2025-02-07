@@ -93,6 +93,12 @@ const RepairRequests = () => {
       width: 130,
       renderCell: (params) => <StatusChip status={params.value} />,
     },
+    {
+      field: "description",
+      headerName: "Description",
+      width: 250,
+      sortable: false,
+    },
   ];
 
   const handleScheduleReplacement = (requestId: string) => {
