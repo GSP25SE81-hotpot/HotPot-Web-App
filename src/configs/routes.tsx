@@ -13,6 +13,7 @@ export const routes = {
   feedback: "/feedback",
   paymentManagement: "/payment-management",
   repairRequests: "/repair-request",
+  equipmentConditionLog: "/equipment-condition-log",
 };
 
 export const adminRoutes = {

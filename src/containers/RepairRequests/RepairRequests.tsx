@@ -3,12 +3,12 @@ import {
   Button,
   Chip,
   Container,
-  Grid,
   Paper,
   TextField,
   Typography,
   useTheme,
 } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import { DateTimePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
@@ -122,7 +122,7 @@ const RepairRequests = () => {
   const renderDetailPanel = ({ row }: { row: RepairRequest }) => (
     <Box sx={{ p: 4, borderTop: "1px solid rgba(224, 224, 224, 1)" }}>
       <Grid container spacing={3}>
-        <Grid item xs={6}>
+        <Grid size={{ xs: 6 }}>
           <Typography variant="h6">Issue Details</Typography>
           <Paper sx={{ p: 2, mt: 1 }}>
             <Typography>{row.description}</Typography>
@@ -140,7 +140,7 @@ const RepairRequests = () => {
           )}
         </Grid>
 
-        <Grid item xs={6}>
+        <Grid size={{ xs: 6 }}>
           {row.status === "Pending" && (
             <>
               <Typography variant="h6">Schedule Replacement</Typography>

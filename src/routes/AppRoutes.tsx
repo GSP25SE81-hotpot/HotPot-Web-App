@@ -14,6 +14,7 @@ import { ChatWithCustomerPage } from "../pages/Staff/ChatWithCustomer/ChatWithCu
 import { DepositConfirmationPage } from "../pages/Staff/DepositConfirmation/DepositConfirmationPage";
 import { PaymentManagementPage } from "../pages/Staff/PaymentManagement/PaymentManagementPage";
 import { RepairRequestsPage } from "../pages/Staff/RepairRequests/RepairRequestsPage";
+import { EquipmentConditionLogPage } from "../pages/Staff/EquipmentConditionLog/EquipmentConditionLogPage";
 
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
@@ -71,6 +72,10 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.routes.repairRequests}
           element={<RepairRequestsPage />}
+        />
+        <Route
+          path={config.routes.equipmentConditionLog}
+          element={<EquipmentConditionLogPage />}
         />
       </Route>
     </Routes>
