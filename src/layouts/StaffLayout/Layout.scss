@@ -1,34 +1,18 @@
-$paddingLayout: 5px;
-$nav-main-height: 60px;
-$border-bottom: 1px solid #e0e0e0;
-
-.header {
+.staff-layout {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  .header__main {
-    justify-content: center;
-    align-items: center;
-    padding-inline: $paddingLayout;
-  }
 }
 
 .main-content {
-  margin-left: 0px;
-  margin-right: 0px;
+  flex-grow: 1;
+  padding: 24px;
   margin-top: 20px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  padding-top: 140px;
+  min-height: 100vh;
+  transition: margin 0.3s ease;
 }
 
-.header-content {
-  width: 100%;
-  position: fixed;
-  z-index: 10;
-  min-height: 140px;
-  background-color: white;
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 16px;
+  }
 }

@@ -202,6 +202,15 @@ const RepairRequests = () => {
             rows={requests}
             columns={columns}
             slots={{ toolbar: GridToolbar }}
+            slotProps={{
+              toolbar: {
+                csvOptions: {
+                  fileName: "repair_requests_export",
+                  delimiter: ",",
+                  utf8WithBom: true,
+                },
+              },
+            }}
             getRowHeight={() => "auto"}
             sx={{
               "& .MuiDataGrid-cell": { py: 2 },

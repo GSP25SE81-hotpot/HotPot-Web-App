@@ -1,6 +1,7 @@
+// Footer.tsx
 import React from "react";
-import "./Footer.scss";
 import { Link } from "react-router-dom";
+import "./Footer.scss";
 
 const Footer: React.FC = () => {
   return (
@@ -30,13 +31,13 @@ const Footer: React.FC = () => {
           <h3>CUSTOMER SUPPORT</h3>
           <ul>
             <li>
-              <Link to="/shipping-policy">Shipping & Delivery</Link>
+              <Link to="/shipping-policy">Shipping &amp; Delivery</Link>
             </li>
             <li>
               <Link to="/payment-methods">Payment Methods</Link>
             </li>
             <li>
-              <Link to="/warranty-policy">Warranty & Returns</Link>
+              <Link to="/warranty-policy">Warranty &amp; Returns</Link>
             </li>
             <li>
               <Link to="/refund-policy">Refund Policy</Link>
