@@ -14,7 +14,6 @@ import {
   IconButton,
   InputLabel,
   MenuItem,
-  Paper,
   Select,
   SelectChangeEvent,
   TextField,
@@ -22,7 +21,6 @@ import {
   Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { PieChart } from "@mui/x-charts/PieChart";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
@@ -206,19 +204,6 @@ const EquipmentStatusReport = () => {
     setAlertDialogOpen(false);
   };
 
-  const statusDistribution = () => {
-    const counts = equipmentList.reduce((acc, eq) => {
-      acc[eq.status] = (acc[eq.status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    return Object.entries(counts).map(([status, count]) => ({
-      id: status,
-      value: count,
-      label: status.replace("_", " ").toUpperCase(),
-    }));
-  };
-
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box sx={{ flexGrow: 1 }}>
@@ -240,33 +225,7 @@ const EquipmentStatusReport = () => {
 
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
           <Grid container spacing={4}>
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Paper sx={{ p: 3, mb: 3, height: 320 }}>
-                <Typography variant="h6" gutterBottom>
-                  Status Distribution
-                </Typography>
-                <PieChart
-                  series={[
-                    {
-                      data: statusDistribution(),
-                      highlightScope: { faded: "global", highlighted: "item" },
-                      faded: { innerRadius: 30, additionalRadius: -30 },
-                    },
-                  ]}
-                  width={500}
-                  height={250}
-                  margin={{ top: 10, right: 220, bottom: 20, left: 20 }}
-                  slotProps={{
-                    legend: {
-                      position: { vertical: "middle", horizontal: "right" },
-                      padding: 50,
-                    },
-                  }}
-                />
-              </Paper>
-            </Grid>
-
-            <Grid size={{ xs: 16, md: 8 }}>
+            <Grid size={{ xs: 16 }}>
               <Box sx={{ height: 650, width: "100%", p: 2 }}>
                 <DataGrid
                   rows={equipmentList}

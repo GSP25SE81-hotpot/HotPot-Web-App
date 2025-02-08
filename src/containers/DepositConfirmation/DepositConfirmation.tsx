@@ -1,20 +1,16 @@
 import {
   CheckCircleOutline,
   Close,
-  ErrorOutline,
   Search,
   Visibility,
 } from "@mui/icons-material";
 import {
-  Alert,
   Box,
-  Button,
   Card,
   CardContent,
   CardHeader,
   IconButton,
   MenuItem,
-  Modal,
   Table,
   TableBody,
   TableCell,
@@ -23,6 +19,11 @@ import {
   TableRow,
   TextField,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import { useState } from "react";
 
@@ -70,19 +71,28 @@ const DepositConfirmation = () => {
   const [selectedDeposit, setSelectedDeposit] = useState<DepositDetails | null>(
     null
   );
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
   const handleVerify = (id: string) => {
-    setDeposits((prev) =>
-      prev.map((dep) => (dep.id === id ? { ...dep, status: "verified" } : dep))
-    );
+    if (window.confirm("Are you sure you want to verify this deposit?")) {
+      setDeposits((prev) =>
+        prev.map((dep) =>
+          dep.id === id ? { ...dep, status: "verified" } : dep
+        )
+      );
+    }
   };
 
   const handleReject = (id: string) => {
-    setDeposits((prev) =>
-      prev.map((dep) => (dep.id === id ? { ...dep, status: "rejected" } : dep))
-    );
+    if (window.confirm("Are you sure you want to reject this deposit?")) {
+      setDeposits((prev) =>
+        prev.map((dep) =>
+          dep.id === id ? { ...dep, status: "rejected" } : dep
+        )
+      );
+    }
   };
 
   const filteredDeposits = deposits.filter((deposit) => {
@@ -101,7 +111,7 @@ const DepositConfirmation = () => {
         <CardHeader
           title={
             <Typography variant="h5" fontWeight="bold">
-              Quản lý tiền
+              Xác nhận tiền đặt cọc
             </Typography>
           }
         />
@@ -111,7 +121,7 @@ const DepositConfirmation = () => {
               <TextField
                 variant="outlined"
                 size="small"
-                placeholder="Search deposits..."
+                placeholder="Tên khách hàng..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 InputProps={{
@@ -124,16 +134,16 @@ const DepositConfirmation = () => {
                 size="small"
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                label="Status"
+                label="Trạng thái"
               >
-                <MenuItem value="all">Trạng thái</MenuItem>
-                <MenuItem value="pending">Pending</MenuItem>
-                <MenuItem value="verified">Verified</MenuItem>
-                <MenuItem value="rejected">Rejected</MenuItem>
+                <MenuItem value="all">Tất cả</MenuItem>
+                <MenuItem value="pending">Chờ xác minh</MenuItem>
+                <MenuItem value="verified">Đã xác minh</MenuItem>
+                <MenuItem value="rejected">Từ chối</MenuItem>
               </TextField>
             </Box>
             <Typography variant="body2" color="text.secondary">
-              Pending Verifications:{" "}
+              Cần xác minh:{" "}
               {deposits.filter((d) => d.status === "pending").length}
             </Typography>
           </Box>
@@ -144,10 +154,10 @@ const DepositConfirmation = () => {
                   <TableCell>ID</TableCell>
                   <TableCell>Khách hàng</TableCell>
                   <TableCell>Mặt hàng</TableCell>
-                  <TableCell>Số lượng</TableCell>
+                  <TableCell>Số tiền</TableCell>
                   <TableCell>Trạng thái</TableCell>
                   <TableCell>Ngày</TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell>Hành động</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -169,8 +179,11 @@ const DepositConfirmation = () => {
                               : "red",
                         }}
                       >
-                        {deposit.status.charAt(0).toUpperCase() +
-                          deposit.status.slice(1)}
+                        {deposit.status === "pending"
+                          ? "Chờ xác minh"
+                          : deposit.status === "verified"
+                          ? "Đã xác minh"
+                          : "Từ chối"}
                       </Typography>
                     </TableCell>
                     <TableCell>{deposit.date}</TableCell>
@@ -178,7 +191,10 @@ const DepositConfirmation = () => {
                       <Box sx={{ display: "flex", gap: 1 }}>
                         <IconButton
                           size="small"
-                          onClick={() => setSelectedDeposit(deposit)}
+                          onClick={() => {
+                            setSelectedDeposit(deposit);
+                            setDetailsOpen(true);
+                          }}
                         >
                           <Visibility />
                         </IconButton>
@@ -209,83 +225,44 @@ const DepositConfirmation = () => {
           </TableContainer>
         </CardContent>
       </Card>
-      {selectedDeposit && (
-        <Modal
-          open={Boolean(selectedDeposit)}
-          onClose={() => setSelectedDeposit(null)}
-        >
-          <Box
-            sx={{
-              backgroundColor: "white",
-              borderRadius: 2,
-              p: 3,
-              maxWidth: 600,
-              mx: "auto",
-              mt: 5,
-            }}
-          >
-            <Typography variant="h6" fontWeight="bold">
-              Deposit Details - {selectedDeposit.id}
-            </Typography>
-            <Box sx={{ mt: 2 }}>
+      <Dialog open={detailsOpen} onClose={() => setDetailsOpen(false)}>
+        <DialogTitle>Chi tiết đặt cọc</DialogTitle>
+        <DialogContent>
+          {selectedDeposit && (
+            <Box sx={{ minWidth: 300 }}>
               <Typography>
-                <strong>Tên khách hàng:</strong> {selectedDeposit.customer}
+                <strong>ID:</strong> {selectedDeposit.id}
+              </Typography>
+              <Typography>
+                <strong>Khách hàng:</strong> {selectedDeposit.customer}
               </Typography>
               <Typography>
                 <strong>Số điện thoại:</strong> {selectedDeposit.phone}
               </Typography>
               <Typography>
-                <strong>Vật phẩm cho thuê:</strong> {selectedDeposit.items}
+                <strong>Mặt hàng:</strong> {selectedDeposit.items}
               </Typography>
               <Typography>
                 <strong>Số tiền:</strong> ${selectedDeposit.amount}
               </Typography>
+              <Typography>
+                <strong>Ngày:</strong> {selectedDeposit.date}
+              </Typography>
+              <Typography>
+                <strong>Trạng thái:</strong>{" "}
+                {selectedDeposit.status === "pending"
+                  ? "Chờ xác minh"
+                  : selectedDeposit.status === "verified"
+                  ? "Đã xác minh"
+                  : "Từ chối"}
+              </Typography>
             </Box>
-            <Alert severity="warning" sx={{ mt: 2 }}>
-              <ErrorOutline sx={{ mr: 1 }} />
-              Vui lòng xác minh ID của khách hàng và thanh toán trước khi xác
-              nhận tiền đặt cọc.
-            </Alert>
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                justifyContent: "flex-end",
-                mt: 2,
-              }}
-            >
-              <Button
-                variant="outlined"
-                onClick={() => setSelectedDeposit(null)}
-              >
-                Đóng
-              </Button>
-              {selectedDeposit.status === "pending" && (
-                <>
-                  <Button
-                    color="error"
-                    onClick={() => {
-                      handleReject(selectedDeposit.id);
-                      setSelectedDeposit(null);
-                    }}
-                  >
-                    Từ chối
-                  </Button>
-                  <Button
-                    color="success"
-                    onClick={() => {
-                      handleVerify(selectedDeposit.id);
-                      setSelectedDeposit(null);
-                    }}
-                  >
-                    Xác minh tiền gửi
-                  </Button>
-                </>
-              )}
-            </Box>
-          </Box>
-        </Modal>
-      )}
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDetailsOpen(false)}>Đóng</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

@@ -1,12 +1,5 @@
-import {
-  AttachMoney,
-  CalendarToday,
-  CreditCard,
-  Description,
-  Receipt,
-  Search,
-  SvgIconComponent,
-} from "@mui/icons-material";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { CalendarToday, Search } from "@mui/icons-material";
 import {
   Alert,
   Box,
@@ -41,18 +34,20 @@ interface Transaction {
   deposit: number;
   status: "pending" | "completed" | "refunded" | "failed";
   date: string;
-  paymentMethod: "credit_card" | "cash" | "bank_transfer";
+  paymentMethod: "cash" | "bank_transfer";
 }
 
-interface SummaryCardProps {
-  icon: SvgIconComponent;
-  title: string;
-  value: string;
-  color: string;
+interface ReceiptData {
+  receiptId: string;
+  transactionId: string;
+  customerName: string;
+  amount: number;
+  date: string;
 }
 
 const PaymentManagement: React.FC = () => {
-  const [transactions] = useState<Transaction[]>([
+  // Initialize transactions as state so we can update them later.
+  const [transactions, setTransactions] = useState<Transaction[]>([
     {
       id: "TXN-2024-001",
       customerName: "John Smith",
@@ -62,7 +57,7 @@ const PaymentManagement: React.FC = () => {
       deposit: 50.0,
       status: "pending",
       date: "2024-01-22",
-      paymentMethod: "credit_card",
+      paymentMethod: "cash",
     },
     {
       id: "TXN-2024-002",
@@ -84,13 +79,24 @@ const PaymentManagement: React.FC = () => {
       deposit: 30.0,
       status: "refunded",
       date: "2024-01-21",
-      paymentMethod: "credit_card",
+      paymentMethod: "bank_transfer",
     },
   ]);
 
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
   const [showNewPayment, setShowNewPayment] = useState(false);
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
+
+  // States for new payment form fields
+  const [newPaymentData, setNewPaymentData] = useState({
+    type: "rental",
+    customerName: "",
+    items: "",
+    amount: 0,
+    deposit: 0,
+    paymentMethod: "cash",
+  });
 
   const getTotalAmount = (transaction: Transaction): number => {
     return transaction.amount + (transaction.deposit || 0);
@@ -116,35 +122,60 @@ const PaymentManagement: React.FC = () => {
     return colors[status];
   };
 
-  const SummaryCard: React.FC<SummaryCardProps> = ({
-    icon: Icon,
-    title,
-    value,
-    color,
-  }) => (
-    <Card>
-      <CardContent>
-        <Box display="flex" alignItems="center">
-          <Box
-            sx={{
-              backgroundColor: `${color}15`,
-              borderRadius: "50%",
-              p: 1,
-              mr: 2,
-            }}
-          >
-            <Icon sx={{ color: color, fontSize: 24 }} />
-          </Box>
-          <Box>
-            <Typography color="textSecondary" variant="body2">
-              {title}
-            </Typography>
-            <Typography variant="h6">{value}</Typography>
-          </Box>
-        </Box>
-      </CardContent>
-    </Card>
-  );
+  // Simulate processing a payment and updating the record.
+  const handleProcessPayment = (transaction: Transaction) => {
+    // In a real app, you’d integrate with your payment gateway API here.
+    // We simulate processing with a timeout.
+    setTimeout(() => {
+      // Update the transaction’s status to "completed".
+      setTransactions((prev) =>
+        prev.map((txn) =>
+          txn.id === transaction.id ? { ...txn, status: "completed" } : txn
+        )
+      );
+      const updatedTransaction: Transaction = {
+        ...transaction,
+        status: "completed",
+      };
+      setSelectedTransaction(updatedTransaction);
+
+      // Generate a simple receipt.
+      const generatedReceipt: ReceiptData = {
+        receiptId: "RCPT-" + updatedTransaction.id,
+        transactionId: updatedTransaction.id,
+        customerName: updatedTransaction.customerName,
+        amount: getTotalAmount(updatedTransaction),
+        date: new Date().toISOString().split("T")[0],
+      };
+      setReceipt(generatedReceipt);
+
+      // Inform the user (you could also open a dedicated receipt modal).
+      alert(
+        `Payment processed successfully.\nReceipt ID: ${generatedReceipt.receiptId}`
+      );
+    }, 1000);
+  };
+
+  // Handle the new payment form submission by creating a new transaction.
+  const handleNewPaymentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newTransaction: Transaction = {
+      id: "TXN-" + new Date().getTime(), // simple unique ID
+      customerName: newPaymentData.customerName,
+      type: newPaymentData.type as Transaction["type"],
+      items: newPaymentData.items,
+      amount: newPaymentData.amount,
+      deposit: newPaymentData.deposit,
+      status: "pending",
+      date: new Date().toISOString().split("T")[0],
+      paymentMethod:
+        newPaymentData.paymentMethod as Transaction["paymentMethod"],
+    };
+    setTransactions((prev) => [newTransaction, ...prev]);
+    setShowNewPayment(false);
+    // Optionally, open the details modal for immediate processing.
+    setSelectedTransaction(newTransaction);
+  };
 
   const NewPaymentForm = () => (
     <Modal
@@ -169,12 +200,25 @@ const PaymentManagement: React.FC = () => {
           <Typography variant="h6" gutterBottom>
             Thanh toán mới
           </Typography>
-          <Box component="form" sx={{ mt: 2 }}>
+          <Box
+            component="form"
+            sx={{ mt: 2 }}
+            onSubmit={handleNewPaymentSubmit}
+          >
             <Grid container spacing={2}>
               <Grid size={{ xs: 12 }}>
                 <FormControl fullWidth>
                   <InputLabel>Loại giao dịch</InputLabel>
-                  <Select defaultValue="rental" label="Transaction Type">
+                  <Select
+                    value={newPaymentData.type}
+                    label="Loại giao dịch"
+                    onChange={(e) =>
+                      setNewPaymentData({
+                        ...newPaymentData,
+                        type: e.target.value,
+                      })
+                    }
+                  >
                     <MenuItem value="rental">Thanh toán tiền thuê</MenuItem>
                     <MenuItem value="purchase">Thanh toán mua hàng</MenuItem>
                     <MenuItem value="deposit">Thanh toán tiền cọc</MenuItem>
@@ -182,23 +226,59 @@ const PaymentManagement: React.FC = () => {
                 </FormControl>
               </Grid>
               <Grid size={{ xs: 12 }}>
-                <TextField fullWidth label="Customer Name" />
+                <TextField
+                  fullWidth
+                  label="Customer Name"
+                  value={newPaymentData.customerName}
+                  onChange={(e) =>
+                    setNewPaymentData({
+                      ...newPaymentData,
+                      customerName: e.target.value,
+                    })
+                  }
+                />
               </Grid>
               <Grid size={{ xs: 6 }}>
-                <TextField fullWidth label="Amount" type="number" />
+                <TextField
+                  fullWidth
+                  label="Amount"
+                  type="number"
+                  value={newPaymentData.amount}
+                  onChange={(e) =>
+                    setNewPaymentData({
+                      ...newPaymentData,
+                      amount: parseFloat(e.target.value),
+                    })
+                  }
+                />
               </Grid>
               <Grid size={{ xs: 6 }}>
                 <TextField
                   fullWidth
                   label="Deposit (if applicable)"
                   type="number"
+                  value={newPaymentData.deposit}
+                  onChange={(e) =>
+                    setNewPaymentData({
+                      ...newPaymentData,
+                      deposit: parseFloat(e.target.value),
+                    })
+                  }
                 />
               </Grid>
               <Grid size={{ xs: 12 }}>
                 <FormControl fullWidth>
                   <InputLabel>Phương thức thanh toán</InputLabel>
-                  <Select defaultValue="credit_card" label="Payment Method">
-                    <MenuItem value="credit_card">Thẻ tín dụng</MenuItem>
+                  <Select
+                    value={newPaymentData.paymentMethod}
+                    label="Phương thức thanh toán"
+                    onChange={(e) =>
+                      setNewPaymentData({
+                        ...newPaymentData,
+                        paymentMethod: e.target.value,
+                      })
+                    }
+                  >
                     <MenuItem value="cash">Tiền mặt</MenuItem>
                     <MenuItem value="bank_transfer">
                       Chuyển khoản ngân hàng
@@ -207,7 +287,19 @@ const PaymentManagement: React.FC = () => {
                 </FormControl>
               </Grid>
               <Grid size={{ xs: 12 }}>
-                <TextField fullWidth label="Items" multiline rows={3} />
+                <TextField
+                  fullWidth
+                  label="Items"
+                  multiline
+                  rows={3}
+                  value={newPaymentData.items}
+                  onChange={(e) =>
+                    setNewPaymentData({
+                      ...newPaymentData,
+                      items: e.target.value,
+                    })
+                  }
+                />
               </Grid>
             </Grid>
             <Box
@@ -224,7 +316,7 @@ const PaymentManagement: React.FC = () => {
               >
                 Hủy bỏ
               </Button>
-              <Button variant="contained" color="primary">
+              <Button type="submit" variant="contained" color="primary">
                 Quy trình thanh toán
               </Button>
             </Box>
@@ -312,12 +404,26 @@ const PaymentManagement: React.FC = () => {
               Đóng
             </Button>
             {selectedTransaction?.status === "pending" && (
-              <Button variant="contained" color="success">
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() => handleProcessPayment(selectedTransaction)}
+              >
                 Process Payment
               </Button>
             )}
             {selectedTransaction?.status === "completed" && (
-              <Button variant="outlined">In Biên lai</Button>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  alert(
+                    "Printing receipt...\nReceipt ID: RCPT-" +
+                      selectedTransaction.id
+                  )
+                }
+              >
+                In Biên lai
+              </Button>
             )}
           </Box>
         </CardContent>
@@ -327,42 +433,6 @@ const PaymentManagement: React.FC = () => {
 
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
-      {/* Summary Cards */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <SummaryCard
-            icon={AttachMoney}
-            title="Today's Revenue"
-            value="$1,234.00"
-            color="#2196f3"
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <SummaryCard
-            icon={CreditCard}
-            title="Pending Payments"
-            value="5"
-            color="#4caf50"
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <SummaryCard
-            icon={Receipt}
-            title="Active Deposits"
-            value="$450.00"
-            color="#ff9800"
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <SummaryCard
-            icon={Description}
-            title="Total Transactions"
-            value="128"
-            color="#9c27b0"
-          />
-        </Grid>
-      </Grid>
-
       {/* Main Content */}
       <Card>
         <CardContent>
