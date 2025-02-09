@@ -112,26 +112,26 @@ const EquipmentStatusReport = () => {
   const [adminMessage, setAdminMessage] = useState("");
 
   const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 120 },
-    { field: "name", headerName: "Equipment Name", width: 200 },
+    { field: "id", headerName: "ID", width: 140 },
+    { field: "name", headerName: "Equipment Name", width: 220 },
     { field: "type", headerName: "Type", width: 120 },
     {
       field: "status",
       headerName: "Status",
-      width: 150,
+      width: 170,
       renderCell: (params) => <StatusChip status={params.value} />,
     },
-    { field: "location", headerName: "Location", width: 150 },
+    { field: "location", headerName: "Location", width: 170 },
     {
       field: "lastChecked",
       headerName: "Last Checked",
-      width: 150,
+      width: 170,
       valueFormatter: () => new Date().toLocaleDateString(),
     },
     {
       field: "actions",
       headerName: "Actions",
-      width: 200,
+      width: 250,
       renderCell: (params) => (
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button
