@@ -1,9 +1,16 @@
 import {
   Alert,
+  Avatar,
   Box,
   Button,
+  Card,
+  Chip,
   FormControl,
   InputLabel,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
   MenuItem,
   Paper,
   Select,
@@ -13,7 +20,14 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import { useState } from "react";
+import {
+  LocalShipping,
+  Schedule,
+  AssignmentInd,
+  DoneAll,
+} from "@mui/icons-material";
 
 // Mock Data
 const MOCK_ORDER = {
@@ -28,10 +42,35 @@ const MOCK_ORDER = {
 };
 
 const MOCK_SHIPPERS = [
-  { id: 1, name: "David Wilson" },
-  { id: 2, name: "Sarah Johnson" },
-  { id: 3, name: "Michael Brown" },
-  { id: 4, name: "Emma Davis" },
+  {
+    id: 1,
+    name: "David Wilson",
+    vehicle: "Truck-202",
+    contact: "555-0101",
+    availability: "Available",
+  },
+  {
+    id: 2,
+    name: "Sarah Johnson",
+    vehicle: "Van-305",
+    contact: "555-0102",
+    availability: "On Delivery",
+  },
+  {
+    id: 3,
+    name: "Michael Brown",
+    vehicle: "Truck-205",
+    contact: "555-0103",
+    availability: "Available",
+  },
+];
+
+const statusSteps = [
+  "PENDING_DELIVERY",
+  "SCHEDULED",
+  "ASSIGNED_TO_SHIPPER",
+  "IN_TRANSIT",
+  "DELIVERED",
 ];
 
 const DeliveryOrder = () => {
@@ -41,20 +80,36 @@ const DeliveryOrder = () => {
   const [shippingAddress, setShippingAddress] = useState(
     MOCK_ORDER.initialAddress
   );
-  const [activeStep, setActiveStep] = useState(0);
   const [shipper, setShipper] = useState("");
   const [orderStatus, setOrderStatus] = useState(MOCK_ORDER.status);
+  const [statusHistory, setStatusHistory] = useState([
+    {
+      status: "PENDING_DELIVERY",
+      timestamp: new Date().toISOString(),
+      actor: "System",
+    },
+  ]);
 
-  const steps = ["Schedule Delivery", "Assign Shipper", "Track Shipment"];
+  const activeStep = statusSteps.indexOf(orderStatus);
 
   const handleDeliverySchedule = () => {
-    setOrderStatus("SCHEDULED");
-    setActiveStep(1);
+    updateStatus("SCHEDULED", "Scheduler");
   };
 
   const handleShipperAssignment = () => {
-    setOrderStatus("ASSIGNED_TO_SHIPPER");
-    setActiveStep(2);
+    updateStatus("ASSIGNED_TO_SHIPPER", "Manager");
+  };
+
+  const updateStatus = (newStatus: string, actor: string) => {
+    setOrderStatus(newStatus);
+    setStatusHistory((prev) => [
+      ...prev,
+      {
+        status: newStatus,
+        timestamp: new Date().toISOString(),
+        actor,
+      },
+    ]);
   };
 
   const getStepContent = (step: number) => {
@@ -62,50 +117,45 @@ const DeliveryOrder = () => {
       case 0:
         return (
           <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle1" sx={{ mb: 2 }}>
-              Chi tiết đơn hàng:
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 1 }}>
-              Khách hàng: {orderDetails.customerName}
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Vật phẩm:
-              {orderDetails.orderItems.map((item) => (
-                <Box key={item.id} sx={{ pl: 2 }}>
-                  • {item.name} x{item.quantity}
-                </Box>
-              ))}
-            </Typography>
+            <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                <Schedule sx={{ verticalAlign: "middle", mr: 1 }} />
+                Lên lịch giao hàng
+              </Typography>
 
-            <TextField
-              type="date"
-              label="Delivery Date"
-              value={deliveryDate}
-              onChange={(e) => setDeliveryDate(e.target.value)}
-              fullWidth
-              sx={{ mb: 2 }}
-              InputLabelProps={{ shrink: true }}
-            />
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <TextField
+                    type="date"
+                    label="Ngày giao hàng"
+                    value={deliveryDate}
+                    onChange={(e) => setDeliveryDate(e.target.value)}
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <TextField
+                    type="time"
+                    label="Giờ giao hàng"
+                    value={deliveryTime}
+                    onChange={(e) => setDeliveryTime(e.target.value)}
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+              </Grid>
 
-            <TextField
-              type="time"
-              label="Delivery Time"
-              value={deliveryTime}
-              onChange={(e) => setDeliveryTime(e.target.value)}
-              fullWidth
-              sx={{ mb: 2 }}
-              InputLabelProps={{ shrink: true }}
-            />
-
-            <TextField
-              fullWidth
-              multiline
-              rows={3}
-              label="Confirm Shipping Address"
-              value={shippingAddress}
-              onChange={(e) => setShippingAddress(e.target.value)}
-              sx={{ mb: 2 }}
-            />
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                label="Địa chỉ giao hàng"
+                value={shippingAddress}
+                onChange={(e) => setShippingAddress(e.target.value)}
+                sx={{ mt: 2 }}
+              />
+            </Card>
 
             <Button
               variant="contained"
@@ -114,8 +164,9 @@ const DeliveryOrder = () => {
               disabled={
                 !deliveryDate || !deliveryTime || !shippingAddress.trim()
               }
+              startIcon={<Schedule />}
             >
-              Lịch trình giao hàng
+              Xác nhận lịch giao
             </Button>
           </Box>
         );
@@ -123,91 +174,144 @@ const DeliveryOrder = () => {
       case 1:
         return (
           <Box sx={{ mt: 2 }}>
-            <Alert severity="info" sx={{ mb: 2 }}>
-              Ngày dự kiến giao hàng: {`${deliveryDate} ${deliveryTime}`}
-            </Alert>
+            <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                <AssignmentInd sx={{ verticalAlign: "middle", mr: 1 }} />
+                Chỉ định nhân viên giao hàng
+              </Typography>
 
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>Chọn Shipper</InputLabel>
-              <Select
-                value={shipper}
-                label="Select Shipper"
-                onChange={(e) => setShipper(e.target.value)}
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel>Chọn shipper</InputLabel>
+                <Select
+                  value={shipper}
+                  label="Chọn shipper"
+                  onChange={(e) => setShipper(e.target.value)}
+                >
+                  {MOCK_SHIPPERS.map((s) => (
+                    <MenuItem
+                      key={s.id}
+                      value={s.name}
+                      disabled={s.availability !== "Available"}
+                    >
+                      <ListItem>
+                        <ListItemAvatar>
+                          <Avatar>{s.name[0]}</Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={s.name}
+                          secondary={`${s.vehicle} • ${s.availability}`}
+                        />
+                      </ListItem>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleShipperAssignment}
+                disabled={!shipper}
+                startIcon={<LocalShipping />}
               >
-                {MOCK_SHIPPERS.map((s) => (
-                  <MenuItem key={s.id} value={s.name}>
-                    {s.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleShipperAssignment}
-              disabled={!shipper}
-            >
-              Chỉ định Shipper
-            </Button>
+                Chỉ định shipper
+              </Button>
+            </Card>
           </Box>
         );
 
       case 2:
         return (
           <Box sx={{ mt: 2 }}>
-            <Alert severity="success" sx={{ mb: 2 }}>
-              Trạng thái: {orderStatus}
-            </Alert>
+            <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                <LocalShipping sx={{ verticalAlign: "middle", mr: 1 }} />
+                Theo dõi tiến độ giao hàng
+              </Typography>
 
-            <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
-              <Typography variant="subtitle2" gutterBottom>
-                Chi tiết giao hàng
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                Đã lên lịch cho: {`${deliveryDate} ${deliveryTime}`}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                Địa chỉ: {shippingAddress}
-              </Typography>
-              <Typography variant="body2">
-                Shipper được chỉ định: {shipper}
-              </Typography>
-            </Paper>
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <List>
+                    {statusHistory.map((history, index) => (
+                      <ListItem key={index}>
+                        <ListItemText
+                          primary={history.status}
+                          secondary={`${new Date(
+                            history.timestamp
+                          ).toLocaleString()} • ${history.actor}`}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Grid>
 
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => setOrderStatus("IN TRANSIT")}
-              sx={{ mr: 1 }}
-            >
-              Đánh dấu là Đang vận chuyển
-            </Button>
-            <Button
-              variant="outlined"
-              color="success"
-              onClick={() => setOrderStatus("DELIVERED")}
-            >
-              Đánh dấu là Đã giao hàng
-            </Button>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <Box sx={{ textAlign: "center", p: 2 }}>
+                    <Chip
+                      label={orderStatus}
+                      color={
+                        orderStatus === "DELIVERED"
+                          ? "success"
+                          : orderStatus === "IN_TRANSIT"
+                          ? "warning"
+                          : "info"
+                      }
+                      sx={{ mb: 2, fontSize: "1.1rem" }}
+                    />
+
+                    <Typography variant="body1" gutterBottom>
+                      <strong>Shipper:</strong> {shipper}
+                    </Typography>
+                    <Typography variant="body1" gutterBottom>
+                      <strong>Thời gian dự kiến:</strong> {deliveryDate}{" "}
+                      {deliveryTime}
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                <Button
+                  variant="contained"
+                  color="warning"
+                  onClick={() => updateStatus("IN_TRANSIT", shipper)}
+                  startIcon={<LocalShipping />}
+                >
+                  Bắt đầu vận chuyển
+                </Button>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={() => updateStatus("DELIVERED", shipper)}
+                  startIcon={<DoneAll />}
+                >
+                  Xác nhận đã giao
+                </Button>
+              </Box>
+            </Card>
           </Box>
         );
 
       default:
-        return "Unknown step";
+        return (
+          <Alert severity="success" sx={{ mt: 2 }}>
+            Đơn hàng đã được giao thành công!
+          </Alert>
+        );
     }
   };
 
   return (
     <Paper sx={{ p: 3, maxWidth: 800, mx: "auto" }}>
-      <Typography variant="h5" gutterBottom>
-        Quản lý giao hàng - Đơn hàng #{orderDetails.id}
+      <Typography variant="h4" gutterBottom>
+        <LocalShipping sx={{ verticalAlign: "middle", mr: 1 }} />
+        Quản lý Giao hàng - #{orderDetails.id}
       </Typography>
 
-      <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-        {steps.map((label) => (
+      <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+        {statusSteps.map((label) => (
           <Step key={label}>
-            <StepLabel>{label}</StepLabel>
+            <StepLabel>{label.split("_").join(" ")}</StepLabel>
           </Step>
         ))}
       </Stepper>
