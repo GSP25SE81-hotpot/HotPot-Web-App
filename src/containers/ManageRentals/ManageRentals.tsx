@@ -18,49 +18,23 @@ import Grid from "@mui/material/Grid2";
 import { styled } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 
-// Custom palette
-const customColors = {
-  ivory: "#FFFFF0",
-  maroon: "#800000",
-  palegoldenrod: "#EEE8AA",
-  powderblue: "#B0E0E6",
-  black: "#000000",
-};
-
 // Styled components
-const StyledCard = styled(Card)({
+const StyledCard = styled(Card)(({ theme }) => ({
   height: "100%",
   transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
-  backgroundColor: customColors.ivory,
+  backgroundColor: theme.palette.background.paper,
   "&:hover": {
     transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
+    boxShadow: theme.shadows[6],
   },
-  border: `1px solid ${customColors.palegoldenrod}`,
-});
-
-const StyledIconButton = styled(IconButton)({
-  backgroundColor: customColors.maroon,
-  color: customColors.ivory,
-  "&:hover": { backgroundColor: customColors.black },
-  width: 48,
-  height: 48,
-});
-
-const ActionButton = styled(Button)(({ theme }) => ({
-  padding: theme.spacing(1.5, 3),
-  borderRadius: theme.shape.borderRadius,
-  textTransform: "none",
-  fontWeight: 600,
-  backgroundColor: customColors.maroon,
-  color: customColors.ivory,
-  "&:hover": { backgroundColor: customColors.black },
+  border: `1px solid ${theme.palette.divider}`,
 }));
 
-const DashboardContainer = styled(Box)({
+const DashboardContainer = styled(Box)(({ theme }) => ({
   minHeight: "100vh",
-  padding: "32px",
-});
+  padding: theme.spacing(4),
+  backgroundColor: theme.palette.background.default,
+}));
 
 const ManageRentals = () => {
   const navigate = useNavigate();
@@ -77,14 +51,9 @@ const ManageRentals = () => {
     <DashboardContainer>
       <Box sx={{ maxWidth: "xl", margin: "0 auto" }}>
         <Grid container spacing={4}>
-          {/* Title */}
           <Grid size={{ xs: 12 }}>
             <Stack direction="row" justifyContent="space-between" mb={4}>
-              <Typography
-                variant="h4"
-                component="h1"
-                sx={{ color: customColors.black }}
-              >
+              <Typography variant="h4" component="h1">
                 Quản lý cho thuê và thiết bị
               </Typography>
             </Stack>
@@ -96,56 +65,45 @@ const ManageRentals = () => {
               <CardContent>
                 <Stack spacing={3}>
                   <Box>
-                    <Typography
-                      variant="h6"
-                      component="h2"
-                      sx={{ fontWeight: "bold", color: customColors.black }}
-                    >
+                    <Typography variant="h6" component="h2" fontWeight="bold">
                       Đồ cho thuê
                     </Typography>
                     <Stack direction="row" spacing={2} alignItems="center">
-                      <Typography sx={{ color: customColors.maroon }}>
+                      <Typography color="text.secondary">
                         {stats.activeRentals} đồ cho thuê còn sẵn
                       </Typography>
                       {stats.overdueReturns > 0 && (
                         <Tooltip
                           title={`Overdue returns: ${stats.overdueReturns}`}
                         >
-                          <WarningIcon sx={{ color: customColors.maroon }} />
+                          <WarningIcon color="warning" />
                         </Tooltip>
                       )}
                     </Stack>
                   </Box>
                   <Box>
-                    <Typography sx={{ mb: 1, color: customColors.black }}>
-                      Thiết bị sử dụng
-                    </Typography>
+                    <Typography mb={1}>Thiết bị sử dụng</Typography>
                     <LinearProgress
                       variant="determinate"
                       value={stats.utilization}
-                      sx={{
-                        height: 8,
-                        bgcolor: customColors.powderblue,
-                        "& .MuiLinearProgress-bar": {
-                          bgcolor: customColors.maroon,
-                        },
-                      }}
+                      sx={{ height: 8 }}
                     />
-                    <Typography sx={{ mt: 1, color: customColors.black }}>
+                    <Typography mt={1}>
                       {stats.utilization}% tổng số thiết bị đang sử dụng
                     </Typography>
                   </Box>
                   <Stack direction="row" spacing={2}>
-                    <ActionButton
+                    <Button
+                      variant="contained"
                       onClick={() => navigate("/manage-rental-status")}
                       endIcon={<ArrowForwardIcon />}
                     >
                       Xem chi tiết
-                    </ActionButton>
+                    </Button>
                     <Tooltip title="Rental Notifications">
-                      <StyledIconButton aria-label="Rental Notifications">
+                      <IconButton color="primary">
                         <NotificationsIcon />
-                      </StyledIconButton>
+                      </IconButton>
                     </Tooltip>
                   </Stack>
                 </Stack>
@@ -159,15 +117,11 @@ const ManageRentals = () => {
               <CardContent>
                 <Stack spacing={3}>
                   <Box>
-                    <Typography
-                      variant="h6"
-                      component="h2"
-                      sx={{ fontWeight: "bold", color: customColors.black }}
-                    >
+                    <Typography variant="h6" component="h2" fontWeight="bold">
                       Thiết bị sẵn có
                     </Typography>
                     <Stack direction="row" spacing={2}>
-                      <Typography sx={{ color: customColors.maroon }}>
+                      <Typography color="text.secondary">
                         {stats.maintenanceItems} các món đang bảo dưỡng
                       </Typography>
                       <Chip
@@ -176,37 +130,27 @@ const ManageRentals = () => {
                         label={`${
                           stats.totalEquipment - stats.maintenanceItems
                         } Available`}
-                        sx={{
-                          bgcolor: customColors.palegoldenrod,
-                          color: customColors.black,
-                        }}
+                        color="success"
                       />
                     </Stack>
                     <Box>
-                      <Typography sx={{ mb: 1, color: customColors.black }}>
-                        Quá trình bảo dưỡng
-                      </Typography>
+                      <Typography mb={1}>Quá trình bảo dưỡng</Typography>
                       <LinearProgress
                         variant="determinate"
                         value={
                           (stats.maintenanceItems / stats.totalEquipment) * 100
                         }
-                        sx={{
-                          height: 8,
-                          bgcolor: customColors.powderblue,
-                          "& .MuiLinearProgress-bar": {
-                            bgcolor: customColors.maroon,
-                          },
-                        }}
+                        sx={{ height: 8 }}
                       />
                     </Box>
                   </Box>
-                  <ActionButton
+                  <Button
+                    variant="contained"
                     onClick={() => navigate("/equipment-availability")}
                     endIcon={<ArrowForwardIcon />}
                   >
                     Xem Thiết bị
-                  </ActionButton>
+                  </Button>
                 </Stack>
               </CardContent>
             </StyledCard>

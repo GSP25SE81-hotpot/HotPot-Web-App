@@ -10,28 +10,20 @@ import {
   Stack,
   Tooltip,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import React, { useState } from "react";
 
-// Custom colors
-const customColors = {
-  ivory: "#FFFFF0",
-  maroon: "#800000",
-  palegoldenrod: "#EEE8AA",
-  powderblue: "#B0E0E6",
-  black: "#000000",
-};
-
 // Styled components
-const StyledCard = styled(Card)(() => ({
-  backgroundColor: customColors.ivory,
+const StyledCard = styled(Card)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
   transition: "all 0.3s ease-in-out",
   "&:hover": {
     transform: "translateY(-2px)",
-    boxShadow: `0 8px 24px rgba(0, 0, 0, 0.15)`,
+    boxShadow: theme.shadows[6],
   },
-  border: `1px solid ${customColors.palegoldenrod}`,
+  border: `1px solid ${theme.palette.divider}`,
 }));
 
 interface Equipment {
@@ -79,58 +71,35 @@ const equipmentData: Equipment[] = [
   },
 ];
 
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case "Available":
-      return <CheckCircleIcon sx={{ color: "#4CAF50" }} />;
-    case "Rented":
-      return <BuildIcon sx={{ color: customColors.maroon }} />;
-    default:
-      return <BuildIcon sx={{ color: customColors.maroon }} />;
-  }
-};
-
-const getStatusChipColor = (status: string) => {
-  switch (status) {
-    case "Available":
-      return "#4CAF50";
-    case "Rented":
-      return customColors.maroon;
-    default:
-      return customColors.black;
-  }
-};
-
 const EquipmentAvailability: React.FC = () => {
+  const theme = useTheme();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "Available":
+        return <CheckCircleIcon color="success" />;
+      case "Rented":
+        return <BuildIcon color="error" />;
+      default:
+        return <BuildIcon />;
+    }
+  };
 
   return (
     <Box
       sx={{
         p: 3,
-        backgroundColor: customColors.ivory,
+        backgroundColor: theme.palette.background.default,
         minHeight: "100vh",
       }}
     >
       <Stack spacing={4}>
         <Box>
-          <Typography
-            variant="h4"
-            component="h1"
-            sx={{
-              color: customColors.black,
-              mb: 2,
-            }}
-          >
+          <Typography variant="h4" component="h1" gutterBottom>
             Dịch vụ cho thuê lẩu sẵn có
           </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: customColors.maroon,
-              mb: 3,
-            }}
-          >
+          <Typography variant="body1" color="text.secondary">
             {equipmentData.filter((e) => e.status === "Available").length} of{" "}
             {equipmentData.length} mặt hàng có sẵn để cho thuê
           </Typography>
@@ -151,37 +120,17 @@ const EquipmentAvailability: React.FC = () => {
                     alignItems="center"
                   >
                     <Stack spacing={1}>
-                      <Typography
-                        variant="h6"
-                        sx={{ color: customColors.black }}
-                      >
-                        {equipment.name}
-                      </Typography>
+                      <Typography variant="h6">{equipment.name}</Typography>
                       <Stack direction="row" spacing={2} alignItems="center">
                         <Chip
                           icon={getStatusIcon(equipment.status)}
                           label={equipment.status}
                           size="small"
-                          sx={{
-                            bgcolor: `${getStatusChipColor(
-                              equipment.status
-                            )}20`,
-                            color: getStatusChipColor(equipment.status),
-                            borderColor: getStatusChipColor(equipment.status),
-                            border: "1px solid",
-                          }}
+                          variant="outlined"
                         />
                         <Stack direction="row" spacing={1} alignItems="center">
-                          <LocalDiningIcon
-                            sx={{
-                              color: customColors.maroon,
-                              fontSize: "1rem",
-                            }}
-                          />
-                          <Typography
-                            variant="body2"
-                            sx={{ color: customColors.maroon }}
-                          >
+                          <LocalDiningIcon color="primary" fontSize="small" />
+                          <Typography variant="body2" color="text.secondary">
                             Renter: {equipment.renter}
                           </Typography>
                         </Stack>
@@ -198,16 +147,8 @@ const EquipmentAvailability: React.FC = () => {
                             spacing={1}
                             alignItems="center"
                           >
-                            <AccessTimeIcon
-                              sx={{
-                                color: customColors.maroon,
-                                fontSize: "1rem",
-                              }}
-                            />
-                            <Typography
-                              variant="body2"
-                              sx={{ color: customColors.maroon }}
-                            >
+                            <AccessTimeIcon color="primary" fontSize="small" />
+                            <Typography variant="body2" color="text.secondary">
                               Last: {equipment.lastRentalDate}
                             </Typography>
                           </Stack>
@@ -218,16 +159,8 @@ const EquipmentAvailability: React.FC = () => {
                             spacing={1}
                             alignItems="center"
                           >
-                            <BuildIcon
-                              sx={{
-                                color: customColors.maroon,
-                                fontSize: "1rem",
-                              }}
-                            />
-                            <Typography
-                              variant="body2"
-                              sx={{ color: customColors.maroon }}
-                            >
+                            <BuildIcon color="primary" fontSize="small" />
+                            <Typography variant="body2" color="text.secondary">
                               Next: {equipment.nextAvailableDate}
                             </Typography>
                           </Stack>

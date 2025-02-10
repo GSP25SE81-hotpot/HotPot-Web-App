@@ -17,50 +17,26 @@ import {
   Stack,
   Tooltip,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import React, { useState } from "react";
 
-// Custom colors
-const customColors = {
-  ivory: "#FFFFF0",
-  maroon: "#800000",
-  lightRed: "#FF6F61",
-  palegoldenrod: "#EEE8AA",
-  powderblue: "#B0E0E6",
-  black: "#000000",
-};
-
 // Styled components
-const StyledCard = styled(Card)(() => ({
-  backgroundColor: customColors.ivory,
+const StyledCard = styled(Card)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
   transition: "all 0.3s ease-in-out",
   "&:hover": {
     transform: "translateY(-2px)",
-    boxShadow: `0 8px 24px rgba(0, 0, 0, 0.15)`,
+    boxShadow: theme.shadows[6],
   },
-  border: `1px solid ${customColors.palegoldenrod}`,
+  border: `1px solid ${theme.palette.divider}`,
 }));
 
-const ActionButton = styled(Button)(() => ({
-  backgroundColor: customColors.maroon,
-  color: customColors.ivory,
-  padding: "8px 24px",
-  "&:hover": {
-    backgroundColor: customColors.black,
-  },
-}));
-
-const StyledSelect = styled(Select)(() => ({
+const StyledSelect = styled(Select)(({ theme }) => ({
   "& .MuiSelect-select": {
-    padding: "8px 16px",
+    padding: theme.spacing(1, 2),
     minWidth: 180,
-  },
-  "& .MuiOutlinedInput-notchedOutline": {
-    borderColor: customColors.palegoldenrod,
-  },
-  "&:hover .MuiOutlinedInput-notchedOutline": {
-    borderColor: customColors.maroon,
   },
 }));
 
@@ -100,39 +76,40 @@ const initialRentals: HotpotRental[] = [
   },
 ];
 
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case "In Use":
-      return <RestaurantIcon sx={{ color: customColors.lightRed }} />;
-    case "Ready for Pickup":
-      return <PendingActionsIcon sx={{ color: customColors.palegoldenrod }} />;
-    case "Completed":
-      return <DoneAllIcon sx={{ color: customColors.maroon }} />;
-    default:
-      return <DoneAllIcon sx={{ color: customColors.maroon }} />;
-  }
-};
-
-const getStatusChipColor = (status: string) => {
-  switch (status) {
-    case "In Use":
-      return customColors.lightRed;
-    case "Ready for Pickup":
-      return customColors.palegoldenrod;
-    case "Completed":
-      return customColors.maroon;
-    default:
-      return customColors.black;
-  }
-};
-
 const ManageRentalStatus: React.FC = () => {
+  const theme = useTheme();
   const [rentals, setRentals] = useState<HotpotRental[]>(initialRentals);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRental, setSelectedRental] = useState<HotpotRental | null>(
     null
   );
   const [tempStatus, setTempStatus] = useState("");
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "In Use":
+        return <RestaurantIcon color="primary" />;
+      case "Ready for Pickup":
+        return <PendingActionsIcon color="warning" />;
+      case "Completed":
+        return <DoneAllIcon color="success" />;
+      default:
+        return <DoneAllIcon />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "In Use":
+        return "primary";
+      case "Ready for Pickup":
+        return "warning";
+      case "Completed":
+        return "success";
+      default:
+        return "default";
+    }
+  };
 
   const handleStatusChange = (id: number, newStatus: string) => {
     const rental = rentals.find((r) => r.id === id);
@@ -161,18 +138,11 @@ const ManageRentalStatus: React.FC = () => {
       sx={{
         flexGrow: 1,
         p: 3,
-        backgroundColor: customColors.powderblue,
+        backgroundColor: theme.palette.background.default,
         minHeight: "100vh",
       }}
     >
-      <Typography
-        variant="h4"
-        gutterBottom
-        sx={{
-          color: customColors.black,
-          mb: 4,
-        }}
-      >
+      <Typography variant="h4" gutterBottom>
         Quản lý cho thuê lẩu
       </Typography>
       <Stack spacing={3}>
@@ -186,21 +156,13 @@ const ManageRentalStatus: React.FC = () => {
                 spacing={3}
               >
                 <Stack spacing={1}>
-                  <Typography variant="h6" sx={{ color: customColors.black }}>
-                    {rental.hotpotName}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: customColors.black }}
-                  >
+                  <Typography variant="h6">{rental.hotpotName}</Typography>
+                  <Typography variant="body2" color="text.secondary">
                     Khách hàng: {rental.customerName}
                   </Typography>
                   <Stack direction="row" spacing={2} alignItems="center">
                     <Tooltip title="Last Updated">
-                      <Typography
-                        variant="body2"
-                        sx={{ color: customColors.maroon }}
-                      >
+                      <Typography variant="body2" color="text.secondary">
                         {rental.lastUpdated}
                       </Typography>
                     </Tooltip>
@@ -208,12 +170,8 @@ const ManageRentalStatus: React.FC = () => {
                       icon={getStatusIcon(rental.status)}
                       label={rental.status}
                       size="small"
-                      sx={{
-                        bgcolor: `${getStatusChipColor(rental.status)}20`,
-                        color: getStatusChipColor(rental.status),
-                        borderColor: getStatusChipColor(rental.status),
-                        border: "1px solid",
-                      }}
+                      color={getStatusColor(rental.status)}
+                      variant="outlined"
                     />
                   </Stack>
                 </Stack>
@@ -244,7 +202,9 @@ const ManageRentalStatus: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Hủy</Button>
-          <ActionButton onClick={handleConfirmStatus}>Xác nhận</ActionButton>
+          <Button variant="contained" onClick={handleConfirmStatus}>
+            Xác nhận
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>

@@ -19,17 +19,9 @@ import {
   TableRow,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import React, { useState } from "react";
-
-const customColors = {
-  ivory: "#FFFFF0",
-  maroon: "#800000",
-  palegoldenrod: "#EEE8AA",
-  powderblue: "#B0E0E6",
-  black: "#000000",
-  darkgreen: "#006400",
-};
 
 const availableItems = [
   { name: "Seafood Hotpot" },
@@ -40,7 +32,28 @@ const availableItems = [
   { name: "Vegetable Platter" },
 ];
 
+const StatusChip = ({ status }: { status: string }) => {
+  const theme = useTheme();
+  const statusColors: Record<string, string> = {
+    "Pending Confirmation": theme.palette.warning.main,
+    Confirmed: theme.palette.success.main,
+    Cancelled: theme.palette.error.main,
+  };
+
+  return (
+    <Chip
+      label={status}
+      size="small"
+      sx={{
+        backgroundColor: statusColors[status] || theme.palette.grey[500],
+        color: theme.palette.common.white,
+      }}
+    />
+  );
+};
+
 const ManageOrder: React.FC = () => {
+  const theme = useTheme();
   const [orders, setOrders] = useState([
     {
       id: 1,
@@ -140,7 +153,13 @@ const ManageOrder: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3, bgcolor: customColors.ivory }}>
+    <Box
+      sx={{
+        p: 3,
+        bgcolor: theme.palette.background.default,
+        minHeight: "100vh",
+      }}
+    >
       <Typography variant="h4" component="h1" mb={3} color="primary">
         Quản lý đơn hàng lẩu
       </Typography>
@@ -148,7 +167,7 @@ const ManageOrder: React.FC = () => {
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow sx={{ bgcolor: customColors.palegoldenrod }}>
+            <TableRow sx={{ bgcolor: theme.palette.grey[200] }}>
               <TableCell sx={{ fontWeight: 600 }}>Tên khách hàng</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Lẩu & Thêm vào</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Ghi chú đặc biệt</TableCell>
@@ -169,9 +188,7 @@ const ManageOrder: React.FC = () => {
                         key={index}
                         alignItems="center"
                       >
-                        <Typography
-                          sx={{ color: customColors.black, minWidth: 150 }}
-                        >
+                        <Typography sx={{ minWidth: 150 }}>
                           {item.name}:
                         </Typography>
                         <TextField
@@ -187,28 +204,15 @@ const ManageOrder: React.FC = () => {
                           }
                           sx={{
                             width: "80px",
-                            "& .MuiOutlinedInput-root": {
-                              bgcolor: customColors.ivory,
-                              "& fieldset": {
-                                borderColor: customColors.maroon,
-                              },
-                              "&:hover fieldset": {
-                                borderColor: customColors.palegoldenrod,
-                              },
+                            "& .MuiInputBase-root": {
+                              bgcolor: theme.palette.background.paper,
                             },
                           }}
                         />
                         <Button
                           variant="outlined"
+                          color="error"
                           onClick={() => handleRemoveItem(order.id, index)}
-                          sx={{
-                            color: customColors.maroon,
-                            borderColor: customColors.maroon,
-                            "&:hover": {
-                              bgcolor: customColors.maroon,
-                              color: customColors.ivory,
-                            },
-                          }}
                         >
                           Xóa
                         </Button>
@@ -237,14 +241,8 @@ const ManageOrder: React.FC = () => {
                       </Select>
                       <Button
                         variant="contained"
+                        color="primary"
                         onClick={() => handleAddItem(order.id)}
-                        sx={{
-                          bgcolor: customColors.maroon,
-                          color: customColors.ivory,
-                          "&:hover": {
-                            bgcolor: customColors.powderblue,
-                          },
-                        }}
                       >
                         Thêm món
                       </Button>
@@ -261,59 +259,29 @@ const ManageOrder: React.FC = () => {
                     }
                     sx={{
                       width: "300px",
-                      "& .MuiOutlinedInput-root": {
-                        bgcolor: customColors.ivory,
-                        "& fieldset": {
-                          borderColor: customColors.maroon,
-                        },
-                        "&:hover fieldset": {
-                          borderColor: customColors.palegoldenrod,
-                        },
+                      "& .MuiInputBase-root": {
+                        bgcolor: theme.palette.background.paper,
                       },
                     }}
                   />
                 </TableCell>
                 <TableCell>
-                  <Chip
-                    label={order.status}
-                    sx={{
-                      backgroundColor:
-                        order.status === "Confirmed"
-                          ? customColors.powderblue
-                          : order.status === "Cancelled"
-                          ? customColors.maroon
-                          : customColors.palegoldenrod,
-                      color: customColors.black,
-                    }}
-                  />
+                  <StatusChip status={order.status} />
                 </TableCell>
                 <TableCell>
                   <Stack spacing={1} direction="row">
                     <Button
                       variant="contained"
+                      color="primary"
                       disabled={order.status === "Cancelled"}
-                      sx={{
-                        bgcolor: customColors.maroon,
-                        color: customColors.ivory,
-                        "&:hover": {
-                          bgcolor: customColors.powderblue,
-                        },
-                      }}
                       onClick={() => handleUpdateStatus(order.id, "Confirmed")}
                     >
                       Xác nhận
                     </Button>
                     <Button
                       variant="contained"
+                      color="secondary"
                       disabled={order.status === "Cancelled"}
-                      sx={{
-                        bgcolor: customColors.palegoldenrod,
-                        color: customColors.black,
-                        "&:hover": {
-                          bgcolor: customColors.black,
-                          color: customColors.ivory,
-                        },
-                      }}
                       onClick={() => setCancelOrderId(order.id)}
                     >
                       Hủy đơn

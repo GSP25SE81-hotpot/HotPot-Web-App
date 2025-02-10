@@ -11,19 +11,16 @@ import {
   TableRow,
   TextField,
   Typography,
+  useTheme,
+  Chip,
 } from "@mui/material";
 import React, { useState } from "react";
-
-// Custom colors for hotpot rental
-const customColors = {
-  ivory: "#FFFFF0",
-  maroon: "#800000",
-  palegoldenrod: "#EEE8AA",
-  powderblue: "#B0E0E6",
-  black: "#000000",
-};
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import BuildIcon from "@mui/icons-material/Build";
+import LocalDiningIcon from "@mui/icons-material/LocalDining";
 
 const CheckDeviceAfterReturn: React.FC = () => {
+  const theme = useTheme();
   const [equipment, setEquipment] = useState([
     {
       id: 1,
@@ -54,36 +51,86 @@ const CheckDeviceAfterReturn: React.FC = () => {
     );
   };
 
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "Cleaned":
+        return <CheckCircleIcon color="success" fontSize="small" />;
+      case "Needs Cleaning":
+        return <BuildIcon color="error" fontSize="small" />;
+      default:
+        return <LocalDiningIcon color="primary" fontSize="small" />;
+    }
+  };
+
   return (
-    <Box sx={{ p: 3, bgcolor: customColors.ivory }}>
-      <Typography variant="h4" component="h1" mb={3} color="primary">
+    <Box
+      sx={{
+        p: 3,
+        backgroundColor: theme.palette.background.default,
+        minHeight: "100vh",
+      }}
+    >
+      <Typography variant="h4" component="h1" gutterBottom>
         Kiểm tra thiết bị lẩu sau khi trả lại
       </Typography>
-      <TableContainer component={Paper} sx={{ bgcolor: customColors.ivory }}>
+
+      <TableContainer
+        component={Paper}
+        sx={{
+          border: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.paper,
+        }}
+      >
         <Table>
           <TableHead>
-            <TableRow sx={{ bgcolor: customColors.palegoldenrod }}>
-              <TableCell>Tên thiết bị</TableCell>
-              <TableCell>Trạng thái</TableCell>
-              <TableCell>Vấn đề</TableCell>
-              <TableCell>Hành động</TableCell>
+            <TableRow sx={{ bgcolor: theme.palette.grey[200] }}>
+              <TableCell sx={{ fontWeight: 600 }}>Tên thiết bị</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Trạng thái</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Vấn đề</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Hành động</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {equipment.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>{item.name}</TableCell>
-                <TableCell>{item.status}</TableCell>
+              <TableRow
+                key={item.id}
+                hover
+                sx={{
+                  "&:hover": {
+                    backgroundColor: theme.palette.action.hover,
+                  },
+                }}
+              >
+                <TableCell>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    {getStatusIcon(item.status)}
+                    <Typography>{item.name}</Typography>
+                  </Stack>
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    label={item.status}
+                    variant="outlined"
+                    color={
+                      item.status === "Cleaned"
+                        ? "success"
+                        : item.status === "Needs Cleaning"
+                        ? "error"
+                        : "default"
+                    }
+                  />
+                </TableCell>
                 <TableCell>
                   <TextField
+                    fullWidth
                     size="small"
                     variant="outlined"
-                    placeholder="Log issues"
+                    placeholder="Ghi chú vấn đề"
                     value={item.issues}
                     onChange={(e) => handleLogIssues(item.id, e.target.value)}
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        bgcolor: customColors.ivory,
+                        backgroundColor: theme.palette.background.paper,
                       },
                     }}
                   />
@@ -92,25 +139,29 @@ const CheckDeviceAfterReturn: React.FC = () => {
                   <Stack direction="row" spacing={1}>
                     <Button
                       variant="contained"
-                      sx={{
-                        bgcolor: customColors.powderblue,
-                        color: customColors.maroon,
-                      }}
+                      color="success"
+                      startIcon={<CheckCircleIcon />}
                       onClick={() => handleStatusUpdate(item.id, "Cleaned")}
+                      sx={{
+                        textTransform: "none",
+                        color: theme.palette.success.contrastText,
+                      }}
                     >
-                      Đánh dấu đã được làm sạch
+                      Đã làm sạch
                     </Button>
                     <Button
                       variant="contained"
-                      sx={{
-                        bgcolor: customColors.palegoldenrod,
-                        color: customColors.maroon,
-                      }}
+                      color="error"
+                      startIcon={<BuildIcon />}
                       onClick={() =>
                         handleStatusUpdate(item.id, "Needs Cleaning")
                       }
+                      sx={{
+                        textTransform: "none",
+                        color: theme.palette.error.contrastText,
+                      }}
                     >
-                      Đánh dấu cần được vệ sinh
+                      Cần vệ sinh
                     </Button>
                   </Stack>
                 </TableCell>
