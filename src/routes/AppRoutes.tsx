@@ -16,6 +16,7 @@ import { PaymentManagementPage } from "../pages/Staff/PaymentManagement/PaymentM
 import { RepairRequestsPage } from "../pages/Staff/RepairRequests/RepairRequestsPage";
 import { EquipmentConditionLogPage } from "../pages/Staff/EquipmentConditionLog/EquipmentConditionLogPage";
 import { EquipmentStatusReportPage } from "../pages/Staff/EquipmentStatusReport/EquipmentStatusReportPage";
+import { OrderHistoryPage } from "../pages/Staff/OrderHistory/OrderHistoryPage";
 
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
@@ -81,6 +82,10 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.routes.equipmentStatusReport}
           element={<EquipmentStatusReportPage />}
+        />
+        <Route
+          path={config.routes.orderHistory}
+          element={<OrderHistoryPage />}
         />
       </Route>
     </Routes>

@@ -72,7 +72,7 @@ const StatusChip = ({ status }: { status: RepairRequest["status"] }) => {
   );
 };
 
-const RepairRequests = () => {
+const RepairRequests: React.FC = () => {
   const [requests, setRequests] = useState<RepairRequest[]>(mockRequests);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [resolutionMessage, setResolutionMessage] = useState("");
@@ -199,11 +199,11 @@ const RepairRequests = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
           Equipment Failure Reports
         </Typography>
 
-        <Box sx={{ height: 600, width: "100%" }}>
+        <Box sx={{ height: 600, width: "100%", mb: 2 }}>
           <DataGrid
             rows={requests}
             columns={columns}
@@ -220,6 +220,7 @@ const RepairRequests = () => {
             getRowHeight={() => "auto"}
             sx={{
               "& .MuiDataGrid-cell": { py: 2 },
+              "& .MuiDataGrid-row": { maxHeight: "none !important" },
             }}
             disableRowSelectionOnClick
             initialState={{

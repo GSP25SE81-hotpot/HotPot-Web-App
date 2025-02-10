@@ -106,7 +106,7 @@ const features = [
     id: "FE-13",
     text: "View Order History",
     icon: <ListAltIcon />,
-    route: routes.contractHistory,
+    route: routes.orderHistory,
   },
   {
     id: "FE-14",
