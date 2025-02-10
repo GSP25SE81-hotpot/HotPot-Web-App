@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   Box,
   Chip,
@@ -12,6 +11,7 @@ import Grid from "@mui/material/Grid2";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
+import React, { useState } from "react";
 
 interface Order {
   id: string;
@@ -80,12 +80,12 @@ const OrderHistory: React.FC = () => {
 
   // Define DataGrid columns
   const columns: GridColDef[] = [
-    { field: "id", headerName: "Order ID", width: 140 },
-    { field: "customerName", headerName: "Customer Name", width: 200 },
+    { field: "id", headerName: "Order ID", width: 160 },
+    { field: "customerName", headerName: "Customer", width: 200 },
     {
       field: "orderDate",
       headerName: "Order Date",
-      width: 170,
+      width: 180,
       valueFormatter: () => new Date().toLocaleDateString(),
     },
     {
@@ -94,7 +94,7 @@ const OrderHistory: React.FC = () => {
       width: 150,
       renderCell: (params) => <OrderStatusChip status={params.value} />,
     },
-    { field: "type", headerName: "Type", width: 150 },
+    { field: "type", headerName: "Type", width: 130 },
     {
       field: "actions",
       headerName: "Actions",
@@ -168,6 +168,7 @@ const OrderHistory: React.FC = () => {
             rows={filteredOrders}
             columns={columns}
             slots={{ toolbar: GridToolbar }}
+            getRowHeight={() => "auto"}
             disableRowSelectionOnClick
             initialState={{
               sorting: {
@@ -175,8 +176,15 @@ const OrderHistory: React.FC = () => {
               },
             }}
             sx={{
-              "& .MuiDataGrid-cell": { py: 2 },
-              "& .MuiDataGrid-row": { maxHeight: "none !important" },
+              "& .MuiDataGrid-cell": {
+                py: 2,
+                display: "flex",
+                alignItems: "center",
+              },
+              "& .MuiDataGrid-row": {
+                maxHeight: "none !important",
+                "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
+              },
             }}
           />
         </Box>

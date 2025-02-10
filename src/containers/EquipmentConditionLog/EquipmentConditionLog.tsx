@@ -323,10 +323,17 @@ const EquipmentConditionLog = () => {
                 sortModel: [{ field: "nextInspection", sort: "asc" }],
               },
             }}
-            getRowSpacing={(params) => ({
-              top: params.isFirstVisible ? 0 : 5,
-              bottom: params.isLastVisible ? 0 : 5,
-            })}
+            sx={{
+              "& .MuiDataGrid-cell": {
+                py: 2,
+                display: "flex",
+                alignItems: "center",
+              },
+              "& .MuiDataGrid-row": {
+                maxHeight: "none !important",
+                "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
+              },
+            }}
             getDetailPanelContent={renderDetailPanel}
           />
         </Box>

@@ -219,8 +219,15 @@ const RepairRequests: React.FC = () => {
             }}
             getRowHeight={() => "auto"}
             sx={{
-              "& .MuiDataGrid-cell": { py: 2 },
-              "& .MuiDataGrid-row": { maxHeight: "none !important" },
+              "& .MuiDataGrid-cell": {
+                py: 2,
+                display: "flex",
+                alignItems: "center",
+              },
+              "& .MuiDataGrid-row": {
+                maxHeight: "none !important",
+                "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
+              },
             }}
             disableRowSelectionOnClick
             initialState={{
