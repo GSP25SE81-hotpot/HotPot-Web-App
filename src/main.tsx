@@ -6,6 +6,9 @@ import GlobalStyled from "./styles/GlobalStyles/index.tsx";
 //toastify
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+
+// editor
+import "react-quill/dist/quill.snow.css";
 //font-family
 import OverrideMuiTheme from "./theme/override.tsx";
 
