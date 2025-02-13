@@ -1,7 +1,10 @@
+import BuildIcon from "@mui/icons-material/Build";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LocalDiningIcon from "@mui/icons-material/LocalDining";
 import {
   Box,
   Button,
-  Paper,
+  Chip,
   Stack,
   Table,
   TableBody,
@@ -11,13 +14,62 @@ import {
   TableRow,
   TextField,
   Typography,
+  alpha,
   useTheme,
-  Chip,
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import React, { useState } from "react";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import BuildIcon from "@mui/icons-material/Build";
-import LocalDiningIcon from "@mui/icons-material/LocalDining";
+
+// Styled Components
+const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+  background: `linear-gradient(135deg, ${alpha(
+    theme.palette.background.paper,
+    0.9
+  )}, ${alpha(theme.palette.background.default, 0.95)})`,
+  backdropFilter: "blur(10px)",
+  borderRadius: 16,
+  boxShadow: `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.08)}`,
+  overflow: "hidden",
+}));
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  padding: theme.spacing(2),
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  transition: "all 0.2s ease-in-out",
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.05),
+    transform: "translateY(-2px)",
+  },
+}));
+
+const AnimatedButton = styled(Button)(({ theme }) => ({
+  borderRadius: 12,
+  transition: "all 0.2s ease-in-out",
+  textTransform: "none",
+  padding: "8px 16px",
+  "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 12,
+    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.background.paper, 0.95),
+    },
+    "&.Mui-focused": {
+      backgroundColor: theme.palette.background.paper,
+      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.1)}`,
+    },
+  },
+}));
 
 const CheckDeviceAfterReturn: React.FC = () => {
   const theme = useTheme();
@@ -65,52 +117,59 @@ const CheckDeviceAfterReturn: React.FC = () => {
   return (
     <Box
       sx={{
-        p: 3,
-        backgroundColor: theme.palette.background.default,
+        p: 4,
         minHeight: "100vh",
+        background: `linear-gradient(135deg, ${alpha(
+          theme.palette.background.default,
+          0.95
+        )}, ${alpha(theme.palette.background.paper, 0.95)})`,
       }}
     >
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography
+        variant="h4"
+        component="h1"
+        gutterBottom
+        sx={{
+          fontWeight: 700,
+          mb: 4,
+          background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}
+      >
         Kiểm tra thiết bị lẩu sau khi trả lại
       </Typography>
 
-      <TableContainer
-        component={Paper}
-        sx={{
-          border: `1px solid ${theme.palette.divider}`,
-          backgroundColor: theme.palette.background.paper,
-        }}
-      >
+      <StyledTableContainer>
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: theme.palette.grey[200] }}>
-              <TableCell sx={{ fontWeight: 600 }}>Tên thiết bị</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Trạng thái</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Vấn đề</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Hành động</TableCell>
+              <StyledTableCell sx={{ fontWeight: 600 }}>
+                Tên thiết bị
+              </StyledTableCell>
+              <StyledTableCell sx={{ fontWeight: 600 }}>
+                Trạng thái
+              </StyledTableCell>
+              <StyledTableCell sx={{ fontWeight: 600 }}>Vấn đề</StyledTableCell>
+              <StyledTableCell sx={{ fontWeight: 600 }}>
+                Hành động
+              </StyledTableCell>
             </TableRow>
           </TableHead>
+
           <TableBody>
             {equipment.map((item) => (
-              <TableRow
-                key={item.id}
-                hover
-                sx={{
-                  "&:hover": {
-                    backgroundColor: theme.palette.action.hover,
-                  },
-                }}
-              >
-                <TableCell>
+              <StyledTableRow key={item.id}>
+                <StyledTableCell>
                   <Stack direction="row" alignItems="center" spacing={1}>
                     {getStatusIcon(item.status)}
                     <Typography>{item.name}</Typography>
                   </Stack>
-                </TableCell>
-                <TableCell>
+                </StyledTableCell>
+                <StyledTableCell>
                   <Chip
                     label={item.status}
-                    variant="outlined"
+                    variant="filled"
                     color={
                       item.status === "Cleaned"
                         ? "success"
@@ -118,58 +177,51 @@ const CheckDeviceAfterReturn: React.FC = () => {
                         ? "error"
                         : "default"
                     }
+                    sx={{
+                      borderRadius: "12px",
+                      boxShadow: `0 2px 8px ${alpha(
+                        theme.palette.common.black,
+                        0.1
+                      )}`,
+                    }}
                   />
-                </TableCell>
-                <TableCell>
-                  <TextField
+                </StyledTableCell>
+                <StyledTableCell>
+                  <StyledTextField
                     fullWidth
                     size="small"
-                    variant="outlined"
                     placeholder="Ghi chú vấn đề"
                     value={item.issues}
                     onChange={(e) => handleLogIssues(item.id, e.target.value)}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: theme.palette.background.paper,
-                      },
-                    }}
                   />
-                </TableCell>
-                <TableCell>
+                </StyledTableCell>
+                <StyledTableCell>
                   <Stack direction="row" spacing={1}>
-                    <Button
+                    <AnimatedButton
                       variant="contained"
                       color="success"
                       startIcon={<CheckCircleIcon />}
                       onClick={() => handleStatusUpdate(item.id, "Cleaned")}
-                      sx={{
-                        textTransform: "none",
-                        color: theme.palette.success.contrastText,
-                      }}
                     >
                       Đã làm sạch
-                    </Button>
-                    <Button
+                    </AnimatedButton>
+                    <AnimatedButton
                       variant="contained"
                       color="error"
                       startIcon={<BuildIcon />}
                       onClick={() =>
                         handleStatusUpdate(item.id, "Needs Cleaning")
                       }
-                      sx={{
-                        textTransform: "none",
-                        color: theme.palette.error.contrastText,
-                      }}
                     >
                       Cần vệ sinh
-                    </Button>
+                    </AnimatedButton>
                   </Stack>
-                </TableCell>
-              </TableRow>
+                </StyledTableCell>
+              </StyledTableRow>
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
+      </StyledTableContainer>
     </Box>
   );
 };

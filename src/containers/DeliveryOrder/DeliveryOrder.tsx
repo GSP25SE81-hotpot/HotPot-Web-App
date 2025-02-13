@@ -1,4 +1,10 @@
 import {
+  AssignmentInd,
+  DoneAll,
+  LocalShipping,
+  Schedule,
+} from "@mui/icons-material";
+import {
   Alert,
   Avatar,
   Box,
@@ -19,15 +25,11 @@ import {
   Stepper,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
+import { alpha, styled } from "@mui/material/styles";
 import { useState } from "react";
-import {
-  LocalShipping,
-  Schedule,
-  AssignmentInd,
-  DoneAll,
-} from "@mui/icons-material";
 
 // Mock Data
 const MOCK_ORDER = {
@@ -73,7 +75,80 @@ const statusSteps = [
   "DELIVERED",
 ];
 
-const DeliveryOrder = () => {
+// Styled Components
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  background: `linear-gradient(135deg, ${alpha(
+    theme.palette.background.paper,
+    0.9
+  )}, ${alpha(theme.palette.background.default, 0.95)})`,
+  backdropFilter: "blur(10px)",
+  borderRadius: 24,
+  boxShadow: `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.08)}`,
+  padding: theme.spacing(4),
+}));
+
+const StyledCard = styled(Card)(({ theme }) => ({
+  background: `linear-gradient(145deg, ${alpha(
+    theme.palette.background.paper,
+    0.8
+  )}, ${alpha(theme.palette.background.default, 0.9)})`,
+  backdropFilter: "blur(8px)",
+  borderRadius: 16,
+  transition: "transform 0.2s ease-in-out",
+  "&:hover": {
+    transform: "translateY(-4px)",
+  },
+}));
+
+const AnimatedButton = styled(Button)(({ theme }) => ({
+  borderRadius: 12,
+  padding: "10px 24px",
+  transition: "all 0.2s ease-in-out",
+  textTransform: "none",
+  "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 12,
+    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.background.paper, 0.95),
+    },
+    "&.Mui-focused": {
+      backgroundColor: theme.palette.background.paper,
+      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.1)}`,
+    },
+  },
+}));
+
+const StyledSelect = styled(Select<string>)(() => ({
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderRadius: 12,
+  },
+  "& .MuiSelect-select": {
+    padding: "12px 16px",
+  },
+}));
+
+const StyledStepper = styled(Stepper)(({ theme }) => ({
+  "& .MuiStepLabel-root": {
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      transform: "translateY(-2px)",
+    },
+  },
+  "& .MuiStepLabel-label": {
+    marginTop: theme.spacing(1),
+  },
+}));
+
+const DeliveryOrder: React.FC = () => {
+  const theme = useTheme();
   const [orderDetails] = useState(MOCK_ORDER);
   const [deliveryDate, setDeliveryDate] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("");
@@ -117,7 +192,7 @@ const DeliveryOrder = () => {
       case 0:
         return (
           <Box sx={{ mt: 2 }}>
-            <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <StyledCard variant="outlined" sx={{ p: 2, mb: 2 }}>
               <Typography variant="h6" gutterBottom>
                 <Schedule sx={{ verticalAlign: "middle", mr: 1 }} />
                 Lên lịch giao hàng
@@ -125,28 +200,36 @@ const DeliveryOrder = () => {
 
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <TextField
+                  <StyledTextField
                     type="date"
                     label="Ngày giao hàng"
                     value={deliveryDate}
                     onChange={(e) => setDeliveryDate(e.target.value)}
                     fullWidth
-                    InputLabelProps={{ shrink: true }}
+                    slotProps={{
+                      inputLabel: {
+                        shrink: true,
+                      },
+                    }}
                   />
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <TextField
+                  <StyledTextField
                     type="time"
                     label="Giờ giao hàng"
                     value={deliveryTime}
                     onChange={(e) => setDeliveryTime(e.target.value)}
                     fullWidth
-                    InputLabelProps={{ shrink: true }}
+                    slotProps={{
+                      inputLabel: {
+                        shrink: true,
+                      },
+                    }}
                   />
                 </Grid>
               </Grid>
 
-              <TextField
+              <StyledTextField
                 fullWidth
                 multiline
                 rows={3}
@@ -155,9 +238,9 @@ const DeliveryOrder = () => {
                 onChange={(e) => setShippingAddress(e.target.value)}
                 sx={{ mt: 2 }}
               />
-            </Card>
+            </StyledCard>
 
-            <Button
+            <AnimatedButton
               variant="contained"
               color="primary"
               onClick={handleDeliverySchedule}
@@ -167,14 +250,14 @@ const DeliveryOrder = () => {
               startIcon={<Schedule />}
             >
               Xác nhận lịch giao
-            </Button>
+            </AnimatedButton>
           </Box>
         );
 
       case 1:
         return (
           <Box sx={{ mt: 2 }}>
-            <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <StyledCard variant="outlined" sx={{ p: 2, mb: 2 }}>
               <Typography variant="h6" gutterBottom>
                 <AssignmentInd sx={{ verticalAlign: "middle", mr: 1 }} />
                 Chỉ định nhân viên giao hàng
@@ -182,7 +265,7 @@ const DeliveryOrder = () => {
 
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel>Chọn shipper</InputLabel>
-                <Select
+                <StyledSelect
                   value={shipper}
                   label="Chọn shipper"
                   onChange={(e) => setShipper(e.target.value)}
@@ -204,10 +287,10 @@ const DeliveryOrder = () => {
                       </ListItem>
                     </MenuItem>
                   ))}
-                </Select>
+                </StyledSelect>
               </FormControl>
 
-              <Button
+              <AnimatedButton
                 variant="contained"
                 color="primary"
                 onClick={handleShipperAssignment}
@@ -215,15 +298,15 @@ const DeliveryOrder = () => {
                 startIcon={<LocalShipping />}
               >
                 Chỉ định shipper
-              </Button>
-            </Card>
+              </AnimatedButton>
+            </StyledCard>
           </Box>
         );
 
       case 2:
         return (
           <Box sx={{ mt: 2 }}>
-            <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <StyledCard variant="outlined" sx={{ p: 2, mb: 2 }}>
               <Typography variant="h6" gutterBottom>
                 <LocalShipping sx={{ verticalAlign: "middle", mr: 1 }} />
                 Theo dõi tiến độ giao hàng
@@ -271,24 +354,24 @@ const DeliveryOrder = () => {
               </Grid>
 
               <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-                <Button
+                <AnimatedButton
                   variant="contained"
                   color="warning"
                   onClick={() => updateStatus("IN_TRANSIT", shipper)}
                   startIcon={<LocalShipping />}
                 >
                   Bắt đầu vận chuyển
-                </Button>
-                <Button
+                </AnimatedButton>
+                <AnimatedButton
                   variant="contained"
                   color="success"
                   onClick={() => updateStatus("DELIVERED", shipper)}
                   startIcon={<DoneAll />}
                 >
                   Xác nhận đã giao
-                </Button>
+                </AnimatedButton>
               </Box>
-            </Card>
+            </StyledCard>
           </Box>
         );
 
@@ -302,22 +385,35 @@ const DeliveryOrder = () => {
   };
 
   return (
-    <Paper sx={{ p: 3, maxWidth: 800, mx: "auto" }}>
-      <Typography variant="h4" gutterBottom>
+    <StyledPaper>
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{
+          fontWeight: 700,
+          mb: 4,
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}
+      >
         <LocalShipping sx={{ verticalAlign: "middle", mr: 1 }} />
         Quản lý Giao hàng - #{orderDetails.id}
       </Typography>
 
-      <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+      <StyledStepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
         {statusSteps.map((label) => (
           <Step key={label}>
             <StepLabel>{label.split("_").join(" ")}</StepLabel>
           </Step>
         ))}
-      </Stepper>
+      </StyledStepper>
 
       {getStepContent(activeStep)}
-    </Paper>
+    </StyledPaper>
   );
 };
 

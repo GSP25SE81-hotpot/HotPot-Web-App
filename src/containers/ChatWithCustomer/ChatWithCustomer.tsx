@@ -1,11 +1,12 @@
 import { Circle, Send, Warning } from "@mui/icons-material";
 import {
+  alpha,
   Avatar,
   Badge,
   Box,
   Button,
   IconButton,
-  List, // Changed: Use ListItemButton instead of ListItem
+  List,
   ListItemAvatar,
   ListItemButton,
   ListItemText,
@@ -13,6 +14,7 @@ import {
   styled,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -40,7 +42,74 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  background: `linear-gradient(135deg, ${alpha(
+    theme.palette.background.paper,
+    0.9
+  )}, ${alpha(theme.palette.background.default, 0.95)})`,
+  backdropFilter: "blur(10px)",
+  borderRadius: 24,
+  boxShadow: `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.08)}`,
+}));
+
+const MessageBubble = styled(Box)<{ isStaff?: boolean }>(
+  ({ theme, isStaff }) => ({
+    maxWidth: "70%",
+    padding: "12px 16px",
+    borderRadius: isStaff ? "20px 20px 4px 20px" : "20px 20px 20px 4px",
+    background: isStaff
+      ? `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`
+      : theme.palette.grey[100],
+    boxShadow: `0 4px 12px ${alpha(
+      isStaff ? theme.palette.primary.main : theme.palette.common.black,
+      0.08
+    )}`,
+    color: isStaff ? "white" : "inherit",
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      transform: "translateY(-1px)",
+      boxShadow: `0 6px 16px ${alpha(
+        isStaff ? theme.palette.primary.main : theme.palette.common.black,
+        0.12
+      )}`,
+    },
+  })
+);
+
+const AnimatedListItem = styled(ListItemButton)(({ theme }) => ({
+  transition: "all 0.2s ease-in-out",
+  borderRadius: 12,
+  margin: "4px 8px",
+  "&:hover": {
+    transform: "translateX(4px)",
+    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+  },
+  "&.Mui-selected": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.12),
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.primary.main, 0.16),
+    },
+  },
+}));
+
+const StyledInput = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 30,
+    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+    backdropFilter: "blur(8px)",
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.background.paper, 0.95),
+    },
+    "&.Mui-focused": {
+      backgroundColor: theme.palette.background.paper,
+      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.12)}`,
+    },
+  },
+}));
+
 const ChatWithCustomer: React.FC = () => {
+  const theme = useTheme();
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [customerChats, setCustomerChats] = useState<CustomerChat[]>([
@@ -131,39 +200,36 @@ const ChatWithCustomer: React.FC = () => {
   const selectedCustomer = customerChats.find((c) => c.id === selectedChat);
 
   return (
-    <Paper
+    <StyledPaper
       elevation={3}
       sx={{
         width: "80vw",
         height: "80vh",
         display: "flex",
         overflow: "hidden",
-        bgcolor: "background.paper",
       }}
     >
       {/* Left Sidebar */}
       <Box
         sx={{
-          width: 250,
+          width: 280,
           borderRight: "1px solid",
           borderColor: "divider",
           overflowY: "auto",
+          bgcolor: alpha(theme.palette.background.paper, 0.6),
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <Typography variant="subtitle1" sx={{ p: 2, fontWeight: "bold" }}>
           Customer Chats
         </Typography>
-        <List>
+        <List sx={{ flex: 1 }}>
           {customerChats.map((chat) => (
-            <ListItemButton
+            <AnimatedListItem
               key={chat.id}
               selected={selectedChat === chat.id}
               onClick={() => setSelectedChat(chat.id)}
-              sx={{
-                "&.Mui-selected": {
-                  backgroundColor: "action.selected",
-                },
-              }}
             >
               <ListItemAvatar>
                 <StyledBadge
@@ -179,14 +245,15 @@ const ChatWithCustomer: React.FC = () => {
               <ListItemText
                 primary={chat.name}
                 secondary={chat.lastMessage}
-                secondaryTypographyProps={{
-                  noWrap: true,
-                  color: "text.secondary",
+                slotProps={{
+                  secondary: {
+                    noWrap: true,
+                    color: "text.secondary",
+                  },
                 }}
-                sx={{ pr: 1 }}
               />
               <Box sx={{ textAlign: "right", minWidth: 60 }}>
-                <Typography variant="caption" color="textSecondary">
+                <Typography variant="caption" color="text.secondary">
                   {new Date(chat.lastActivity).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -194,29 +261,27 @@ const ChatWithCustomer: React.FC = () => {
                 </Typography>
                 {chat.unread > 0 && (
                   <Circle
-                    sx={{
-                      fontSize: 12,
-                      color: "primary.main",
-                      mt: 0.5,
-                    }}
+                    sx={{ fontSize: 12, color: "primary.main", mt: 0.5 }}
                   />
                 )}
               </Box>
-            </ListItemButton>
+            </AnimatedListItem>
           ))}
         </List>
       </Box>
 
-      {/* Right Chat Area */}
+      {/* Chat Area */}
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
         {selectedCustomer ? (
           <>
-            {/* Chat Header */}
+            {/* Header */}
             <Box
               sx={{
                 p: 2,
                 borderBottom: "1px solid",
                 borderColor: "divider",
+                bgcolor: alpha(theme.palette.background.paper, 0.8),
+                backdropFilter: "blur(8px)",
                 display: "flex",
                 alignItems: "center",
               }}
@@ -228,22 +293,22 @@ const ChatWithCustomer: React.FC = () => {
                 <Typography variant="subtitle1" fontWeight="500">
                   {selectedCustomer.name}
                 </Typography>
-                <Typography variant="caption" color="textSecondary">
+                <Typography variant="caption" color="text.secondary">
                   Online
                 </Typography>
               </Box>
             </Box>
 
             {/* Messages */}
-            <List
+            <Box
               sx={{
                 flex: 1,
                 overflowY: "auto",
-                p: 2,
-                bgcolor: "background.default",
+                p: 3,
+                bgcolor: alpha(theme.palette.background.default, 0.6),
                 display: "flex",
                 flexDirection: "column",
-                gap: 1.5,
+                gap: 2,
               }}
             >
               {selectedCustomer.messages.map((msg, index) => (
@@ -255,21 +320,7 @@ const ChatWithCustomer: React.FC = () => {
                       msg.sender === "staff" ? "flex-end" : "flex-start",
                   }}
                 >
-                  <Box
-                    sx={{
-                      maxWidth: "70%",
-                      p: "8px 12px",
-                      borderRadius: 4,
-                      bgcolor:
-                        msg.sender === "staff" ? "primary.main" : "grey.100",
-                      color:
-                        msg.sender === "staff"
-                          ? "common.white"
-                          : "text.primary",
-                      boxShadow: 1,
-                      position: "relative",
-                    }}
-                  >
+                  <MessageBubble isStaff={msg.sender === "staff"}>
                     <Typography variant="body2">{msg.text}</Typography>
                     <Typography
                       variant="caption"
@@ -281,7 +332,7 @@ const ChatWithCustomer: React.FC = () => {
                         color:
                           msg.sender === "staff"
                             ? "common.white"
-                            : "text.secondary",
+                            : "text.primary",
                       }}
                     >
                       {msg.timestamp.toLocaleTimeString([], {
@@ -289,11 +340,11 @@ const ChatWithCustomer: React.FC = () => {
                         minute: "2-digit",
                       })}
                     </Typography>
-                  </Box>
+                  </MessageBubble>
                 </Box>
               ))}
               <div ref={messagesEndRef} />
-            </List>
+            </Box>
 
             {/* Input Area */}
             <Box
@@ -301,11 +352,12 @@ const ChatWithCustomer: React.FC = () => {
                 p: 2,
                 borderTop: "1px solid",
                 borderColor: "divider",
-                bgcolor: "background.paper",
+                bgcolor: alpha(theme.palette.background.paper, 0.8),
+                backdropFilter: "blur(8px)",
               }}
             >
               <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
-                <TextField
+                <StyledInput
                   fullWidth
                   multiline
                   maxRows={4}
@@ -314,12 +366,6 @@ const ChatWithCustomer: React.FC = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "24px",
-                      bgcolor: "background.paper",
-                    },
-                  }}
                 />
                 <IconButton
                   color="primary"
@@ -358,6 +404,7 @@ const ChatWithCustomer: React.FC = () => {
               alignItems: "center",
               justifyContent: "center",
               color: "text.secondary",
+              bgcolor: alpha(theme.palette.background.default, 0.6),
             }}
           >
             <Typography variant="h6">
@@ -366,7 +413,7 @@ const ChatWithCustomer: React.FC = () => {
           </Box>
         )}
       </Box>
-    </Paper>
+    </StyledPaper>
   );
 };
 

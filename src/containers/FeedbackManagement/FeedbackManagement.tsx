@@ -1,10 +1,13 @@
+import { Star, StarBorder } from "@mui/icons-material";
 import {
+  alpha,
   Box,
   Button,
   Card,
   CardContent,
   Chip,
   Divider,
+  Rating,
   Stack,
   TextField,
   Typography,
@@ -12,8 +15,6 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import React, { useState } from "react";
-import { Star, StarBorder } from "@mui/icons-material";
-import { Rating } from "@mui/material";
 
 // Feedback interface
 interface Feedback {
@@ -55,13 +56,38 @@ const feedbackData: Feedback[] = [
   },
 ];
 
+// Enhanced styled components
 const StyledCard = styled(Card)(({ theme }) => ({
-  backgroundColor: theme.palette.background.default,
-  border: `1px solid ${theme.palette.divider}`,
-  borderRadius: "8px",
-  transition: "transform 0.2s ease-in-out",
+  background: `linear-gradient(145deg, ${alpha(
+    theme.palette.background.paper,
+    0.9
+  )}, ${alpha(theme.palette.background.default, 0.9)})`,
+  backdropFilter: "blur(10px)",
+  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  borderRadius: "16px",
+  boxShadow: `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.1)}`,
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: `0 12px 48px 0 ${alpha(theme.palette.common.black, 0.12)}`,
+  },
+}));
+
+const AnimatedChip = styled(Chip)(() => ({
+  transition: "all 0.2s ease-in-out",
+  "&:hover": {
+    transform: "scale(1.05)",
+  },
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  borderRadius: "12px",
+  padding: "8px 24px",
+  transition: "all 0.2s ease-in-out",
+  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
   "&:hover": {
     transform: "translateY(-2px)",
+    boxShadow: `0 8px 20px -6px ${alpha(theme.palette.primary.main, 0.6)}`,
   },
 }));
 
@@ -92,40 +118,49 @@ const FeedbackManagement: React.FC = () => {
 
   return (
     <Box
-      sx={{ p: 3, backgroundColor: "background.default", minHeight: "100vh" }}
+      sx={{
+        p: 4,
+        background: (theme) =>
+          `linear-gradient(135deg, ${alpha(
+            theme.palette.background.default,
+            0.95
+          )}, ${alpha(theme.palette.background.paper, 0.95)})`,
+        minHeight: "100vh",
+      }}
     >
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 4 }}>
         Quản lý Phản hồi Khách hàng
       </Typography>
 
-      {/* Filter Chips */}
-      <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
-        <Chip
-          label="Tất cả"
-          onClick={() => handleFilterChange("all")}
-          color={filter === "all" ? "primary" : "default"}
-        />
-        <Chip
-          label="Chờ xử lý"
-          onClick={() => handleFilterChange("pending")}
-          color={filter === "pending" ? "primary" : "default"}
-        />
-        <Chip
-          label="Đã phản hồi"
-          onClick={() => handleFilterChange("responded")}
-          color={filter === "responded" ? "primary" : "default"}
-        />
-        <Chip
-          label="Đã giải quyết"
-          onClick={() => handleFilterChange("resolved")}
-          color={filter === "resolved" ? "primary" : "default"}
-        />
+      <Stack direction="row" spacing={2} sx={{ mb: 4 }}>
+        {["all", "pending", "responded", "resolved"].map((filterType) => (
+          <AnimatedChip
+            key={filterType}
+            label={
+              filterType === "all"
+                ? "Tất cả"
+                : filterType === "pending"
+                ? "Chờ xử lý"
+                : filterType === "responded"
+                ? "Đã phản hồi"
+                : "Đã giải quyết"
+            }
+            onClick={() =>
+              handleFilterChange(filterType as "all" | Feedback["status"])
+            }
+            color={filter === filterType ? "primary" : "default"}
+            sx={{
+              px: 2,
+              borderRadius: "10px",
+            }}
+          />
+        ))}
       </Stack>
 
       <Stack spacing={3}>
         {filteredFeedbacks.map((feedback) => (
           <StyledCard key={feedback.id}>
-            <CardContent>
+            <CardContent sx={{ p: 3 }}>
               <Stack spacing={2}>
                 {/* Feedback Header */}
                 <Stack
@@ -199,7 +234,7 @@ const FeedbackManagement: React.FC = () => {
                         value={responseText}
                         onChange={(e) => setResponseText(e.target.value)}
                       />
-                      <Button
+                      <StyledButton
                         variant="contained"
                         sx={{
                           alignSelf: "flex-end",
@@ -208,7 +243,7 @@ const FeedbackManagement: React.FC = () => {
                         onClick={() => handleSubmitResponse(feedback.id)}
                       >
                         Gửi phản hồi
-                      </Button>
+                      </StyledButton>
                     </Stack>
                   </>
                 )}
