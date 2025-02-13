@@ -32,70 +32,74 @@ import CreateIngredientsPage from "../pages/Admin/CreateIngredients/CreateIngred
 const AppRoute: React.FC = () => {
   return (
     <Routes>
-      <Route key="layout" path={config.routes.home} element={<ManagerLayout />}>
-        <Route key="home" path={config.routes.home} element={<Home />} />
+      <Route
+        key="layoutManager"
+        path={config.managerRoutes.home}
+        element={<ManagerLayout />}
+      >
+        <Route key="home" path={config.managerRoutes.home} element={<Home />} />
         <Route
-          path={config.routes.manageRentals}
+          path={config.managerRoutes.manageRentals}
           element={<ManageRentalsPage />}
         />
         <Route
-          path={config.routes.manageRentalStatus}
+          path={config.managerRoutes.manageRentalStatus}
           element={<ManageRentalStatusPage />}
         />
         <Route
-          path={config.routes.equipmentAvailability}
+          path={config.managerRoutes.equipmentAvailability}
           element={<EquipmentAvailabilityPage />}
         />
         <Route
-          path={config.routes.checkDevice}
+          path={config.managerRoutes.checkDevice}
           element={<CheckDeviceAfterReturnPage />}
         />
         <Route
-          path={config.routes.manageOrders}
+          path={config.managerRoutes.manageOrders}
           element={<ManageOrderPage />}
         />
         <Route
-          path={config.routes.workAssignment}
+          path={config.managerRoutes.workAssignment}
           element={<WorkAssignmentSchedulePage />}
         />
         <Route
-          path={config.routes.workAssignment}
+          path={config.managerRoutes.workAssignment}
           element={<WorkAssignmentSchedulePage />}
         />
         <Route
-          path={config.routes.deliveryOrder}
+          path={config.managerRoutes.deliveryOrder}
           element={<DeliveryOrderPage />}
         />
         <Route
-          path={config.routes.customerChat}
+          path={config.managerRoutes.customerChat}
           element={<ChatWithCustomerPage />}
         />
         <Route
-          path={config.routes.depositConfirmation}
+          path={config.managerRoutes.depositConfirmation}
           element={<DepositConfirmationPage />}
         />
         <Route
-          path={config.routes.paymentManagement}
+          path={config.managerRoutes.paymentManagement}
           element={<PaymentManagementPage />}
         />
         <Route
-          path={config.routes.repairRequests}
+          path={config.managerRoutes.repairRequests}
           element={<RepairRequestsPage />}
         />
         <Route
-          path={config.routes.equipmentConditionLog}
+          path={config.managerRoutes.equipmentConditionLog}
           element={<EquipmentConditionLogPage />}
         />
         <Route
-          path={config.routes.equipmentStatusReport}
+          path={config.managerRoutes.equipmentStatusReport}
           element={<EquipmentStatusReportPage />}
         />
         <Route
-          path={config.routes.orderHistory}
+          path={config.managerRoutes.orderHistory}
           element={<OrderHistoryPage />}
         />
         <Route
-          path={config.routes.feedbackManagement}
+          path={config.managerRoutes.feedbackManagement}
           element={<FeedbackManagementPage />}
         />
       </Route>

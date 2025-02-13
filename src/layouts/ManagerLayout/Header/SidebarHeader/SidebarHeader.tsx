@@ -25,7 +25,7 @@ import {
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import LogoContainer from "../../../../components/Logo/Logo";
-import { routes } from "../../../../configs/routes";
+import { managerRoutes } from "../../../../configs/routes";
 
 export const drawerWidth = 260;
 
@@ -35,84 +35,89 @@ interface SidebarHeaderProps {
 }
 
 const features = [
-  { id: "FE-01", text: "Login/Logout", icon: <HomeIcon />, route: routes.home },
+  {
+    id: "FE-01",
+    text: "Login/Logout",
+    icon: <HomeIcon />,
+    route: managerRoutes.home,
+  },
   {
     id: "FE-02",
     text: "Rentals and Equipment Status",
     icon: <ListAltIcon />,
-    route: routes.manageRentals,
+    route: managerRoutes.manageRentals,
   },
   {
     id: "FE-03",
     text: "Check Device After Return",
     icon: <CheckCircleIcon />,
-    route: routes.checkDevice,
+    route: managerRoutes.checkDevice,
   },
   {
     id: "FE-04",
     text: "Manage Order",
     icon: <ListAltIcon />,
-    route: routes.manageOrders,
+    route: managerRoutes.manageOrders,
   },
   {
     id: "FE-05",
     text: "Deliver Order to Shipper",
     icon: <LocalShippingIcon />,
-    route: routes.deliveryOrder,
+    route: managerRoutes.deliveryOrder,
   },
   {
     id: "FE-06",
     text: "Confirm Deposits",
     icon: <PaymentIcon />,
-    route: routes.depositConfirmation,
+    route: managerRoutes.depositConfirmation,
   },
   {
     id: "FE-07",
     text: "Manage Payment",
     icon: <PaymentIcon />,
-    route: routes.paymentManagement,
+    route: managerRoutes.paymentManagement,
   },
   {
     id: "FE-08",
     text: "Chat with Customer",
     icon: <ChatIcon />,
-    route: routes.customerChat,
+    route: managerRoutes.customerChat,
   },
   {
     id: "FE-09",
     text: "Equipment Failure Reports",
     icon: <BuildIcon />,
-    route: routes.repairRequests,
+    route: managerRoutes.repairRequests,
   },
   {
     id: "FE-10",
     text: "Log Equipment Conditions",
     icon: <AssignmentIcon />,
-    route: routes.equipmentConditionLog,
+    route: managerRoutes.equipmentConditionLog,
   },
   {
     id: "FE-11",
     text: "Equipment stock status",
     icon: <AssignmentIcon />,
-    route: routes.equipmentStatusReport,
+    route: managerRoutes.equipmentStatusReport,
   },
   {
     id: "FE-12",
     text: "View Feedback",
     icon: <FeedbackIcon />,
-    route: routes.feedbackManagement,
+    route: managerRoutes.feedbackManagement,
   },
   {
     id: "FE-13",
     text: "View Order History",
     icon: <ListAltIcon />,
-    route: routes.orderHistory,
+    route: managerRoutes.orderHistory,
   },
   {
     id: "FE-14",
     text: "Work Schedule",
     icon: <ScheduleIcon />,
-    route: routes.workAssignment,
+    route: managerRoutes.workAssignment,
   },
 ];
 

@@ -1,4 +1,4 @@
-export const routes = {
+export const managerRoutes = {
   home: "/",
   manageRentals: "/manage-rentals",
   manageRentalStatus: "/manage-rental-status",
@@ -28,4 +28,3 @@ export const adminRoutes = {
   tableIngredients: "/dashboard/ingredients",
   createIngredients: "/dashboard/createIngredients",
 };
-
