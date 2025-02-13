@@ -100,7 +100,7 @@ const features = [
     id: "FE-12",
     text: "View Feedback",
     icon: <FeedbackIcon />,
-    route: routes.feedback,
+    route: routes.feedbackManagement,
   },
   {
     id: "FE-13",

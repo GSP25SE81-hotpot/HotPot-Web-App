@@ -2,21 +2,22 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import config from "../configs";
 import Home from "../pages/Home/HomePage";
-import StaffLayout from "../layouts/StaffLayout/StaffLayout";
-import { ManageRentalsPage } from "../pages/Staff/ManageRentals/ManageRentalsPage";
-import { ManageRentalStatusPage } from "../pages/Staff/ManageRentals/ManageRentalStatusPage";
-import { EquipmentAvailabilityPage } from "../pages/Staff/ManageRentals/EquipmentAvailabilityPage";
-import { CheckDeviceAfterReturnPage } from "../pages/Staff/CheckDeviceAfterReturn/CheckDeviceAfterReturnPage";
-import { ManageOrderPage } from "../pages/Staff/ManageOrder/ManageOrderPage";
-import { WorkAssignmentSchedulePage } from "../pages/Staff/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
-import { DeliveryOrderPage } from "../pages/Staff/DeliveryOrder/DeliveryOrderPage";
-import { ChatWithCustomerPage } from "../pages/Staff/ChatWithCustomer/ChatWithCustomerPage";
-import { DepositConfirmationPage } from "../pages/Staff/DepositConfirmation/DepositConfirmationPage";
-import { PaymentManagementPage } from "../pages/Staff/PaymentManagement/PaymentManagementPage";
-import { RepairRequestsPage } from "../pages/Staff/RepairRequests/RepairRequestsPage";
-import { EquipmentConditionLogPage } from "../pages/Staff/EquipmentConditionLog/EquipmentConditionLogPage";
-import { EquipmentStatusReportPage } from "../pages/Staff/EquipmentStatusReport/EquipmentStatusReportPage";
-import { OrderHistoryPage } from "../pages/Staff/OrderHistory/OrderHistoryPage";
+import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
+import { ManageRentalsPage } from "../pages/Manager/ManageRentals/ManageRentalsPage";
+import { ManageRentalStatusPage } from "../pages/Manager/ManageRentals/ManageRentalStatusPage";
+import { EquipmentAvailabilityPage } from "../pages/Manager/ManageRentals/EquipmentAvailabilityPage";
+import { CheckDeviceAfterReturnPage } from "../pages/Manager/CheckDeviceAfterReturn/CheckDeviceAfterReturnPage";
+import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
+import { WorkAssignmentSchedulePage } from "../pages/Manager/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
+import { DeliveryOrderPage } from "../pages/Manager/DeliveryOrder/DeliveryOrderPage";
+import { ChatWithCustomerPage } from "../pages/Manager/ChatWithCustomer/ChatWithCustomerPage";
+import { DepositConfirmationPage } from "../pages/Manager/DepositConfirmation/DepositConfirmationPage";
+import { PaymentManagementPage } from "../pages/Manager/PaymentManagement/PaymentManagementPage";
+import { RepairRequestsPage } from "../pages/Manager/RepairRequests/RepairRequestsPage";
+import { EquipmentConditionLogPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionLogPage";
+import { EquipmentStatusReportPage } from "../pages/Manager/EquipmentStatusReport/EquipmentStatusReportPage";
+import { OrderHistoryPage } from "../pages/Manager/OrderHistory/OrderHistoryPage";
+import { FeedbackManagementPage } from "../pages/Manager/FeedbackManagement/FeedbackManagementPage";
 
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
@@ -25,7 +26,7 @@ import { OrderHistoryPage } from "../pages/Staff/OrderHistory/OrderHistoryPage";
 const AppRoute: React.FC = () => {
   return (
     <Routes>
-      <Route key="layout" path={config.routes.home} element={<StaffLayout />}>
+      <Route key="layout" path={config.routes.home} element={<ManagerLayout />}>
         <Route key="home" path={config.routes.home} element={<Home />} />
         <Route
           path={config.routes.manageRentals}
@@ -86,6 +87,10 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.routes.orderHistory}
           element={<OrderHistoryPage />}
+        />
+        <Route
+          path={config.routes.feedbackManagement}
+          element={<FeedbackManagementPage />}
         />
       </Route>
     </Routes>

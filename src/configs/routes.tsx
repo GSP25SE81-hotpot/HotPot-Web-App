@@ -15,6 +15,7 @@ export const routes = {
   repairRequests: "/repair-request",
   equipmentConditionLog: "/equipment-condition-log",
   equipmentStatusReport: "/equipment-status-report",
+  feedbackManagement: "/feedback-management",
 };
 
 export const adminRoutes = {
