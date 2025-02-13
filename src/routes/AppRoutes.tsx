@@ -1,8 +1,23 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import config from "../configs";
-import Home from "../pages/Home/Home";
-import StaffLayout from "../layouts/StaffLayout/StaffLayout";
+import Home from "../pages/Home/HomePage";
+import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
+import { ManageRentalsPage } from "../pages/Manager/ManageRentals/ManageRentalsPage";
+import { ManageRentalStatusPage } from "../pages/Manager/ManageRentals/ManageRentalStatusPage";
+import { EquipmentAvailabilityPage } from "../pages/Manager/ManageRentals/EquipmentAvailabilityPage";
+import { CheckDeviceAfterReturnPage } from "../pages/Manager/CheckDeviceAfterReturn/CheckDeviceAfterReturnPage";
+import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
+import { WorkAssignmentSchedulePage } from "../pages/Manager/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
+import { DeliveryOrderPage } from "../pages/Manager/DeliveryOrder/DeliveryOrderPage";
+import { ChatWithCustomerPage } from "../pages/Manager/ChatWithCustomer/ChatWithCustomerPage";
+import { DepositConfirmationPage } from "../pages/Manager/DepositConfirmation/DepositConfirmationPage";
+import { PaymentManagementPage } from "../pages/Manager/PaymentManagement/PaymentManagementPage";
+import { RepairRequestsPage } from "../pages/Manager/RepairRequests/RepairRequestsPage";
+import { EquipmentConditionLogPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionLogPage";
+import { EquipmentStatusReportPage } from "../pages/Manager/EquipmentStatusReport/EquipmentStatusReportPage";
+import { OrderHistoryPage } from "../pages/Manager/OrderHistory/OrderHistoryPage";
+import { FeedbackManagementPage } from "../pages/Manager/FeedbackManagement/FeedbackManagementPage";
 
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
@@ -11,8 +26,72 @@ import StaffLayout from "../layouts/StaffLayout/StaffLayout";
 const AppRoute: React.FC = () => {
   return (
     <Routes>
-      <Route key="layout" path={config.routes.home} element={<StaffLayout />}>
+      <Route key="layout" path={config.routes.home} element={<ManagerLayout />}>
         <Route key="home" path={config.routes.home} element={<Home />} />
+        <Route
+          path={config.routes.manageRentals}
+          element={<ManageRentalsPage />}
+        />
+        <Route
+          path={config.routes.manageRentalStatus}
+          element={<ManageRentalStatusPage />}
+        />
+        <Route
+          path={config.routes.equipmentAvailability}
+          element={<EquipmentAvailabilityPage />}
+        />
+        <Route
+          path={config.routes.checkDevice}
+          element={<CheckDeviceAfterReturnPage />}
+        />
+        <Route
+          path={config.routes.manageOrders}
+          element={<ManageOrderPage />}
+        />
+        <Route
+          path={config.routes.workAssignment}
+          element={<WorkAssignmentSchedulePage />}
+        />
+        <Route
+          path={config.routes.workAssignment}
+          element={<WorkAssignmentSchedulePage />}
+        />
+        <Route
+          path={config.routes.deliveryOrder}
+          element={<DeliveryOrderPage />}
+        />
+        <Route
+          path={config.routes.customerChat}
+          element={<ChatWithCustomerPage />}
+        />
+        <Route
+          path={config.routes.depositConfirmation}
+          element={<DepositConfirmationPage />}
+        />
+        <Route
+          path={config.routes.paymentManagement}
+          element={<PaymentManagementPage />}
+        />
+        <Route
+          path={config.routes.repairRequests}
+          element={<RepairRequestsPage />}
+        />
+        <Route
+          path={config.routes.equipmentConditionLog}
+          element={<EquipmentConditionLogPage />}
+        />
+        <Route
+          path={config.routes.equipmentStatusReport}
+          element={<EquipmentStatusReportPage />}
+        />
+        <Route
+          path={config.routes.orderHistory}
+          element={<OrderHistoryPage />}
+        />
+        <Route
+          path={config.routes.feedbackManagement}
+          element={<FeedbackManagementPage />}
+        />
       </Route>
     </Routes>
   );
