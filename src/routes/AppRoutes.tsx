@@ -18,6 +18,12 @@ import { EquipmentConditionLogPage } from "../pages/Manager/EquipmentConditionLo
 import { EquipmentStatusReportPage } from "../pages/Manager/EquipmentStatusReport/EquipmentStatusReportPage";
 import { OrderHistoryPage } from "../pages/Manager/OrderHistory/OrderHistoryPage";
 import { FeedbackManagementPage } from "../pages/Manager/FeedbackManagement/FeedbackManagementPage";
+import AdminLayout from "../layouts/AdminLayout/LayoutAdmin";
+import Dashboard from "../pages/Admin/Dashboard/Dashboard";
+import FeedbackPage from "../pages/Admin/Feedback/FeedbackPage";
+import FeedbackDetailPage from "../pages/Admin/Feedback/FeedbackDetailPage";
+import CreateComboPage from "../pages/Admin/Combohotpot/CreateComboPage";
+import CreateIngredientsPage from "../pages/Admin/CreateIngredients/CreateIngredientsPage";
 
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
@@ -91,6 +97,37 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.routes.feedbackManagement}
           element={<FeedbackManagementPage />}
+        />
+      </Route>
+      <Route
+        key="layoutAdmin"
+        path={config.adminRoutes.dashboard}
+        element={<AdminLayout />}
+      >
+        <Route
+          key="dashboard"
+          path={config.adminRoutes.dashboard}
+          element={<Dashboard />}
+        />
+        <Route
+          key="feedbackTable"
+          path={config.adminRoutes.feedback}
+          element={<FeedbackPage />}
+        />
+        <Route
+          key="feedbackDetail"
+          path={config.adminRoutes.feedbackDetail}
+          element={<FeedbackDetailPage />}
+        />
+        <Route
+          key="createCombo"
+          path={config.adminRoutes.createHotPotCombo}
+          element={<CreateComboPage />}
+        />
+        <Route
+          key="createIngredients"
+          path={config.adminRoutes.createIngredients}
+          element={<CreateIngredientsPage />}
         />
       </Route>
     </Routes>
