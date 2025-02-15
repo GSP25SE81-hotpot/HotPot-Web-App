@@ -63,10 +63,6 @@ const AppRoute: React.FC = () => {
           element={<WorkAssignmentSchedulePage />}
         />
         <Route
-          path={config.managerRoutes.workAssignment}
-          element={<WorkAssignmentSchedulePage />}
-        />
-        <Route
           path={config.managerRoutes.deliveryOrder}
           element={<DeliveryOrderPage />}
         />
