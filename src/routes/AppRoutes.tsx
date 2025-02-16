@@ -24,6 +24,7 @@ import FeedbackPage from "../pages/Admin/Feedback/FeedbackPage";
 import FeedbackDetailPage from "../pages/Admin/Feedback/FeedbackDetailPage";
 import CreateComboPage from "../pages/Admin/Combohotpot/CreateComboPage";
 import CreateIngredientsPage from "../pages/Admin/CreateIngredients/CreateIngredientsPage";
+import { ManageReplacementPage } from "../pages/Manager/ManageReplacement/ManageReplacementPage";
 
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
@@ -97,6 +98,10 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.feedbackManagement}
           element={<FeedbackManagementPage />}
+        />
+        <Route
+          path={config.managerRoutes.manageReplacement}
+          element={<ManageReplacementPage />}
         />
       </Route>
       <Route

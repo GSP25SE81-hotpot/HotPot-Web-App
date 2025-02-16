@@ -119,6 +119,12 @@ const features = [
     icon: <ScheduleIcon />,
     route: managerRoutes.workAssignment,
   },
+  {
+    id: "FE-15",
+    text: "Replacement Management",
+    icon: <ScheduleIcon />,
+    route: managerRoutes.manageReplacement,
+  },
 ];
 
 const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {

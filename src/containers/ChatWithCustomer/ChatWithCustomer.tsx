@@ -34,6 +34,7 @@ interface CustomerChat {
   messages: Message[];
 }
 
+// Styled Components
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
     backgroundColor: "#44b700",

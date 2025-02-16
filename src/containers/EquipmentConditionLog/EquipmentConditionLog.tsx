@@ -25,6 +25,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { styled, alpha } from "@mui/material/styles";
 
+// Styled Components
 const StyledBox = styled(Box)(({ theme }) => ({
   background: `linear-gradient(135deg, ${alpha(
     theme.palette.background.paper,

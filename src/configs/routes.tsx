@@ -16,6 +16,7 @@ export const managerRoutes = {
   equipmentConditionLog: "/equipment-condition-log",
   equipmentStatusReport: "/equipment-status-report",
   feedbackManagement: "/feedback-management",
+  manageReplacement: "/manage-replacement",
 };
 
 export const adminRoutes = {
