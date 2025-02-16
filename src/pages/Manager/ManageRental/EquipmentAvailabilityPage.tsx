@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
-import RepairRequests from "../../../containers/RepairRequests/RepairRequests";
+import EquipmentAvailability from "../../../containers/ManageRental/EquipmentAvailability";
 import OverrideMuiTheme from "../../../theme/override";
 
-export const RepairRequestsPage = () => {
+export const EquipmentAvailabilityPage = () => {
   return (
     <OverrideMuiTheme>
       <Box>
-        <RepairRequests />
+        <EquipmentAvailability />
       </Box>
     </OverrideMuiTheme>
   );
