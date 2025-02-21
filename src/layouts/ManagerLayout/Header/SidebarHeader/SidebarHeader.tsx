@@ -43,7 +43,7 @@ const features = [
   },
   {
     id: "FE-02",
-    text: "Rentals and Equipment Status",
+    text: "Equipment Stock Status (Manager)",
     icon: <ListAltIcon />,
     route: managerRoutes.manageRentals,
   },

@@ -1,19 +1,23 @@
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import BuildIcon from "@mui/icons-material/Build";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import LocalDiningIcon from "@mui/icons-material/LocalDining"; // New icon for hotpot equipment
+import LocalDiningIcon from "@mui/icons-material/LocalDining";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import {
+  Alert,
   Box,
   Card,
   CardContent,
   Chip,
+  IconButton,
+  Snackbar,
   Stack,
   Tooltip,
   Typography,
   useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 // Styled components
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -74,6 +78,15 @@ const equipmentData: Equipment[] = [
 const EquipmentAvailability: React.FC = () => {
   const theme = useTheme();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [notification, setNotification] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error" | "info" | "warning";
+  }>({
+    open: false,
+    message: "",
+    severity: "info",
+  });
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -85,6 +98,47 @@ const EquipmentAvailability: React.FC = () => {
         return <BuildIcon />;
     }
   };
+
+  // Function to report equipment status
+  const reportEquipmentStatus = (equipment: Equipment) => {
+    const statusMessage = `${
+      equipment.name
+    } is currently ${equipment.status.toLowerCase()}`;
+    const adminMessage = `Admin notified about ${equipment.name} status`;
+
+    const severity = equipment.status === "Available" ? "success" : "warning";
+
+    // Simulate API calls
+    console.log(`[LOG] Equipment Status: ${statusMessage}`); // Log to system
+    console.log(`[ADMIN NOTIFICATION] ${adminMessage}`); // Notify admin
+
+    setNotification({
+      open: true,
+      message: `${statusMessage}. Admin notification sent.`,
+      severity,
+    });
+  };
+
+  // Function to handle notification close
+  const handleNotificationClose = () => {
+    setNotification({ ...notification, open: false });
+  };
+
+  // Monitor equipment status changes
+  useEffect(() => {
+    const availableCount = equipmentData.filter(
+      (e) => e.status === "Available"
+    ).length;
+
+    if (availableCount <= equipmentData.length / 2) {
+      console.log("[ADMIN ALERT] Low equipment availability!");
+      setNotification({
+        open: true,
+        message: "Low equipment availability alert! Admin team notified.",
+        severity: "warning",
+      });
+    }
+  }, []);
 
   return (
     <Box
@@ -99,10 +153,33 @@ const EquipmentAvailability: React.FC = () => {
           <Typography variant="h4" component="h1" gutterBottom>
             Dịch vụ cho thuê lẩu sẵn có
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            {equipmentData.filter((e) => e.status === "Available").length} of{" "}
-            {equipmentData.length} mặt hàng có sẵn để cho thuê
-          </Typography>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="body1" color="text.secondary">
+              {equipmentData.filter((e) => e.status === "Available").length} of{" "}
+              {equipmentData.length} mặt hàng có sẵn để cho thuê
+            </Typography>
+            <Tooltip title="Report Status">
+              <IconButton
+                color="primary"
+                onClick={() => {
+                  const availableCount = equipmentData.filter(
+                    (e) => e.status === "Available"
+                  ).length;
+                  reportEquipmentStatus({
+                    id: 0,
+                    name: "Overall Status",
+                    status: availableCount > 0 ? "Available" : "Unavailable",
+                  });
+                }}
+              >
+                <NotificationsIcon />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         </Box>
 
         <Stack spacing={2}>
@@ -127,6 +204,7 @@ const EquipmentAvailability: React.FC = () => {
                           label={equipment.status}
                           size="small"
                           variant="outlined"
+                          onClick={() => reportEquipmentStatus(equipment)}
                         />
                         <Stack direction="row" spacing={1} alignItems="center">
                           <LocalDiningIcon color="primary" fontSize="small" />
@@ -174,6 +252,20 @@ const EquipmentAvailability: React.FC = () => {
           ))}
         </Stack>
       </Stack>
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={6000}
+        onClose={handleNotificationClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleNotificationClose}
+          severity={notification.severity}
+          sx={{ width: "100%" }}
+        >
+          {notification.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
