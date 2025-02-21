@@ -14,6 +14,7 @@ import {
   useTheme,
 } from "@mui/material";
 import React from "react";
+// import { useAuth } from "../context/AuthContext"; // Assume you have an auth context
 
 interface ShiftType {
   color: string;
@@ -94,6 +95,9 @@ const WorkScheduleTable: React.FC<{ schedules?: StaffSchedule[] }> = ({
   schedules = staffSchedules,
 }) => {
   const theme = useTheme();
+  // const { currentUser } = useAuth(); // Get current logged-in user
+  // const [personalSchedule, setPersonalSchedule] =
+  //   useState<StaffSchedule | null>(null);
   const days = [
     "Monday",
     "Tuesday",
@@ -103,6 +107,16 @@ const WorkScheduleTable: React.FC<{ schedules?: StaffSchedule[] }> = ({
     "Saturday",
     "Sunday",
   ];
+
+  // For staff personal schedule
+  //  useEffect(() => {
+  //    if (currentUser) {
+  //      const foundSchedule = schedules.find(
+  //        (s) => s.employeeName === currentUser.displayName
+  //      );
+  //      setPersonalSchedule(foundSchedule || null);
+  //    }
+  //  }, [schedules, currentUser]);
 
   const ShiftCell: React.FC<{ shift: string }> = ({ shift }) => {
     const shiftType = shiftTypes[shift];

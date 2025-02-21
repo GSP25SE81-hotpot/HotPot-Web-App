@@ -12,7 +12,7 @@ export const managerRoutes = {
   customerChat: "/chat",
   feedback: "/feedback",
   paymentManagement: "/payment-management",
-  repairRequests: "/repair-request",
+  resolveEquipmentFailure: "/resolve-equipment-failure",
   equipmentConditionLog: "/equipment-condition-log",
   equipmentStatusReport: "/equipment-status-report",
   feedbackManagement: "/feedback-management",

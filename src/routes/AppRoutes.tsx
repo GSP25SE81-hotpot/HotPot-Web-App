@@ -13,7 +13,7 @@ import { DeliveryOrderPage } from "../pages/Manager/DeliveryOrder/DeliveryOrderP
 import { ChatWithCustomerPage } from "../pages/Manager/ChatWithCustomer/ChatWithCustomerPage";
 import { DepositConfirmationPage } from "../pages/Manager/DepositConfirmation/DepositConfirmationPage";
 import { PaymentManagementPage } from "../pages/Manager/PaymentManagement/PaymentManagementPage";
-import { RepairRequestsPage } from "../pages/Manager/RepairRequest/RepairRequestsPage";
+import { ResolveEquipmentFailurePage } from "../pages/Manager/ResolveEquipmentFailure/ResolveEquipmentFailurePage";
 import { EquipmentConditionLogPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionLogPage";
 import { EquipmentStatusReportPage } from "../pages/Manager/EquipmentStatusReport/EquipmentStatusReportPage";
 import { OrderHistoryPage } from "../pages/Manager/OrderHistory/OrderHistoryPage";
@@ -80,8 +80,8 @@ const AppRoute: React.FC = () => {
           element={<PaymentManagementPage />}
         />
         <Route
-          path={config.managerRoutes.repairRequests}
-          element={<RepairRequestsPage />}
+          path={config.managerRoutes.resolveEquipmentFailure}
+          element={<ResolveEquipmentFailurePage />}
         />
         <Route
           path={config.managerRoutes.equipmentConditionLog}
