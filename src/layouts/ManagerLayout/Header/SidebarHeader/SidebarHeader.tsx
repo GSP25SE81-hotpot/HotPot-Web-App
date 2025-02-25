@@ -1,8 +1,8 @@
-import React, { useState } from "react";
 import {
   AppBar,
   Avatar,
   Box,
+  Chip,
   Collapse,
   Divider,
   Drawer,
@@ -11,34 +11,34 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem,
   Toolbar,
   Typography,
   useMediaQuery,
   useTheme,
-  Chip,
-  Menu,
-  MenuItem,
 } from "@mui/material";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoContainer from "../../../../components/Logo/Logo";
 
 // Icons
-import MenuIcon from "@mui/icons-material/Menu";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import SupportAgentIcon from "@mui/icons-material/SupportAgent";
-import PaymentIcon from "@mui/icons-material/Payment";
-import ReceiptIcon from "@mui/icons-material/Receipt";
-import EngineeringIcon from "@mui/icons-material/Engineering";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import AssignmentIcon from "@mui/icons-material/Assignment";
-import FeedbackIcon from "@mui/icons-material/Feedback";
-import ScheduleIcon from "@mui/icons-material/Schedule";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-import PersonIcon from "@mui/icons-material/Person";
-import LogoutIcon from "@mui/icons-material/Logout";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import EngineeringIcon from "@mui/icons-material/Engineering";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import FeedbackIcon from "@mui/icons-material/Feedback";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import LogoutIcon from "@mui/icons-material/Logout";
+import MenuIcon from "@mui/icons-material/Menu";
+import PaymentIcon from "@mui/icons-material/Payment";
+import PersonIcon from "@mui/icons-material/Person";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import SupportAgentIcon from "@mui/icons-material/SupportAgent";
+import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 
 import { managerRoutes } from "../../../../configs/routes";
 
