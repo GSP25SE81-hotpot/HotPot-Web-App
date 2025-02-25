@@ -55,7 +55,7 @@ const features = [
   },
   {
     id: "FE-04",
-    text: "View assigned orders (Staff)",
+    text: "View Assigned orders (Staff)",
     icon: <ListAltIcon />,
     route: managerRoutes.manageOrders,
   },

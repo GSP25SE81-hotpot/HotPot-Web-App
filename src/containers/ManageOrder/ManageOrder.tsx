@@ -24,20 +24,20 @@ import {
 import React, { useState } from "react";
 
 const availableItems = [
-  { name: "Seafood Hotpot" },
-  { name: "Vegetarian Hotpot" },
-  { name: "Extra Shrimp" },
-  { name: "Extra Tofu" },
-  { name: "Beef Slice" },
-  { name: "Vegetable Platter" },
+  { name: "Lẩu hải sản" },
+  { name: "Lẩu chay" },
+  { name: "Thêm tôm" },
+  { name: "Thêm đậu hũ" },
+  { name: "Thêm thịt bò" },
+  { name: "Thêm rau" },
 ];
 
 const StatusChip = ({ status }: { status: string }) => {
   const theme = useTheme();
   const statusColors: Record<string, string> = {
-    "Pending Confirmation": theme.palette.warning.main,
-    Confirmed: theme.palette.success.main,
-    Cancelled: theme.palette.error.main,
+    "Chờ xác nhận": theme.palette.warning.main,
+    "Đã xác nhận": theme.palette.success.main,
+    "Đã hủy": theme.palette.error.main,
   };
 
   return (
@@ -59,21 +59,21 @@ const ManageOrder: React.FC = () => {
       id: 1,
       customerName: "Alice Brown",
       items: [
-        { name: "Seafood Hotpot", quantity: 1 },
-        { name: "Extra Shrimp", quantity: 2 },
+        { name: "Lẩu hải sản", quantity: 1 },
+        { name: "Thêm tôm", quantity: 2 },
       ],
-      specialInstructions: "Less spicy please",
-      status: "Pending Confirmation",
+      specialInstructions: "Ít cay",
+      status: "Chờ xác nhận",
     },
     {
       id: 2,
       customerName: "Bob Green",
       items: [
-        { name: "Vegetarian Hotpot", quantity: 1 },
-        { name: "Extra Tofu", quantity: 3 },
+        { name: "Lẩu chay", quantity: 1 },
+        { name: "Thêm đậu hũ", quantity: 3 },
       ],
-      specialInstructions: "No mushrooms",
-      status: "Pending Confirmation",
+      specialInstructions: "Đừng bỏ nấm",
+      status: "Chờ xác nhận",
     },
   ]);
 
@@ -273,15 +273,15 @@ const ManageOrder: React.FC = () => {
                     <Button
                       variant="contained"
                       color="primary"
-                      disabled={order.status === "Cancelled"}
-                      onClick={() => handleUpdateStatus(order.id, "Confirmed")}
+                      disabled={order.status === "Hủy"}
+                      onClick={() => handleUpdateStatus(order.id, "Xác nhận")}
                     >
                       Xác nhận
                     </Button>
                     <Button
                       variant="contained"
                       color="secondary"
-                      disabled={order.status === "Cancelled"}
+                      disabled={order.status === "Hủy"}
                       onClick={() => setCancelOrderId(order.id)}
                     >
                       Hủy đơn
@@ -309,7 +309,7 @@ const ManageOrder: React.FC = () => {
           <Button
             onClick={() => {
               if (cancelOrderId !== null) {
-                handleUpdateStatus(cancelOrderId, "Cancelled");
+                handleUpdateStatus(cancelOrderId, "Hủy");
                 setCancelOrderId(null);
               }
             }}

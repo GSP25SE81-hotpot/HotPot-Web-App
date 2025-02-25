@@ -3,21 +3,30 @@ import BuildIcon from "@mui/icons-material/Build";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LocalDiningIcon from "@mui/icons-material/LocalDining";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import SendIcon from "@mui/icons-material/Send";
 import {
   Alert,
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
-  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  MenuItem,
+  Select,
   Snackbar,
   Stack,
+  TextField,
   Tooltip,
   Typography,
   useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 // Styled components
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -34,6 +43,7 @@ interface Equipment {
   id: number;
   name: string;
   status: string;
+  condition: string;
   lastRentalDate?: string;
   nextAvailableDate?: string;
   renter?: string;
@@ -45,6 +55,7 @@ const equipmentData: Equipment[] = [
     id: 1,
     name: "Large Hotpot Cooker",
     status: "Available",
+    condition: "Good",
     lastRentalDate: "2024-01-01",
     nextAvailableDate: "2024-01-10",
     renter: "John Doe",
@@ -53,6 +64,7 @@ const equipmentData: Equipment[] = [
     id: 2,
     name: "Table Grill Set",
     status: "Rented",
+    condition: "Good",
     lastRentalDate: "2024-01-05",
     nextAvailableDate: "2024-01-15",
     renter: "Jane Smith",
@@ -61,6 +73,7 @@ const equipmentData: Equipment[] = [
     id: 3,
     name: "Soup Base Container",
     status: "Available",
+    condition: "Needs Maintenance",
     lastRentalDate: "2024-01-03",
     nextAvailableDate: "2024-01-12",
     renter: "Mike Johnson",
@@ -69,6 +82,7 @@ const equipmentData: Equipment[] = [
     id: 4,
     name: "Portable Burner",
     status: "Rented",
+    condition: "Good",
     lastRentalDate: "2024-01-06",
     nextAvailableDate: "2024-01-18",
     renter: "Sarah Wilson",
@@ -87,36 +101,97 @@ const EquipmentAvailability: React.FC = () => {
     message: "",
     severity: "info",
   });
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(
+    null
+  );
+  const [reportMessage, setReportMessage] = useState("");
+  const [equipmentList, setEquipmentList] =
+    useState<Equipment[]>(equipmentData);
+  const [conditionDialogOpen, setConditionDialogOpen] = useState(false);
+  const [selectedCondition, setSelectedCondition] = useState("");
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Available":
         return <CheckCircleIcon color="success" />;
       case "Rented":
+        return <BuildIcon color="warning" />;
+      case "Maintenance":
         return <BuildIcon color="error" />;
       default:
         return <BuildIcon />;
     }
   };
 
-  // Function to report equipment status
-  const reportEquipmentStatus = (equipment: Equipment) => {
-    const statusMessage = `${
-      equipment.name
-    } is currently ${equipment.status.toLowerCase()}`;
-    const adminMessage = `Admin notified about ${equipment.name} status`;
+  const getConditionIcon = (condition: string) => {
+    switch (condition) {
+      case "Good":
+        return <CheckCircleIcon color="success" />;
+      case "Needs Maintenance":
+        return <BuildIcon color="warning" />;
+      case "Damaged":
+        return <BuildIcon color="error" />;
+      default:
+        return <BuildIcon />;
+    }
+  };
 
-    const severity = equipment.status === "Available" ? "success" : "warning";
+  // Function to open report dialog
+  const openReportDialog = (equipment: Equipment) => {
+    setSelectedEquipment(equipment);
+    setReportMessage(
+      `${
+        equipment.name
+      } is currently ${equipment.status.toLowerCase()} and in ${equipment.condition.toLowerCase()} condition.`
+    );
+    setReportDialogOpen(true);
+  };
 
-    // Simulate API calls
-    console.log(`[LOG] Equipment Status: ${statusMessage}`); // Log to system
-    console.log(`[ADMIN NOTIFICATION] ${adminMessage}`); // Notify admin
+  // Function to open condition update dialog
+  const openConditionDialog = (equipment: Equipment) => {
+    setSelectedEquipment(equipment);
+    setSelectedCondition(equipment.condition);
+    setConditionDialogOpen(true);
+  };
 
-    setNotification({
-      open: true,
-      message: `${statusMessage}. Admin notification sent.`,
-      severity,
-    });
+  // Function to update equipment condition
+  const updateEquipmentCondition = () => {
+    if (selectedEquipment && selectedCondition) {
+      setEquipmentList((prev) =>
+        prev.map((item) =>
+          item.id === selectedEquipment.id
+            ? { ...item, condition: selectedCondition }
+            : item
+        )
+      );
+
+      // Show notification
+      setNotification({
+        open: true,
+        message: `${selectedEquipment.name} condition updated to ${selectedCondition}`,
+        severity: "success",
+      });
+
+      setConditionDialogOpen(false);
+    }
+  };
+
+  // Function to report equipment status to admin
+  const sendReportToAdmin = () => {
+    if (selectedEquipment) {
+      // Simulate API call to notify admin
+      console.log(`[ADMIN NOTIFICATION] Equipment Report: ${reportMessage}`);
+
+      // Show success notification
+      setNotification({
+        open: true,
+        message: "Equipment status report sent to admin successfully",
+        severity: "success",
+      });
+
+      setReportDialogOpen(false);
+    }
   };
 
   // Function to handle notification close
@@ -124,13 +199,45 @@ const EquipmentAvailability: React.FC = () => {
     setNotification({ ...notification, open: false });
   };
 
+  // Function to send overall status report to admin
+  const sendOverallStatusReport = () => {
+    const availableCount = equipmentList.filter(
+      (e) => e.status === "Available"
+    ).length;
+    const maintenanceCount = equipmentList.filter(
+      (e) => e.condition === "Needs Maintenance" || e.condition === "Damaged"
+    ).length;
+
+    const reportSummary = `
+      Equipment Status Report:
+      - Total equipment: ${equipmentList.length}
+      - Available: ${availableCount}
+      - In use: ${equipmentList.length - availableCount}
+      - Needs maintenance: ${maintenanceCount}
+    `;
+
+    // Simulate API call
+    console.log(`[ADMIN NOTIFICATION] Overall Status Report: ${reportSummary}`);
+
+    // Show notification
+    setNotification({
+      open: true,
+      message: "Overall equipment status report sent to admin",
+      severity: "info",
+    });
+  };
+
   // Monitor equipment status changes
   useEffect(() => {
-    const availableCount = equipmentData.filter(
+    const availableCount = equipmentList.filter(
       (e) => e.status === "Available"
     ).length;
 
-    if (availableCount <= equipmentData.length / 2) {
+    const maintenanceNeeded = equipmentList.filter(
+      (e) => e.condition === "Needs Maintenance" || e.condition === "Damaged"
+    ).length;
+
+    if (availableCount <= equipmentList.length / 2) {
       console.log("[ADMIN ALERT] Low equipment availability!");
       setNotification({
         open: true,
@@ -138,7 +245,11 @@ const EquipmentAvailability: React.FC = () => {
         severity: "warning",
       });
     }
-  }, []);
+
+    if (maintenanceNeeded > 0) {
+      console.log(`[ADMIN ALERT] ${maintenanceNeeded} items need maintenance!`);
+    }
+  }, [equipmentList]);
 
   return (
     <Box
@@ -159,31 +270,21 @@ const EquipmentAvailability: React.FC = () => {
             alignItems="center"
           >
             <Typography variant="body1" color="text.secondary">
-              {equipmentData.filter((e) => e.status === "Available").length} of{" "}
-              {equipmentData.length} mặt hàng có sẵn để cho thuê
+              {equipmentList.filter((e) => e.status === "Available").length} of{" "}
+              {equipmentList.length} mặt hàng có sẵn để cho thuê
             </Typography>
-            <Tooltip title="Report Status">
-              <IconButton
-                color="primary"
-                onClick={() => {
-                  const availableCount = equipmentData.filter(
-                    (e) => e.status === "Available"
-                  ).length;
-                  reportEquipmentStatus({
-                    id: 0,
-                    name: "Overall Status",
-                    status: availableCount > 0 ? "Available" : "Unavailable",
-                  });
-                }}
-              >
-                <NotificationsIcon />
-              </IconButton>
-            </Tooltip>
+            <Button
+              variant="contained"
+              startIcon={<NotificationsIcon />}
+              onClick={sendOverallStatusReport}
+            >
+              Báo cáo trạng thái thiết bị
+            </Button>
           </Stack>
         </Box>
 
         <Stack spacing={2}>
-          {equipmentData.map((equipment) => (
+          {equipmentList.map((equipment) => (
             <StyledCard
               key={equipment.id}
               onMouseEnter={() => setHoveredId(equipment.id)}
@@ -204,16 +305,47 @@ const EquipmentAvailability: React.FC = () => {
                           label={equipment.status}
                           size="small"
                           variant="outlined"
-                          onClick={() => reportEquipmentStatus(equipment)}
+                          color={
+                            equipment.status === "Available"
+                              ? "success"
+                              : "warning"
+                          }
                         />
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <LocalDiningIcon color="primary" fontSize="small" />
-                          <Typography variant="body2" color="text.secondary">
-                            Renter: {equipment.renter}
-                          </Typography>
-                        </Stack>
+                        <Chip
+                          icon={getConditionIcon(equipment.condition)}
+                          label={equipment.condition}
+                          size="small"
+                          variant="outlined"
+                          color={
+                            equipment.condition === "Good"
+                              ? "success"
+                              : "warning"
+                          }
+                          onClick={() => openConditionDialog(equipment)}
+                        />
+                        {equipment.status === "Rented" && (
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            alignItems="center"
+                          >
+                            <LocalDiningIcon color="primary" fontSize="small" />
+                            <Typography variant="body2" color="text.secondary">
+                              Renter: {equipment.renter}
+                            </Typography>
+                          </Stack>
+                        )}
                       </Stack>
                     </Stack>
+
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => openReportDialog(equipment)}
+                      startIcon={<SendIcon />}
+                    >
+                      Báo cáo
+                    </Button>
                   </Stack>
 
                   {hoveredId === equipment.id && (
@@ -252,6 +384,77 @@ const EquipmentAvailability: React.FC = () => {
           ))}
         </Stack>
       </Stack>
+
+      {/* Report Dialog */}
+      <Dialog
+        open={reportDialogOpen}
+        onClose={() => setReportDialogOpen(false)}
+      >
+        <DialogTitle>Báo cáo về trạng thái thiết bị</DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 1, minWidth: 400 }}>
+            <Typography>
+              Gửi báo cáo về {selectedEquipment?.name} tới quản trị viên:
+            </Typography>
+            <TextField
+              label="Chi tiết báo cáo"
+              multiline
+              rows={4}
+              fullWidth
+              value={reportMessage}
+              onChange={(e) => setReportMessage(e.target.value)}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReportDialogOpen(false)}>Hủy</Button>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<SendIcon />}
+            onClick={sendReportToAdmin}
+          >
+            Gửi báo cáo
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Condition Update Dialog */}
+      <Dialog
+        open={conditionDialogOpen}
+        onClose={() => setConditionDialogOpen(false)}
+      >
+        <DialogTitle>Cập nhật tình trạng thiết bị</DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 1, minWidth: 300 }}>
+            <Typography>
+              Cập nhật tình trạng của {selectedEquipment?.name}:
+            </Typography>
+            <FormControl fullWidth>
+              <Select
+                value={selectedCondition}
+                onChange={(e) => setSelectedCondition(e.target.value)}
+              >
+                <MenuItem value="Good">Good</MenuItem>
+                <MenuItem value="Needs Maintenance">Needs Maintenance</MenuItem>
+                <MenuItem value="Damaged">Damaged</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConditionDialogOpen(false)}>Hủy</Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={updateEquipmentCondition}
+          >
+            Cập nhật
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Notification Snackbar */}
       <Snackbar
         open={notification.open}
         autoHideDuration={6000}
