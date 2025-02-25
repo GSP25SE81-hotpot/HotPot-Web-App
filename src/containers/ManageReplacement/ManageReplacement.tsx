@@ -29,6 +29,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   TableSortLabel,
   TextField,
@@ -36,7 +37,6 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
-  TablePagination,
 } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import { useState } from "react";
@@ -452,12 +452,14 @@ const ManageReplacement: React.FC = () => {
             flexGrow: 1,
             "& .MuiOutlinedInput-root": { borderRadius: 3 },
           }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="primary" />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="primary" />
+                </InputAdornment>
+              ),
+            },
           }}
         />
         <StyledFormControl sx={{ minWidth: 150 }}>
