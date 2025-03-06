@@ -24,6 +24,8 @@ import FeedbackPage from "../pages/Admin/Feedback/FeedbackPage";
 import FeedbackDetailPage from "../pages/Admin/Feedback/FeedbackDetailPage";
 import CreateComboPage from "../pages/Admin/Combohotpot/CreateComboPage";
 import CreateIngredientsPage from "../pages/Admin/CreateIngredients/CreateIngredientsPage";
+import ManageUserPage from "../pages/Admin/ManageUser/ManageUserPage";
+import { AuthenticatePage } from "../pages/Global/Authenticate/SignIn";
 
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
@@ -32,6 +34,8 @@ import CreateIngredientsPage from "../pages/Admin/CreateIngredients/CreateIngred
 const AppRoute: React.FC = () => {
   return (
     <Routes>
+      <Route key = "login" path = {config.authRoutes.authenticate} element ={<AuthenticatePage/>} />
+    
       <Route key="layout" path={config.routes.home} element={<ManagerLayout />}>
         <Route key="home" path={config.routes.home} element={<Home />} />
         <Route
@@ -108,6 +112,11 @@ const AppRoute: React.FC = () => {
           key="dashboard"
           path={config.adminRoutes.dashboard}
           element={<Dashboard />}
+        />
+        <Route
+          key={"manageUser"}
+          path={config.adminRoutes.manageUsers}
+          element={<ManageUserPage  />}
         />
         <Route
           key="feedbackTable"
