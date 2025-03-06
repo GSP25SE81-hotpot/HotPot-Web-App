@@ -19,6 +19,10 @@ export const managerRoutes = {
   manageReplacement: "/manage-replacement",
 };
 
+export const authRoutes = {
+  authenticate: "/auth"
+}
+
 export const adminRoutes = {
   dashboard: "/dashboard",
   feedbackDetail: "/dashboard/feedback/:id",
@@ -28,4 +32,5 @@ export const adminRoutes = {
   profile: "/profile",
   tableIngredients: "/dashboard/ingredients",
   createIngredients: "/dashboard/createIngredients",
+  manageUsers: "/dashboard/listUsers",
 };
