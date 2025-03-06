@@ -2,6 +2,7 @@ import {
   AppBar,
   Avatar,
   Box,
+  Button,
   Chip,
   Collapse,
   Divider,
@@ -33,6 +34,7 @@ import FeedbackIcon from "@mui/icons-material/Feedback";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import PaymentIcon from "@mui/icons-material/Payment";
 import PersonIcon from "@mui/icons-material/Person";
 import ReceiptIcon from "@mui/icons-material/Receipt";
@@ -47,6 +49,12 @@ export const drawerWidth = 280;
 interface SidebarHeaderProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+interface Notification {
+  id: number;
+  message: string;
+  time: string;
+  read: boolean;
 }
 
 const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
@@ -63,6 +71,10 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
   // User menu state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const userMenuOpen = Boolean(anchorEl);
+
+  // Notification state
+  const [notificationAnchorEl, setNotificationAnchorEl] =
+    useState<null | HTMLElement>(null);
 
   // Mock user data (replace with actual user data)
   const userData = {
@@ -95,7 +107,35 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
     // navigate to login page
     navigate("/login");
   };
+  const [notifications] = useState([
+    {
+      id: 1,
+      message: "New order #123 received",
+      time: "5 min ago",
+      read: false,
+    },
+    {
+      id: 2,
+      message: "Equipment HP-001 maintenance due",
+      time: "1 hour ago",
+      read: false,
+    },
+    {
+      id: 3,
+      message: "Customer feedback received",
+      time: "2 hours ago",
+      read: true,
+    },
+  ]);
+  const [unreadCount] = useState(2);
 
+  const handleNotificationOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setNotificationAnchorEl(event.currentTarget);
+  };
+
+  const handleNotificationClose = () => {
+    setNotificationAnchorEl(null);
+  };
   // Menu categories
   const inventoryItems = [
     {
@@ -231,6 +271,186 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
           </Box>
 
           <Box sx={{ flexGrow: 1 }} />
+
+          {/* Notification section */}
+          <Box sx={{ mr: 2 }}>
+            <IconButton
+              color="inherit"
+              onClick={handleNotificationOpen}
+              sx={{
+                position: "relative",
+                transition: "all 0.2s",
+                "&:hover": {
+                  backgroundColor: "rgba(0, 0, 0, 0.04)",
+                },
+              }}
+            >
+              <NotificationsIcon />
+              {unreadCount > 0 && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 2,
+                    right: 2,
+                    backgroundColor: "error.main",
+                    color: "white",
+                    borderRadius: "50%",
+                    width: 18,
+                    height: 18,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.7rem",
+                    fontWeight: "bold",
+                    boxShadow: "0 0 0 2px #fff",
+                  }}
+                >
+                  {unreadCount}
+                </Box>
+              )}
+            </IconButton>
+            <Menu
+              anchorEl={notificationAnchorEl}
+              open={Boolean(notificationAnchorEl)}
+              onClose={handleNotificationClose}
+              transformOrigin={{ horizontal: "right", vertical: "top" }}
+              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+              PaperProps={{
+                elevation: 3,
+                sx: {
+                  width: 320,
+                  maxHeight: 400,
+                  overflowY: "auto",
+                  borderRadius: 2,
+                  mt: 1,
+                  "& .MuiList-root": {
+                    padding: 0,
+                  },
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  p: 2,
+                  borderBottom: 1,
+                  borderColor: "divider",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 600, fontSize: "1rem" }}
+                >
+                  Notifications
+                </Typography>
+                {unreadCount > 0 && (
+                  <Chip
+                    size="small"
+                    label={`${unreadCount} new`}
+                    color="primary"
+                    sx={{ height: 24 }}
+                  />
+                )}
+              </Box>
+
+              {notifications.length > 0 ? (
+                <>
+                  {notifications.map((notification: Notification) => (
+                    <MenuItem
+                      key={notification.id}
+                      onClick={handleNotificationClose}
+                      sx={{
+                        py: 1.5,
+                        px: 2,
+                        borderBottom: 1,
+                        borderColor: "divider",
+                        backgroundColor: notification.read
+                          ? "transparent"
+                          : "action.hover",
+                        "&:hover": {
+                          backgroundColor: notification.read
+                            ? "action.hover"
+                            : "action.selected",
+                        },
+                        display: "flex",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <Box sx={{ width: "100%" }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            mb: 0.5,
+                          }}
+                        >
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontWeight: notification.read ? "normal" : "bold",
+                              fontSize: "0.9rem",
+                              lineHeight: 1.3,
+                            }}
+                          >
+                            {notification.message}
+                          </Typography>
+                          {!notification.read && (
+                            <Box
+                              sx={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: "50%",
+                                bgcolor: "primary.main",
+                                ml: 1,
+                                mt: 0.8,
+                                flexShrink: 0,
+                              }}
+                            />
+                          )}
+                        </Box>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ fontSize: "0.75rem" }}
+                        >
+                          {notification.time}
+                        </Typography>
+                      </Box>
+                    </MenuItem>
+                  ))}
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      textAlign: "center",
+                      borderTop: 1,
+                      borderColor: "divider",
+                      bgcolor: "background.default",
+                    }}
+                  >
+                    <Button
+                      color="primary"
+                      size="small"
+                      sx={{
+                        fontWeight: 500,
+                        textTransform: "none",
+                        fontSize: "0.85rem",
+                      }}
+                    >
+                      View All Notifications
+                    </Button>
+                  </Box>
+                </>
+              ) : (
+                <Box sx={{ p: 3, textAlign: "center" }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No notifications yet
+                  </Typography>
+                </Box>
+              )}
+            </Menu>
+          </Box>
 
           {/* User profile section */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
