@@ -3,11 +3,11 @@ export const managerRoutes = {
   manageRentals: "/manage-rentals",
   manageRentalStatus: "/manage-rental-status",
   equipmentAvailability: "/equipment-availability",
-  checkDevice: "/check-device",
+  retrieveRentalEquipment: "/retrieve-rental-equipment",
   orderHistory: "/order-history",
   workAssignment: "/work-assignment",
-  deliveryOrder: "/delivery-order",
-  manageOrders: "/manage-orders",
+  manageOrder: "/manage-order",
+  assignOrder: "/assign-order",
   depositConfirmation: "/deposit-confirmation",
   customerChat: "/chat",
   feedback: "/feedback",
@@ -20,8 +20,8 @@ export const managerRoutes = {
 };
 
 export const authRoutes = {
-  authenticate: "/auth"
-}
+  authenticate: "/auth",
+};
 
 export const adminRoutes = {
   dashboard: "/dashboard",

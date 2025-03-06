@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
-import DeliveryOrder from "../../../containers/DeliveryOrder/DeliveryOrder";
+import AssignOrder from "../../../containers/AssignOrder/AssignOrder";
 import OverrideMuiTheme from "../../../theme/override";
 
-export const DeliveryOrderPage = () => {
+export const AssignOrderPage = () => {
   return (
     <OverrideMuiTheme>
       <Box>
-        <DeliveryOrder />
+        <AssignOrder />
       </Box>
     </OverrideMuiTheme>
   );

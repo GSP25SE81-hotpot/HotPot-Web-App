@@ -5,9 +5,9 @@ import OverrideMuiTheme from "../../../theme/override";
 export const ManageOrderPage = () => {
   return (
     <OverrideMuiTheme>
-    <Box>
-        <ManageOrder/>
-    </Box>
+      <Box>
+        <ManageOrder />
+      </Box>
     </OverrideMuiTheme>
-  )
-}
+  );
+};

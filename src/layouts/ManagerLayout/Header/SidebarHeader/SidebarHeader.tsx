@@ -157,13 +157,13 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
       id: "FE-04",
       text: "View Assigned Orders",
       icon: <ReceiptIcon />,
-      route: managerRoutes.manageOrders,
+      route: managerRoutes.assignOrder,
     },
     {
       id: "FE-05",
       text: "Manage Orders",
       icon: <InventoryIcon />,
-      route: managerRoutes.deliveryOrder,
+      route: managerRoutes.manageOrder,
     },
     {
       id: "FE-13",
@@ -229,7 +229,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
       id: "FE-03",
       text: "Retrieve Rental Equipment",
       icon: <InventoryIcon />,
-      route: managerRoutes.checkDevice,
+      route: managerRoutes.retrieveRentalEquipment,
     },
     {
       id: "FE-08",
