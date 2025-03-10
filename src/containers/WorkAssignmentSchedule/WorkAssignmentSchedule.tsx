@@ -1,7 +1,10 @@
+// src/components/WorkScheduleTable.tsx (updated with custom hook)
+
 import {
   Box,
   Card,
   CardContent,
+  CircularProgress,
   Paper,
   Table,
   TableBody,
@@ -14,90 +17,16 @@ import {
   useTheme,
 } from "@mui/material";
 import React from "react";
-// import { useAuth } from "../context/AuthContext"; // Assume you have an auth context
+import { shiftTypes } from "../../types/scheduleInterfaces";
+import { useAuthContext } from "../../context/AuthContext";
+import { useSchedule } from "../../hooks/useSchedule";
 
-interface ShiftType {
-  color: string;
-  backgroundColor: string;
-  label: string;
-  description: string;
-}
-
-const shiftTypes: Record<string, ShiftType> = {
-  "Day Off": {
-    color: "#1a5f7a",
-    backgroundColor: "#e3fafc",
-    label: "OFF",
-    description: "Rest day - Not scheduled for work",
-  },
-  "Morning Shift": {
-    color: "#974c00",
-    backgroundColor: "#fff4e6",
-    label: "AM",
-    description: "Morning Shift - Early hours",
-  },
-  "Mid-Day Shift": {
-    color: "#862e9c",
-    backgroundColor: "#f8f0fc",
-    label: "MID",
-    description: "Mid-Day Shift - Standard hours",
-  },
-  "Evening Shift": {
-    color: "#087f5b",
-    backgroundColor: "#e6fcf5",
-    label: "PM",
-    description: "Evening Shift - Late hours",
-  },
-  "Overnight Shift": {
-    color: "#364fc7",
-    backgroundColor: "#edf2ff",
-    label: "NOC",
-    description: "Overnight Shift - Night hours",
-  },
-};
-
-interface StaffSchedule {
-  employeeName: string;
-  week: string;
-  schedule: string[];
-}
-
-const staffSchedules: StaffSchedule[] = [
-  {
-    employeeName: "Wyatt Russell",
-    week: "09/07/2020",
-    schedule: [
-      "Day Off",
-      "Evening Shift",
-      "Morning Shift",
-      "Morning Shift",
-      "Mid-Day Shift",
-      "Day Off",
-      "Day Off",
-    ],
-  },
-  {
-    employeeName: "Mike Parker",
-    week: "09/07/2020",
-    schedule: [
-      "Morning Shift",
-      "Mid-Day Shift",
-      "Mid-Day Shift",
-      "Day Off",
-      "Evening Shift",
-      "Day Off",
-      "Mid-Day Shift",
-    ],
-  },
-];
-
-const WorkScheduleTable: React.FC<{ schedules?: StaffSchedule[] }> = ({
-  schedules = staffSchedules,
-}) => {
+const WorkAssignmentSchedule: React.FC = () => {
   const theme = useTheme();
-  // const { currentUser } = useAuth(); // Get current logged-in user
-  // const [personalSchedule, setPersonalSchedule] =
-  //   useState<StaffSchedule | null>(null);
+  const { role } = useAuthContext();
+
+  const { loading, error, schedules, personalSchedule } = useSchedule();
+
   const days = [
     "Monday",
     "Tuesday",
@@ -107,16 +36,6 @@ const WorkScheduleTable: React.FC<{ schedules?: StaffSchedule[] }> = ({
     "Saturday",
     "Sunday",
   ];
-
-  // For staff personal schedule
-  //  useEffect(() => {
-  //    if (currentUser) {
-  //      const foundSchedule = schedules.find(
-  //        (s) => s.employeeName === currentUser.displayName
-  //      );
-  //      setPersonalSchedule(foundSchedule || null);
-  //    }
-  //  }, [schedules, currentUser]);
 
   const ShiftCell: React.FC<{ shift: string }> = ({ shift }) => {
     const shiftType = shiftTypes[shift];
@@ -145,18 +64,32 @@ const WorkScheduleTable: React.FC<{ schedules?: StaffSchedule[] }> = ({
     );
   };
 
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 4, textAlign: "center" }}>
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
+
   return (
     <Card
       elevation={2}
       sx={{
-        maxWidth: 1400, // Wider card
+        maxWidth: 1400,
         mx: "auto",
         overflow: "hidden",
       }}
     >
       <CardContent sx={{ p: 4 }}>
-        {" "}
-        {/* Increased padding */}
         <Box
           sx={{
             display: "flex",
@@ -175,75 +108,200 @@ const WorkScheduleTable: React.FC<{ schedules?: StaffSchedule[] }> = ({
             Lịch hàng tuần
           </Typography>
         </Box>
-        <TableContainer
-          component={Paper}
-          elevation={0}
-          sx={{
-            width: "100%",
-            minWidth: 1200,
-            overflowX: "auto",
-          }}
-        >
-          <Table size="medium">
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", p: 2 }}>
-                  {" "}
-                  Tên nhân viên
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", fontSize: "1rem", p: 2 }}>
-                  Tuần
-                </TableCell>
-                {days.map((day) => (
-                  <TableCell
-                    key={day}
-                    align="center"
+
+        {personalSchedule && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Lịch cá nhân
+            </Typography>
+            <TableContainer
+              component={Paper}
+              elevation={1}
+              sx={{
+                width: "100%",
+                minWidth: 1200,
+                overflowX: "auto",
+                mb: 4,
+              }}
+            >
+              <Table size="medium">
+                <TableHead>
+                  <TableRow>
+                    <TableCell
+                      sx={{ fontWeight: "bold", fontSize: "1rem", p: 2 }}
+                    >
+                      Tên nhân viên
+                    </TableCell>
+                    <TableCell
+                      sx={{ fontWeight: "bold", fontSize: "1rem", p: 2 }}
+                    >
+                      Tuần
+                    </TableCell>
+                    {days.map((day) => (
+                      <TableCell
+                        key={day}
+                        align="center"
+                        sx={{
+                          fontWeight: "bold",
+                          fontSize: "1rem",
+                          minWidth: 100,
+                          p: 1,
+                        }}
+                      >
+                        <Typography variant="body2" color="textSecondary">
+                          {day.substring(0, 3)}
+                        </Typography>
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow
                     sx={{
-                      fontWeight: "bold",
-                      fontSize: "1rem",
-                      minWidth: 100,
-                      p: 1,
+                      backgroundColor: theme.palette.primary.light,
+                      "&:hover": {
+                        backgroundColor: theme.palette.primary.light,
+                      },
                     }}
                   >
-                    <Typography variant="body2" color="textSecondary">
-                      {day.substring(0, 3)}
-                    </Typography>
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {schedules.map((staff) => (
-                <TableRow
-                  key={staff.employeeName}
-                  sx={{
-                    "&:nth-of-type(even)": {
-                      backgroundColor: theme.palette.grey[50],
-                    },
-                    height: 40,
-                  }}
-                >
-                  <TableCell sx={{ fontSize: "1rem", p: 2 }}>
-                    <Typography fontWeight="medium">
-                      {staff.employeeName}
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "1rem", p: 2 }}>
-                    {staff.week}
-                  </TableCell>
-                  {staff.schedule.map((shift, index) => (
-                    <TableCell key={index} align="center" sx={{ p: 2 }}>
-                      <ShiftCell shift={shift} />
+                    <TableCell sx={{ fontSize: "1rem", p: 2 }}>
+                      <Typography fontWeight="bold" color="white">
+                        {personalSchedule.employeeName}
+                      </Typography>
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                    <TableCell sx={{ fontSize: "1rem", p: 2, color: "white" }}>
+                      {personalSchedule.week}
+                    </TableCell>
+                    {personalSchedule.schedule.map((shift, index) => (
+                      <TableCell key={index} align="center" sx={{ p: 2 }}>
+                        <ShiftCell shift={shift} />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        )}
+
+        {(role === "Manager" || role === "Admin") && schedules.length > 1 && (
+          <>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Lịch của tất cả nhân viên
+            </Typography>
+            <TableContainer
+              component={Paper}
+              elevation={0}
+              sx={{
+                width: "100%",
+                minWidth: 1200,
+                overflowX: "auto",
+              }}
+            >
+              <Table size="medium">
+                <TableHead>
+                  <TableRow>
+                    <TableCell
+                      sx={{ fontWeight: "bold", fontSize: "1rem", p: 2 }}
+                    >
+                      Tên nhân viên
+                    </TableCell>
+                    <TableCell
+                      sx={{ fontWeight: "bold", fontSize: "1rem", p: 2 }}
+                    >
+                      Tuần
+                    </TableCell>
+                    {days.map((day) => (
+                      <TableCell
+                        key={day}
+                        align="center"
+                        sx={{
+                          fontWeight: "bold",
+                          fontSize: "1rem",
+                          minWidth: 100,
+                          p: 1,
+                        }}
+                      >
+                        <Typography variant="body2" color="textSecondary">
+                          {day.substring(0, 3)}
+                        </Typography>
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {schedules
+                    .filter(
+                      (staff) =>
+                        staff.employeeName !== personalSchedule?.employeeName
+                    )
+                    .map((staff) => (
+                      <TableRow
+                        key={staff.employeeName}
+                        sx={{
+                          "&:nth-of-type(even)": {
+                            backgroundColor: theme.palette.grey[50],
+                          },
+                          height: 40,
+                        }}
+                      >
+                        <TableCell sx={{ fontSize: "1rem", p: 2 }}>
+                          <Typography fontWeight="medium">
+                            {staff.employeeName}
+                          </Typography>
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "1rem", p: 2 }}>
+                          {staff.week}
+                        </TableCell>
+                        {staff.schedule.map((shift, index) => (
+                          <TableCell key={index} align="center" sx={{ p: 2 }}>
+                            <ShiftCell shift={shift} />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </>
+        )}
+
+        {/* Legend for shift types */}
+        <Box sx={{ mt: 4, display: "flex", flexWrap: "wrap", gap: 2 }}>
+          <Typography
+            variant="subtitle1"
+            fontWeight="bold"
+            sx={{ width: "100%", mb: 1 }}
+          >
+            Chú thích:
+          </Typography>
+          {Object.entries(shiftTypes).map(([name, type]) => (
+            <Box
+              key={name}
+              sx={{ display: "flex", alignItems: "center", gap: 1 }}
+            >
+              <Box
+                sx={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: 1,
+                  backgroundColor: type.backgroundColor,
+                  color: type.color,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: "bold",
+                }}
+              >
+                {type.label}
+              </Box>
+              <Typography variant="body2">{name}</Typography>
+            </Box>
+          ))}
+        </Box>
       </CardContent>
     </Card>
   );
 };
 
-export default WorkScheduleTable;
+export default WorkAssignmentSchedule;

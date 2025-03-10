@@ -16,8 +16,8 @@ export const AuthenticatePage = () => {
   //   const { setAuth } = useAuth();
 
   const validationSchema = Yup.object({
-    username: Yup.string()
-      .required("Tài khoản không được để trống!")
+    phoneNumber: Yup.string()
+      .required("Số điện thoại không được để trống!")
       .min(3, "Độ dài tài khoản phải tối thiểu 3 kí tự"),
     password: Yup.string()
       .required("Mật khẩu không được để trống!")
@@ -26,7 +26,7 @@ export const AuthenticatePage = () => {
 
   const formik = useFormik({
     initialValues: {
-      username: "",
+      phoneNumber: "",
       password: "",
     },
     validationSchema: validationSchema,
@@ -64,17 +64,17 @@ export const AuthenticatePage = () => {
           <h1 className={cx("title")}>Đăng Nhập</h1>
           <div className={cx("input-box")}>
             <input
-              id="username"
+              id="phoneNumber"
               //   name="userName"
               type="text"
               className={cx("input-text")}
-              placeholder="Tên đăng nhập *"
-              {...formik.getFieldProps("username")}
+              placeholder="Số điện thoại *"
+              {...formik.getFieldProps("phoneNumber")}
             />
             <FaUser className={cx("icon")} />
           </div>
-          {formik.touched.username && formik.errors.username ? (
-            <div className={cx("error")}>{formik.errors.username}</div>
+          {formik.touched.phoneNumber && formik.errors.phoneNumber ? (
+            <div className={cx("error")}>{formik.errors.phoneNumber}</div>
           ) : null}
           <div className={cx("input-box")}>
             <input

@@ -105,7 +105,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
     // Add logout logic here
     handleUserMenuClose();
     // navigate to login page
-    navigate("/login");
+    navigate("/auth");
   };
   const [notifications] = useState([
     {

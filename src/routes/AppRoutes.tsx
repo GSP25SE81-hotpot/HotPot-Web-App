@@ -1,13 +1,12 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import config from "../configs";
-import Home from "../pages/Home/HomePage";
+// import Home from "../pages/Home/HomePage";
 import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
 import { ManageRentalsPage } from "../pages/Manager/ManageRental/ManageRentalsPage";
 import { ManageRentalStatusPage } from "../pages/Manager/ManageRental/ManageRentalStatusPage";
 import { EquipmentAvailabilityPage } from "../pages/Manager/ManageRental/EquipmentAvailabilityPage";
 import { CheckDeviceAfterReturnPage } from "../pages/Staff/CheckDeviceAfterReturn/CheckDeviceAfterReturnPage";
-import { WorkAssignmentSchedulePage } from "../pages/Manager/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
 import { ChatWithCustomerPage } from "../pages/Manager/ChatWithCustomer/ChatWithCustomerPage";
 import { DepositConfirmationPage } from "../pages/Staff/DepositConfirmation/DepositConfirmationPage";
 import { PaymentManagementPage } from "../pages/Staff/PaymentManagement/PaymentManagementPage";
@@ -25,12 +24,12 @@ import CreateIngredientsPage from "../pages/Admin/CreateIngredients/CreateIngred
 import { ManageReplacementPage } from "../pages/Manager/ManageReplacement/ManageReplacementPage";
 import ManageUserPage from "../pages/Admin/ManageUser/ManageUserPage";
 import { AuthenticatePage } from "../pages/Global/Authenticate/SignIn";
-
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
 // import { Role } from "./Roles";
 import AssignOrder from "../containers/AssignOrder/AssignOrder";
 import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
+import WorkAssignmentSchedulePage from "../pages/Manager/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -46,7 +45,6 @@ const AppRoute: React.FC = () => {
         path={config.managerRoutes.home}
         element={<ManagerLayout />}
       >
-        <Route key="home" path={config.managerRoutes.home} element={<Home />} />
         <Route
           path={config.managerRoutes.manageRentals}
           element={<ManageRentalsPage />}

@@ -1,13 +1,18 @@
+// src/containers/WorkAssignmentSchedule/WorkAssignmentSchedule.tsx
+
+import React from "react";
 import { Box } from "@mui/material";
 import WorkAssignmentSchedule from "../../../containers/WorkAssignmentSchedule/WorkAssignmentSchedule";
-import OverrideMuiTheme from "../../../theme/override";
+import { AuthContextProvider } from "../../../context/AuthContext";
 
-export const WorkAssignmentSchedulePage = () => {
+const WorkAssignmentSchedulePage: React.FC = () => {
   return (
-    <OverrideMuiTheme>
+    <AuthContextProvider>
       <Box>
         <WorkAssignmentSchedule />
       </Box>
-    </OverrideMuiTheme>
+    </AuthContextProvider>
   );
 };
+
+export default WorkAssignmentSchedulePage;
