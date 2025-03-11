@@ -2,7 +2,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { LoginInfo } from "../types/loginInterface";
 
-const BASE_URL = "https://hpty.vinhuser.one/api/";
+const BASE_URL = "/api/";
 
 const axiosPublic = axios.create({
   baseURL: BASE_URL,
