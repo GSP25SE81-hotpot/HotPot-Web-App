@@ -1,3 +1,4 @@
+import { WorkDays } from "../../types/scheduleInterfaces";
 import { axiosPrivate } from "../axiosInstance";
 
 const API_URL = "managerordermanagement";
@@ -33,7 +34,7 @@ export interface ShippingOrder {
   proofTimestamp?: string;
   createdAt: string;
   updatedAt: string;
-  staff?: Staff;
+  staff?: StaffDto;
 }
 
 export interface OrderDetail {
@@ -45,14 +46,23 @@ export interface OrderDetail {
   productName: string;
 }
 
-export interface Staff {
-  staffId: number;
+export interface UserDto {
   userId: number;
-  workDays: number;
-  userName: string;
+  name: string;
   email: string;
   phoneNumber: string;
-  assignedOrders: number;
+  address: string | null;
+  roleName: string | null;
+  imageURL: string | null;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+}
+
+export interface StaffDto {
+  id: number;
+  workDays: number;
+  user: UserDto;
+  shippingOrders: ShippingOrder[] | null;
 }
 
 export interface Order {
@@ -169,10 +179,10 @@ const orderManagementService = {
   },
 
   // Get all staff
-  getAllStaff: async (): Promise<Staff[]> => {
-    // This endpoint might need to be implemented on the backend
-    // For now, we'll assume it exists
-    const response = await axiosPrivate.get<ApiResponse<Staff[]>>(`staff/all`);
+  getAllStaff: async (): Promise<StaffDto[]> => {
+    const response = await axiosPrivate.get<ApiResponse<StaffDto[]>>(
+      `staff/all`
+    );
     return response.data.data;
   },
 };
@@ -184,4 +194,8 @@ interface ApiResponse<T> {
   data: T;
   message: string;
   success: boolean;
+}
+
+export function worksOnDay(staff: StaffDto, day: WorkDays): boolean {
+  return (staff.workDays & day) !== 0;
 }

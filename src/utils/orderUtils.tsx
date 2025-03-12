@@ -2,7 +2,7 @@
 import { format } from "date-fns";
 import {
   Order as ApiOrder,
-  Staff as ApiStaff,
+  StaffDto as ApiStaff,
   OrderDetail,
 } from "../api/services/orderManagementService";
 import {
@@ -28,13 +28,18 @@ export const convertApiOrderToFrontendOrder = (
   let assignedTo: FrontendStaff | undefined = undefined;
   if (apiOrder.shippingOrder?.staff) {
     const staff = apiOrder.shippingOrder.staff;
+    // Calculate the number of assigned orders
+    const assignedOrdersCount = staff.shippingOrders
+      ? staff.shippingOrders.length
+      : 1;
+
     assignedTo = {
-      id: staff.staffId,
-      name: staff.userName || `Staff #${staff.staffId}`,
+      id: staff.id,
+      name: staff.user.name || `Staff #${staff.id}`,
       role: "Delivery Staff",
-      contact: staff.phoneNumber || apiOrder.userPhone || "N/A",
+      contact: staff.user.phoneNumber || apiOrder.userPhone || "N/A",
       availability: "On Delivery",
-      assignedOrders: staff.assignedOrders || 1,
+      assignedOrders: assignedOrdersCount,
     };
   }
 
@@ -52,7 +57,7 @@ export const convertApiOrderToFrontendOrder = (
     {
       status: mapOrderStatus(apiOrder.status),
       timestamp: apiOrder.updatedAt,
-      actor: apiOrder.shippingOrder?.staff?.userName || "System",
+      actor: apiOrder.shippingOrder?.staff?.user.name || "System",
       note: apiOrder.notes || undefined,
     },
   ];
@@ -62,7 +67,7 @@ export const convertApiOrderToFrontendOrder = (
     statusHistory.push({
       status: apiOrder.shippingOrder.isDelivered ? "DELIVERED" : "IN_TRANSIT",
       timestamp: apiOrder.shippingOrder.updatedAt,
-      actor: apiOrder.shippingOrder.staff?.userName || "Delivery Staff",
+      actor: apiOrder.shippingOrder.staff?.user.name || "Delivery Staff",
       note: apiOrder.shippingOrder.deliveryNotes,
     });
   }
@@ -86,13 +91,22 @@ export const convertApiOrderToFrontendOrder = (
 export const convertApiStaffToFrontendStaff = (
   apiStaff: ApiStaff
 ): FrontendStaff => {
+  // Calculate the number of assigned orders
+  const assignedOrdersCount = apiStaff.shippingOrders
+    ? apiStaff.shippingOrders.length
+    : 0;
+
+  // Determine availability based on the count
+  const availability: "Available" | "On Delivery" | "Off Duty" =
+    assignedOrdersCount >= 3 ? "On Delivery" : "Available";
+
   return {
-    id: apiStaff.staffId,
-    name: apiStaff.userName || `Staff #${apiStaff.staffId}`,
+    id: apiStaff.id,
+    name: apiStaff.user.name || `Staff #${apiStaff.id}`,
     role: "Delivery Staff",
-    contact: apiStaff.phoneNumber || "N/A",
-    availability: apiStaff.assignedOrders >= 3 ? "On Delivery" : "Available",
-    assignedOrders: apiStaff.assignedOrders || 0,
+    contact: apiStaff.user.phoneNumber || "N/A",
+    availability: availability,
+    assignedOrders: assignedOrdersCount,
   };
 };
 
