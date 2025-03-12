@@ -27,9 +27,10 @@ import { AuthenticatePage } from "../pages/Global/Authenticate/SignIn";
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
 // import { Role } from "./Roles";
-import AssignOrder from "../containers/AssignOrder/AssignOrder";
 import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
 import WorkAssignmentSchedulePage from "../pages/Manager/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
+import { AssignOrderPage } from "../pages/Staff/AssignOrder/AssignOrderPage";
+import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliveryPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -58,10 +59,6 @@ const AppRoute: React.FC = () => {
           element={<EquipmentAvailabilityPage />}
         />
         <Route
-          path={config.managerRoutes.retrieveRentalEquipment}
-          element={<CheckDeviceAfterReturnPage />}
-        />
-        <Route
           path={config.managerRoutes.manageOrder}
           element={<ManageOrderPage />}
         />
@@ -70,20 +67,8 @@ const AppRoute: React.FC = () => {
           element={<WorkAssignmentSchedulePage />}
         />
         <Route
-          path={config.managerRoutes.assignOrder}
-          element={<AssignOrder />}
-        />
-        <Route
           path={config.managerRoutes.customerChat}
           element={<ChatWithCustomerPage />}
-        />
-        <Route
-          path={config.managerRoutes.depositConfirmation}
-          element={<DepositConfirmationPage />}
-        />
-        <Route
-          path={config.managerRoutes.paymentManagement}
-          element={<PaymentManagementPage />}
         />
         <Route
           path={config.managerRoutes.resolveEquipmentFailure}
@@ -98,10 +83,6 @@ const AppRoute: React.FC = () => {
           element={<EquipmentStatusReportPage />}
         />
         <Route
-          path={config.managerRoutes.orderHistory}
-          element={<OrderHistoryPage />}
-        />
-        <Route
           path={config.managerRoutes.feedbackManagement}
           element={<FeedbackManagementPage />}
         />
@@ -110,6 +91,7 @@ const AppRoute: React.FC = () => {
           element={<ManageReplacementPage />}
         />
       </Route>
+
       <Route
         key="layoutAdmin"
         path={config.adminRoutes.dashboard}
@@ -144,6 +126,37 @@ const AppRoute: React.FC = () => {
           key="createIngredients"
           path={config.adminRoutes.createIngredients}
           element={<CreateIngredientsPage />}
+        />
+      </Route>
+
+      <Route
+        key="layoutStaff"
+        path={config.managerRoutes.home}
+        element={<ManagerLayout />}
+      >
+        <Route
+          path={config.staffRoutes.depositConfirmation}
+          element={<DepositConfirmationPage />}
+        />
+        <Route
+          path={config.staffRoutes.paymentManagement}
+          element={<PaymentManagementPage />}
+        />
+        <Route
+          path={config.staffRoutes.retrieveRentalEquipment}
+          element={<CheckDeviceAfterReturnPage />}
+        />
+        <Route
+          path={config.staffRoutes.assignOrder}
+          element={<AssignOrderPage />}
+        />
+        <Route
+          path={config.staffRoutes.orderHistory}
+          element={<OrderHistoryPage />}
+        />
+        <Route
+          path={config.staffRoutes.proofOfDelivery}
+          element={<ProofOfDeliveryPage />}
         />
       </Route>
     </Routes>

@@ -3,15 +3,10 @@ export const managerRoutes = {
   manageRentals: "/manage-rentals",
   manageRentalStatus: "/manage-rental-status",
   equipmentAvailability: "/equipment-availability",
-  retrieveRentalEquipment: "/retrieve-rental-equipment",
-  orderHistory: "/order-history",
   workAssignment: "/work-assignment",
   manageOrder: "/manage-order",
-  assignOrder: "/assign-order",
-  depositConfirmation: "/deposit-confirmation",
   customerChat: "/chat",
   feedback: "/feedback",
-  paymentManagement: "/payment-management",
   resolveEquipmentFailure: "/resolve-equipment-failure",
   equipmentConditionLog: "/equipment-condition-log",
   equipmentStatusReport: "/equipment-status-report",
@@ -33,4 +28,13 @@ export const adminRoutes = {
   tableIngredients: "/dashboard/ingredients",
   createIngredients: "/dashboard/createIngredients",
   manageUsers: "/dashboard/listUsers",
+};
+
+export const staffRoutes = {
+  paymentManagement: "/payment-management",
+  depositConfirmation: "/deposit-confirmation",
+  retrieveRentalEquipment: "/retrieve-rental-equipment",
+  orderHistory: "/order-history",
+  assignOrder: "/assign-order",
+  proofOfDelivery: "/proof-of-delivery",
 };

@@ -1,13 +1,13 @@
 import { Box } from "@mui/material";
 import ManageOrder from "../../../containers/ManageOrder/ManageOrder";
-import OverrideMuiTheme from "../../../theme/override";
+import { AuthContextProvider } from "../../../context/AuthContext";
 
 export const ManageOrderPage = () => {
   return (
-    <OverrideMuiTheme>
+    <AuthContextProvider>
       <Box>
         <ManageOrder />
       </Box>
-    </OverrideMuiTheme>
+    </AuthContextProvider>
   );
 };

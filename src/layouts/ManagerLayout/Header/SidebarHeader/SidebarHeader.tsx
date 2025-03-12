@@ -42,7 +42,7 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 
-import { managerRoutes } from "../../../../configs/routes";
+import { managerRoutes, staffRoutes } from "../../../../configs/routes";
 
 export const drawerWidth = 280;
 
@@ -157,7 +157,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
       id: "FE-04",
       text: "View Assigned Orders",
       icon: <ReceiptIcon />,
-      route: managerRoutes.assignOrder,
+      route: staffRoutes.assignOrder,
     },
     {
       id: "FE-05",
@@ -169,7 +169,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
       id: "FE-13",
       text: "Order History",
       icon: <AssignmentIcon />,
-      route: managerRoutes.orderHistory,
+      route: staffRoutes.orderHistory,
     },
   ];
 
@@ -214,13 +214,13 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
       id: "FE-06",
       text: "Confirm Deposits",
       icon: <PaymentIcon />,
-      route: managerRoutes.depositConfirmation,
+      route: staffRoutes.depositConfirmation,
     },
     {
       id: "FE-07",
       text: "Manage Payment",
       icon: <PaymentIcon />,
-      route: managerRoutes.paymentManagement,
+      route: staffRoutes.paymentManagement,
     },
   ];
 
@@ -229,7 +229,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
       id: "FE-03",
       text: "Retrieve Rental Equipment",
       icon: <InventoryIcon />,
-      route: managerRoutes.retrieveRentalEquipment,
+      route: staffRoutes.retrieveRentalEquipment,
     },
     {
       id: "FE-08",
