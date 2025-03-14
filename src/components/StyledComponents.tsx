@@ -12,6 +12,10 @@ import {
   SelectProps,
   Stepper,
   TextField,
+  Container,
+  Table,
+  FormControl,
+  IconButton,
 } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import { OrderStatus } from "../types/orderManagement";
@@ -142,3 +146,67 @@ export const CenteredBox = styled(Box)({
   height: "100%",
   py: 8,
 });
+
+export const StyledContainer = styled(Container)(({ theme }) => ({
+  "& .MuiTypography-h4": {
+    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    fontWeight: 700,
+    marginBottom: theme.spacing(3),
+  },
+}));
+
+export const StyledTable = styled(Table)(({ theme }) => ({
+  "& .MuiTableCell-head": {
+    fontWeight: 600,
+    backgroundColor: alpha(theme.palette.primary.main, 0.05),
+  },
+  "& .MuiTableCell-root": {
+    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  },
+}));
+
+export const StyledFormControl = styled(FormControl)(() => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 12,
+  },
+  "& .MuiSelect-select": {
+    padding: "8px 14px",
+  },
+}));
+
+export const StyledChip = styled(Chip)<{ status: string }>(
+  ({ theme, status }) => {
+    const getStatusColor = () => {
+      switch (status) {
+        case "Pending":
+          return theme.palette.warning.main;
+        case "Approved":
+          return theme.palette.info.main;
+        case "InProgress":
+        case "In Progress":
+          return theme.palette.primary.main;
+        case "Completed":
+          return theme.palette.success.main;
+        case "Rejected":
+        case "Cancelled":
+          return theme.palette.error.main;
+        default:
+          return theme.palette.grey[500];
+      }
+    };
+
+    return {
+      borderRadius: 12,
+      fontWeight: 500,
+      backgroundColor: alpha(getStatusColor(), 0.1),
+      color: getStatusColor(),
+    };
+  }
+);
+
+export const FilterButton = styled(IconButton)(({ theme }) => ({
+  borderRadius: 10,
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+}));
