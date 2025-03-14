@@ -15,7 +15,7 @@ export const saveProofOfDelivery = async (
   data: ProofOfDeliveryRequest
 ): Promise<ApiResponse<ProofOfDeliveryResponse>> => {
   const response = await axiosPrivate.post(
-    `/staffproofofdelivery/${shippingOrderId}`,
+    `/staff/proof-delivery/${shippingOrderId}`,
     data
   );
   return response.data;
@@ -26,7 +26,7 @@ export const getProofOfDelivery = async (
   shippingOrderId: number
 ): Promise<ApiResponse<ProofOfDeliveryDto>> => {
   const response = await axiosPrivate.get(
-    `/staffproofofdelivery/${shippingOrderId}`
+    `/staff/proof-delivery/${shippingOrderId}`
   );
   return response.data;
 };
@@ -51,7 +51,7 @@ export const uploadProofOfDelivery = async (
   }
 
   const response = await axiosPrivate.post(
-    `/staffproofofdelivery/${shippingOrderId}/upload`,
+    `/staff/proof-delivery/${shippingOrderId}/upload`,
     form,
     {
       headers: {

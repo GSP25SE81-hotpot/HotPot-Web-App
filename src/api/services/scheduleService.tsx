@@ -9,7 +9,7 @@ import {
   StaffDto,
 } from "../../types/scheduleInterfaces";
 
-const SCHEDULE_URL = "managerschedule";
+const SCHEDULE_URL = "manager/schedule";
 
 // Helper function to determine shift type based on start time
 const getShiftType = (shiftStartTime: string): string => {

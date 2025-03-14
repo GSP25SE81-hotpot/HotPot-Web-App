@@ -3,7 +3,7 @@
 import { axiosPrivate } from "../axiosInstance";
 import { MaintenanceStatus } from "../../types/equipmentFailure";
 
-const API_URL = "managerequipment";
+const API_URL = "manager/equipment-condition";
 
 export interface EquipmentFailureDto {
   name: string;

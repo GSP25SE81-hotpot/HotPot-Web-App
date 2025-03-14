@@ -13,7 +13,7 @@ const replacementService = {
   getAllReplacements: async (): Promise<ReplacementRequestSummaryDto[]> => {
     const response = await axiosPrivate.get<
       ApiResponse<ReplacementRequestSummaryDto[]>
-    >("/managerreplacement");
+    >("/manager/replacement");
     return response.data.data;
   },
 
@@ -22,7 +22,7 @@ const replacementService = {
   ): Promise<ReplacementRequestSummaryDto[]> => {
     const response = await axiosPrivate.get<
       ApiResponse<ReplacementRequestSummaryDto[]>
-    >(`/managerreplacement/status/${status}`);
+    >(`/manager/replacement/status/${status}`);
     return response.data.data;
   },
 
@@ -31,7 +31,7 @@ const replacementService = {
   ): Promise<ReplacementRequestDetailDto> => {
     const response = await axiosPrivate.get<
       ApiResponse<ReplacementRequestDetailDto>
-    >(`/managerreplacement/${id}`);
+    >(`/manager/replacement/${id}`);
     return response.data.data;
   },
 
@@ -41,7 +41,7 @@ const replacementService = {
   ): Promise<ReplacementRequestDetailDto> => {
     const response = await axiosPrivate.put<
       ApiResponse<ReplacementRequestDetailDto>
-    >(`/managerreplacement/${id}/review`, data);
+    >(`/manager/replacement/${id}/review`, data);
     return response.data.data;
   },
 
@@ -51,7 +51,7 @@ const replacementService = {
   ): Promise<ReplacementRequestDetailDto> => {
     const response = await axiosPrivate.put<
       ApiResponse<ReplacementRequestDetailDto>
-    >(`/managerreplacement/${id}/assign`, data);
+    >(`/manager/replacement/${id}/assign`, data);
     return response.data.data;
   },
 
@@ -61,7 +61,7 @@ const replacementService = {
   ): Promise<ReplacementRequestDetailDto> => {
     const response = await axiosPrivate.put<
       ApiResponse<ReplacementRequestDetailDto>
-    >(`/managerreplacement/${id}/complete`, data);
+    >(`/manager/replacement/${id}/complete`, data);
     return response.data.data;
   },
 };

@@ -1,7 +1,7 @@
 import { WorkDays } from "../../types/scheduleInterfaces";
 import { axiosPrivate } from "../axiosInstance";
 
-const API_URL = "managerordermanagement";
+const API_URL = "manager/order-management";
 
 export interface AllocateOrderRequest {
   orderId: number;
