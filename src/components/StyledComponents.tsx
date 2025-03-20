@@ -1,5 +1,3 @@
-// src/components/order-management/components/StyledComponents.tsx
-
 import {
   Avatar,
   Box,
@@ -16,6 +14,8 @@ import {
   Table,
   FormControl,
   IconButton,
+  Typography,
+  Divider,
 } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import { OrderStatus } from "../types/orderManagement";
@@ -209,4 +209,81 @@ export const StyledChip = styled(Chip)<{ status: string }>(
 export const FilterButton = styled(IconButton)(({ theme }) => ({
   borderRadius: 10,
   border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+}));
+
+export const DashboardContainer = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(4),
+  borderRadius: 24,
+  background: `linear-gradient(145deg, ${alpha(
+    theme.palette.background.paper,
+    0.7
+  )}, ${alpha(theme.palette.background.default, 0.8)})`,
+  backdropFilter: "blur(10px)",
+}));
+
+export const SectionHeading = styled(Typography)(({ theme }) => ({
+  fontSize: "1.5rem",
+  fontWeight: 700,
+  marginBottom: theme.spacing(1),
+  position: "relative",
+  display: "inline-block",
+  "&:after": {
+    content: '""',
+    position: "absolute",
+    bottom: -5,
+    left: 0,
+    width: "40%",
+    height: 3,
+    background: `linear-gradient(90deg, ${theme.palette.primary.main}, transparent)`,
+    borderRadius: 4,
+  },
+}));
+
+export const StyledDivider = styled(Divider)(({ theme }) => ({
+  margin: `${theme.spacing(2)} 0 ${theme.spacing(4)} 0`,
+  background: `linear-gradient(90deg, ${alpha(
+    theme.palette.primary.light,
+    0.2
+  )}, transparent)`,
+  height: 1,
+}));
+
+export const CardIcon = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: 48,
+  height: 48,
+  borderRadius: 12,
+  marginRight: theme.spacing(2),
+  background: `linear-gradient(135deg, ${alpha(
+    theme.palette.primary.main,
+    0.1
+  )}, ${alpha(theme.palette.primary.light, 0.2)})`,
+  color: theme.palette.primary.main,
+  transition: "all 0.3s ease",
+  "& svg": {
+    fontSize: 24,
+  },
+}));
+
+export const CardTitle = styled(Typography)(({ theme }) => ({
+  fontWeight: 600,
+  fontSize: "1.1rem",
+  color: theme.palette.text.primary,
+  marginBottom: theme.spacing(0.5),
+}));
+
+export const CardDescription = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  fontSize: "0.9rem",
+  lineHeight: 1.5,
+}));
+
+export const SectionContainer = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(5),
+  transition: "all 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-5px)",
+  },
 }));

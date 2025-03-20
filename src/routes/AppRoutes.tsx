@@ -31,6 +31,12 @@ import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
 import WorkAssignmentSchedulePage from "../pages/Manager/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
 import { AssignOrderPage } from "../pages/Staff/AssignOrder/AssignOrderPage";
 import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliveryPage";
+import { ManagerRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManagerRentalReturnPage";
+import { UnassignedPickupsPage } from "../pages/Manager/ManagerRentalReturnPage/UnassignedPickupsPage";
+import { CurrentAssignmentsPage } from "../pages/Manager/ManagerRentalReturnPage/CurrentAssignmentsPage";
+import { RentalHistoryPage } from "../pages/Manager/ManagerRentalReturnPage/RentalHistoryPage";
+import { LateFeeCalculatorPage } from "../pages/Manager/ManagerRentalReturnPage/LateFeeCalculatorPage";
+import { ReturnDateAdjustmentPage } from "../pages/Manager/ManagerRentalReturnPage/ReturnDateAdjustmentPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -89,6 +95,30 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.manageReplacement}
           element={<ManageReplacementPage />}
+        />
+        <Route
+          path={config.managerRoutes.rentalDashboard}
+          element={<ManagerRentalReturnPage />}
+        />
+        <Route
+          path={config.managerRoutes.unassignedPickups}
+          element={<UnassignedPickupsPage />}
+        />
+        <Route
+          path={config.managerRoutes.currentAssignments}
+          element={<CurrentAssignmentsPage />}
+        />
+        <Route
+          path={config.managerRoutes.rentalHistory}
+          element={<RentalHistoryPage />}
+        />
+        <Route
+          path={config.managerRoutes.calculateLateFee}
+          element={<LateFeeCalculatorPage />}
+        />
+        <Route
+          path={config.managerRoutes.adjustReturnDate}
+          element={<ReturnDateAdjustmentPage />}
         />
       </Route>
 

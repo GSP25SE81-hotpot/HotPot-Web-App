@@ -12,6 +12,12 @@ export const managerRoutes = {
   equipmentStatusReport: "/equipment-status-report",
   feedbackManagement: "/feedback-management",
   manageReplacement: "/manage-replacement",
+  rentalDashboard: "/rental-dashboard",
+  unassignedPickups: "/unassigned-pickups",
+  currentAssignments: "/current-assignments",
+  rentalHistory: "/rental-history",
+  calculateLateFee: "/calculate-late-fee",
+  adjustReturnDate: "/adjust-return-date",
 };
 
 export const authRoutes = {
