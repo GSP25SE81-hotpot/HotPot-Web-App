@@ -37,6 +37,9 @@ import { CurrentAssignmentsPage } from "../pages/Manager/ManagerRentalReturnPage
 import { RentalHistoryPage } from "../pages/Manager/ManagerRentalReturnPage/RentalHistoryPage";
 import { LateFeeCalculatorPage } from "../pages/Manager/ManagerRentalReturnPage/LateFeeCalculatorPage";
 import { ReturnDateAdjustmentPage } from "../pages/Manager/ManagerRentalReturnPage/ReturnDateAdjustmentPage";
+import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
+import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
+import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -173,7 +176,7 @@ const AppRoute: React.FC = () => {
           element={<PaymentManagementPage />}
         />
         <Route
-          path={config.staffRoutes.retrieveRentalEquipment}
+          path={config.staffRoutes.checkDeviceAfterReturn}
           element={<CheckDeviceAfterReturnPage />}
         />
         <Route
@@ -188,6 +191,22 @@ const AppRoute: React.FC = () => {
           path={config.staffRoutes.proofOfDelivery}
           element={<ProofOfDeliveryPage />}
         />
+        <Route
+          path={config.staffRoutes.rentalDetail}
+          element={<RentalDetailPage />}
+        />
+        <Route
+          path={config.staffRoutes.recordReturn}
+          element={<RecordReturnPage />}
+        />
+        <Route
+          path={config.staffRoutes.pickupRental}
+          element={<PickupRentalPage />}
+        />
+        {/* <Route
+          path={config.staffRoutes.retrieveRentalEquipment}
+          element={<RetrieveRentalEquipmentPage />}
+        /> */}
       </Route>
     </Routes>
   );

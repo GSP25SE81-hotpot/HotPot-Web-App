@@ -40,7 +40,11 @@ export const staffRoutes = {
   paymentManagement: "/payment-management",
   depositConfirmation: "/deposit-confirmation",
   retrieveRentalEquipment: "/retrieve-rental-equipment",
+  checkDeviceAfterReturn: "/check-device-after-return",
   orderHistory: "/order-history",
   assignOrder: "/assign-order",
   proofOfDelivery: "/proof-of-delivery",
+  rentalDetail: "/staff/rentals/:id",
+  recordReturn: "/staff/rentals/record-return",
+  pickupRental: "/pickup-rental",
 };

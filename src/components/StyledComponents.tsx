@@ -16,6 +16,9 @@ import {
   IconButton,
   Typography,
   Divider,
+  TypographyProps,
+  TableContainer,
+  TablePagination,
 } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import { OrderStatus } from "../types/orderManagement";
@@ -221,23 +224,25 @@ export const DashboardContainer = styled(Box)(({ theme }) => ({
   backdropFilter: "blur(10px)",
 }));
 
-export const SectionHeading = styled(Typography)(({ theme }) => ({
-  fontSize: "1.5rem",
-  fontWeight: 700,
-  marginBottom: theme.spacing(1),
-  position: "relative",
-  display: "inline-block",
-  "&:after": {
-    content: '""',
-    position: "absolute",
-    bottom: -5,
-    left: 0,
-    width: "40%",
-    height: 3,
-    background: `linear-gradient(90deg, ${theme.palette.primary.main}, transparent)`,
-    borderRadius: 4,
-  },
-}));
+export const SectionHeading = styled(Typography)<TypographyProps>(
+  ({ theme }) => ({
+    fontSize: "1.5rem",
+    fontWeight: 700,
+    marginBottom: theme.spacing(1),
+    position: "relative",
+    display: "inline-block",
+    "&:after": {
+      content: '""',
+      position: "absolute",
+      bottom: -5,
+      left: 0,
+      width: "40%",
+      height: 3,
+      background: `linear-gradient(90deg, ${theme.palette.primary.main}, transparent)`,
+      borderRadius: 4,
+    },
+  })
+);
 
 export const StyledDivider = styled(Divider)(({ theme }) => ({
   margin: `${theme.spacing(2)} 0 ${theme.spacing(4)} 0`,
@@ -285,5 +290,174 @@ export const SectionContainer = styled(Box)(({ theme }) => ({
   transition: "all 0.3s ease",
   "&:hover": {
     transform: "translateY(-5px)",
+  },
+}));
+
+export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+  borderRadius: 16,
+  overflow: "hidden",
+  boxShadow: `0 6px 16px 0 ${alpha(theme.palette.common.black, 0.08)}`,
+  "& .MuiTableCell-head": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+    color: theme.palette.primary.main,
+    fontWeight: 600,
+    padding: "16px",
+  },
+  "& .MuiTableRow-root": {
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.primary.main, 0.04),
+    },
+    "&:last-child td": {
+      borderBottom: 0,
+    },
+  },
+  "& .MuiTableCell-body": {
+    padding: "16px",
+  },
+}));
+
+export const CustomerCell = styled(Box)(() => ({
+  display: "flex",
+  flexDirection: "column",
+}));
+
+export const CustomerName = styled(Typography)(() => ({
+  fontWeight: 600,
+  fontSize: "0.9rem",
+}));
+
+export const CustomerPhone = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  fontSize: "0.8rem",
+}));
+
+export const ActionButtonsContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  gap: theme.spacing(1),
+}));
+
+export const StatusContainer = styled(Box)(() => ({
+  display: "flex",
+  alignItems: "center",
+}));
+
+export const AssignmentChip = styled(Chip)<{ status: "completed" | "pending" }>(
+  ({ theme, status }) => ({
+    borderRadius: 12,
+    fontWeight: 600,
+    fontSize: "0.75rem",
+    backgroundColor:
+      status === "completed"
+        ? alpha(theme.palette.success.main, 0.1)
+        : alpha(theme.palette.warning.main, 0.1),
+    color:
+      status === "completed"
+        ? theme.palette.success.main
+        : theme.palette.warning.main,
+    border: `1px solid ${
+      status === "completed"
+        ? alpha(theme.palette.success.main, 0.3)
+        : alpha(theme.palette.warning.main, 0.3)
+    }`,
+  })
+);
+
+export const FilterContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  marginBottom: theme.spacing(3),
+  padding: theme.spacing(2),
+  borderRadius: 12,
+  backgroundColor: alpha(theme.palette.background.paper, 0.7),
+  backdropFilter: "blur(8px)",
+  boxShadow: `0 4px 12px ${alpha(theme.palette.common.black, 0.05)}`,
+}));
+
+export const EmptyStateContainer = styled(StyledPaper)(({ theme }) => ({
+  padding: theme.spacing(6),
+  textAlign: "center",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: 200,
+  gap: theme.spacing(2),
+}));
+export const OverdueChip = styled(Chip)<{
+  severity: "high" | "medium" | "low";
+}>(({ theme, severity }) => {
+  const getSeverityColor = () => {
+    switch (severity) {
+      case "high":
+        return theme.palette.error.main;
+      case "medium":
+        return theme.palette.warning.main;
+      case "low":
+        return theme.palette.warning.light;
+      default:
+        return theme.palette.warning.main;
+    }
+  };
+
+  return {
+    borderRadius: 12,
+    fontWeight: 600,
+    fontSize: "0.75rem",
+    backgroundColor: alpha(getSeverityColor(), 0.1),
+    color: getSeverityColor(),
+    border: `1px solid ${alpha(getSeverityColor(), 0.3)}`,
+  };
+});
+
+export const StyledTablePagination = styled(TablePagination)(({ theme }) => ({
+  ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
+    margin: 0,
+  },
+  ".MuiTablePagination-select": {
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  ".MuiTablePagination-actions": {
+    "& .MuiIconButton-root": {
+      padding: 8,
+      borderRadius: 8,
+      transition: "all 0.2s",
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+      },
+    },
+  },
+}));
+
+export const EquipmentCell = styled(Box)(() => ({
+  display: "flex",
+  flexDirection: "column",
+}));
+
+export const EquipmentName = styled(Typography)(() => ({
+  fontWeight: 600,
+  fontSize: "0.9rem",
+}));
+
+export const EquipmentType = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  fontSize: "0.8rem",
+}));
+
+export const PriceCell = styled(Typography)(({ theme }) => ({
+  fontWeight: 600,
+  color: theme.palette.primary.main,
+  fontSize: "0.95rem",
+}));
+
+export const DateCell = styled(Typography)(({ theme }) => ({
+  fontWeight: 500,
+  fontSize: "0.9rem",
+  display: "flex",
+  alignItems: "center",
+  "& svg": {
+    marginRight: theme.spacing(0.5),
+    fontSize: "1rem",
+    color: theme.palette.info.main,
   },
 }));

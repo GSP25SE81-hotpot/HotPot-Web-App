@@ -229,7 +229,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
       id: "FE-03",
       text: "Retrieve Rental Equipment",
       icon: <InventoryIcon />,
-      route: staffRoutes.retrieveRentalEquipment,
+      route: staffRoutes.checkDeviceAfterReturn,
     },
     {
       id: "FE-16",
