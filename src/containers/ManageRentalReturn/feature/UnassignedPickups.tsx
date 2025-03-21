@@ -1,4 +1,3 @@
-// src/components/manager/UnassignedPickups.tsx
 import React, { useState, useEffect } from "react";
 import {
   Box,

@@ -11,7 +11,7 @@ import {
 } from "../../types/rentalTypes";
 import { axiosPrivate } from "../axiosInstance"; // Import the authenticated axios instance
 
-const API_URL = "/api/manager/rentals";
+const API_URL = "/manager/rentals";
 
 // Get unassigned pickups
 export const getUnassignedPickups = async (
