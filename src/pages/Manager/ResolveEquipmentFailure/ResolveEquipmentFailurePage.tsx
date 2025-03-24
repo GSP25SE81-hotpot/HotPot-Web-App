@@ -1,13 +1,13 @@
-import { Box } from "@mui/material";
 import OverrideMuiTheme from "../../../theme/override";
 import ResolveEquipmentFailure from "../../../containers/ResolveEquipmentFailure/ResolveEquipmentFailure";
+import ErrorBoundary from "../../../components/ErrorBoundary";
 
 export const ResolveEquipmentFailurePage = () => {
   return (
     <OverrideMuiTheme>
-      <Box>
+      <ErrorBoundary>
         <ResolveEquipmentFailure />
-      </Box>
+      </ErrorBoundary>
     </OverrideMuiTheme>
   );
 };

@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
-import PaymentManagement from "../../../containers/PaymentManagement/PaymentManagement";
+
 import OverrideMuiTheme from "../../../theme/override";
+import PaymentManagement from "../../../containers/PaymentManagement/PaymentManagement";
 
 export const PaymentManagementPage = () => {
   return (
