@@ -1,60 +1,48 @@
 // src/components/FeedbackManagement.tsx
+import { HubConnectionState } from "@microsoft/signalr";
 import { Star, StarBorder } from "@mui/icons-material";
 import {
-  alpha,
-  Box,
+  Alert,
   Button,
-  Card,
   CardContent,
   Chip,
+  CircularProgress,
   Divider,
+  Pagination,
   Rating,
+  Snackbar,
   Stack,
   TextField,
   Typography,
-  useTheme,
-  Pagination,
-  CircularProgress,
-  Alert,
-  Snackbar,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import React, { useState, useEffect, useCallback } from "react";
-import feedbackService from "../../api/services/feedbackService";
+import React, { useCallback, useEffect, useState } from "react";
+import feedbackService, { Feedback } from "../../api/services/feedbackService";
+import {
+  DateText,
+  EmptyStateMessage,
+  FeedbackContainer,
+  FeedbackList,
+  FeedbackTitle,
+  FilterContainer,
+  LoadingContainer,
+  OrderInfoText,
+  PaginationContainer,
+  RatingContainer,
+  RatingScoreText,
+  ResponseActionsContainer,
+  ResponseButton,
+  ResponseInputContainer,
+  ResponseSection,
+  SectionHeading,
+  StatItem,
+  StatsContainer,
+  StyledCard,
+  StyledChip,
+  SubmitButton,
+} from "../../components/StyledComponents"; // Adjust the import path as needed
 import { useSignalR } from "../../context/SignalRContext";
-import { Feedback } from "../../api/services/feedbackService";
-import { HubConnectionState } from "@microsoft/signalr";
-
-// Styled components
-const StyledCard = styled(Card)(() => ({
-  borderRadius: 12,
-  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-  "&:hover": {
-    transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-  },
-}));
-
-const AnimatedChip = styled(Chip)(() => ({
-  transition: "all 0.3s ease",
-  "&:hover": {
-    transform: "scale(1.05)",
-  },
-}));
-
-const StyledButton = styled(Button)(() => ({
-  borderRadius: 8,
-  textTransform: "none",
-  fontWeight: 600,
-  boxShadow: "none",
-  "&:hover": {
-    boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-  },
-}));
 
 const FeedbackManagement: React.FC = () => {
-  const theme = useTheme();
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [responseText, setResponseText] = useState<string>("");
   const [activeFeedbackId, setActiveFeedbackId] = useState<number | null>(null);
@@ -168,8 +156,6 @@ const FeedbackManagement: React.FC = () => {
       // Register event handlers with the hub service
       hubService.feedback.onReceiveApprovedFeedback(handleApprovedFeedback);
       hubService.feedback.onReceiveFeedbackResponse(handleFeedbackResponse);
-
-      // No need to return cleanup function as the SignalR context handles disconnection
     }
   }, [
     isInitialized,
@@ -205,18 +191,15 @@ const FeedbackManagement: React.FC = () => {
       setError("Response cannot be empty");
       return;
     }
-
     setLoading(true);
     try {
       const response = await feedbackService.respondToFeedback(feedbackId, {
         managerId,
         response: responseText,
       });
-
       if (response.isSuccess && response.data) {
         // Get the feedback and user info
         const feedback = response.data;
-
         // Update the feedback in the list
         setFeedbacks(
           feedbacks.map((fb) =>
@@ -238,11 +221,9 @@ const FeedbackManagement: React.FC = () => {
               : fb
           )
         );
-
         setSuccess("Response submitted successfully");
         setResponseText("");
         setActiveFeedbackId(null);
-
         // Notify the user about the response via SignalR
         if (isInitialized && feedback.userId) {
           try {
@@ -257,7 +238,6 @@ const FeedbackManagement: React.FC = () => {
             console.error("Failed to send real-time notification:", err);
           }
         }
-
         // Refresh stats
         fetchStats();
       } else {
@@ -292,20 +272,8 @@ const FeedbackManagement: React.FC = () => {
     : HubConnectionState.Disconnected;
 
   return (
-    <Box
-      sx={{
-        p: 4,
-        background: (theme) =>
-          `linear-gradient(135deg, ${alpha(
-            theme.palette.background.default,
-            0.95
-          )}, ${alpha(theme.palette.background.paper, 0.95)})`,
-        minHeight: "100vh",
-      }}
-    >
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 4 }}>
-        Quản lý Phản hồi Khách hàng
-      </Typography>
+    <FeedbackContainer>
+      <FeedbackTitle variant="h4">Quản lý Phản hồi Khách hàng</FeedbackTitle>
 
       {/* Connection status */}
       {connectionState !== HubConnectionState.Connected && (
@@ -315,59 +283,57 @@ const FeedbackManagement: React.FC = () => {
       )}
 
       {/* Stats Section */}
-      <Box sx={{ mb: 4, p: 2, bgcolor: "background.paper", borderRadius: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Thống kê
-        </Typography>
+      <StatsContainer>
+        <SectionHeading variant="h6">Thống kê</SectionHeading>
         <Stack direction="row" spacing={4} sx={{ flexWrap: "wrap" }}>
-          <Box>
+          <StatItem>
             <Typography variant="subtitle2" color="text.secondary">
               Tổng số phản hồi
             </Typography>
             <Typography variant="h5">{stats.totalFeedbackCount}</Typography>
-          </Box>
-          <Box>
+          </StatItem>
+          <StatItem>
             <Typography variant="subtitle2" color="text.secondary">
               Đã phản hồi
             </Typography>
             <Typography variant="h5">{stats.respondedFeedbackCount}</Typography>
-          </Box>
-          <Box>
+          </StatItem>
+          <StatItem>
             <Typography variant="subtitle2" color="text.secondary">
               Chưa phản hồi
             </Typography>
             <Typography variant="h5">
               {stats.unrespondedFeedbackCount}
             </Typography>
-          </Box>
-          <Box>
+          </StatItem>
+          <StatItem>
             <Typography variant="subtitle2" color="text.secondary">
               Tỷ lệ phản hồi
             </Typography>
             <Typography variant="h5">
               {stats.responseRate.toFixed(1)}%
             </Typography>
-          </Box>
+          </StatItem>
         </Stack>
-      </Box>
+      </StatsContainer>
 
       {/* Filters */}
-      <Stack direction="row" spacing={2} sx={{ mb: 4 }}>
-        <AnimatedChip
+      <FilterContainer>
+        <Chip
           key="all"
           label="Tất cả"
           onClick={() => handleFilterChange("all")}
           color={filter === "all" ? "primary" : "default"}
           sx={{ px: 2, borderRadius: "10px" }}
         />
-        <AnimatedChip
+        <Chip
           key="pending"
           label="Chờ xử lý"
           onClick={() => handleFilterChange("pending")}
           color={filter === "pending" ? "primary" : "default"}
           sx={{ px: 2, borderRadius: "10px" }}
         />
-      </Stack>
+      </FilterContainer>
 
       {/* Error and Success Messages */}
       <Snackbar
@@ -383,7 +349,6 @@ const FeedbackManagement: React.FC = () => {
           {error}
         </Alert>
       </Snackbar>
-
       <Snackbar
         open={!!success}
         autoHideDuration={6000}
@@ -400,17 +365,17 @@ const FeedbackManagement: React.FC = () => {
 
       {/* Loading Indicator */}
       {loading && (
-        <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+        <LoadingContainer>
           <CircularProgress />
-        </Box>
+        </LoadingContainer>
       )}
 
       {/* Feedback List */}
-      <Stack spacing={3}>
+      <FeedbackList>
         {feedbacks.length === 0 && !loading ? (
-          <Typography variant="body1" sx={{ textAlign: "center", my: 4 }}>
+          <EmptyStateMessage variant="body1">
             Không có phản hồi nào
-          </Typography>
+          </EmptyStateMessage>
         ) : (
           feedbacks.map((feedback) => (
             <StyledCard key={feedback.feedbackId}>
@@ -425,9 +390,9 @@ const FeedbackManagement: React.FC = () => {
                     <Typography variant="h6">
                       {feedback.user ? feedback.user.name : "Khách hàng"}
                     </Typography>
-                    <Chip
+                    <StyledChip
                       label={feedback.response ? "Đã phản hồi" : "Chờ xử lý"}
-                      color={feedback.response ? "success" : "error"}
+                      status={feedback.response ? "Completed" : "Pending"}
                       size="small"
                     />
                   </Stack>
@@ -444,7 +409,7 @@ const FeedbackManagement: React.FC = () => {
 
                   {/* Rating Display */}
                   {feedback.rating > 0 && (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <RatingContainer>
                       <Rating
                         value={feedback.rating}
                         readOnly
@@ -452,25 +417,23 @@ const FeedbackManagement: React.FC = () => {
                         icon={<Star fontSize="inherit" />}
                         emptyIcon={<StarBorder fontSize="inherit" />}
                       />
-                      <Typography variant="body2" color="text.secondary">
-                        ({feedback.rating}/5)
-                      </Typography>
-                    </Box>
+                      <RatingScoreText>({feedback.rating}/5)</RatingScoreText>
+                    </RatingContainer>
                   )}
 
                   {/* Order Information */}
                   {feedback.order && (
-                    <Typography variant="caption" color="text.secondary">
+                    <OrderInfoText>
                       Đơn hàng: #{feedback.order.orderNumber} -
                       {new Date(feedback.createdAt).toLocaleDateString("vi-VN")}
-                    </Typography>
+                    </OrderInfoText>
                   )}
 
                   {/* Response Section */}
                   {feedback.response && (
                     <>
                       <Divider />
-                      <Stack spacing={1}>
+                      <ResponseSection>
                         <Typography variant="subtitle2" color="primary">
                           Phản hồi của quản lý:
                         </Typography>
@@ -478,14 +441,14 @@ const FeedbackManagement: React.FC = () => {
                           {feedback.response}
                         </Typography>
                         {feedback.responseDate && (
-                          <Typography variant="caption" color="text.secondary">
+                          <DateText>
                             Phản hồi lúc:{" "}
                             {new Date(feedback.responseDate).toLocaleString(
                               "vi-VN"
                             )}
-                          </Typography>
+                          </DateText>
                         )}
-                      </Stack>
+                      </ResponseSection>
                     </>
                   )}
 
@@ -494,7 +457,7 @@ const FeedbackManagement: React.FC = () => {
                     <>
                       <Divider />
                       {activeFeedbackId === feedback.feedbackId ? (
-                        <Stack spacing={2}>
+                        <ResponseInputContainer>
                           <TextField
                             multiline
                             rows={3}
@@ -503,11 +466,7 @@ const FeedbackManagement: React.FC = () => {
                             value={responseText}
                             onChange={(e) => setResponseText(e.target.value)}
                           />
-                          <Stack
-                            direction="row"
-                            spacing={2}
-                            justifyContent="flex-end"
-                          >
+                          <ResponseActionsContainer>
                             <Button
                               variant="outlined"
                               onClick={() =>
@@ -516,31 +475,27 @@ const FeedbackManagement: React.FC = () => {
                             >
                               Hủy
                             </Button>
-                            <StyledButton
+                            <SubmitButton
                               variant="contained"
-                              sx={{
-                                backgroundColor: theme.palette.success.main,
-                              }}
                               onClick={() =>
                                 handleSubmitResponse(feedback.feedbackId)
                               }
                               disabled={loading}
                             >
                               Gửi phản hồi
-                            </StyledButton>
-                          </Stack>
-                        </Stack>
+                            </SubmitButton>
+                          </ResponseActionsContainer>
+                        </ResponseInputContainer>
                       ) : (
-                        <Button
+                        <ResponseButton
                           variant="outlined"
                           color="primary"
                           onClick={() =>
                             handleSetActiveFeedback(feedback.feedbackId)
                           }
-                          sx={{ alignSelf: "flex-start", mt: 1 }}
                         >
                           Viết phản hồi
-                        </Button>
+                        </ResponseButton>
                       )}
                     </>
                   )}
@@ -549,11 +504,11 @@ const FeedbackManagement: React.FC = () => {
             </StyledCard>
           ))
         )}
-      </Stack>
+      </FeedbackList>
 
       {/* Pagination */}
       {totalCount > pageSize && (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <PaginationContainer>
           <Pagination
             count={Math.ceil(totalCount / pageSize)}
             page={pageNumber}
@@ -561,9 +516,9 @@ const FeedbackManagement: React.FC = () => {
             color="primary"
             size="large"
           />
-        </Box>
+        </PaginationContainer>
       )}
-    </Box>
+    </FeedbackContainer>
   );
 };
 

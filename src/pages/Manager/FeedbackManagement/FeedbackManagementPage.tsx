@@ -1,13 +1,19 @@
-import { Box } from "@mui/material";
 import OverrideMuiTheme from "../../../theme/override";
 import FeedbackManagement from "../../../containers/FeedbackManagement/FeedbackManagement";
+import ErrorBoundary from "../../../components/ErrorBoundary";
+import { SignalRProvider } from "../../../context/SignalRContext";
+import { AuthContextProvider } from "../../../context/AuthContext";
 
 export const FeedbackManagementPage = () => {
   return (
     <OverrideMuiTheme>
-      <Box>
-        <FeedbackManagement />
-      </Box>
+      <ErrorBoundary>
+        <AuthContextProvider>
+          <SignalRProvider>
+            <FeedbackManagement />
+          </SignalRProvider>
+        </AuthContextProvider>
+      </ErrorBoundary>
     </OverrideMuiTheme>
   );
 };
