@@ -15,10 +15,12 @@ export const useEquipmentFailures = () => {
     "All"
   );
   const [requests, setRequests] = useState<ConditionLog[]>([]);
-  const filteredRequests =
-    statusFilter === "All"
+  const filteredRequests = requests
+    ? statusFilter === "All"
       ? requests
-      : requests.filter((req) => req.status === statusFilter);
+      : requests.filter((req) => req.status === statusFilter)
+    : [];
+
   const [expandedRequestId, setExpandedRequestId] = useState<number | null>(
     null
   );
@@ -43,12 +45,12 @@ export const useEquipmentFailures = () => {
   // Fetch active equipment failures
   useEffect(() => {
     const EQUIPMENT_HUB = `/equipmentHub`;
-
     const fetchEquipmentFailures = async () => {
       try {
         setLoading(true);
         const data = await equipmentService.getActiveConditionLogs();
-        setRequests(data);
+        // Ensure data is an array before setting it
+        setRequests(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Error fetching equipment failures:", error);
         setNotification({
@@ -60,10 +62,13 @@ export const useEquipmentFailures = () => {
         } else {
           setError(new Error("Failed to load equipment failures"));
         }
+        // Important: Set requests to empty array on error
+        setRequests([]);
       } finally {
         setLoading(false);
       }
     };
+
     fetchEquipmentFailures();
 
     // Set up SignalR connection for real-time updates

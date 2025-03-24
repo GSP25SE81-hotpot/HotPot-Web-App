@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { IOrder } from "../../types/order";
 import orderManagementAPI from "../../api/orderManagementAPI";
@@ -65,7 +66,6 @@ const OrderTable = () => {
         data={orderData}
         tableHeaderTitle={tableOrderHeader}
         title="Quản lý đơn hàng"
-        // searchTool={<SearchTool setFilter={setFilter} filter={filter} />}
         menuAction={
           <MenuActionTableOrder
             orderData={selectOrderdata}

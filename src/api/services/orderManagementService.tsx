@@ -1,8 +1,7 @@
 import { WorkDays } from "../../types/scheduleInterfaces";
 import axiosClient from "../axiosInstance";
-// import { axiosClient } from "../axiosInstance";
 
-const API_URL = "manager/order-management";
+const API_URL = "/manager/order-management";
 
 export interface AllocateOrderRequest {
   orderId: number;
@@ -146,7 +145,7 @@ const orderManagementService = {
   // Get staff workload
   getStaffWorkload: async (staffId: number): Promise<StaffWorkload> => {
     const response = await axiosClient.get<ApiResponse<StaffWorkload>>(
-      `${API_URL}/staff/${staffId}`
+      `/staff/${staffId}`
     );
     return response.data.data;
   },
@@ -181,10 +180,24 @@ const orderManagementService = {
 
   // Get all staff
   getAllStaff: async (): Promise<StaffDto[]> => {
-    const response = await axiosClient.get<ApiResponse<StaffDto[]>>(
-      `staff/all`
-    );
-    return response.data.data;
+    try {
+      const response = await axiosClient.get<ApiResponse<StaffDto[]>>(
+        `staff/all`
+      );
+
+      // Check if response.data and response.data.data exist before returning
+      if (response?.data?.data && Array.isArray(response.data.data)) {
+        return response.data.data;
+      } else {
+        console.warn(
+          "API response for staff doesn't contain expected data structure"
+        );
+        return []; // Return empty array as fallback
+      }
+    } catch (error) {
+      console.error("Error fetching staff:", error);
+      return []; // Return empty array in case of error
+    }
   },
 };
 

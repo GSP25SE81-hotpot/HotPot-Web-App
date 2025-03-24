@@ -1,21 +1,12 @@
-// // src/services/unifiedHubService.ts
-// import {
-//   chatHubService,
-//   feedbackHubService,
-//   equipmentHubService,
-//   scheduleHubService,
-//   equipmentConditionHubService,
-//   equipmentStockHubService,
-//   notificationHubService,
-// } from "./hubServices";
-
-import { chatHubService, feedbackHubService, 
-    equipmentHubService,
-    scheduleHubService,
-    equipmentConditionHubService,
-    equipmentStockHubService,
-    notificationHubService, 
-  } from "./hubServices";
+import {
+  chatHubService,
+  feedbackHubService,
+  equipmentHubService,
+  scheduleHubService,
+  equipmentConditionHubService,
+  equipmentStockHubService,
+  notificationHubService,
+} from "./hubServices";
 
 class UnifiedHubService {
   private userId: number | null = null;
@@ -38,10 +29,14 @@ class UnifiedHubService {
     this.userType = userType;
 
     // Validate userId
-    if (isNaN(this.userId)) {
+    if (
+      this.userId === null ||
+      this.userId === undefined ||
+      isNaN(this.userId)
+    ) {
+      console.error("Invalid user ID:", userId);
       throw new Error("Invalid user ID");
     }
-
     const connectPromises: Promise<void>[] = [];
 
     // Connect to specified hubs

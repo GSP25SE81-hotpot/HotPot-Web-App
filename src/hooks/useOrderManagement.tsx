@@ -29,20 +29,33 @@ export const useOrderManagement = () => {
   });
 
   // Fetch orders and staff data
+  // src/components/order-management/hooks/useOrderManagement.ts
   const fetchData = async () => {
     try {
       setLoading(true);
+
       // Fetch unallocated orders
-      const unallocatedOrders =
+      const unallocatedOrdersResponse =
         await orderManagementService.getUnallocatedOrders();
+      // Ensure unallocatedOrders is an array
+      const unallocatedOrders = Array.isArray(unallocatedOrdersResponse)
+        ? unallocatedOrdersResponse
+        : [];
+
       // Fetch pending deliveries
-      const pendingDeliveries =
+      const pendingDeliveriesResponse =
         await orderManagementService.getPendingDeliveries();
+      // Ensure pendingDeliveries is an array
+      const pendingDeliveries = Array.isArray(pendingDeliveriesResponse)
+        ? pendingDeliveriesResponse
+        : [];
+
       // Combine and convert to frontend format
       const allOrders = [...unallocatedOrders, ...pendingDeliveries];
       const frontendOrders = allOrders.map(convertApiOrderToFrontendOrder);
       setOrders(frontendOrders);
 
+      // Rest of your code...
       // Fetch available statuses
       const statuses = await orderManagementService.getAvailableStatuses();
       setAvailableStatuses(statuses);
@@ -50,11 +63,17 @@ export const useOrderManagement = () => {
       // Fetch staff
       try {
         const apiStaff = await orderManagementService.getAllStaff();
-        const frontendStaff = apiStaff.map(convertApiStaffToFrontendStaff);
-        setStaffList(frontendStaff);
+
+        // Check if apiStaff is an array before mapping
+        if (apiStaff && Array.isArray(apiStaff)) {
+          const frontendStaff = apiStaff.map(convertApiStaffToFrontendStaff);
+          setStaffList(frontendStaff);
+        } else {
+          console.warn("Staff data is not an array:", apiStaff);
+          setStaffList([]);
+        }
       } catch (staffError) {
         console.error("Error fetching staff:", staffError);
-        // If we can't get staff, we'll just have an empty list
         setStaffList([]);
       }
     } catch (error) {

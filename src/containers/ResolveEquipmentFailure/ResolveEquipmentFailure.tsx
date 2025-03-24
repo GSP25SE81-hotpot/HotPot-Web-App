@@ -61,8 +61,8 @@ const ResolveEquipmentFailure: React.FC = () => {
           Equipment Failure Reports
         </Typography>
 
-        {/* Statistics Section */}
-        <EquipmentStatistics requests={requests} />
+        {/* Statistics Section - Add null check */}
+        <EquipmentStatistics requests={requests || []} />
 
         {/* Report Logging Section */}
         <EquipmentFailureForm
@@ -71,20 +71,20 @@ const ResolveEquipmentFailure: React.FC = () => {
           handleLogFailure={handleLogFailure}
         />
 
-        {/* Status Filter */}
-        {!loading && requests.length > 0 && (
+        {/* Status Filter - Add null checks */}
+        {!loading && requests?.length > 0 && (
           <StatusFilter
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}
-            filteredCount={filteredRequests.length}
-            totalCount={requests.length}
+            filteredCount={filteredRequests?.length || 0}
+            totalCount={requests?.length || 0}
           />
         )}
 
-        {/* Requests List */}
+        {/* Requests List - Add null check */}
         <EquipmentFailureList
           loading={loading}
-          requests={filteredRequests}
+          requests={filteredRequests || []}
           expandedRequestId={expandedRequestId}
           setExpandedRequestId={setExpandedRequestId}
           selectedDates={selectedDates}

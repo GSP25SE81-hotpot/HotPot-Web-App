@@ -1,4 +1,4 @@
-import { axiosPrivate } from "../axiosInstance";
+import axiosClient from "../axiosInstance";
 
 const API_URL = "manager/feedback";
 
@@ -70,7 +70,7 @@ const feedbackService = {
     pageSize: number = 10
   ): Promise<ApiResponse<PaginatedResult<Feedback>>> => {
     try {
-      const response = await axiosPrivate.get(
+      const response = await axiosClient.get(
         `${API_URL}?pageNumber=${pageNumber}&pageSize=${pageSize}`
       );
       return response.data;
@@ -89,7 +89,7 @@ const feedbackService = {
     pageSize: number = 10
   ): Promise<ApiResponse<PaginatedResult<Feedback>>> => {
     try {
-      const response = await axiosPrivate.get(
+      const response = await axiosClient.get(
         `${API_URL}/unresponded?pageNumber=${pageNumber}&pageSize=${pageSize}`
       );
       return response.data;
@@ -105,7 +105,7 @@ const feedbackService = {
 
   getFeedbackStats: async (): Promise<ApiResponse<FeedbackStats>> => {
     try {
-      const response = await axiosPrivate.get(`${API_URL}/stats`);
+      const response = await axiosClient.get(`${API_URL}/stats`);
       return response.data;
     } catch (error) {
       console.error("Error fetching feedback stats:", error);
@@ -127,7 +127,7 @@ const feedbackService = {
     feedbackResponse: FeedbackResponse
   ): Promise<ApiResponse<Feedback>> => {
     try {
-      const response = await axiosPrivate.post(
+      const response = await axiosClient.post(
         `${API_URL}/${feedbackId}/respond`,
         feedbackResponse
       );
