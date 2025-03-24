@@ -20,7 +20,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import {
   getProofOfDelivery,
   uploadProofOfDelivery,
-} from "../../../api/services/proofOfDeliveryService";
+} from "../../../api/Services/proofOfDeliveryService";
 import { ProofOfDeliveryDto } from "../../../types/proofOfDelivery";
 
 interface ProofOfDeliveryFormProps {

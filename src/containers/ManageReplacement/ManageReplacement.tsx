@@ -33,8 +33,8 @@ import { IconButton } from "@mui/material";
 import { formatDate } from "../../utils/replacementUtils";
 import { alpha } from "@mui/material/styles";
 import { useEffect, useState } from "react";
-import replacementService from "../../api/services/replacementService";
-import staffService from "../../api/services/staffService";
+import replacementService from "../../api/Services/replacementService";
+import staffService from "../../api/Services/staffService";
 import {
   AssignStaffDto,
   CompleteReplacementDto,

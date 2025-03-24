@@ -10,7 +10,7 @@ import Grid from "@mui/material/Grid2";
 
 import { format, formatDistanceToNow } from "date-fns";
 import React, { useEffect, useState } from "react";
-import { getCurrentAssignments } from "../../../api/services/rentalService";
+import { getCurrentAssignments } from "../../../api/Services/rentalService";
 import {
   PagedResult,
   StaffPickupAssignmentDto,

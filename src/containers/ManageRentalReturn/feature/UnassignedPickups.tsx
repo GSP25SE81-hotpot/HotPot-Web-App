@@ -10,7 +10,7 @@ import {
   Alert,
 } from "@mui/material";
 import { format } from "date-fns";
-import { getUnassignedPickups } from "../../../api/services/rentalService";
+import { getUnassignedPickups } from "../../../api/Services/rentalService";
 import { PagedResult, RentOrderDetail } from "../../../types/rentalTypes";
 import AssignStaffDialog from "../dialog/AssignStaffDialog";
 

@@ -25,7 +25,7 @@ import {
 import {
   getAvailableStaff,
   allocateStaffForPickup,
-} from "../../../api/services/rentalService";
+} from "../../../api/Services/rentalService";
 import { format } from "date-fns";
 
 interface AssignStaffDialogProps {

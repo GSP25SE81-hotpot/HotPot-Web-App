@@ -11,7 +11,7 @@ import {
 import Grid from "@mui/material/Grid2";
 import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { rentalService } from "../../../api/services/pickupService";
+import { rentalService } from "../../../api/Services/pickupService";
 import ErrorAlert from "../../../components/errorAlert/ErrorAlert";
 import LoadingSpinner from "../../../components/loadingSpinner/LoadingSpinner";
 import {

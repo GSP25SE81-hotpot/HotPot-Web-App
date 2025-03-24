@@ -16,7 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
-import feedbackService, { Feedback } from "../../api/services/feedbackService";
+import feedbackService, { Feedback } from "../../api/Services/feedbackService";
 import {
   DateText,
   EmptyStateMessage,
