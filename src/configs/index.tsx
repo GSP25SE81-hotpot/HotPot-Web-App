@@ -1,14 +1,14 @@
-import { MessageNotice, AdminMessageNotice } from "./message";
-import { routes, adminRoutes, authRoutes } from "./routes";
+import { MessageNotice, AdminMessageNotice } from "./messages";
+import { routes, adminRoutes, authRoute } from "./routes";
 import { Vntext } from "./texts";
 
 const config = {
   routes,
-  authRoutes,
+  authRoute,
   adminRoutes,
   MessageNotice,
   AdminMessageNotice,
-  Vntext
+  Vntext,
 };
 
 export default config;

@@ -1,8 +1,8 @@
 import React from "react";
 import HeaderBreadcrumbs from "../../../components/HeaderBreadcrumbs";
-import FeedbackTable from "../../../containers/Feedback/FeedbackTable";
 import ContainerWrapper from "../../../components/Container";
 import config from "../../../configs";
+import TableFeedback from "../../../containers/Feedback/FeedbackTable";
 
 const FeedbackPage: React.FC = () => {
   return (
@@ -15,7 +15,7 @@ const FeedbackPage: React.FC = () => {
             { name: config.Vntext.Feedback.feedbackPage },
           ]}
         />
-        <FeedbackTable />{" "}
+        <TableFeedback />{" "}
       </ContainerWrapper>
     </>
   );

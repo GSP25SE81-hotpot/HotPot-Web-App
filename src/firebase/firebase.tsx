@@ -3,15 +3,24 @@ import { getStorage } from "firebase/storage";
 import { getMessaging } from "firebase/messaging";
 
 const firebaseConfig = {
-apiKey:"AIzaSyAlkbqhhEHHVGvracWexnlXKu-qIHD2a28",
-authDomain:"selling-maintainance-machinery.firebaseapp.com",
-projectId:"selling-maintainance-machinery",
-storageBucket:"selling-maintainance-machinery.appspot.com",
-messagingSenderId:"281208452095",
-appId:"1:281208452095:web:1daace5dc7b6bd0cdaedca",
-measurementId:"G-MHFR6SB0Z4"
+  apiKey: "AIzaSyBFzlw5rRnI16yQEIVJeRRMBs6Kd5rJWVI",
+  authDomain: "hot-pot-to-you.firebaseapp.com",
+  projectId: "hot-pot-to-you",
+  storageBucket: "hot-pot-to-you.firebasestorage.app",
+  messagingSenderId: "277605613910",
+  appId: "1:277605613910:web:d84588fdb9a4eb8b2f16f7",
+  measurementId: "G-BHDSQJ359N",
 };
 
+// const firebaseConfig = {
+//   apiKey: import.meta.env.VITE_apiKey_FIREBASE,
+//   authDomain: import.meta.env.VITE_authDOMAIN_FIREBASE,
+//   projectId: import.meta.env.VITE_projectId_FIREBASE,
+//   storageBucket: import.meta.env.VITE_storageBucket_FIREBASE,
+//   messagingSenderId: import.meta.env.VITE_messagingSenderId_FIREBASE,
+//   appId: import.meta.env.VITE_appId_FIREBASE,
+//   measurementId: import.meta.env.VITE_measurementId_FIREBASE,
+// };
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 

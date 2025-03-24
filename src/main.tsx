@@ -13,7 +13,6 @@ import "react-quill/dist/quill.snow.css";
 import OverrideMuiTheme from "./theme/override.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  // <AuthContextProvider>
   <>
     <ToastContainer
       position="top-right"
@@ -32,5 +31,4 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       </OverrideMuiTheme>
     </GlobalStyled>
   </>
-  // </AuthContextProvider>
 );
