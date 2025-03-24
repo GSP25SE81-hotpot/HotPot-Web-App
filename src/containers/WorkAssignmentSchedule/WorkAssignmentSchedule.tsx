@@ -18,12 +18,12 @@ import {
 } from "@mui/material";
 import React from "react";
 import { shiftTypes } from "../../types/scheduleInterfaces";
-import { useAuthContext } from "../../context/AuthContext";
 import { useSchedule } from "../../hooks/useSchedule";
+import useAuth from "../../hooks/useAuth";
 
 const WorkAssignmentSchedule: React.FC = () => {
   const theme = useTheme();
-  const { role } = useAuthContext();
+  const { auth } = useAuth();
 
   const { loading, error, schedules, personalSchedule } = useSchedule();
 
@@ -184,7 +184,7 @@ const WorkAssignmentSchedule: React.FC = () => {
           </Box>
         )}
 
-        {(role === "Manager" || role === "Admin") && schedules.length > 1 && (
+        {(auth?.user?.role === "Manager" || auth?.user?.role === "Admin") && schedules.length > 1 && (
           <>
             <Typography variant="h6" sx={{ mb: 2 }}>
               Lịch của tất cả nhân viên

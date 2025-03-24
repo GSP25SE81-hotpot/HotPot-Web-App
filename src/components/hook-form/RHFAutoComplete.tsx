@@ -5,7 +5,7 @@ import TextField from "@mui/material/TextField";
 type IProps = {
   name: string;
   label: string;
-  options: { id: string; name: string }[];
+  options: { ingredientTypeId: string; name: string }[];
 };
 
 export default function RHFAutoComplete({
@@ -25,10 +25,12 @@ export default function RHFAutoComplete({
           options={options || []}
           getOptionLabel={(option) => option.name}
           onChange={(_e, newValue) => {
-            setValue(name, newValue ? newValue.id : "");
-            onChange(newValue ? newValue.id : "");
+            setValue(name, newValue ? newValue.ingredientTypeId : "");
+            onChange(newValue ? newValue.ingredientTypeId : "");
           }}
-          value={options.find((option) => option.id === value) || null} // initial value
+          value={
+            options.find((option) => option.ingredientTypeId === value) || null
+          }
           renderInput={(params) => (
             <TextField
               {...params}

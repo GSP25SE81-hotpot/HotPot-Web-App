@@ -1,8 +1,10 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import config from "../configs";
+import Home from "../pages/Home/Home";
+import StaffLayout from "../layouts/StaffLayout/StaffLayout";
 // import Home from "../pages/Home/HomePage";
-import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
+
 import { ManageRentalsPage } from "../pages/Manager/ManageRental/ManageRentalsPage";
 import { ManageRentalStatusPage } from "../pages/Manager/ManageRental/ManageRentalStatusPage";
 import { EquipmentAvailabilityPage } from "../pages/Manager/ManageRental/EquipmentAvailabilityPage";
@@ -16,14 +18,21 @@ import { EquipmentStatusReportPage } from "../pages/Manager/EquipmentStatusRepor
 import { OrderHistoryPage } from "../pages/Staff/OrderHistory/OrderHistoryPage";
 import { FeedbackManagementPage } from "../pages/Manager/FeedbackManagement/FeedbackManagementPage";
 import AdminLayout from "../layouts/AdminLayout/LayoutAdmin";
-import Dashboard from "../pages/Admin/Dashboard/Dashboard";
-import FeedbackPage from "../pages/Admin/Feedback/FeedbackPage";
 import FeedbackDetailPage from "../pages/Admin/Feedback/FeedbackDetailPage";
+import FeedbackPage from "../pages/Admin/Feedback/FeedbackPage";
 import CreateComboPage from "../pages/Admin/Combohotpot/CreateComboPage";
 import CreateIngredientsPage from "../pages/Admin/CreateIngredients/CreateIngredientsPage";
 import { ManageReplacementPage } from "../pages/Manager/ManageReplacement/ManageReplacementPage";
 import ManageUserPage from "../pages/Admin/ManageUser/ManageUserPage";
 import { AuthenticatePage } from "../pages/Global/Authenticate/SignIn";
+import TableIngredientsPage from "../pages/Admin/TableIngredients/TableIngredientsPage";
+import TableHotpotPage from "../pages/Admin/Tablehotpot/TableHotpotPage";
+import TableHotpotComboPage from "../pages/Admin/TableCombo/TableHotpoComboPage";
+import CreateHotpotPage from "../pages/Admin/CreateHotpot/CreateHotpotPage";
+import DashboardPage from "../pages/Admin/Dashboard/DashboardPage";
+import OrderPage from "../pages/Admin/ManageOrder/OrderPage";
+import HotpotComboDetailPage from "../pages/Admin/ComboDetail/HotpotComboDetailPage";
+
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
 // import { Role } from "./Roles";
@@ -40,15 +49,17 @@ import { ReturnDateAdjustmentPage } from "../pages/Manager/ManagerRentalReturnPa
 import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
 import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
 import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
+import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
 
 const AppRoute: React.FC = () => {
   return (
     <Routes>
       <Route
-        key="login"
+        key={"Login"}
         path={config.authRoutes.authenticate}
         element={<AuthenticatePage />}
       />
+
 
       <Route
         key="layoutManager"
@@ -133,9 +144,16 @@ const AppRoute: React.FC = () => {
         <Route
           key="dashboard"
           path={config.adminRoutes.dashboard}
-          element={<Dashboard />}
+          element={<DashboardPage />}
         />
         <Route
+          key="order"
+          path={config.adminRoutes.orders}
+          element={<OrderPage />}
+
+        />
+           <Route
+
           key={"manageUser"}
           path={config.adminRoutes.manageUsers}
           element={<ManageUserPage />}
@@ -160,7 +178,43 @@ const AppRoute: React.FC = () => {
           path={config.adminRoutes.createIngredients}
           element={<CreateIngredientsPage />}
         />
+        <Route
+          key="listIngredients"
+          path={config.adminRoutes.manageIngredients}
+          element={<TableIngredientsPage />}
+        />
+        <Route
+          key="listHotpot"
+          path={config.adminRoutes.hotpotType}
+          element={<TableHotpotPage />}
+        />
+
+        <Route
+          key="ListHotpotCombo"
+          path={config.adminRoutes.tableHotPotCombo}
+          element={<TableHotpotComboPage />}
+        />
+
+        <Route
+          key="AddHotpot"
+          path={config.adminRoutes.addHotpot}
+          element={<CreateHotpotPage />}
+        />
+
+        <Route
+          key="hotpotDetail"
+          path={config.adminRoutes.HotpotDetail}
+          element={<HotpotComboDetailPage />}
+        />
+        <Route
+          key={"manageUser"}
+          path={config.adminRoutes.manageUsers}
+          element={<ManageUserPage />}
+        />
       </Route>
+      {/* <Route key="layout" path={config.routes.home} element={<StaffLayout />}>
+        <Route key="home" path={config.routes.home} element={<Home />} />
+      </Route> */}
 
       <Route
         key="layoutStaff"

@@ -1,5 +1,6 @@
 import { WorkDays } from "../../types/scheduleInterfaces";
-import { axiosPrivate } from "../axiosInstance";
+import axiosClient from "../axiosInstance";
+// import { axiosClient } from "../axiosInstance";
 
 const API_URL = "manager/order-management";
 
@@ -95,7 +96,7 @@ const orderManagementService = {
   allocateOrderToStaff: async (
     request: AllocateOrderRequest
   ): Promise<ShippingOrder> => {
-    const response = await axiosPrivate.post<ApiResponse<ShippingOrder>>(
+    const response = await axiosClient.post<ApiResponse<ShippingOrder>>(
       `${API_URL}/allocate`,
       request
     );
@@ -107,7 +108,7 @@ const orderManagementService = {
     id: number,
     request: UpdateDeliveryStatusRequest
   ): Promise<boolean> => {
-    const response = await axiosPrivate.put<ApiResponse<boolean>>(
+    const response = await axiosClient.put<ApiResponse<boolean>>(
       `${API_URL}/delivery/status/${id}`,
       request
     );
@@ -119,7 +120,7 @@ const orderManagementService = {
     id: number,
     request: UpdateDeliveryTimeRequest
   ): Promise<boolean> => {
-    const response = await axiosPrivate.put<ApiResponse<boolean>>(
+    const response = await axiosClient.put<ApiResponse<boolean>>(
       `${API_URL}/delivery/time/${id}`,
       request
     );
@@ -128,7 +129,7 @@ const orderManagementService = {
 
   // Get order details
   getOrderDetails: async (id: number): Promise<Order> => {
-    const response = await axiosPrivate.get<ApiResponse<Order>>(
+    const response = await axiosClient.get<ApiResponse<Order>>(
       `${API_URL}/details/${id}`
     );
     return response.data.data;
@@ -136,7 +137,7 @@ const orderManagementService = {
 
   // Get pending deliveries
   getPendingDeliveries: async (): Promise<Order[]> => {
-    const response = await axiosPrivate.get<ApiResponse<Order[]>>(
+    const response = await axiosClient.get<ApiResponse<Order[]>>(
       `${API_URL}/pending-deliveries`
     );
     return response.data.data;
@@ -144,7 +145,7 @@ const orderManagementService = {
 
   // Get staff workload
   getStaffWorkload: async (staffId: number): Promise<StaffWorkload> => {
-    const response = await axiosPrivate.get<ApiResponse<StaffWorkload>>(
+    const response = await axiosClient.get<ApiResponse<StaffWorkload>>(
       `${API_URL}/staff/${staffId}`
     );
     return response.data.data;
@@ -155,7 +156,7 @@ const orderManagementService = {
     id: number,
     request: UpdateOrderStatusRequest
   ): Promise<boolean> => {
-    const response = await axiosPrivate.put<ApiResponse<boolean>>(
+    const response = await axiosClient.put<ApiResponse<boolean>>(
       `${API_URL}/status/${id}`,
       request
     );
@@ -164,7 +165,7 @@ const orderManagementService = {
 
   // Get available statuses
   getAvailableStatuses: async (): Promise<string[]> => {
-    const response = await axiosPrivate.get<ApiResponse<string[]>>(
+    const response = await axiosClient.get<ApiResponse<string[]>>(
       `${API_URL}/status/available`
     );
     return response.data.data;
@@ -172,7 +173,7 @@ const orderManagementService = {
 
   // Get unallocated orders
   getUnallocatedOrders: async (): Promise<Order[]> => {
-    const response = await axiosPrivate.get<ApiResponse<Order[]>>(
+    const response = await axiosClient.get<ApiResponse<Order[]>>(
       `${API_URL}/unallocated`
     );
     return response.data.data;
@@ -180,7 +181,7 @@ const orderManagementService = {
 
   // Get all staff
   getAllStaff: async (): Promise<StaffDto[]> => {
-    const response = await axiosPrivate.get<ApiResponse<StaffDto[]>>(
+    const response = await axiosClient.get<ApiResponse<StaffDto[]>>(
       `staff/all`
     );
     return response.data.data;

@@ -6,9 +6,11 @@ import React, {
   useState,
   ReactNode,
 } from "react";
-import unifiedHubService from "../api/services/unifiedHubService";
-import { useAuthContext } from "./AuthContext";
+// import unifiedHubService from "../api/services/unifiedHubService";
+// import { useAuthContext } from "./AuthContext";
 import { Role } from "../routes/Roles";
+import useAuth from "../hooks/useAuth";
+import unifiedHubService from "../api/Services/unifiedHubService";
 
 interface SignalRContextType {
   isInitialized: boolean;
@@ -22,7 +24,7 @@ const SignalRContext = createContext<SignalRContextType | undefined>(undefined);
 export const SignalRProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { authUser, role, isLoading } = useAuthContext();
+  const { auth } = useAuth();
   const [isInitialized, setIsInitialized] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -30,12 +32,12 @@ export const SignalRProvider: React.FC<{ children: ReactNode }> = ({
   // Initialize hub connections when the user logs in
   useEffect(() => {
     // Don't try to initialize if still loading auth state
-    if (isLoading) {
-      return;
-    }
+    // if (isLoading) {
+    //   return;
+    // }
 
     const initializeHubs = async () => {
-      if (authUser) {
+      if (auth) {
         setIsConnecting(true);
         setError(null);
 
@@ -43,9 +45,9 @@ export const SignalRProvider: React.FC<{ children: ReactNode }> = ({
           // Determine which hubs to connect to based on user role
           const hubsToConnect: string[] = ["notification"]; // Everyone gets notifications
 
-          if (role === Role.Manager) {
+          if (auth?.user?.role === Role.Manager) {
             hubsToConnect.push("feedback", "equipment", "equipmentStock");
-          } else if (role === Role.Admin) {
+          } else if (auth?.user?.role === Role.Admin) {
             hubsToConnect.push(
               "feedback",
               "equipment",
@@ -54,13 +56,13 @@ export const SignalRProvider: React.FC<{ children: ReactNode }> = ({
             );
           }
 
-          // Parse authUser as number if it's a string
+          // Parse auth as number if it's a string
           const userId =
-            typeof authUser === "string" ? parseInt(authUser, 10) : authUser;
+            typeof auth?.user?.userId === "string" ? parseInt(auth?.user?.userId, 10) : auth?.user?.userId;
 
           await unifiedHubService.initializeHubs(
             userId,
-            role || "guest",
+            auth?.user?.role || "guest",
             hubsToConnect
           );
           setIsInitialized(true);
@@ -100,7 +102,7 @@ export const SignalRProvider: React.FC<{ children: ReactNode }> = ({
         });
       }
     };
-  }, [authUser, role, isInitialized, isLoading]);
+  }, [auth, isInitialized]);
 
   return (
     <SignalRContext.Provider

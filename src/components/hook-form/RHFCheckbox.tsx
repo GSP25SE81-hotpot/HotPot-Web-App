@@ -6,6 +6,7 @@ import {
   FormControlLabel,
   FormGroup,
   FormControlLabelProps,
+  FormHelperText,
 } from "@mui/material";
 
 // ----------------------------------------------------------------------
@@ -54,7 +55,12 @@ export function RHFMultiCheckbox({
     <Controller
       name={name}
       control={control}
-      render={({ field }) => {
+      render={({ field, fieldState: { error } }) => {
+        //check show message
+        const checkError =
+          !!error && (!field.value || field.value.length === 0);
+
+        //check choose
         const onSelected = (option: string) =>
           field.value.includes(option)
             ? field.value.filter((value: string) => value !== option)
@@ -74,7 +80,12 @@ export function RHFMultiCheckbox({
                 label={option.label}
                 {...other}
               />
-            ))}
+            ))}{" "}
+            {checkError && (
+              <FormHelperText error sx={{ px: 2, textAlign: "center" }}>
+                {error.message}
+              </FormHelperText>
+            )}
           </FormGroup>
         );
       }}

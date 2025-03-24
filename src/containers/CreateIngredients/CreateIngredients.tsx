@@ -1,48 +1,67 @@
-import React, { useCallback } from "react";
-import { Box, Card, CardContent, Typography } from "@mui/material";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Box,
+  Card,
+  CardContent,
+  InputAdornment,
+  Typography,
+} from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import {
   FormProvider,
-  RHFEditor,
+  RHFAutoComplete,
   RHFTextField,
-  RHFUploadMultiFile,
+  RHFUploadSingleFile,
 } from "../../components/hook-form";
-// import { toast } from "react-toastify";
 import { LoadingButton } from "@mui/lab";
-import { CreateHotPotFormSchema } from "../../types/hotpot";
-import uploadImageToFirebase from "../../firebase/uploadImageToFirebase";
+import { uploadImageToFirebase } from "../../firebase/uploadImageToFirebase";
+import { IngredientAddSchema } from "../../types/ingredients";
+import adminIngredientsAPI from "../../api/Services/adminIngredientsAPI";
+import { useNavigate } from "react-router";
 import config from "../../configs";
-
-// const LabelStyle = styled(Typography)(({ theme }) => ({
-//   ...theme.typography.subtitle2,
-//   color: theme.palette.text.secondary,
-//   marginBottom: theme.spacing(1),
-// }));
+import { toast } from "react-toastify";
 
 const CreateIngredients: React.FC = () => {
-  //yub
+  const [type, setType] = useState<any[]>([]);
+  const navigate = useNavigate();
   const defaultValues = {
     name: "",
     description: "",
-    imageURL: [],
+    imageURL: "",
+    quantity: 0,
+    measurementUnit: "",
+    minStockLevel: 0,
+    ingredientTypeID: "",
+    price: 0.01,
   };
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string()
-      .trim()
-      .required("Bắt buộc có tên sản phẩm")
-      .min(1, "Tối thiểu 1 kí tự"),
+    name: Yup.string().trim().required("Bắt buộc có tên nguyên liệu"),
     description: Yup.string()
       .trim()
       .required("Bắt buộc có mô tả")
       .min(10, "Tối thiểu 10 kí tự"),
-    imageURL: Yup.array().of(Yup.string()).min(1, "Bắt buộc có hình"),
+    imageURL: Yup.string().min(1, "Bắt buộc có hình"),
+    quantity: Yup.number()
+      .required("Bắt buộc nhập số lượng")
+      .min(0, "Số lượng không hợp lệ"),
+    measurementUnit: Yup.string()
+      .trim()
+      .required("Bắt buộc nhập đơn vị đo lường"),
+    minStockLevel: Yup.number()
+      .required("Bắt buộc nhập mức tồn kho tối thiểu")
+      .min(0, "Giá trị không hợp lệ"),
+    ingredientTypeID: Yup.string().required("Bắt buộc nhập loại nguyên liệu"),
+    price: Yup.number()
+      .required("Bắt buộc nhập giá")
+      .min(0, "Giá không hợp lệ"),
   });
 
-  const methods = useForm<CreateHotPotFormSchema>({
+  const methods = useForm<IngredientAddSchema>({
     resolver: yupResolver(validationSchema),
     defaultValues,
   });
@@ -51,84 +70,124 @@ const CreateIngredients: React.FC = () => {
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { isSubmitting },
   } = methods;
 
-  const values = watch();
-  const onSubmit = async (values: CreateHotPotFormSchema) => {
+  console.log(watch("ingredientTypeID"));
+
+  const fetchType = async () => {
     try {
-      console.log(values);
+      const data = await adminIngredientsAPI.getListIngredientsType();
+      console.log(data?.data);
+
+      setType(data?.data);
+    } catch (error) {
+      console.error("Error fetching ingredient types:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchType();
+  }, []);
+
+  const onSubmit = async (values: IngredientAddSchema) => {
+    try {
+      const resData = await adminIngredientsAPI.createNewIngredients(values);
+      reset();
+      navigate(config.adminRoutes.manageIngredients);
+      toast.success("Thêm mới thành công");
+      console.log(resData);
     } catch (error) {
       console.error(error);
     }
   };
-
   const handleDrop = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async (acceptedFiles: any) => {
-      const images = values.imageURL || [];
+    async (acceptedFiles: any[]) => {
+      const file = acceptedFiles[0];
 
-      const uploadedImages = await Promise.all(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        acceptedFiles.map(async (file: any) => {
-          const downloadURL = await uploadImageToFirebase(file);
-          return downloadURL;
-        })
-      );
-
-      // Update the form with the new image URLs
-      setValue("imageURL", [...images, ...uploadedImages]);
+      const coverImage = await uploadImageToFirebase(file);
+      if (typeof coverImage === "string") {
+        setValue("imageURL", coverImage);
+      }
     },
-    [setValue, values.imageURL]
+    [setValue]
   );
-
-  const handleRemoveAll = () => {
-    setValue("imageURL", []);
-  };
-
-  const handleRemove = (file: File | string) => {
-    const filteredItems = values.imageURL?.filter((_file) => _file !== file);
-    setValue("imageURL", filteredItems);
-  };
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Card sx={{ maxWidth: "100%", margin: "auto", mt: 4, p: 3 }}>
         <CardContent>
           <Typography variant="h5" gutterBottom>
-            Tạo mới thực đơn lẩu
+            Tạo mới nguyên liệu
           </Typography>
 
           <Grid2 container spacing={3}>
             <Grid2 size={{ mobile: 12, desktop: 6 }}>
               <RHFTextField
-                name="hotpotName"
-                label={config.Vntext.CreateCombo.hotpotName}
+                name="name"
+                label="Tên nguyên liệu"
                 sx={{ mb: 2 }}
               />
-
+              <RHFTextField name="description" label="Mô tả" sx={{ mb: 2 }} />
               <RHFTextField
-                name="description"
-                label={config.Vntext.CreateCombo.description}
+                name="quantity"
+                type="number"
+                label="Số lượng"
+                sx={{ mb: 2 }}
+                InputProps={{
+                  type: "number",
+                  inputProps: { min: 0 },
+                }}
+              />
+              <RHFTextField
+                name="measurementUnit"
+                label="Đơn vị đo lường"
                 sx={{ mb: 2 }}
               />
-
-              <div>
-                <RHFEditor simple name="newsContent" label="Nội dung" />
-              </div>
-              <div>
-                <RHFUploadMultiFile
-                  label={config.Vntext.CreateCombo.image}
-                  showPreview
-                  name="imageURL"
-                  maxSize={3145728}
-                  onDrop={handleDrop}
-                  onRemove={handleRemove}
-                  onRemoveAll={handleRemoveAll}
-                />
-              </div>
+              <RHFTextField
+                name="minStockLevel"
+                type="number"
+                label="Mức tồn kho tối thiểu"
+                sx={{ mb: 2 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">VNĐ</InputAdornment>
+                  ),
+                  type: "number",
+                  inputProps: { min: 0 },
+                }}
+              />
+              <RHFAutoComplete
+                name="ingredientTypeID"
+                options={type || []}
+                label="Chọn Loại nguyên liệu"
+              />
+              <RHFTextField
+                name="price"
+                type="number"
+                label="Giá"
+                sx={{ mb: 2, mt: 2 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">VNĐ</InputAdornment>
+                  ),
+                  type: "number",
+                  inputProps: { min: 0 },
+                }}
+              />
+            </Grid2>
+            <Grid2 size={{ mobile: 12, desktop: 6 }}>
+              <RHFUploadSingleFile
+                label="Hình ảnh"
+                name="imageURL"
+                maxSize={3145728}
+                onDrop={handleDrop}
+              />
             </Grid2>
           </Grid2>
+
           <Box
             sx={{
               mt: 2,
@@ -144,7 +203,7 @@ const CreateIngredients: React.FC = () => {
               loading={isSubmitting}
               sx={{ ml: "auto" }}
             >
-              Thêm món lẩu mới
+              Thêm nguyên liệu mới
             </LoadingButton>
           </Box>
         </CardContent>

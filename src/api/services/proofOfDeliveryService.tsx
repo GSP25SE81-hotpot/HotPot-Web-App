@@ -1,5 +1,5 @@
 // proofOfDeliveryService.ts
-import { axiosPrivate } from "../axiosInstance";
+// import { axiosClient } from "../axiosInstance";
 import {
   ApiResponse,
   ProofOfDeliveryDto,
@@ -8,13 +8,14 @@ import {
   ProofOfDeliveryResponse,
   ShippingListDto,
 } from "../../types/proofOfDelivery";
+import axiosClient from "../axiosInstance";
 
 // Save proof of delivery with JSON data
 export const saveProofOfDelivery = async (
   shippingOrderId: number,
   data: ProofOfDeliveryRequest
 ): Promise<ApiResponse<ProofOfDeliveryResponse>> => {
-  const response = await axiosPrivate.post(
+  const response = await axiosClient.post(
     `/staff/proof-delivery/${shippingOrderId}`,
     data
   );
@@ -25,7 +26,7 @@ export const saveProofOfDelivery = async (
 export const getProofOfDelivery = async (
   shippingOrderId: number
 ): Promise<ApiResponse<ProofOfDeliveryDto>> => {
-  const response = await axiosPrivate.get(
+  const response = await axiosClient.get(
     `/staff/proof-delivery/${shippingOrderId}`
   );
   return response.data;
@@ -50,7 +51,7 @@ export const uploadProofOfDelivery = async (
     form.append("DeliveryNotes", formData.deliveryNotes);
   }
 
-  const response = await axiosPrivate.post(
+  const response = await axiosClient.post(
     `/staff/proof-delivery/${shippingOrderId}/upload`,
     form,
     {
@@ -67,7 +68,7 @@ export const uploadProofOfDelivery = async (
 export const getShippingDetail = async (
   shippingOrderId: number
 ): Promise<ShippingListDto> => {
-  const response = await axiosPrivate.get(`/staff/shipping/${shippingOrderId}`);
+  const response = await axiosClient.get(`/staff/shipping/${shippingOrderId}`);
   return response.data.data;
 };
 
@@ -75,6 +76,6 @@ export const getShippingDetail = async (
 export const getPendingShippingList = async (
   staffId: number
 ): Promise<ShippingListDto[]> => {
-  const response = await axiosPrivate.get(`/staff/shipping/pending/${staffId}`);
+  const response = await axiosClient.get(`/staff/shipping/pending/${staffId}`);
   return response.data.data;
 };

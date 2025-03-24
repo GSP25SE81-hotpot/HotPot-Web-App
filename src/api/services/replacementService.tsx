@@ -1,5 +1,5 @@
 // src/api/services/replacementService.ts
-import { axiosPrivate } from "../axiosInstance";
+// import { axiosClient } from "../axiosInstance";
 import {
   ApiResponse,
   AssignStaffDto,
@@ -8,10 +8,11 @@ import {
   ReplacementRequestSummaryDto,
   ReviewReplacementRequestDto,
 } from "../../types/replacement";
+import axiosClient from "../axiosInstance";
 
 const replacementService = {
   getAllReplacements: async (): Promise<ReplacementRequestSummaryDto[]> => {
-    const response = await axiosPrivate.get<
+    const response = await axiosClient.get<
       ApiResponse<ReplacementRequestSummaryDto[]>
     >("/manager/replacement");
     return response.data.data;
@@ -20,7 +21,7 @@ const replacementService = {
   getReplacementsByStatus: async (
     status: string
   ): Promise<ReplacementRequestSummaryDto[]> => {
-    const response = await axiosPrivate.get<
+    const response = await axiosClient.get<
       ApiResponse<ReplacementRequestSummaryDto[]>
     >(`/manager/replacement/status/${status}`);
     return response.data.data;
@@ -29,7 +30,7 @@ const replacementService = {
   getReplacementById: async (
     id: number
   ): Promise<ReplacementRequestDetailDto> => {
-    const response = await axiosPrivate.get<
+    const response = await axiosClient.get<
       ApiResponse<ReplacementRequestDetailDto>
     >(`/manager/replacement/${id}`);
     return response.data.data;
@@ -39,7 +40,7 @@ const replacementService = {
     id: number,
     data: ReviewReplacementRequestDto
   ): Promise<ReplacementRequestDetailDto> => {
-    const response = await axiosPrivate.put<
+    const response = await axiosClient.put<
       ApiResponse<ReplacementRequestDetailDto>
     >(`/manager/replacement/${id}/review`, data);
     return response.data.data;
@@ -49,7 +50,7 @@ const replacementService = {
     id: number,
     data: AssignStaffDto
   ): Promise<ReplacementRequestDetailDto> => {
-    const response = await axiosPrivate.put<
+    const response = await axiosClient.put<
       ApiResponse<ReplacementRequestDetailDto>
     >(`/manager/replacement/${id}/assign`, data);
     return response.data.data;
@@ -59,7 +60,7 @@ const replacementService = {
     id: number,
     data: CompleteReplacementDto
   ): Promise<ReplacementRequestDetailDto> => {
-    const response = await axiosPrivate.put<
+    const response = await axiosClient.put<
       ApiResponse<ReplacementRequestDetailDto>
     >(`/manager/replacement/${id}/complete`, data);
     return response.data.data;

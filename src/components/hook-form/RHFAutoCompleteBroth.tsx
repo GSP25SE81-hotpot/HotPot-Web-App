@@ -3,13 +3,13 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 
 type IProps = {
-  name: string;
+  tagname: string;
   label: string;
-  options: { id: string; fullName: string }[];
+  options: { ingredientId: string; name: string }[];
 };
 
-export default function RHFAutoCompleteUser({
-  name,
+export default function RHFAutoCompleteBroth({
+  tagname,
   label,
   options,
   ...other
@@ -18,17 +18,19 @@ export default function RHFAutoCompleteUser({
 
   return (
     <Controller
-      name={name}
+      name={tagname}
       control={control}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
         <Autocomplete
           options={options || []}
-          getOptionLabel={(option) => option.fullName}
+          getOptionLabel={(option) => option.name}
           onChange={(_e, newValue) => {
-            setValue(name, newValue ? newValue.id : "");
-            onChange(newValue ? newValue.id : "");
+            setValue(tagname, newValue ? newValue.ingredientId : "");
+            onChange(newValue ? newValue.ingredientId : "");
           }}
-          value={options.find((option) => option.id === value) || null} // initial value
+          value={
+            options.find((option) => option.ingredientId === value) || null
+          } // initial value
           renderInput={(params) => (
             <TextField
               {...params}

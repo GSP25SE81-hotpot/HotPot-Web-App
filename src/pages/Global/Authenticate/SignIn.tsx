@@ -8,16 +8,19 @@ import { FaUser, FaLock } from "react-icons/fa";
 // import "./SignIn.scss";
 import classNames from "classnames/bind";
 import styles from "./authenticate.module.scss";
+import authApi from "../../../api/authAPI";
+import { toast } from "react-toastify";
+import useAuth from "../../../hooks/useAuth";
 // import useAuth from "../../hooks/useAuth";
 
 export const AuthenticatePage = () => {
   const navigate = useNavigate();
   const cx = classNames.bind(styles);
-  //   const { setAuth } = useAuth();
+  const { setAuth } = useAuth();
 
   const validationSchema = Yup.object({
     phoneNumber: Yup.string()
-      .required("Số điện thoại không được để trống!")
+      .required("Tài khoản không được để trống!")
       .min(3, "Độ dài tài khoản phải tối thiểu 3 kí tự"),
     password: Yup.string()
       .required("Mật khẩu không được để trống!")
@@ -32,28 +35,28 @@ export const AuthenticatePage = () => {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       console.log("data truyền: ", values);
-      navigate("/dashboard");
-      //   try {
-      //     const response: any = await authApi.login({
-      //       username: values.userName,
-      //       password: values.password,
-      //     });
-      //     localStorage.setItem("userInfor", JSON.stringify(response));
-      //     console.log("first", response);
-      //     setAuth({
-      //       user: response,
-      //       accessToken: response.tokenModel.accessToken,
-      //     });
-      //     if (response?.role == "Admin") {
-      //       navigate("/warranty");
-      //     } else {
-      //       navigate("/forbidden");
-      //     }
-      //     toast.success("Đăng nhập thành công!");
-      //   } catch (error) {
-      //     console.error("Login failed:", error);
-      //     toast.error(error.message || "Đăng nhập không thành công!");
-      //   }
+      try {
+        const response: any = await authApi.login({
+          phoneNumber: values.phoneNumber,
+          password: values.password,
+        });
+        localStorage.setItem("userInfor", JSON.stringify(response?.data));
+        console.log("first", response?.data);
+        navigate("/dashboard");
+        setAuth({
+          user: response?.data,
+          accessToken: response?.data?.accessToken,
+        });
+        // if (response?.role == "Admin") {
+        //   navigate("/warranty");
+        // } else {
+        //   navigate("/forbidden");
+        // }
+        toast.success("Đăng nhập thành công!");
+      } catch (error: any) {
+        console.error("Login failed:", error);
+        toast.error(error.message || "Đăng nhập không thành công!");
+      }
     },
   });
 
@@ -65,10 +68,9 @@ export const AuthenticatePage = () => {
           <div className={cx("input-box")}>
             <input
               id="phoneNumber"
-              //   name="userName"
               type="text"
               className={cx("input-text")}
-              placeholder="Số điện thoại *"
+              placeholder="Tên đăng nhập *"
               {...formik.getFieldProps("phoneNumber")}
             />
             <FaUser className={cx("icon")} />
@@ -79,7 +81,6 @@ export const AuthenticatePage = () => {
           <div className={cx("input-box")}>
             <input
               id="password"
-              //   name="password"
               type="password"
               className={cx("input-text")}
               style={{ color: "black" }}

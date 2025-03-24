@@ -6,9 +6,9 @@ import {
   NewEquipmentFailure,
   NotificationState,
 } from "../types/equipmentFailure";
-import equipmentService from "../api/services/equipmentService";
+import equipmentService from "../api/Services/equipmentService";
 import { format } from "date-fns";
-import signalRService, { HubCallback } from "../api/services/signalrService";
+import signalRService, { HubCallback } from "../api/Services/signalrService";
 
 export const useEquipmentFailures = () => {
   const [statusFilter, setStatusFilter] = useState<MaintenanceStatus | "All">(

@@ -9,7 +9,8 @@ import {
   RentalHistoryItem,
   Staff,
 } from "../../types/rentalTypes";
-import { axiosPrivate } from "../axiosInstance"; // Import the authenticated axios instance
+import axiosClient from "../axiosInstance";
+// import { axiosClient } from "../axiosInstance"; // Import the authenticated axios instance
 
 const API_URL = "/manager/rentals";
 
@@ -19,7 +20,7 @@ export const getUnassignedPickups = async (
   pageSize = 10
 ): Promise<PagedResult<RentOrderDetail>> => {
   try {
-    const response = await axiosPrivate.get<
+    const response = await axiosClient.get<
       ApiResponse<PagedResult<RentOrderDetail>>
     >(
       `${API_URL}/unassigned-pickups?pageNumber=${pageNumber}&pageSize=${pageSize}`
@@ -41,7 +42,7 @@ export const allocateStaffForPickup = async (
   request: PickupAssignmentRequestDto
 ): Promise<StaffPickupAssignmentDto> => {
   try {
-    const response = await axiosPrivate.post<
+    const response = await axiosClient.post<
       ApiResponse<StaffPickupAssignmentDto>
     >(`${API_URL}/allocate-pickup`, request);
 
@@ -61,7 +62,7 @@ export const getRentalHistoryByUtensil = async (
   utensilId: number
 ): Promise<RentalHistoryItem[]> => {
   try {
-    const response = await axiosPrivate.get<RentalHistoryItem[]>(
+    const response = await axiosClient.get<RentalHistoryItem[]>(
       `${API_URL}/equipment/${utensilId}`
     );
     return response.data;
@@ -76,7 +77,7 @@ export const getRentalHistoryByHotpot = async (
   hotpotInventoryId: number
 ): Promise<RentalHistoryItem[]> => {
   try {
-    const response = await axiosPrivate.get<RentalHistoryItem[]>(
+    const response = await axiosClient.get<RentalHistoryItem[]>(
       `${API_URL}/hotpot/${hotpotInventoryId}`
     );
     return response.data;
@@ -91,7 +92,7 @@ export const getRentalHistoryByUser = async (
   userId: number
 ): Promise<RentalHistoryItem[]> => {
   try {
-    const response = await axiosPrivate.get<RentalHistoryItem[]>(
+    const response = await axiosClient.get<RentalHistoryItem[]>(
       `${API_URL}/user/${userId}`
     );
     return response.data;
@@ -107,7 +108,7 @@ export const adjustReturnDateForException = async (
   request: UpdateRentOrderDetailRequest
 ): Promise<void> => {
   try {
-    await axiosPrivate.put(`${API_URL}/${id}`, request);
+    await axiosClient.put(`${API_URL}/${id}`, request);
   } catch (error) {
     console.error("Error adjusting return date:", error);
     throw error;
@@ -120,7 +121,7 @@ export const calculateLateFee = async (
   actualReturnDate: string
 ): Promise<number> => {
   try {
-    const response = await axiosPrivate.get(
+    const response = await axiosClient.get(
       `${API_URL}/${id}/calculate-late-fee?actualReturnDate=${actualReturnDate}`
     );
     return response.data.lateFee;
@@ -136,7 +137,7 @@ export const getCurrentAssignments = async (
   pageSize = 10
 ): Promise<PagedResult<StaffPickupAssignmentDto>> => {
   try {
-    const response = await axiosPrivate.get<
+    const response = await axiosClient.get<
       ApiResponse<PagedResult<StaffPickupAssignmentDto>>
     >(
       `${API_URL}/current-assignments?pageNumber=${pageNumber}&pageSize=${pageSize}`
@@ -156,7 +157,7 @@ export const getCurrentAssignments = async (
 // Get available staff (this would be from a different controller)
 export const getAvailableStaff = async (): Promise<Staff[]> => {
   try {
-    const response = await axiosPrivate.get<ApiResponse<Staff[]>>(
+    const response = await axiosClient.get<ApiResponse<Staff[]>>(
       "/api/manager/staff/available"
     );
 

@@ -1,8 +1,9 @@
 // src/hooks/useSchedule.ts
 import { useState, useEffect, useCallback } from "react";
 import { StaffSchedule } from "../types/scheduleInterfaces";
-import scheduleService from "../api/services/scheduleService";
-import { useAuthContext } from "../context/AuthContext";
+import scheduleService from "../api/Services/scheduleService";
+import useAuth from "./useAuth";
+
 
 interface UseScheduleReturn {
   loading: boolean;
@@ -13,7 +14,7 @@ interface UseScheduleReturn {
 }
 
 export const useSchedule = (): UseScheduleReturn => {
-  const { authUser, role, isLoading: authLoading } = useAuthContext();
+  const { auth } = useAuth();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [schedules, setSchedules] = useState<StaffSchedule[]>([]);
@@ -27,7 +28,7 @@ export const useSchedule = (): UseScheduleReturn => {
       setError(null);
 
       // If user is not authenticated, don't fetch anything
-      if (!authUser) {
+      if (!auth) {
         setSchedules([]);
         setPersonalSchedule(null);
         setLoading(false);
@@ -35,7 +36,7 @@ export const useSchedule = (): UseScheduleReturn => {
       }
 
       // If user is a manager, get their schedule and all staff schedules
-      if (role === "Manager") {
+      if (auth?.user?.role === "Manager") {
         const managerSchedule = await scheduleService.getManagerSchedule();
         const staffSchedules = await scheduleService.getAllStaffSchedules();
 
@@ -43,16 +44,16 @@ export const useSchedule = (): UseScheduleReturn => {
         setSchedules([managerSchedule, ...staffSchedules]);
       }
       // If user is a staff, get only their schedule
-      else if (role === "Staff") {
-        // For staff, we'll use the authUser as staffId
-        // You might need to adjust this if your staffId is different from authUser
-        const staffId = parseInt(authUser);
+      else if (auth?.user?.role === "Staff") {
+        // For staff, we'll use the auth?.user?.userId as staffId
+        // You might need to adjust this if your staffId is different from auth?.user?.userId
+        const staffId = parseInt(auth?.user?.userId);
         const staffSchedule = await scheduleService.getStaffSchedule(staffId);
         setPersonalSchedule(staffSchedule);
         setSchedules([staffSchedule]);
       }
       // Otherwise, try to get all staff schedules (for admin)
-      else if (role === "Admin") {
+      else if (auth?.user?.role === "Admin") {
         const allSchedules = await scheduleService.getAllStaffSchedules();
         setSchedules(allSchedules);
       }
@@ -62,20 +63,17 @@ export const useSchedule = (): UseScheduleReturn => {
     } finally {
       setLoading(false);
     }
-  }, [authUser, role]); // Include dependencies that fetchSchedules uses from the component scope
+  }, [auth?.user?.userId, auth?.user?.role]); // Include dependencies that fetchSchedules uses from the component scope
 
   useEffect(() => {
     // Only fetch schedules when auth loading is complete and user is authenticated
-    if (!authLoading && authUser) {
+    if ( auth?.user?.userId) {
       fetchSchedules();
-    } else if (!authLoading) {
-      // If auth loading is complete but no user, set loading to false
-      setLoading(false);
-    }
-  }, [authUser, role, authLoading, fetchSchedules]); // Now we can safely include fetchSchedules
+    } 
+  }, [auth?.user?.userId, auth?.user?.role, fetchSchedules]); // Now we can safely include fetchSchedules
 
   return {
-    loading: loading || authLoading,
+    loading: loading ,
     error,
     schedules,
     personalSchedule,

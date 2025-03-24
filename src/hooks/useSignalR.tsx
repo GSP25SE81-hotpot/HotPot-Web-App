@@ -1,6 +1,6 @@
 // src/hooks/useSignalR.ts
 import { useState, useEffect, useCallback } from "react";
-import signalRService from "../api/services/signalrService";
+import signalRService from "../api/Services/signalrService";
 import { HubConnectionState } from "@microsoft/signalr";
 
 /**

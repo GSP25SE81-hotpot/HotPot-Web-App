@@ -21,6 +21,7 @@ import styles from "./Navbar.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import Logout from "@mui/icons-material/Logout";
 import config from "../../../configs";
+import useAuth from "../../../hooks/useAuth";
 
 interface NavbarProps {
   onMenuClick?: () => void;
@@ -30,13 +31,21 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ onMenuClick, isSidebarCollapsed }) => {
   const cx = classNames.bind(styles);
 
-  const jsonString = localStorage.getItem("loginInfo");
+  const jsonString = localStorage.getItem("userInfor");
   const user = JSON.parse(jsonString || "{}");
   const [name, setName] = React.useState(
     user?.data?.fullName ? user?.data?.fullName : "U"
   );
+
+  const { setAuth } = useAuth();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("userInfor");
+    setAuth(null);
+    navigate(config.authRoute.authenticate);
+  };
 
   const open = Boolean(anchorEl);
 
@@ -125,7 +134,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick, isSidebarCollapsed }) => {
           </Link>
         </MenuItem>
         <Divider />
-        <MenuItem sx={{ color: "red" }}>
+        <MenuItem sx={{ color: "red" }} onClick={handleLogout}>
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>

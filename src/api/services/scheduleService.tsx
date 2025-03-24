@@ -1,6 +1,6 @@
 // src/services/scheduleService.ts
 
-import { axiosPrivate } from "../axiosInstance";
+// import { axiosClient } from "../axiosInstance";
 import {
   StaffSchedule,
   StaffScheduleDto,
@@ -8,6 +8,7 @@ import {
   WorkDays,
   StaffDto,
 } from "../../types/scheduleInterfaces";
+import axiosClient from "../axiosInstance";
 
 const SCHEDULE_URL = "manager/schedule";
 
@@ -84,7 +85,7 @@ const transformToStaffSchedule = (
 // Get manager's own schedule
 export const getManagerSchedule = async (): Promise<StaffSchedule> => {
   try {
-    const response = await axiosPrivate.get<WorkShiftDto[]>(
+    const response = await axiosClient.get<WorkShiftDto[]>(
       `${SCHEDULE_URL}/my-schedule`
     );
 
@@ -146,7 +147,7 @@ export const getManagerSchedule = async (): Promise<StaffSchedule> => {
 // Get all staff schedules
 export const getAllStaffSchedules = async (): Promise<StaffSchedule[]> => {
   try {
-    const response = await axiosPrivate.get<StaffScheduleDto[]>(
+    const response = await axiosClient.get<StaffScheduleDto[]>(
       `${SCHEDULE_URL}/staff-schedules`
     );
     return transformToStaffSchedule(response.data);
@@ -161,7 +162,7 @@ export const getStaffSchedule = async (
   staffId: number
 ): Promise<StaffSchedule> => {
   try {
-    const response = await axiosPrivate.get<StaffScheduleDto>(
+    const response = await axiosClient.get<StaffScheduleDto>(
       `${SCHEDULE_URL}/staff-schedules/${staffId}`
     );
     const transformed = transformToStaffSchedule([response.data]);
@@ -175,7 +176,7 @@ export const getStaffSchedule = async (
 // Get staff working on a specific day
 export const getStaffByDay = async (day: WorkDays): Promise<StaffDto[]> => {
   try {
-    const response = await axiosPrivate.get<StaffDto[]>(
+    const response = await axiosClient.get<StaffDto[]>(
       `${SCHEDULE_URL}/staff-by-day?day=${day}`
     );
     return response.data;
@@ -190,7 +191,7 @@ export const getShiftsByDay = async (
   day: WorkDays
 ): Promise<WorkShiftDto[]> => {
   try {
-    const response = await axiosPrivate.get<WorkShiftDto[]>(
+    const response = await axiosClient.get<WorkShiftDto[]>(
       `${SCHEDULE_URL}/shifts-by-day?day=${day}`
     );
     return response.data;

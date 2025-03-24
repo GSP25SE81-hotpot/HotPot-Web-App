@@ -1,7 +1,8 @@
 // src/api/services/equipmentService.ts
 
-import { axiosPrivate } from "../axiosInstance";
 import { MaintenanceStatus } from "../../types/equipmentFailure";
+import axiosClient from "../axiosInstance";
+
 
 const API_URL = "manager/equipment";
 
@@ -53,7 +54,7 @@ const equipmentService = {
   logEquipmentFailure: async (
     failureData: EquipmentFailureDto
   ): Promise<ConditionLog> => {
-    const response = await axiosPrivate.post<ApiResponse<ConditionLog>>(
+    const response = await axiosClient.post<ApiResponse<ConditionLog>>(
       `${API_URL}/failures`,
       failureData
     );
@@ -65,7 +66,7 @@ const equipmentService = {
     id: number,
     data: UpdateResolutionTimelineRequest
   ): Promise<ConditionLog> => {
-    const response = await axiosPrivate.put<ApiResponse<ConditionLog>>(
+    const response = await axiosClient.put<ApiResponse<ConditionLog>>(
       `${API_URL}/failures/${id}/timeline`,
       data
     );
@@ -74,7 +75,7 @@ const equipmentService = {
 
   // Get a specific condition log
   getConditionLog: async (id: number): Promise<ConditionLog> => {
-    const response = await axiosPrivate.get<ApiResponse<ConditionLog>>(
+    const response = await axiosClient.get<ApiResponse<ConditionLog>>(
       `${API_URL}/failures/${id}`
     );
     return response.data.data;
@@ -82,7 +83,7 @@ const equipmentService = {
 
   // Get all active condition logs
   getActiveConditionLogs: async (): Promise<ConditionLog[]> => {
-    const response = await axiosPrivate.get<ApiResponse<ConditionLog[]>>(
+    const response = await axiosClient.get<ApiResponse<ConditionLog[]>>(
       `${API_URL}/failures/active`
     );
     return response.data.data;
@@ -92,7 +93,7 @@ const equipmentService = {
   getConditionLogsByStatus: async (
     status: MaintenanceStatus
   ): Promise<ConditionLog[]> => {
-    const response = await axiosPrivate.get<ApiResponse<ConditionLog[]>>(
+    const response = await axiosClient.get<ApiResponse<ConditionLog[]>>(
       `${API_URL}/failures/status/${status}`
     );
     return response.data.data;
@@ -103,7 +104,7 @@ const equipmentService = {
     id: number,
     staffId: number
   ): Promise<boolean> => {
-    const response = await axiosPrivate.post<ApiResponse<boolean>>(
+    const response = await axiosClient.post<ApiResponse<boolean>>(
       `${API_URL}/failures/${id}/assign`,
       { staffId }
     );
@@ -115,7 +116,7 @@ const equipmentService = {
     id: number,
     resolutionNotes: string
   ): Promise<boolean> => {
-    const response = await axiosPrivate.post<ApiResponse<boolean>>(
+    const response = await axiosClient.post<ApiResponse<boolean>>(
       `${API_URL}/failures/${id}/resolve`,
       { resolutionNotes }
     );
@@ -126,7 +127,7 @@ const equipmentService = {
   notifyCustomerDirectly: async (
     data: NotifyCustomerRequest
   ): Promise<boolean> => {
-    const response = await axiosPrivate.post<ApiResponse<boolean>>(
+    const response = await axiosClient.post<ApiResponse<boolean>>(
       `${API_URL}/failures/notify-customer`,
       data
     );
