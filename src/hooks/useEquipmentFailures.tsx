@@ -1,3 +1,4 @@
+// src/hooks/useEquipmentFailures.tsx
 import { useEffect, useState } from "react";
 import {
   ConditionLog,
@@ -7,10 +8,7 @@ import {
 } from "../types/equipmentFailure";
 import equipmentService from "../api/services/equipmentService";
 import { format } from "date-fns";
-import {
-  getSignalRConnection,
-  startSignalRConnection,
-} from "../utils/signalRService";
+import signalRService, { HubCallback } from "../api/services/signalrService";
 
 export const useEquipmentFailures = () => {
   const [statusFilter, setStatusFilter] = useState<MaintenanceStatus | "All">(
@@ -21,7 +19,6 @@ export const useEquipmentFailures = () => {
     statusFilter === "All"
       ? requests
       : requests.filter((req) => req.status === statusFilter);
-
   const [expandedRequestId, setExpandedRequestId] = useState<number | null>(
     null
   );
@@ -41,9 +38,12 @@ export const useEquipmentFailures = () => {
   const [notification, setNotification] = useState<NotificationState | null>(
     null
   );
+  const [error, setError] = useState<Error | null>(null);
 
   // Fetch active equipment failures
   useEffect(() => {
+    const EQUIPMENT_HUB = `/equipmentHub`;
+
     const fetchEquipmentFailures = async () => {
       try {
         setLoading(true);
@@ -55,11 +55,15 @@ export const useEquipmentFailures = () => {
           message: "Failed to load equipment failures",
           severity: "error",
         });
+        if (error instanceof Error) {
+          setError(error);
+        } else {
+          setError(new Error("Failed to load equipment failures"));
+        }
       } finally {
         setLoading(false);
       }
     };
-
     fetchEquipmentFailures();
 
     // Set up SignalR connection for real-time updates
@@ -67,39 +71,78 @@ export const useEquipmentFailures = () => {
       try {
         // Get token from localStorage or your auth context
         const loginInfoString = localStorage.getItem("loginInfo");
-        if (!loginInfoString) return;
+        if (!loginInfoString) {
+          console.warn("No login info found, skipping SignalR connection");
+          return;
+        }
 
-        const loginInfo = JSON.parse(loginInfoString);
-        const token = loginInfo.data.token;
+        let loginInfo;
+        try {
+          loginInfo = JSON.parse(loginInfoString);
+        } catch (e) {
+          console.error("Error parsing login info:", e);
+          return;
+        }
 
-        const connection = await startSignalRConnection(token);
+        if (!loginInfo || !loginInfo.data) {
+          console.warn("Invalid login info, skipping SignalR connection");
+          return;
+        }
 
-        // Listen for new failures
-        connection.on(
-          "ReceiveNewFailure",
-          (id, name, description, status, loggedDate) => {
+        // Start the SignalR connection directly using signalRService
+        await signalRService.startConnection(EQUIPMENT_HUB);
+
+        // Register user connection if needed
+        const userId = loginInfo.data.userId || 0;
+        const userType = loginInfo.data.role || "manager";
+        await signalRService.registerUserConnection(
+          EQUIPMENT_HUB,
+          userId,
+          userType
+        );
+
+        // Handler for new failures
+        const handleNewFailure: HubCallback = (...args) => {
+          try {
+            // Cast the args to their expected types
+            const [id, name, description, status, loggedDate] = args as [
+              number,
+              string,
+              string,
+              string,
+              string
+            ];
+
             setRequests((prev) => [
               ...prev,
               {
                 conditionLogId: id,
                 name,
                 description,
-                status,
+                status: status as MaintenanceStatus,
                 loggedDate,
               },
             ]);
-
             setNotification({
               message: `New equipment failure reported: ${name}`,
               severity: "info",
             });
+          } catch (error) {
+            console.error("Error in handleNewFailure:", error);
           }
-        );
+        };
 
-        // Listen for resolution updates
-        connection.on(
-          "ReceiveResolutionUpdate",
-          (id, status, estimatedTime, message) => {
+        // Handler for resolution updates
+        const handleResolutionUpdate: HubCallback = (...args) => {
+          try {
+            // Cast the args to their expected types
+            const [id, status, estimatedTime, message] = args as [
+              number,
+              string,
+              string,
+              string
+            ];
+
             setRequests((prev) =>
               prev.map((req) =>
                 req.conditionLogId === id
@@ -112,26 +155,39 @@ export const useEquipmentFailures = () => {
                   : req
               )
             );
-
             setNotification({
               message: `Equipment status updated: ${status}`,
               severity: "info",
             });
+          } catch (error) {
+            console.error("Error in handleResolutionUpdate:", error);
           }
+        };
+
+        // Register the handlers directly with signalRService
+        signalRService.on(EQUIPMENT_HUB, "ReceiveNewFailure", handleNewFailure);
+        signalRService.on(
+          EQUIPMENT_HUB,
+          "ReceiveResolutionUpdate",
+          handleResolutionUpdate
         );
       } catch (error) {
         console.error("SignalR setup error:", error);
+        // Don't set error state here as SignalR is not critical for the component to function
       }
     };
-
     setupSignalR();
 
     return () => {
       // Clean up SignalR connection when component unmounts
-      const connection = getSignalRConnection();
-      if (connection) {
-        connection.off("ReceiveNewFailure");
-        connection.off("ReceiveResolutionUpdate");
+      try {
+        signalRService.off(EQUIPMENT_HUB, "ReceiveNewFailure");
+        signalRService.off(EQUIPMENT_HUB, "ReceiveResolutionUpdate");
+        signalRService
+          .stopConnection(EQUIPMENT_HUB)
+          .catch((err) => console.error("Error stopping connection:", err));
+      } catch (error) {
+        console.error("Error cleaning up SignalR connection:", error);
       }
     };
   }, []);
@@ -150,7 +206,6 @@ export const useEquipmentFailures = () => {
       });
       return;
     }
-
     try {
       const failureData = {
         name: newReport.name,
@@ -159,9 +214,7 @@ export const useEquipmentFailures = () => {
           ? { utensilID: parseInt(newReport.equipmentId) }
           : { hotPotInventoryId: parseInt(newReport.equipmentId) }),
       };
-
       const result = await equipmentService.logEquipmentFailure(failureData);
-
       setRequests([...requests, result]);
       setNewReport({
         name: "",
@@ -169,7 +222,6 @@ export const useEquipmentFailures = () => {
         equipmentType: "",
         equipmentId: "",
       });
-
       setNotification({
         message: "New failure report logged successfully",
         severity: "success",
@@ -193,7 +245,6 @@ export const useEquipmentFailures = () => {
       });
       return;
     }
-
     try {
       const result = await equipmentService.updateResolutionTimeline(
         requestId,
@@ -203,13 +254,10 @@ export const useEquipmentFailures = () => {
           message: `Replacement scheduled for ${format(selectedDate, "PPpp")}`,
         }
       );
-
       setRequests(
         requests.map((req) => (req.conditionLogId === requestId ? result : req))
       );
-
       setSelectedDates((prev) => ({ ...prev, [requestId]: null }));
-
       setNotification({
         message: "Replacement scheduled successfully",
         severity: "success",
@@ -233,10 +281,8 @@ export const useEquipmentFailures = () => {
       });
       return;
     }
-
     try {
       await equipmentService.markAsResolved(requestId, resolutionMessage);
-
       setRequests(
         requests.map((req) =>
           req.conditionLogId === requestId
@@ -249,9 +295,7 @@ export const useEquipmentFailures = () => {
             : req
         )
       );
-
       setResolutionMessages((prev) => ({ ...prev, [requestId]: "" }));
-
       setNotification({
         message: "Request resolved and customer notified",
         severity: "success",
@@ -284,5 +328,6 @@ export const useEquipmentFailures = () => {
     statusFilter,
     setStatusFilter,
     filteredRequests,
+    error, // Return the error state
   };
 };

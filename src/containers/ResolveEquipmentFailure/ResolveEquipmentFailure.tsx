@@ -1,16 +1,16 @@
 // src/pages/equipment/ResolveEquipmentFailure.tsx
-
-import { Container, Typography } from "@mui/material";
+import { Alert, Box, Button, Container, Typography } from "@mui/material";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useEquipmentFailures } from "../../hooks/useEquipmentFailures";
 import EquipmentFailureForm from "./Equipment/EquipmentFailureForm";
 import EquipmentFailureList from "./Equipment/EquipmentFailureList";
-import NotificationSnackbar from "./Equipment/NotificationSnackbar";
 import EquipmentStatistics from "./Equipment/EquipmentStatistics";
+import NotificationSnackbar from "./Equipment/NotificationSnackbar";
 import StatusFilter from "./Equipment/StatusFilter";
 
 const ResolveEquipmentFailure: React.FC = () => {
+  // Always call hooks at the top level
   const {
     requests,
     expandedRequestId,
@@ -30,7 +30,29 @@ const ResolveEquipmentFailure: React.FC = () => {
     statusFilter,
     setStatusFilter,
     filteredRequests,
+    error, // This comes from the hook
   } = useEquipmentFailures();
+
+  // Handle errors from the hook
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          <Typography variant="h6">Error loading equipment failures</Typography>
+          <Typography variant="body2">{error.message}</Typography>
+        </Alert>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => window.location.reload()}
+          >
+            Reload Page
+          </Button>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>

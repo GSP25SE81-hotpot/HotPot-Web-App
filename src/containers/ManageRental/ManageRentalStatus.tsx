@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import AddIcon from "@mui/icons-material/Add";
+// import AddIcon from "@mui/icons-material/Add";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
@@ -64,17 +64,6 @@ const StyledSelect = styled(Select)(({ theme }) => ({
 const StyledTextField = styled(TextField)(() => ({
   "& .MuiOutlinedInput-root": {
     borderRadius: 8,
-  },
-}));
-
-const AnimatedButton = styled(Button)(({ theme }) => ({
-  borderRadius: 8,
-  transition: "all 0.2s ease-in-out",
-  textTransform: "none",
-  boxShadow: "none",
-  "&:hover": {
-    transform: "translateY(-2px)",
-    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
   },
 }));
 
@@ -344,13 +333,6 @@ const ManageRentalStatus: React.FC = () => {
                 Theo dõi và quản lý trạng thái các bộ lẩu đang cho thuê
               </Typography>
             </Box>
-            <AnimatedButton
-              variant="contained"
-              startIcon={<AddIcon />}
-              color="primary"
-            >
-              Thêm đơn thuê mới
-            </AnimatedButton>
           </Stack>
         </Grid>
 
