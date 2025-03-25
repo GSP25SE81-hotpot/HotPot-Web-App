@@ -1,444 +1,467 @@
-import { WarningAmberRounded } from "@mui/icons-material";
+import AddIcon from "@mui/icons-material/Add";
 import {
+  Alert,
   Box,
   Button,
-  Chip,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
   Paper,
-  Select,
-  SelectChangeEvent,
-  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography,
+  TextField,
+  useTheme,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers";
+import React, { useState } from "react";
+import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { useState } from "react";
+import { styled, alpha } from "@mui/material/styles";
 
-interface ConditionLog {
+// Styled Components
+const StyledBox = styled(Box)(({ theme }) => ({
+  background: `linear-gradient(135deg, ${alpha(
+    theme.palette.background.paper,
+    0.9
+  )}, ${alpha(theme.palette.background.default, 0.95)})`,
+  borderRadius: 24,
+  padding: theme.spacing(4),
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  background: `linear-gradient(145deg, ${alpha(
+    theme.palette.background.paper,
+    0.8
+  )}, ${alpha(theme.palette.background.default, 0.9)})`,
+  backdropFilter: "blur(8px)",
+  borderRadius: 16,
+  transition: "transform 0.2s ease-in-out",
+  "&:hover": {
+    transform: "translateY(-4px)",
+  },
+}));
+
+const StyledTable = styled(Table)(({ theme }) => ({
+  "& .MuiTableCell-head": {
+    fontWeight: 600,
+    backgroundColor: alpha(theme.palette.primary.main, 0.05),
+  },
+  "& .MuiTableCell-root": {
+    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  },
+  "& .MuiTableRow-root": {
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.primary.main, 0.05),
+      transform: "translateY(-2px)",
+    },
+  },
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  borderRadius: 12,
+  padding: "10px 24px",
+  transition: "all 0.2s ease-in-out",
+  textTransform: "none",
+  "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
+  },
+}));
+
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+  "& .MuiDialog-paper": {
+    borderRadius: 16,
+    background: `linear-gradient(135deg, ${alpha(
+      theme.palette.background.paper,
+      0.95
+    )}, ${alpha(theme.palette.background.default, 0.95)})`,
+    backdropFilter: "blur(10px)",
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 12,
+    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.background.paper, 0.95),
+    },
+    "&.Mui-focused": {
+      backgroundColor: theme.palette.background.paper,
+      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.1)}`,
+    },
+  },
+}));
+
+const StatusChip = styled(Box)<{ status: EquipmentLog["status"] }>(
+  ({ theme, status }) => ({
+    display: "inline-block",
+    padding: "6px 12px",
+    borderRadius: 12,
+    fontSize: "0.875rem",
+    fontWeight: 500,
+    backgroundColor: alpha(
+      status === "Available"
+        ? theme.palette.success.main
+        : status === "Needs Repair"
+        ? theme.palette.error.main
+        : theme.palette.warning.main,
+      0.1
+    ),
+    color:
+      status === "Available"
+        ? theme.palette.success.main
+        : status === "Needs Repair"
+        ? theme.palette.error.main
+        : theme.palette.warning.main,
+    border: `1px solid ${alpha(
+      status === "Available"
+        ? theme.palette.success.main
+        : status === "Needs Repair"
+        ? theme.palette.error.main
+        : theme.palette.warning.main,
+      0.2
+    )}`,
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      transform: "translateY(-1px)",
+      backgroundColor: alpha(
+        status === "Available"
+          ? theme.palette.success.main
+          : status === "Needs Repair"
+          ? theme.palette.error.main
+          : theme.palette.warning.main,
+        0.2
+      ),
+    },
+  })
+);
+
+interface EquipmentLog {
   id: string;
-  date: Date;
-  condition: number; // 0-100 percentage
-  notes: string;
-  type: "pre-rental" | "post-rental" | "inspection";
+  equipmentId: string;
+  checkInDate: Date | null;
+  checkOutDate: Date | null;
+  conditionBefore: string;
+  conditionAfter: string;
+  issues: string;
+  status: "Available" | "In Maintenance" | "Needs Repair";
 }
 
-interface Equipment {
+interface MaintenanceSchedule {
   id: string;
-  name: string;
-  type: string;
-  lastInspection: Date;
-  nextInspection: Date;
-  condition: number;
-  status: "excellent" | "good" | "fair" | "poor";
-  history: ConditionLog[];
+  equipmentId: string;
+  scheduledDate: Date;
+  completed: boolean;
 }
 
-const mockEquipment: Equipment[] = [
+const mockEquipmentLogs: EquipmentLog[] = [
   {
-    id: "EQ-001",
-    name: "Electric Hot Pot Pro",
-    type: "Electric",
-    lastInspection: new Date("2024-03-01"),
-    nextInspection: new Date("2024-04-01"),
-    condition: 85,
-    status: "good",
-    history: [
-      {
-        id: "CL-001",
-        date: new Date("2024-03-15"),
-        condition: 90,
-        notes: "Pre-rental check - all functions normal",
-        type: "pre-rental",
-      },
-      {
-        id: "CL-002",
-        date: new Date("2024-03-16"),
-        condition: 85,
-        notes: "Post-rental - minor exterior scratches",
-        type: "post-rental",
-      },
-    ],
+    id: "1",
+    equipmentId: "HP-001",
+    checkInDate: new Date("2024-03-01"),
+    checkOutDate: new Date("2024-03-05"),
+    conditionBefore: "Good condition, no visible damage",
+    conditionAfter: "Minor scratches on exterior",
+    issues: "None",
+    status: "Available",
   },
+  // Add more mock data as needed
+];
+
+const mockMaintenanceSchedules: MaintenanceSchedule[] = [
   {
-    id: "EQ-002",
-    name: "Butane Portable Cooker",
-    type: "Gas",
-    lastInspection: new Date("2024-02-15"),
-    nextInspection: new Date("2024-03-25"),
-    condition: 65,
-    status: "fair",
-    history: [
-      {
-        id: "CL-003",
-        date: new Date("2024-03-10"),
-        condition: 70,
-        notes: "Reported ignition issues",
-        type: "inspection",
-      },
-    ],
-  },
-  {
-    id: "EQ-003",
-    name: "Premium Induction Cooktop",
-    type: "Induction",
-    lastInspection: new Date("2024-03-10"),
-    nextInspection: new Date("2024-04-10"),
-    condition: 45,
-    status: "poor",
-    history: [
-      {
-        id: "CL-004",
-        date: new Date("2024-03-12"),
-        condition: 50,
-        notes: "Temperature control malfunction",
-        type: "pre-rental",
-      },
-    ],
+    id: "M1",
+    equipmentId: "HP-001",
+    scheduledDate: new Date("2024-04-01"),
+    completed: false,
   },
 ];
 
-const StatusChip = ({ status }: { status: Equipment["status"] }) => {
-  const statusColors = {
-    excellent: "#4CAF50",
-    good: "#8BC34A",
-    fair: "#FFC107",
-    poor: "#F44336",
-  };
-
-  return (
-    <Chip
-      label={status}
-      sx={{ backgroundColor: statusColors[status], color: "white" }}
-    />
+const EquipmentConditionLog: React.FC = () => {
+  const theme = useTheme();
+  const [logs, setLogs] = useState<EquipmentLog[]>(mockEquipmentLogs);
+  const [maintenanceSchedules] = useState<MaintenanceSchedule[]>(
+    mockMaintenanceSchedules
   );
-};
-
-const ConditionBar = ({ value }: { value: number }) => (
-  <Box sx={{ display: "flex", alignItems: "center" }}>
-    <LinearProgress
-      variant="determinate"
-      value={value}
-      sx={{ width: "100%", mr: 1 }}
-    />
-    <Typography variant="body2" color="text.secondary">{`${Math.round(
-      value
-    )}%`}</Typography>
-  </Box>
-);
-
-const EquipmentConditionLog = () => {
-  const [equipmentList, setEquipmentList] =
-    useState<Equipment[]>(mockEquipment);
-  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(
-    null
-  );
-  const [logDialogOpen, setLogDialogOpen] = useState(false);
-  const [inspectionDialogOpen, setInspectionDialogOpen] = useState(false);
-  const [newCondition, setNewCondition] = useState({
-    date: new Date(),
-    condition: 100,
-    notes: "",
-    type: "pre-rental" as ConditionLog["type"],
+  const [openDialog, setOpenDialog] = useState(false);
+  const [newLog, setNewLog] = useState<
+    Omit<EquipmentLog, "id" | "equipmentId" | "status">
+  >({
+    checkInDate: null,
+    checkOutDate: null,
+    conditionBefore: "",
+    conditionAfter: "",
+    issues: "",
   });
 
-  const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 120 },
-    { field: "name", headerName: "Equipment Name", width: 200 },
-    { field: "type", headerName: "Type", width: 120 },
-    {
-      field: "lastInspection",
-      headerName: "Last Inspection",
-      width: 150,
-      valueFormatter: () => new Date().toLocaleDateString(),
-    },
-    {
-      field: "nextInspection",
-      headerName: "Next Inspection",
-      width: 150,
-      valueFormatter: () => new Date().toLocaleDateString(),
-    },
-    {
-      field: "condition",
-      headerName: "Condition",
-      width: 200,
-      renderCell: (params) => <ConditionBar value={params.value} />,
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      width: 120,
-      renderCell: (params) => <StatusChip status={params.value} />,
-    },
-  ];
+  const handleAddLog = () => {
+    if (!newLog.checkInDate || !newLog.checkOutDate) {
+      alert("Please select both check-in and check-out dates");
+      return;
+    }
 
-  const handleLogCondition = (equipmentId: string) => {
-    const equipment = equipmentList.find((eq) => eq.id === equipmentId);
-    setSelectedEquipment(equipment || null);
-    setLogDialogOpen(true);
-  };
+    setLogs((prev) => [
+      ...prev,
+      {
+        id: (prev.length + 1).toString(),
+        equipmentId: `HP-${(prev.length + 1).toString().padStart(3, "0")}`,
+        checkInDate: newLog.checkInDate!,
+        checkOutDate: newLog.checkOutDate!,
+        conditionBefore: newLog.conditionBefore || "",
+        conditionAfter: newLog.conditionAfter || "",
+        issues: newLog.issues || "",
+        status: "Available",
+      } as EquipmentLog,
+    ]);
 
-  const handleScheduleInspection = (equipmentId: string) => {
-    const equipment = equipmentList.find((eq) => eq.id === equipmentId);
-    setSelectedEquipment(equipment || null);
-    setInspectionDialogOpen(true);
-  };
-
-  const handleSubmitCondition = () => {
-    if (!selectedEquipment) return;
-
-    const updatedEquipment = {
-      ...selectedEquipment,
-      condition: newCondition.condition,
-      history: [
-        ...selectedEquipment.history,
-        {
-          id: `CL-${Math.random().toString(36).substr(2, 9)}`,
-          ...newCondition,
-        },
-      ],
-    };
-
-    setEquipmentList((prev) =>
-      prev.map((eq) => (eq.id === selectedEquipment.id ? updatedEquipment : eq))
-    );
-
-    setLogDialogOpen(false);
-    setNewCondition({
-      date: new Date(),
-      condition: 100,
-      notes: "",
-      type: "pre-rental",
+    setOpenDialog(false);
+    setNewLog({
+      checkInDate: null,
+      checkOutDate: null,
+      conditionBefore: "",
+      conditionAfter: "",
+      issues: "",
     });
   };
 
-  const handleScheduleNextInspection = (date: Date | null) => {
-    if (!selectedEquipment || !date) return;
-
-    const updatedEquipment = {
-      ...selectedEquipment,
-      nextInspection: date,
-    };
-
-    setEquipmentList((prev) =>
-      prev.map((eq) => (eq.id === selectedEquipment.id ? updatedEquipment : eq))
-    );
-
-    setInspectionDialogOpen(false);
-  };
-
-  const hasRecurringIssues = (equipment: Equipment) => {
-    return equipment.history.filter((log) => log.condition < 50).length >= 2;
-  };
-
-  const renderDetailPanel = ({ row }: { row: Equipment }) => (
-    <Box sx={{ p: 3, borderTop: "1px solid rgba(224, 224, 224, 1)" }}>
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 8 }}>
-          <Typography variant="h6" gutterBottom>
-            Maintenance History
-          </Typography>
-          <Paper sx={{ p: 2 }}>
-            <Box sx={{ maxHeight: 350, overflow: "auto" }}>
-              {row.history.map((log) => (
-                <Box
-                  key={log.id}
-                  sx={{ mb: 2, p: 1, borderBottom: "1px solid #eee" }}
-                >
-                  <Typography variant="subtitle2">
-                    {new Date(log.date).toLocaleDateString()} - {log.type}
-                  </Typography>
-                  <ConditionBar value={log.condition} />
-                  <Typography variant="body2" color="text.secondary">
-                    {log.notes}
-                  </Typography>
-                </Box>
-              ))}
-              {row.history.length === 0 && (
-                <Typography color="text.secondary">
-                  No maintenance history recorded
-                </Typography>
-              )}
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid size={{ xs: 4 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => handleLogCondition(row.id)}
-            >
-              Log New Condition
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => handleScheduleInspection(row.id)}
-            >
-              Schedule Inspection
-            </Button>
-            {hasRecurringIssues(row) && (
-              <Paper sx={{ p: 2, bgcolor: "#fff3e0" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <WarningAmberRounded color="warning" />
-                  <Typography color="text.secondary">
-                    Recurring issues detected - notify management
-                  </Typography>
-                </Box>
-              </Paper>
-            )}
-          </Box>
-        </Grid>
-      </Grid>
-    </Box>
-  );
-
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Equipment Condition Monitoring
+      <StyledBox>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{
+            fontWeight: 700,
+            mb: 4,
+            background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          Equipment Condition Management
         </Typography>
 
-        <Box sx={{ height: 600, width: "100%" }}>
-          <DataGrid
-            rows={equipmentList}
-            columns={columns}
-            slots={{ toolbar: GridToolbar }}
-            getRowHeight={() => "auto"}
-            disableRowSelectionOnClick
-            initialState={{
-              sorting: {
-                sortModel: [{ field: "nextInspection", sort: "asc" }],
-              },
-            }}
-            sx={{
-              "& .MuiDataGrid-cell": {
-                py: 2,
-                display: "flex",
-                alignItems: "center",
-              },
-              "& .MuiDataGrid-row": {
-                maxHeight: "none !important",
-                "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.04)" },
-              },
-            }}
-            getDetailPanelContent={renderDetailPanel}
-          />
+        <Box sx={{ mb: 4 }}>
+          <StyledButton
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setOpenDialog(true)}
+          >
+            Add New Log Entry
+          </StyledButton>
         </Box>
 
-        {/* Log Condition Dialog */}
-        <Dialog open={logDialogOpen} onClose={() => setLogDialogOpen(false)}>
-          <DialogTitle>Log Equipment Condition</DialogTitle>
-          <DialogContent>
-            <Box
-              sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
-            >
-              <DatePicker
-                label="Check Date"
-                value={newCondition.date}
-                onChange={(newValue) =>
-                  setNewCondition({
-                    ...newCondition,
-                    date: newValue || new Date(),
-                  })
-                }
-              />
-              <FormControl fullWidth>
-                <InputLabel>Check Type</InputLabel>
-                <Select
-                  value={newCondition.type}
-                  label="Check Type"
-                  onChange={(e: SelectChangeEvent) =>
-                    setNewCondition({
-                      ...newCondition,
-                      type: e.target.value as ConditionLog["type"],
-                    })
-                  }
-                >
-                  <MenuItem value="pre-rental">Pre-Rental Check</MenuItem>
-                  <MenuItem value="post-rental">Post-Rental Check</MenuItem>
-                  <MenuItem value="inspection">Scheduled Inspection</MenuItem>
-                </Select>
-              </FormControl>
-              <Typography gutterBottom>Condition Assessment</Typography>
-              <LinearProgress
-                variant="determinate"
-                value={newCondition.condition}
-                sx={{ height: 10, borderRadius: 5 }}
-              />
-              <TextField
-                type="number"
-                label="Condition Percentage"
-                value={newCondition.condition}
-                onChange={(e) =>
-                  setNewCondition({
-                    ...newCondition,
-                    condition: Math.min(
-                      100,
-                      Math.max(0, parseInt(e.target.value))
-                    ),
-                  })
-                }
-              />
-              <TextField
-                multiline
-                rows={3}
-                label="Notes"
-                value={newCondition.notes}
-                onChange={(e) =>
-                  setNewCondition({ ...newCondition, notes: e.target.value })
-                }
-              />
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setLogDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSubmitCondition} variant="contained">
-              Save Condition
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Schedule Inspection Dialog */}
-        <Dialog
-          open={inspectionDialogOpen}
-          onClose={() => setInspectionDialogOpen(false)}
+        <Alert
+          severity="warning"
+          sx={{
+            mb: 3,
+            borderRadius: 3,
+            "& .MuiAlert-icon": {
+              alignItems: "center",
+            },
+          }}
         >
-          <DialogTitle>Schedule Next Inspection</DialogTitle>
+          Recurring issue detected with HP-001: Consistent exterior scratches
+          reported
+        </Alert>
+
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+          Equipment Logs
+        </Typography>
+
+        <StyledPaper sx={{ mb: 4 }}>
+          <TableContainer>
+            <StyledTable>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Equipment ID</TableCell>
+                  <TableCell>Check-out Date</TableCell>
+                  <TableCell>Check-in Date</TableCell>
+                  <TableCell>Condition Before</TableCell>
+                  <TableCell>Condition After</TableCell>
+                  <TableCell>Issues</TableCell>
+                  <TableCell>Status</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {logs.map((log) => (
+                  <TableRow key={log.id}>
+                    <TableCell>{log.equipmentId}</TableCell>
+                    <TableCell>
+                      {log.checkOutDate?.toLocaleDateString() ?? "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      {log.checkInDate?.toLocaleDateString() ?? "N/A"}
+                    </TableCell>
+                    <TableCell>{log.conditionBefore}</TableCell>
+                    <TableCell>{log.conditionAfter}</TableCell>
+                    <TableCell>{log.issues || "None"}</TableCell>
+                    <TableCell>
+                      <StatusChip status={log.status}>{log.status}</StatusChip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </StyledTable>
+          </TableContainer>
+        </StyledPaper>
+
+        {/* Maintenance Schedule */}
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+          Maintenance Schedule
+        </Typography>
+
+        <StyledPaper>
+          <TableContainer>
+            <StyledTable>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Equipment ID</TableCell>
+                  <TableCell>Scheduled Date</TableCell>
+                  <TableCell>Status</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {maintenanceSchedules.map((schedule) => (
+                  <TableRow key={schedule.id}>
+                    <TableCell>{schedule.equipmentId}</TableCell>
+                    <TableCell>
+                      {schedule.scheduledDate.toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <StatusChip
+                        status={
+                          schedule.completed ? "Available" : "In Maintenance"
+                        }
+                      >
+                        {schedule.completed ? "Completed" : "Pending"}
+                      </StatusChip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </StyledTable>
+          </TableContainer>
+        </StyledPaper>
+
+        {/* Add Log Dialog */}
+        <StyledDialog
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle sx={{ fontWeight: 600 }}>
+            New Equipment Log Entry
+          </DialogTitle>
           <DialogContent>
-            <Box sx={{ mt: 2 }}>
-              <DatePicker
-                label="Next Inspection Date"
-                value={selectedEquipment?.nextInspection || null}
-                onChange={(newValue) => handleScheduleNextInspection(newValue)}
-              />
-            </Box>
+            <Grid container spacing={3} sx={{ mt: 1 }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <DatePicker
+                  label="Check-out Date"
+                  value={newLog.checkOutDate}
+                  onChange={(date) =>
+                    setNewLog((prev) => ({
+                      ...prev,
+                      checkOutDate: date ? new Date(date) : null,
+                    }))
+                  }
+                  slotProps={{
+                    textField: {
+                      required: true,
+                      error: !newLog.checkOutDate,
+                      fullWidth: true,
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <DatePicker
+                  label="Check-in Date"
+                  value={newLog.checkInDate}
+                  onChange={(date) =>
+                    setNewLog((prev) => ({
+                      ...prev,
+                      checkInDate: date ? new Date(date) : null,
+                    }))
+                  }
+                  slotProps={{
+                    textField: {
+                      required: true,
+                      error: !newLog.checkInDate,
+                      fullWidth: true,
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <StyledTextField
+                  fullWidth
+                  label="Condition Before Rental"
+                  multiline
+                  rows={3}
+                  value={newLog.conditionBefore}
+                  onChange={(e) =>
+                    setNewLog((prev) => ({
+                      ...prev,
+                      conditionBefore: e.target.value,
+                    }))
+                  }
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <StyledTextField
+                  fullWidth
+                  label="Condition After Rental"
+                  multiline
+                  rows={3}
+                  value={newLog.conditionAfter}
+                  onChange={(e) =>
+                    setNewLog((prev) => ({
+                      ...prev,
+                      conditionAfter: e.target.value,
+                    }))
+                  }
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <StyledTextField
+                  fullWidth
+                  label="Issues Found"
+                  multiline
+                  rows={2}
+                  value={newLog.issues}
+                  onChange={(e) =>
+                    setNewLog((prev) => ({ ...prev, issues: e.target.value }))
+                  }
+                />
+              </Grid>
+            </Grid>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setInspectionDialogOpen(false)}>
+          <DialogActions sx={{ p: 3 }}>
+            <StyledButton onClick={() => setOpenDialog(false)}>
               Cancel
-            </Button>
-            <Button
-              onClick={() => setInspectionDialogOpen(false)}
+            </StyledButton>
+            <StyledButton
               variant="contained"
+              onClick={handleAddLog}
+              disabled={!newLog.checkInDate || !newLog.checkOutDate}
             >
-              Schedule
-            </Button>
+              Add Entry
+            </StyledButton>
           </DialogActions>
-        </Dialog>
-      </Container>
+        </StyledDialog>
+      </StyledBox>
     </LocalizationProvider>
   );
 };

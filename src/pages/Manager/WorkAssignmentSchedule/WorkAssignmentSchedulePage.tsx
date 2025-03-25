@@ -1,13 +1,13 @@
+import React from "react";
 import { Box } from "@mui/material";
 import WorkAssignmentSchedule from "../../../containers/WorkAssignmentSchedule/WorkAssignmentSchedule";
-import OverrideMuiTheme from "../../../theme/override";
 
-export const WorkAssignmentSchedulePage = () => {
+const WorkAssignmentSchedulePage: React.FC = () => {
   return (
-    <OverrideMuiTheme>
       <Box>
         <WorkAssignmentSchedule />
       </Box>
-    </OverrideMuiTheme>
   );
 };
+
+export default WorkAssignmentSchedulePage;

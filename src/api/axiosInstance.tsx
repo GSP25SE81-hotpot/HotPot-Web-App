@@ -1,69 +1,111 @@
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
-import { LoginInfo } from "../types/loginInterface";
+import { toast } from "react-toastify";
 
-const BASE_URL ="";
-
-const axiosPublic = axios.create({
-  baseURL: BASE_URL,
+const axiosClient = axios.create({
+  baseURL: `https://hpty.vinhuser.one/api`,
+  headers: {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Methods": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Allow-Origin": "*",
+  },
 });
 
-const getLoginInfo = (): LoginInfo | null => {
-  const loginInfoString = localStorage.getItem("loginInfo");
-  return loginInfoString ? JSON.parse(loginInfoString).data : null;
-};
+axiosClient.interceptors.request.use(
+  async (config) => {
+    const userDataLocal = localStorage.getItem("userInfor");
+    const userData = userDataLocal ? JSON.parse(userDataLocal) : null;
+    console.log("ber: ", userData);
+    if (userData) {
+      config.headers.Authorization = `Bearer ${userData?.accessToken}`;
+    }
 
-const createAxiosPrivate = () => {
-  // sure accessToken always new
-  let accessToken = "";
-  const loginInfo = getLoginInfo();
-  accessToken = loginInfo?.tokenModel?.accessToken || "";
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-  return axios.create({
-    baseURL: BASE_URL,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-};
+axiosClient.interceptors.response.use(
+  (response) => response.data,
+  async (error) => {
+    const prevRequest = error?.config;
 
-const axiosPrivate = createAxiosPrivate();
+    if (error?.response?.status === 401 && !prevRequest?.sent) {
+      const userDataLocal = localStorage.getItem("userInfor");
+      const userData = userDataLocal ? JSON.parse(userDataLocal) : null;
 
-axiosPrivate.interceptors.request.use(async (req) => {
-  const loginInfo = getLoginInfo();
-  const accessToken = loginInfo?.tokenModel?.accessToken || "";
-  const refreshToken = loginInfo?.tokenModel?.refreshToken || "";
+      if (userData) {
+        prevRequest.sent = true;
 
-  req.headers.Authorization = `Bearer ${accessToken}`;
-
-  if (accessToken) {
-    const user = jwtDecode(accessToken);
-    const date = new Date();
-    // Check if the token is expired
-    if (user.exp) {
-      const isExpired = user?.exp < date.getTime() / 1000;
-      if (!isExpired) {
-        return req;
-      } else {
         try {
-          const params = {
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            expires: user?.exp,
-          };
-          const response = await axiosPublic.post(`/auths/refresh`, params);
-          localStorage.setItem("loginInfo", JSON.stringify(response.data));
-          req.headers.Authorization = `Bearer ${response.data.accessToken}`;
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
-          // If refresh fails, clear loginInfo
-          localStorage.removeItem("loginInfo");
-          // You might want to redirect to login page here
+          const res = await axios.post(
+            "/auth/renewtoken",
+            {
+              refreshToken: userData.tokenModel.refreshToken,
+              accessToken: userData.tokenModel.accessToken,
+            },
+            { baseURL: "https://hpty.vinhuser.one/api" }
+          );
+
+          const newToken = res?.data?.accessToken;
+
+          if (newToken) {
+            const newUserInfor = {
+              ...userData,
+              tokenModel: {
+                refreshToken: userData.tokenModel.refreshToken,
+                // refreshToken: res.data.refreshToken
+                accessToken: newToken,
+              },
+            };
+            localStorage.setItem("userInfor", JSON.stringify(newUserInfor));
+
+            prevRequest.headers.Authorization = `Bearer ${newToken}`;
+            return axios(prevRequest).then((data) => data.data);
+          }
+        } catch (err) {
+          console.log("Error");
+          // handleTokenExpiration();
+          return null;
         }
       }
+    } else if (error?.response?.status === 403) {
+      redirectTo403Page();
+    } else if (error?.response?.status === 500) {
+      handleServerError(error);
+    } else {
+      handleGenericError();
     }
-  }
-  return req;
-});
 
-export { axiosPrivate, axiosPublic };
+    return Promise.reject(error);
+  }
+);
+
+// function handleTokenExpiration() {
+//   toast.error(
+//     "Tài khoản của bạn đã hết hạn đăng nhập.\n Hệ thống sẽ tự động thoát sau 3 giây.",
+//     {
+//       onClose() {
+//         localStorage.removeItem("userInfor");
+//         window.location.href = "/";
+//       },
+//       autoClose: 3000,
+//       pauseOnHover: false,
+//     }
+//   );
+// }
+
+function redirectTo403Page() {
+  window.location.href = "/403";
+}
+
+function handleServerError(error: any) {
+  console.log(error);
+}
+
+function handleGenericError() {
+  return;
+}
+
+export default axiosClient;

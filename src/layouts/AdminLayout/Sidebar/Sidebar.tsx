@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   List,
@@ -8,17 +8,11 @@ import {
   Collapse,
 } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
-import {
-  Dashboard as DashboardIcon,
-  People as PeopleIcon,
-  Inventory as InventoryIcon,
-  Settings as SettingsIcon,
-} from "@mui/icons-material";
-import { MenuItem } from "../../../types/menu";
 import classNames from "classnames/bind";
 import styles from "./Sidebar.module.scss";
-import Iconify from "../../../components/Iconify";
 import config from "../../../configs";
+import { MenuItem } from "../../../types/menu";
+import { menuItems } from "./MenuItems";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -28,48 +22,40 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed }) => {
   const location = useLocation();
   const [open, setOpen] = useState<string | null>(null);
   const cx = classNames.bind(styles);
+  const [filteredMenuItems, setFilteredMenuItems] = useState<MenuItem[]>([]);
 
-  const menuItems: MenuItem[] = [
-    {
-      icon: <DashboardIcon />,
-      label: config.Vntext.SideBar.Dashboard,
-      path: config.adminRoutes.dashboard,
-    },
-    {
-      icon: <PeopleIcon />,
-      label: config.Vntext.SideBar.Users,
-      path: "",
-      children: [
-        { label: "Danh sách", path: config.adminRoutes.manageUsers },
-        { label: "Vị trí", path: "/users/roles" },
-      ],
-    },
-    {
-      icon: <InventoryIcon />,
-      label: config.Vntext.SideBar.Hotpot.hotpotSidebar,
-      path: "",
-      children: [
-        {
-          label: config.Vntext.SideBar.Hotpot.hotpotCombo,
-          path: config.adminRoutes.tableHotPotCombo,
-        },
-        {
-          label: config.Vntext.SideBar.Hotpot.hotpotIngredients,
-          path: config.adminRoutes.tableIngredients,
-        },
-      ],
-    },
-    {
-      icon: <SettingsIcon />,
-      label: config.Vntext.SideBar.Settings,
-      path: "/settings",
-    },
-    {
-      icon: <Iconify icon={"ri:feedback-line"} />,
-      label: config.Vntext.SideBar.Feedback,
-      path: config.adminRoutes.feedback,
-    },
-  ];
+  useEffect(() => {
+    const rawUserRoles = localStorage.getItem("loginInfo");
+    let userRoles: string[] = [];
+
+    try {
+      const parsedInfo = JSON.parse(rawUserRoles || "{}");
+      if (parsedInfo && parsedInfo.data && parsedInfo.data.role) {
+        userRoles = [parsedInfo.data.role];
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e) {
+      console.error("Lỗi lấy dữ liệu");
+    }
+
+    const hasAccess = (roles: string[]) => {
+      if (!roles) return true;
+      return roles.some((role) => userRoles.includes(role));
+    };
+
+    const filterMenuItems = (items: MenuItem[]): MenuItem[] => {
+      return items
+        .filter((item: any) => hasAccess(item?.role))
+        .map((item) => ({
+          ...item,
+          children: item.children ? filterMenuItems(item.children) : undefined,
+        }));
+    };
+
+    const safeMenuItems: MenuItem[] = Array.isArray(menuItems) ? menuItems : [];
+
+    setFilteredMenuItems(filterMenuItems(safeMenuItems));
+  }, []);
 
   const handleClick = (label: string) => {
     setOpen(open === label ? null : label);
@@ -92,7 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed }) => {
       </Link>
 
       <List component="nav" className={cx("nav-menu")}>
-        {menuItems.map((item, index) => (
+        {filteredMenuItems.map((item, index) => (
           <React.Fragment key={index}>
             <ListItem
               component={Link}

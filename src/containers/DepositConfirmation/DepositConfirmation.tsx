@@ -6,9 +6,14 @@ import {
 } from "@mui/icons-material";
 import {
   Box,
+  Button,
   Card,
   CardContent,
   CardHeader,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   MenuItem,
   Table,
@@ -19,13 +24,68 @@ import {
   TableRow,
   TextField,
   Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
+  useTheme,
 } from "@mui/material";
+import { alpha, styled } from "@mui/material/styles";
 import { useState } from "react";
+
+// Styled Components
+const StyledCard = styled(Card)(({ theme }) => ({
+  background: `linear-gradient(135deg, ${alpha(
+    theme.palette.background.paper,
+    0.9
+  )}, ${alpha(theme.palette.background.default, 0.95)})`,
+  backdropFilter: "blur(10px)",
+  borderRadius: 16,
+  boxShadow: `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.08)}`,
+}));
+
+const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+  "& .MuiTableCell-root": {
+    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  },
+  "& .MuiTableRow-root": {
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.primary.main, 0.05),
+      transform: "translateY(-2px)",
+    },
+  },
+}));
+
+const AnimatedIconButton = styled(IconButton)(({ theme }) => ({
+  transition: "all 0.2s ease-in-out",
+  "&:hover": {
+    transform: "scale(1.1)",
+    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 12,
+    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.background.paper, 0.95),
+    },
+    "&.Mui-focused": {
+      backgroundColor: theme.palette.background.paper,
+      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.1)}`,
+    },
+  },
+}));
+
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+  "& .MuiDialog-paper": {
+    borderRadius: 16,
+    background: `linear-gradient(135deg, ${alpha(
+      theme.palette.background.paper,
+      0.95
+    )}, ${alpha(theme.palette.background.default, 0.95)})`,
+    backdropFilter: "blur(10px)",
+  },
+}));
 
 type DepositDetails = {
   id: string;
@@ -37,7 +97,8 @@ type DepositDetails = {
   phone: string;
 };
 
-const DepositConfirmation = () => {
+const DepositConfirmation: React.FC = () => {
+  const theme = useTheme();
   const [deposits, setDeposits] = useState<DepositDetails[]>([
     {
       id: "DEP-2024-001",
@@ -106,11 +167,19 @@ const DepositConfirmation = () => {
   });
 
   return (
-    <Box sx={{ maxWidth: "1200px", mx: "auto", p: 2 }}>
-      <Card>
+    <Box sx={{ maxWidth: "1400px", mx: "auto", p: 2 }}>
+      <StyledCard>
         <CardHeader
           title={
-            <Typography variant="h5" fontWeight="bold">
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 700,
+                background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
               Xác nhận tiền đặt cọc
             </Typography>
           }
@@ -118,17 +187,17 @@ const DepositConfirmation = () => {
         <CardContent>
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
             <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
+              <StyledTextField
                 variant="outlined"
                 size="small"
                 placeholder="Tên khách hàng..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: <Search sx={{ mr: 1 }} />,
+                slotProps={{
+                  input: <Search sx={{ mr: 1 }} />,
                 }}
               />
-              <TextField
+              <StyledTextField
                 select
                 variant="outlined"
                 size="small"
@@ -140,14 +209,22 @@ const DepositConfirmation = () => {
                 <MenuItem value="pending">Chờ xác minh</MenuItem>
                 <MenuItem value="verified">Đã xác minh</MenuItem>
                 <MenuItem value="rejected">Từ chối</MenuItem>
-              </TextField>
+              </StyledTextField>
             </Box>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
               Cần xác minh:{" "}
               {deposits.filter((d) => d.status === "pending").length}
             </Typography>
           </Box>
-          <TableContainer>
+          <StyledTableContainer>
             <Table>
               <TableHead>
                 <TableRow>
@@ -189,7 +266,7 @@ const DepositConfirmation = () => {
                     <TableCell>{deposit.date}</TableCell>
                     <TableCell>
                       <Box sx={{ display: "flex", gap: 1 }}>
-                        <IconButton
+                        <AnimatedIconButton
                           size="small"
                           onClick={() => {
                             setSelectedDeposit(deposit);
@@ -197,23 +274,23 @@ const DepositConfirmation = () => {
                           }}
                         >
                           <Visibility />
-                        </IconButton>
+                        </AnimatedIconButton>
                         {deposit.status === "pending" && (
                           <>
-                            <IconButton
+                            <AnimatedIconButton
                               size="small"
                               color="success"
                               onClick={() => handleVerify(deposit.id)}
                             >
                               <CheckCircleOutline />
-                            </IconButton>
-                            <IconButton
+                            </AnimatedIconButton>
+                            <AnimatedIconButton
                               size="small"
                               color="error"
                               onClick={() => handleReject(deposit.id)}
                             >
                               <Close />
-                            </IconButton>
+                            </AnimatedIconButton>
                           </>
                         )}
                       </Box>
@@ -222,10 +299,10 @@ const DepositConfirmation = () => {
                 ))}
               </TableBody>
             </Table>
-          </TableContainer>
+          </StyledTableContainer>
         </CardContent>
-      </Card>
-      <Dialog open={detailsOpen} onClose={() => setDetailsOpen(false)}>
+      </StyledCard>
+      <StyledDialog open={detailsOpen} onClose={() => setDetailsOpen(false)}>
         <DialogTitle>Chi tiết đặt cọc</DialogTitle>
         <DialogContent>
           {selectedDeposit && (
@@ -262,7 +339,7 @@ const DepositConfirmation = () => {
         <DialogActions>
           <Button onClick={() => setDetailsOpen(false)}>Đóng</Button>
         </DialogActions>
-      </Dialog>
+      </StyledDialog>
     </Box>
   );
 };
