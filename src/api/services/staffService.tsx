@@ -1,7 +1,5 @@
-// src/api/services/staffService.ts
-// import { axiosClient } from "../axiosInstance";
 import { ApiResponse } from "../../types/replacement";
-import { StaffDto } from "../../types/staff";
+import { StaffAvailabilityDto, StaffDto } from "../../types/staff";
 import axiosClient from "../axiosInstance";
 
 const staffService = {
@@ -15,6 +13,13 @@ const staffService = {
   getStaffById: async (id: number): Promise<StaffDto> => {
     const response = await axiosClient.get<ApiResponse<StaffDto>>(
       `/staff/${id}`
+    );
+    return response.data.data;
+  },
+
+  getAvailableStaff: async (): Promise<StaffAvailabilityDto> => {
+    const response = await axiosClient.get<ApiResponse<StaffAvailabilityDto>>(
+      `/staff/available`
     );
     return response.data.data;
   },

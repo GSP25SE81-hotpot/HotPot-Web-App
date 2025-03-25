@@ -19,6 +19,14 @@ export interface StaffDto {
   shippingOrders: any[] | null;
 }
 
+export interface StaffAvailabilityDto {
+  staffId: number;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  available: boolean;
+}
+
 export interface StaffAvailabilityStatus {
   available: boolean;
   reason: string;
