@@ -1,12 +1,16 @@
 // src/pages/OrderManagement/OrderManagementDashboard.tsx
 import React, { useState, useEffect } from "react";
 import { CircularProgress, Alert } from "@mui/material";
-import { OrderStatus } from "../../api/Services/orderManagementService";
 import OrderStatusCard from "./ManageOrderComponents/OrderStatusCard";
 import UnallocatedOrdersList from "./ManageOrderComponents/UnallocatedOrdersList";
 import PendingDeliveriesList from "./ManageOrderComponents/PendingDeliveriesList";
 import OrdersByStatusList from "./ManageOrderComponents/OrdersByStatusList";
-import { orderManagementService } from "../../api/Services/orderManagementService";
+import {
+  Order,
+  OrderStatus,
+  PagedResult,
+  orderManagementService,
+} from "../../api/Services/orderManagementService";
 import {
   DashboardWrapper,
   DashboardTitle,
@@ -72,11 +76,19 @@ const ManageOrder: React.FC = () => {
         for (const status of Object.values(OrderStatus)) {
           if (typeof status === "number") {
             try {
-              const orders = await orderManagementService.getOrdersByStatus(
-                status
-              );
-              // Check if orders is defined and has a length property
-              counts[status as OrderStatus] = orders?.length || 0;
+              // Explicitly type the response
+              const response: PagedResult<Order> =
+                await orderManagementService.getOrdersByStatus(
+                  status as OrderStatus
+                );
+
+              // Now TypeScript knows that response has an 'items' property
+              if (response && "items" in response) {
+                counts[status as OrderStatus] =
+                  response.totalCount || response.items.length;
+              } else {
+                counts[status as OrderStatus] = 0;
+              }
             } catch (statusError) {
               console.error(
                 `Error fetching orders for status ${status}:`,
@@ -100,7 +112,7 @@ const ManageOrder: React.FC = () => {
     fetchOrderCounts();
   }, []);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
 

@@ -1,203 +1,181 @@
 // src/pages/OrderManagement/components/PendingDeliveriesList.tsx
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ClearIcon from "@mui/icons-material/Clear";
 import InfoIcon from "@mui/icons-material/Info";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Alert,
   Box,
+  Button,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
+  IconButton,
+  InputAdornment,
   Snackbar,
-  Switch,
   Table,
   TableBody,
   TableHead,
+  TablePagination,
   TableRow,
+  TableSortLabel,
   TextField,
   Tooltip,
   alpha,
-  Typography,
 } from "@mui/material";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useEffect, useState } from "react";
 import {
-  orderManagementService,
   ShippingOrder,
+  ShippingOrderQueryParams,
+  orderManagementService,
 } from "../../../api/Services/orderManagementService";
-import { formatDate } from "../../../utils/formatters";
 import {
-  ActionButton,
   ActionsContainer,
   CountBadge,
   CustomerName,
   CustomerPhone,
-  DeliveriesListContainer,
-  DeliveryTime,
+  DialogActionButton,
   EmptyStateContainer,
   EmptyStateSubtitle,
   EmptyStateTitle,
   IdCell,
   ListTitle,
   LoadingContainer,
-  StaffName,
-  StatusChip,
+  OrderTypeChip,
+  OrdersListContainer,
   StyledHeaderCell,
   StyledPaper,
+  StyledTableCell,
   StyledTableContainer,
   StyledTableRow,
-  ViewDetailsButton,
-} from "../../../components/manager/styles/PendingDeliveriesListStyles";
+} from "../../../components/manager/styles/PendingDeliveriesListStyles"; // You'll need to create this
+import { formatDate } from "../../../utils/formatters";
 
 const PendingDeliveriesList: React.FC = () => {
   const [deliveries, setDeliveries] = useState<ShippingOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [updating, setUpdating] = useState(false);
   const [selectedDelivery, setSelectedDelivery] =
     useState<ShippingOrder | null>(null);
-  const [openStatusDialog, setOpenStatusDialog] = useState(false);
-  const [openTimeDialog, setOpenTimeDialog] = useState(false);
-  const [isDelivered, setIsDelivered] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
   const [deliveryNotes, setDeliveryNotes] = useState("");
-  const [deliveryTime, setDeliveryTime] = useState<Date | null>(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success" as "success" | "error",
   });
 
+  // Pagination state
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+
+  // Sorting state
+  const [sortBy, setSortBy] = useState<string>("deliverytime");
+  const [sortDescending, setSortDescending] = useState(true);
+
+  // Search state
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
-    const fetchDeliveries = async () => {
-      try {
-        setLoading(true);
-        const data = await orderManagementService.getPendingDeliveries();
-        // Ensure data is an array
-        setDeliveries(Array.isArray(data) ? data : []);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching pending deliveries:", err);
-        setError("Failed to load pending deliveries. Please try again later.");
-        // Ensure deliveries is an empty array in case of error
-        setDeliveries([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDeliveries();
-  }, []);
+  }, [pageNumber, pageSize, sortBy, sortDescending]);
 
-  const handleUpdateStatusClick = (delivery: ShippingOrder) => {
-    setSelectedDelivery(delivery);
-    setIsDelivered(delivery.isDelivered);
-    setDeliveryNotes(delivery.deliveryNotes || "");
-    setOpenStatusDialog(true);
-  };
-
-  const handleUpdateTimeClick = (delivery: ShippingOrder) => {
-    setSelectedDelivery(delivery);
-    setDeliveryTime(
-      delivery.deliveryTime ? new Date(delivery.deliveryTime) : new Date()
-    );
-    setOpenTimeDialog(true);
-  };
-
-  const handleCloseStatusDialog = () => {
-    setOpenStatusDialog(false);
-    setSelectedDelivery(null);
-  };
-
-  const handleCloseTimeDialog = () => {
-    setOpenTimeDialog(false);
-    setSelectedDelivery(null);
-  };
-
-  const handleUpdateStatus = async () => {
-    if (!selectedDelivery) return;
+  const fetchDeliveries = async () => {
     try {
-      setUpdating(true);
-      const updatedDelivery = await orderManagementService.updateDeliveryStatus(
-        selectedDelivery.shippingOrderId,
-        {
-          isDelivered,
-          notes: deliveryNotes,
-        }
+      setLoading(true);
+
+      // Create query params
+      const queryParams: ShippingOrderQueryParams = {
+        pageNumber,
+        pageSize,
+        sortBy,
+        sortDescending,
+        searchTerm: searchTerm || undefined,
+        isDelivered: false, // Only get pending deliveries
+      };
+
+      const response = await orderManagementService.getPendingDeliveries(
+        queryParams
       );
-      // Update the delivery in the list
-      setDeliveries(
-        deliveries.map((delivery) =>
-          delivery.shippingOrderId === updatedDelivery.shippingOrderId
-            ? updatedDelivery
-            : delivery
-        )
-      );
-      setSnackbar({
-        open: true,
-        message: `Delivery status updated successfully`,
-        severity: "success",
-      });
-      handleCloseStatusDialog();
+
+      // Update state with paginated data
+      setDeliveries(response.items);
+      setTotalCount(response.totalCount);
+      setError(null);
     } catch (err) {
-      console.error("Error updating delivery status:", err);
-      setSnackbar({
-        open: true,
-        message: `Failed to update delivery status: ${
-          err instanceof Error ? err.message : "Unknown error"
-        }`,
-        severity: "error",
-      });
+      console.error("Error fetching pending deliveries:", err);
+      setError("Failed to load pending deliveries. Please try again later.");
+      setDeliveries([]);
     } finally {
-      setUpdating(false);
+      setLoading(false);
     }
   };
 
-  const handleUpdateTime = async () => {
-    if (!selectedDelivery || !deliveryTime) return;
-    try {
-      setUpdating(true);
-      const updatedDelivery = await orderManagementService.updateDeliveryTime(
-        selectedDelivery.shippingOrderId,
-        {
-          deliveryTime: deliveryTime.toISOString(),
-        }
-      );
-      // Update the delivery in the list
-      setDeliveries(
-        deliveries.map((delivery) =>
-          delivery.shippingOrderId === updatedDelivery.shippingOrderId
-            ? updatedDelivery
-            : delivery
-        )
-      );
-      setSnackbar({
-        open: true,
-        message: `Delivery time updated successfully`,
-        severity: "success",
-      });
-      handleCloseTimeDialog();
-    } catch (err) {
-      console.error("Error updating delivery time:", err);
-      setSnackbar({
-        open: true,
-        message: `Failed to update delivery time: ${
-          err instanceof Error ? err.message : "Unknown error"
-        }`,
-        severity: "error",
-      });
-    } finally {
-      setUpdating(false);
+  // Handle search
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  // Apply search
+  const applySearch = () => {
+    setPageNumber(1); // Reset to first page when searching
+    fetchDeliveries();
+  };
+
+  // Handle page change
+  const handlePageChange = (event: unknown, newPage: number) => {
+    setPageNumber(newPage + 1); // MUI pagination is 0-based, our API is 1-based
+  };
+
+  // Handle rows per page change
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setPageSize(parseInt(event.target.value, 10));
+    setPageNumber(1);
+  };
+
+  // Handle sort change
+  const handleSortChange = (column: string) => {
+    if (sortBy === column) {
+      // Toggle sort direction if clicking the same column
+      setSortDescending(!sortDescending);
+    } else {
+      // Set new sort column and default to descending
+      setSortBy(column);
+      setSortDescending(true);
     }
   };
 
+  // Handle mark as delivered click
+  const handleMarkAsDeliveredClick = (delivery: ShippingOrder) => {
+    setSelectedDelivery(delivery);
+    setDeliveryNotes("");
+    setOpenDialog(true);
+  };
+
+  // Handle close dialog
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedDelivery(null);
+  };
+
+  // Handle delivery notes change
+  const handleDeliveryNotesChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setDeliveryNotes(event.target.value);
+  };
+
+  // Handle close snackbar
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  if (loading) {
+  if (loading && deliveries.length === 0) {
     return (
       <LoadingContainer>
         <CircularProgress />
@@ -215,119 +193,247 @@ const PendingDeliveriesList: React.FC = () => {
     );
   }
 
-  // Safe check for deliveries array
-  const deliveriesList = deliveries || [];
-
-  if (deliveriesList.length === 0) {
-    return (
-      <EmptyStateContainer>
-        <EmptyStateTitle variant="h6">
-          No pending deliveries found
-        </EmptyStateTitle>
-        <EmptyStateSubtitle variant="body2">
-          All deliveries have been completed
-        </EmptyStateSubtitle>
-      </EmptyStateContainer>
-    );
-  }
-
   return (
-    <DeliveriesListContainer>
-      <ListTitle variant="h6">
-        Pending Deliveries <CountBadge>{deliveriesList.length}</CountBadge>
-        // src/pages/OrderManagement/components/PendingDeliveriesList.tsx
-        (continued)
-      </ListTitle>
+    <OrdersListContainer>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
+        <ListTitle variant="h6">
+          Pending Deliveries <CountBadge>{totalCount}</CountBadge>
+        </ListTitle>
+
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <TextField
+            placeholder="Search deliveries..."
+            size="small"
+            value={searchTerm}
+            onChange={handleSearch}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+                endAdornment: searchTerm && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setSearchTerm("");
+                        applySearch();
+                      }}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: { borderRadius: 2 },
+              },
+            }}
+            onKeyUp={(e) => {
+              if (e.key === "Enter") {
+                applySearch();
+              }
+            }}
+          />
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={fetchDeliveries}
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+          >
+            Refresh
+          </Button>
+        </Box>
+      </Box>
 
       <StyledPaper>
-        <StyledTableContainer>
-          <Table stickyHeader>
-            <TableHead>
-              <TableRow>
-                <StyledHeaderCell>Shipping ID</StyledHeaderCell>
-                <StyledHeaderCell>Order ID</StyledHeaderCell>
-                <StyledHeaderCell>Customer</StyledHeaderCell>
-                <StyledHeaderCell>Staff</StyledHeaderCell>
-                <StyledHeaderCell>Delivery Time</StyledHeaderCell>
-                <StyledHeaderCell>Status</StyledHeaderCell>
-                <StyledHeaderCell>Actions</StyledHeaderCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {deliveriesList.map((delivery) => (
-                <StyledTableRow key={delivery.shippingOrderId}>
-                  <IdCell>#{delivery.shippingOrderId}</IdCell>
-                  <IdCell>#{delivery.orderId}</IdCell>
-                  <StyledHeaderCell>
-                    <CustomerName>
-                      {delivery.order?.user?.fullName || "Unknown"}
-                    </CustomerName>
-                    <CustomerPhone>
-                      {delivery.order?.user?.phoneNumber || "No phone"}
-                    </CustomerPhone>
-                  </StyledHeaderCell>
-                  <StyledHeaderCell>
-                    <StaffName>
-                      {delivery.staff?.fullName || "Unassigned"}
-                    </StaffName>
-                  </StyledHeaderCell>
-                  <StyledHeaderCell>
-                    <DeliveryTime>
-                      {delivery.deliveryTime
-                        ? formatDate(delivery.deliveryTime)
-                        : "Not scheduled"}
-                    </DeliveryTime>
-                  </StyledHeaderCell>
-                  <StyledHeaderCell>
-                    <StatusChip
-                      label={delivery.isDelivered ? "Delivered" : "Pending"}
-                      size="small"
-                      delivered={delivery.isDelivered}
-                    />
-                  </StyledHeaderCell>
-                  <StyledHeaderCell>
-                    <ActionsContainer>
-                      <ActionButton
-                        variant="outlined"
-                        size="small"
-                        onClick={() => handleUpdateStatusClick(delivery)}
+        {deliveries.length === 0 ? (
+          <EmptyStateContainer>
+            <EmptyStateTitle variant="h6">
+              No pending deliveries found
+            </EmptyStateTitle>
+            <EmptyStateSubtitle variant="body2">
+              All orders have been delivered or no orders have been allocated
+              for delivery
+            </EmptyStateSubtitle>
+          </EmptyStateContainer>
+        ) : (
+          <>
+            <StyledTableContainer>
+              <Table stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    <StyledHeaderCell>Order ID</StyledHeaderCell>
+                    <StyledHeaderCell>
+                      <TableSortLabel
+                        active={sortBy === "customer"}
+                        direction={sortDescending ? "desc" : "asc"}
+                        onClick={() => handleSortChange("customer")}
                       >
-                        Update Status
-                      </ActionButton>
-                      <ActionButton
-                        variant="outlined"
-                        size="small"
-                        onClick={() => handleUpdateTimeClick(delivery)}
+                        Customer
+                      </TableSortLabel>
+                    </StyledHeaderCell>
+                    <StyledHeaderCell>
+                      <TableSortLabel
+                        active={sortBy === "deliverytime"}
+                        direction={sortDescending ? "desc" : "asc"}
+                        onClick={() => handleSortChange("deliverytime")}
                       >
-                        Set Time
-                      </ActionButton>
-                      <Tooltip title="View order details">
-                        <ViewDetailsButton
-                          size="small"
-                          onClick={() =>
-                            window.open(`/orders/${delivery.orderId}`, "_blank")
-                          }
-                        >
-                          <InfoIcon fontSize="small" />
-                        </ViewDetailsButton>
-                      </Tooltip>
-                    </ActionsContainer>
-                  </StyledHeaderCell>
-                </StyledTableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </StyledTableContainer>
+                        Delivery Time
+                      </TableSortLabel>
+                    </StyledHeaderCell>
+                    <StyledHeaderCell>
+                      <TableSortLabel
+                        active={sortBy === "staff"}
+                        direction={sortDescending ? "desc" : "asc"}
+                        onClick={() => handleSortChange("staff")}
+                      >
+                        Assigned To
+                      </TableSortLabel>
+                    </StyledHeaderCell>
+                    <StyledHeaderCell>Address</StyledHeaderCell>
+                    <StyledHeaderCell>Items</StyledHeaderCell>
+                    <StyledHeaderCell>Actions</StyledHeaderCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {deliveries.map((delivery) => (
+                    <StyledTableRow key={delivery.shippingOrderId}>
+                      <IdCell>#{delivery.order?.orderId}</IdCell>
+                      <StyledTableCell>
+                        <CustomerName>
+                          {delivery.order?.user?.fullName || "Unknown"}
+                        </CustomerName>
+                        <CustomerPhone>
+                          {delivery.order?.user?.phoneNumber || "No phone"}
+                        </CustomerPhone>
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        {delivery.deliveryTime
+                          ? formatDate(delivery.deliveryTime)
+                          : "Not scheduled"}
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        {delivery.staff?.fullName || "Unassigned"}
+                      </StyledTableCell>
+                      <StyledTableCell sx={{ maxWidth: 200 }}>
+                        <Tooltip title={delivery.order?.address || ""}>
+                          <Box
+                            sx={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {delivery.order?.address || "No address"}
+                          </Box>
+                        </Tooltip>
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        {delivery.order?.hasSellItems && (
+                          <OrderTypeChip label="Sell" size="small" />
+                        )}
+                        {delivery.order?.hasRentItems && (
+                          <OrderTypeChip
+                            label="Rent"
+                            size="small"
+                            color="secondary"
+                          />
+                        )}
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        <ActionsContainer>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            color="success"
+                            startIcon={<CheckCircleIcon />}
+                            onClick={() => handleMarkAsDeliveredClick(delivery)}
+                            sx={{
+                              borderRadius: 2,
+                              textTransform: "none",
+                              fontWeight: 600,
+                            }}
+                          >
+                            Delivered
+                          </Button>
+                          <Tooltip title="View order details">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => {
+                                // Navigate to order details
+                                window.location.href = `/orders/${delivery.order?.orderId}`;
+                              }}
+                              sx={{
+                                backgroundColor: (theme) =>
+                                  alpha(theme.palette.primary.main, 0.1),
+                                "&:hover": {
+                                  backgroundColor: (theme) =>
+                                    alpha(theme.palette.primary.main, 0.2),
+                                },
+                              }}
+                            >
+                              <InfoIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </ActionsContainer>
+                      </StyledTableCell>
+                    </StyledTableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </StyledTableContainer>
+
+            {/* Pagination */}
+            <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
+              <TablePagination
+                component="div"
+                count={totalCount}
+                page={pageNumber - 1} // Convert 1-based to 0-based for MUI
+                onPageChange={handlePageChange}
+                rowsPerPage={pageSize}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                labelRowsPerPage="Rows:"
+                labelDisplayedRows={({ from, to, count }) =>
+                  `${from}-${to} of ${count !== -1 ? count : `more than ${to}`}`
+                }
+                sx={{
+                  ".MuiTablePagination-select": {
+                    borderRadius: 1,
+                  },
+                  ".MuiTablePagination-selectIcon": {
+                    color: "primary.main",
+                  },
+                }}
+              />
+            </Box>
+          </>
+        )}
       </StyledPaper>
 
-      {/* Update Status Dialog */}
+      {/* Mark as Delivered Dialog */}
       <Dialog
-        open={openStatusDialog}
-        onClose={handleCloseStatusDialog}
+        open={openDialog}
+        onClose={handleCloseDialog}
         PaperProps={{
           sx: {
             borderRadius: 3,
             boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
+            padding: 1,
           },
         }}
       >
@@ -338,148 +444,41 @@ const PendingDeliveriesList: React.FC = () => {
             pb: 1,
           }}
         >
-          Update Delivery Status
+          Mark Order #{selectedDelivery?.order?.orderId} as Delivered
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3, pb: 2 }}>
           <Box sx={{ mt: 1, minWidth: 300 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isDelivered}
-                  onChange={(e) => setIsDelivered(e.target.checked)}
-                  color="primary"
-                  sx={{
-                    "& .MuiSwitch-switchBase.Mui-checked": {
-                      color: (theme) => theme.palette.success.main,
-                      "&:hover": {
-                        backgroundColor: (theme) =>
-                          alpha(theme.palette.success.main, 0.08),
-                      },
-                    },
-                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                      backgroundColor: (theme) => theme.palette.success.main,
-                    },
-                  }}
-                />
-              }
-              label={
-                <Typography
-                  sx={{
-                    fontWeight: 500,
-                    color: (theme) =>
-                      isDelivered
-                        ? theme.palette.success.main
-                        : theme.palette.warning.main,
-                  }}
-                >
-                  {isDelivered ? "Delivered" : "Pending"}
-                </Typography>
-              }
-              sx={{ mb: 2 }}
-            />
             <TextField
-              margin="dense"
-              label="Delivery Notes"
-              fullWidth
+              label="Delivery Notes (Optional)"
               multiline
               rows={4}
+              fullWidth
               value={deliveryNotes}
-              onChange={(e) => setDeliveryNotes(e.target.value)}
-              variant="outlined"
+              onChange={handleDeliveryNotesChange}
+              placeholder="Enter any notes about the delivery..."
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: (theme) =>
-                      alpha(theme.palette.primary.main, 0.2),
-                  },
                 },
               }}
             />
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
-          <ActionButton onClick={handleCloseStatusDialog}>Cancel</ActionButton>
-          <ActionButton
-            onClick={handleUpdateStatus}
-            variant="contained"
-            disabled={updating}
+          <DialogActionButton
+            onClick={handleCloseDialog}
             sx={{
-              backgroundColor: (theme) => theme.palette.primary.main,
-              color: "white",
+              color: (theme) => theme.palette.text.secondary,
               "&:hover": {
-                backgroundColor: (theme) => theme.palette.primary.dark,
+                backgroundColor: (theme) =>
+                  alpha(theme.palette.text.secondary, 0.08),
               },
             }}
           >
-            {updating ? <CircularProgress size={24} /> : "Update"}
-          </ActionButton>
+            Cancel
+          </DialogActionButton>
         </DialogActions>
       </Dialog>
-
-      {/* Update Time Dialog */}
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <Dialog
-          open={openTimeDialog}
-          onClose={handleCloseTimeDialog}
-          PaperProps={{
-            sx: {
-              borderRadius: 3,
-              boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
-            },
-          }}
-        >
-          <DialogTitle
-            sx={{
-              fontSize: "1.25rem",
-              fontWeight: 600,
-              pb: 1,
-            }}
-          >
-            Set Delivery Time
-          </DialogTitle>
-          <DialogContent sx={{ pt: 2, px: 3, pb: 2 }}>
-            <Box sx={{ mt: 1, minWidth: 300 }}>
-              <DateTimePicker
-                label="Delivery Time"
-                value={deliveryTime}
-                onChange={(newValue) => setDeliveryTime(newValue)}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    sx: {
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 2,
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: (theme) =>
-                            alpha(theme.palette.primary.main, 0.2),
-                        },
-                      },
-                    },
-                  },
-                }}
-              />
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 3 }}>
-            <ActionButton onClick={handleCloseTimeDialog}>Cancel</ActionButton>
-            <ActionButton
-              onClick={handleUpdateTime}
-              variant="contained"
-              disabled={updating || !deliveryTime}
-              sx={{
-                backgroundColor: (theme) => theme.palette.primary.main,
-                color: "white",
-                "&:hover": {
-                  backgroundColor: (theme) => theme.palette.primary.dark,
-                },
-              }}
-            >
-              {updating ? <CircularProgress size={24} /> : "Update"}
-            </ActionButton>
-          </DialogActions>
-        </Dialog>
-      </LocalizationProvider>
 
       {/* Snackbar for notifications */}
       <Snackbar
@@ -501,7 +500,7 @@ const PendingDeliveriesList: React.FC = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </DeliveriesListContainer>
+    </OrdersListContainer>
   );
 };
 

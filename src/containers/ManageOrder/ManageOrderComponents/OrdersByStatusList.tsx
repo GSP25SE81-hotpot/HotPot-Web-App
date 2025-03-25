@@ -1,36 +1,43 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+// src/pages/OrderManagement/components/OrdersByStatusList.tsx
+import ClearIcon from "@mui/icons-material/Clear";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import InfoIcon from "@mui/icons-material/Info";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Alert,
   Box,
+  Button,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  Collapse,
   FormControl,
+  IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
   Snackbar,
   Table,
   TableBody,
   TableHead,
+  TablePagination,
   TableRow,
+  TableSortLabel,
+  TextField,
   Tooltip,
   alpha,
 } from "@mui/material";
+import Grid from "@mui/material/Grid2";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useEffect, useState } from "react";
 import {
   Order,
-  orderManagementService,
+  OrderQueryParams,
   OrderStatus,
+  orderManagementService,
 } from "../../../api/Services/orderManagementService";
-import {
-  formatCurrency,
-  formatDate,
-  getOrderStatusLabel,
-} from "../../../utils/formatters";
 import {
   ActionsContainer,
   CustomerName,
@@ -45,7 +52,7 @@ import {
   StyledHeaderCell,
   StyledPaper,
   StyledTab,
-  StyledTabPanel,
+  StyledTableCell,
   StyledTableContainer,
   StyledTableRow,
   StyledTabs,
@@ -53,38 +60,38 @@ import {
   UpdateStatusButton,
   ViewDetailsButton,
 } from "../../../components/manager/styles/OrdersByStatusListStyles";
-import { ActionButton } from "../../../components/manager/styles/OrderDetailStyles";
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <StyledTabPanel
-      role="tabpanel"
-      hidden={value !== index}
-      id={`status-tabpanel-${index}`}
-      aria-labelledby={`status-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box>{children}</Box>}
-    </StyledTabPanel>
-  );
-}
+import {
+  formatCurrency,
+  formatDate,
+  getOrderStatusLabel,
+} from "../../../utils/formatters";
 
 const OrdersByStatusList: React.FC = () => {
+  // State for active tab
   const [activeTab, setActiveTab] = useState(0);
+
+  // State for orders data
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [updating, setUpdating] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [openStatusDialog, setOpenStatusDialog] = useState(false);
-  const [newStatus, setNewStatus] = useState<OrderStatus>(OrderStatus.Pending);
+
+  // Pagination state
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+
+  // Sorting state
+  const [sortBy, setSortBy] = useState<string>("date");
+  const [sortDescending, setSortDescending] = useState(true);
+
+  // Filtering state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [fromDate, setFromDate] = useState<Date | null>(null);
+  const [toDate, setToDate] = useState<Date | null>(null);
+  const [customerId, setCustomerId] = useState<number | null>(null);
+
+  // Snackbar state
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -102,177 +109,428 @@ const OrdersByStatusList: React.FC = () => {
     OrderStatus.Returning,
   ];
 
+  // Fetch orders when dependencies change
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        setLoading(true);
-        const status = tabToStatus[activeTab];
-        const data = await orderManagementService.getOrdersByStatus(status);
-        // Ensure data is an array
-        setOrders(Array.isArray(data) ? data : []);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching orders:", err);
-        setError(`Failed to load orders. Please try again later.`);
-        // Ensure orders is an empty array in case of error
-        setOrders([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchOrders();
-  }, [activeTab]);
+  }, [activeTab, pageNumber, pageSize, sortBy, sortDescending]);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
-  };
-
-  const handleUpdateStatusClick = (order: Order) => {
-    setSelectedOrder(order);
-    setNewStatus(order.status);
-    setOpenStatusDialog(true);
-  };
-
-  const handleCloseStatusDialog = () => {
-    setOpenStatusDialog(false);
-    setSelectedOrder(null);
-  };
-
-  const handleStatusChange = (event: SelectChangeEvent<number>) => {
-    setNewStatus(Number(event.target.value) as OrderStatus);
-  };
-
-  const handleUpdateStatus = async () => {
-    if (!selectedOrder) return;
+  // Function to fetch orders with current filters
+  const fetchOrders = async () => {
     try {
-      setUpdating(true);
-      const updatedOrder = await orderManagementService.updateOrderStatus(
-        selectedOrder.orderId,
-        { status: newStatus }
+      setLoading(true);
+      const status = tabToStatus[activeTab];
+
+      // Create query params object
+      const queryParams: Omit<OrderQueryParams, "status"> = {
+        pageNumber,
+        pageSize,
+        sortBy,
+        sortDescending,
+        searchTerm: searchTerm || undefined,
+        fromDate: fromDate ? fromDate.toISOString() : undefined,
+        toDate: toDate ? toDate.toISOString() : undefined,
+        customerId: customerId || undefined,
+      };
+
+      const response = await orderManagementService.getOrdersByStatus(
+        status,
+        queryParams
       );
-      // If the status changed to a different tab, remove from current list
-      if (newStatus !== tabToStatus[activeTab]) {
-        setOrders(
-          orders.filter((order) => order.orderId !== updatedOrder.orderId)
-        );
-      } else {
-        // Otherwise update the order in the list
-        setOrders(
-          orders.map((order) =>
-            order.orderId === updatedOrder.orderId ? updatedOrder : order
-          )
-        );
-      }
-      setSnackbar({
-        open: true,
-        message: `Order status updated successfully`,
-        severity: "success",
-      });
-      handleCloseStatusDialog();
+
+      // Update state with paginated data
+      setOrders(response.items);
+      setTotalCount(response.totalCount);
+      setError(null);
     } catch (err) {
-      console.error("Error updating order status:", err);
-      setSnackbar({
-        open: true,
-        message: `Failed to update order status: ${
-          err instanceof Error ? err.message : "Unknown error"
-        }`,
-        severity: "error",
-      });
+      console.error("Error fetching orders:", err);
+      setError(`Failed to load orders. Please try again later.`);
+      setOrders([]);
     } finally {
-      setUpdating(false);
+      setLoading(false);
     }
   };
 
+  // Handle tab change
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+    setPageNumber(1); // Reset to first page when changing tabs
+  };
+
+  // Handle page change
+  const handlePageChange = (_event: unknown, newPage: number) => {
+    setPageNumber(newPage + 1); // MUI pagination is 0-based, our API is 1-based
+  };
+
+  // Handle rows per page change
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setPageSize(parseInt(event.target.value, 10));
+    setPageNumber(1);
+  };
+
+  // Handle sort change
+  const handleSortChange = (column: string) => {
+    if (sortBy === column) {
+      // Toggle sort direction if clicking the same column
+      setSortDescending(!sortDescending);
+    } else {
+      // Set new sort column and default to descending
+      setSortBy(column);
+      setSortDescending(true);
+    }
+  };
+
+  // Handle search
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  // Apply filters
+  const applyFilters = () => {
+    setPageNumber(1); // Reset to first page when applying filters
+    fetchOrders();
+  };
+
+  // Clear filters
+  const clearFilters = () => {
+    setSearchTerm("");
+    setFromDate(null);
+    setToDate(null);
+    setCustomerId(null);
+    setPageNumber(1);
+    // Fetch orders with cleared filters
+    fetchOrders();
+  };
+
+  // Toggle filters visibility
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
+  // Handle close snackbar
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const handleViewDetails = (orderId: number) => {
-    window.open(`/orders/${orderId}`, "_blank");
-  };
+  // Render filters section
+  const renderFilters = () => (
+    <Collapse in={showFilters}>
+      <Box
+        sx={{
+          p: 2,
+          mb: 2,
+          bgcolor: (theme) => alpha(theme.palette.background.paper, 0.5),
+          borderRadius: 2,
+        }}
+      >
+        <Grid container spacing={2} alignItems="center">
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="From Date"
+                value={fromDate}
+                onChange={(newValue) => setFromDate(newValue)}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    size: "small",
+                    sx: {
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 2,
+                      },
+                    },
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="To Date"
+                value={toDate}
+                onChange={(newValue) => setToDate(newValue)}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    size: "small",
+                    sx: {
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 2,
+                      },
+                    },
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Customer</InputLabel>
+              <Select
+                value={customerId || ""}
+                label="Customer"
+                onChange={(e) =>
+                  setCustomerId((e.target.value as number) || null)
+                }
+                sx={{
+                  borderRadius: 2,
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) =>
+                      alpha(theme.palette.primary.main, 0.2),
+                  },
+                }}
+              >
+                <MenuItem value="">All Customers</MenuItem>
+                {/* Add customer options here */}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                variant="contained"
+                onClick={applyFilters}
+                sx={{
+                  flex: 1,
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 600,
+                }}
+              >
+                Apply
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={clearFilters}
+                sx={{
+                  flex: 1,
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 600,
+                }}
+              >
+                Clear
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
+      </Box>
+    </Collapse>
+  );
 
   return (
     <OrdersListContainer>
       <StyledPaper>
+        {/* Tabs section */}
         <StyledTabs
           value={activeTab}
           onChange={handleTabChange}
-          indicatorColor="primary"
-          textColor="primary"
           variant="scrollable"
           scrollButtons="auto"
+          aria-label="order status tabs"
         >
-          {tabToStatus.map((status) => (
-            <StyledTab key={status} label={getOrderStatusLabel(status)} />
-          ))}
+          <StyledTab label="Pending" />
+          <StyledTab label="Processing" />
+          <StyledTab label="Shipping" />
+          <StyledTab label="Delivered" />
+          <StyledTab label="Completed" />
+          <StyledTab label="Cancelled" />
+          <StyledTab label="Returning" />
         </StyledTabs>
 
-        {tabToStatus.map((status, index) => (
-          <TabPanel key={status} value={activeTab} index={index}>
-            {loading ? (
-              <LoadingContainer>
-                <CircularProgress />
-              </LoadingContainer>
-            ) : error ? (
-              <Box sx={{ p: 2 }}>
-                <Alert severity="error">{error}</Alert>
+        {/* Search and filter toolbar */}
+        <Box
+          sx={{
+            p: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Box
+              component="h2"
+              sx={{
+                m: 0,
+                fontSize: "1.25rem",
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              {getOrderStatusLabel(tabToStatus[activeTab])} Orders
+              <Box
+                sx={{
+                  ml: 1,
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 1.5,
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                  color: "primary.main",
+                }}
+              >
+                {totalCount}
               </Box>
-            ) : orders.length === 0 ? (
-              <EmptyStateContainer>
-                <EmptyStateText variant="h6">
-                  No {getOrderStatusLabel(status).toLowerCase()} orders found
-                </EmptyStateText>
-              </EmptyStateContainer>
-            ) : (
-              <StyledTableContainer>
-                <Table stickyHeader>
-                  //
-                  src/pages/OrderManagement/ManageOrderComponents/OrdersByStatusList.tsx
-                  (continued)
-                  <TableHead>
-                    <TableRow>
-                      <StyledHeaderCell>Order ID</StyledHeaderCell>
-                      <StyledHeaderCell>Customer</StyledHeaderCell>
-                      <StyledHeaderCell>Date</StyledHeaderCell>
-                      <StyledHeaderCell>Total</StyledHeaderCell>
-                      <StyledHeaderCell>Items</StyledHeaderCell>
-                      <StyledHeaderCell>Shipping</StyledHeaderCell>
-                      <StyledHeaderCell>Actions</StyledHeaderCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {(orders || []).map((order) => (
-                      <StyledTableRow key={order.orderId}>
-                        <OrderIdCell>#{order.orderId}</OrderIdCell>
-                        <StyledHeaderCell>
-                          <CustomerName variant="body2">
-                            {order.user?.fullName || "Unknown"}
-                          </CustomerName>
-                          <CustomerPhone variant="caption">
-                            {order.user?.phoneNumber || "No phone"}
-                          </CustomerPhone>
-                        </StyledHeaderCell>
-                        <StyledHeaderCell>
-                          {formatDate(order.createdAt)}
-                        </StyledHeaderCell>
-                        <StyledHeaderCell>
-                          {formatCurrency(order.totalPrice)}
-                        </StyledHeaderCell>
-                        <StyledHeaderCell>
-                          {order.hasSellItems && (
-                            <OrderTypeChip label="Sell" size="small" />
-                          )}
-                          {order.hasRentItems && (
-                            <OrderTypeChip
-                              label="Rent"
-                              size="small"
-                              color="secondary"
-                            />
-                          )}
-                        </StyledHeaderCell>
-                        <StyledHeaderCell>
-                          {order.shippingOrder ? (
+            </Box>
+          </Box>
+
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <TextField
+              placeholder="Search orders..."
+              size="small"
+              value={searchTerm}
+              onChange={handleSearch}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+                endAdornment: searchTerm && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setSearchTerm("");
+                        applyFilters();
+                      }}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: { borderRadius: 2 },
+              }}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  applyFilters();
+                }
+              }}
+            />
+
+            <Tooltip title="Advanced filters">
+              <Button
+                variant={showFilters ? "contained" : "outlined"}
+                color="primary"
+                onClick={toggleFilters}
+                startIcon={<FilterListIcon />}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 600,
+                }}
+              >
+                Filters
+              </Button>
+            </Tooltip>
+          </Box>
+        </Box>
+
+        {/* Filters section */}
+        {renderFilters()}
+
+        {/* Loading state */}
+        {loading && orders.length === 0 ? (
+          <LoadingContainer>
+            <CircularProgress />
+          </LoadingContainer>
+        ) : error ? (
+          <Box sx={{ p: 2 }}>
+            <Alert severity="error" sx={{ borderRadius: 2 }}>
+              {error}
+            </Alert>
+          </Box>
+        ) : orders.length === 0 ? (
+          <EmptyStateContainer>
+            <EmptyStateText variant="h6">
+              No {getOrderStatusLabel(tabToStatus[activeTab]).toLowerCase()}{" "}
+              orders found
+            </EmptyStateText>
+            <EmptyStateText variant="body2" sx={{ mt: 1 }}>
+              Try adjusting your filters or search criteria
+            </EmptyStateText>
+          </EmptyStateContainer>
+        ) : (
+          <>
+            {/* Orders table */}
+            <StyledTableContainer>
+              <Table stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    <StyledHeaderCell>Order ID</StyledHeaderCell>
+                    <StyledHeaderCell>
+                      <TableSortLabel
+                        active={sortBy === "customer"}
+                        direction={sortDescending ? "desc" : "asc"}
+                        onClick={() => handleSortChange("customer")}
+                      >
+                        Customer
+                      </TableSortLabel>
+                    </StyledHeaderCell>
+                    <StyledHeaderCell>
+                      <TableSortLabel
+                        active={sortBy === "date"}
+                        direction={sortDescending ? "desc" : "asc"}
+                        onClick={() => handleSortChange("date")}
+                      >
+                        Date
+                      </TableSortLabel>
+                    </StyledHeaderCell>
+                    <StyledHeaderCell>
+                      <TableSortLabel
+                        active={sortBy === "totalprice"}
+                        direction={sortDescending ? "desc" : "asc"}
+                        onClick={() => handleSortChange("totalprice")}
+                      >
+                        Total
+                      </TableSortLabel>
+                    </StyledHeaderCell>
+                    <StyledHeaderCell>Items</StyledHeaderCell>
+                    <StyledHeaderCell>Shipping</StyledHeaderCell>
+                    <StyledHeaderCell>Actions</StyledHeaderCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {orders.map((order) => (
+                    <StyledTableRow key={order.orderId}>
+                      <OrderIdCell>#{order.orderId}</OrderIdCell>
+                      <StyledTableCell>
+                        <CustomerName>
+                          {order.user?.fullName || "Unknown"}
+                        </CustomerName>
+                        <CustomerPhone>
+                          {order.user?.phoneNumber || "No phone"}
+                        </CustomerPhone>
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        {formatDate(order.createdAt)}
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        {formatCurrency(order.totalPrice)}
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        {order.hasSellItems && (
+                          <OrderTypeChip label="Sell" size="small" />
+                        )}
+                        {order.hasRentItems && (
+                          <OrderTypeChip
+                            label="Rent"
+                            size="small"
+                            color="secondary"
+                          />
+                        )}
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        {order.shippingOrder ? (
+                          <Tooltip
+                            title={`Assigned to ${
+                              order.shippingOrder.staff?.fullName || "Unknown"
+                            }`}
+                          >
                             <ShippingStatusChip
                               label={
                                 order.shippingOrder.isDelivered
@@ -282,101 +540,69 @@ const OrdersByStatusList: React.FC = () => {
                               size="small"
                               delivered={order.shippingOrder.isDelivered}
                             />
-                          ) : (
-                            <UnallocatedChip label="Unallocated" size="small" />
-                          )}
-                        </StyledHeaderCell>
-                        <StyledHeaderCell>
-                          <ActionsContainer>
-                            <UpdateStatusButton
-                              variant="outlined"
+                          </Tooltip>
+                        ) : (
+                          <UnallocatedChip label="Not Assigned" size="small" />
+                        )}
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        <ActionsContainer>
+                          <UpdateStatusButton
+                            variant="outlined"
+                            size="small"
+                            onClick={() => {
+                              // Navigate to order details for updating
+                              window.location.href = `/orders/${order.orderId}/edit`;
+                            }}
+                          >
+                            Update
+                          </UpdateStatusButton>
+                          <Tooltip title="View order details">
+                            <ViewDetailsButton
                               size="small"
-                              onClick={() => handleUpdateStatusClick(order)}
+                              onClick={() => {
+                                // Navigate to order details
+                                window.location.href = `/orders/${order.orderId}`;
+                              }}
                             >
-                              Update Status
-                            </UpdateStatusButton>
-                            <Tooltip title="View order details">
-                              <ViewDetailsButton
-                                size="small"
-                                onClick={() => handleViewDetails(order.orderId)}
-                              >
-                                <InfoIcon fontSize="small" />
-                              </ViewDetailsButton>
-                            </Tooltip>
-                          </ActionsContainer>
-                        </StyledHeaderCell>
-                      </StyledTableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </StyledTableContainer>
-            )}
-          </TabPanel>
-        ))}
-      </StyledPaper>
+                              <InfoIcon fontSize="small" />
+                            </ViewDetailsButton>
+                          </Tooltip>
+                        </ActionsContainer>
+                      </StyledTableCell>
+                    </StyledTableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </StyledTableContainer>
 
-      {/* Update Status Dialog */}
-      <Dialog
-        open={openStatusDialog}
-        onClose={handleCloseStatusDialog}
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            fontSize: "1.25rem",
-            fontWeight: 600,
-            pb: 1,
-          }}
-        >
-          Update Order Status
-        </DialogTitle>
-        <DialogContent sx={{ pt: 2, px: 3, pb: 2 }}>
-          <Box sx={{ mt: 1, minWidth: 300 }}>
-            <FormControl fullWidth>
-              <InputLabel id="status-select-label">Status</InputLabel>
-              <Select
-                labelId="status-select-label"
-                value={newStatus}
-                label="Status"
-                onChange={handleStatusChange}
+            {/* Pagination */}
+            <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
+              <TablePagination
+                component="div"
+                count={totalCount}
+                page={pageNumber - 1} // Convert 1-based to 0-based for MUI
+                onPageChange={handlePageChange}
+                rowsPerPage={pageSize}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                labelRowsPerPage="Rows:"
+                labelDisplayedRows={({ from, to, count }) =>
+                  `${from}-${to} of ${count !== -1 ? count : `more than ${to}`}`
+                }
                 sx={{
-                  borderRadius: 2,
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: (theme) =>
-                      alpha(theme.palette.primary.main, 0.2),
+                  ".MuiTablePagination-select": {
+                    borderRadius: 1,
+                  },
+                  ".MuiTablePagination-selectIcon": {
+                    color: "primary.main",
                   },
                 }}
-              >
-                <MenuItem value={OrderStatus.Pending}>Pending</MenuItem>
-                <MenuItem value={OrderStatus.Processing}>Processing</MenuItem>
-                <MenuItem value={OrderStatus.Shipping}>Shipping</MenuItem>
-                <MenuItem value={OrderStatus.Delivered}>Delivered</MenuItem>
-                <MenuItem value={OrderStatus.Completed}>Completed</MenuItem>
-                <MenuItem value={OrderStatus.Cancelled}>Cancelled</MenuItem>
-                <MenuItem value={OrderStatus.Returning}>Returning</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <ActionButton onClick={handleCloseStatusDialog}>Cancel</ActionButton>
-          <ActionButton
-            onClick={handleUpdateStatus}
-            variant="contained"
-            disabled={
-              updating ||
-              (selectedOrder !== null && newStatus === selectedOrder.status)
-            }
-          >
-            {updating ? <CircularProgress size={24} /> : "Update"}
-          </ActionButton>
-        </DialogActions>
-      </Dialog>
+              />
+            </Box>
+          </>
+        )}
+      </StyledPaper>
 
       {/* Snackbar for notifications */}
       <Snackbar

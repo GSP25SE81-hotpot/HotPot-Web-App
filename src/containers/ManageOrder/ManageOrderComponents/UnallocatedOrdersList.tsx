@@ -1,5 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/pages/OrderManagement/components/UnallocatedOrdersList.tsx
-import React, { useState, useEffect } from "react";
+import ClearIcon from "@mui/icons-material/Clear";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Alert,
   Box,
@@ -9,6 +11,8 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
@@ -17,19 +21,19 @@ import {
   Table,
   TableBody,
   TableHead,
+  TablePagination,
   TableRow,
+  TableSortLabel,
+  TextField,
   alpha,
 } from "@mui/material";
-import { Order } from "../../../api/Services/orderManagementService";
-import { orderManagementService } from "../../../api/Services/orderManagementService";
-import staffService from "../../../api/Services/staffService";
-import { StaffAvailabilityDto } from "../../../types/staff";
+import React, { useEffect, useState } from "react";
 import {
-  formatDate,
-  formatCurrency,
-  getOrderStatusLabel,
-  getOrderStatusColor,
-} from "../../../utils/formatters";
+  Order,
+  OrderQueryParams,
+  orderManagementService,
+} from "../../../api/Services/orderManagementService";
+import staffService from "../../../api/Services/staffService";
 import {
   AllocateButton,
   CountBadge,
@@ -47,9 +51,17 @@ import {
   StatusChip,
   StyledHeaderCell,
   StyledPaper,
+  StyledTableCell,
   StyledTableContainer,
   StyledTableRow,
 } from "../../../components/manager/styles/UnallocatedOrdersListStyles";
+import { StaffAvailabilityDto } from "../../../types/staff";
+import {
+  formatCurrency,
+  formatDate,
+  getOrderStatusColor,
+  getOrderStatusLabel,
+} from "../../../utils/formatters";
 
 const UnallocatedOrdersList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -66,19 +78,87 @@ const UnallocatedOrdersList: React.FC = () => {
     severity: "success" as "success" | "error",
   });
 
+  // Pagination state
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+
+  // Sorting state
+  const [sortBy, setSortBy] = useState<string>("date");
+  const [sortDescending, setSortDescending] = useState(true);
+
+  // Search state
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
-    const fetchData = async () => {
+    fetchData();
+  }, [pageNumber, pageSize, sortBy, sortDescending]);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      // Create query params
+      const queryParams: OrderQueryParams = {
+        pageNumber,
+        pageSize,
+        sortBy,
+        sortDescending,
+        searchTerm: searchTerm || undefined,
+      };
+
+      // Get unallocated orders
+      const ordersResponse = await orderManagementService.getUnallocatedOrders(
+        queryParams
+      );
+
+      // Check if the response has the expected structure
+      if (ordersResponse && typeof ordersResponse === "object") {
+        // Handle different response formats
+        if (Array.isArray(ordersResponse)) {
+          // If the API returns an array instead of a paged result
+          setOrders(ordersResponse);
+          setTotalCount(ordersResponse.length);
+        } else if (
+          "items" in ordersResponse &&
+          Array.isArray(ordersResponse.items)
+        ) {
+          // If the API returns a paged result with items
+          setOrders(ordersResponse.items);
+          setTotalCount(
+            ordersResponse.totalCount || ordersResponse.items.length
+          );
+        } else {
+          // Unexpected response format
+          console.error("Unexpected response format:", ordersResponse);
+          setError("Received unexpected data format from server");
+          setOrders([]);
+          setTotalCount(0);
+        }
+      } else {
+        // Handle null or undefined response
+        console.error("Invalid response:", ordersResponse);
+        setError(
+          "Failed to load unallocated orders. Invalid response from server."
+        );
+        setOrders([]);
+        setTotalCount(0);
+      }
+
+      // Get available staff
       try {
-        setLoading(true);
-        // Get unallocated orders
-        const ordersData = await orderManagementService.getUnallocatedOrders();
-        // Ensure ordersData is an array
-        setOrders(Array.isArray(ordersData) ? ordersData : []);
-        // Get available staff - handle both array and single object responses
         const staffData = await staffService.getAvailableStaff();
+
         // Check if staffData is an array, if not, convert it to an array
         if (Array.isArray(staffData)) {
           setStaff(staffData);
+        } else if (
+          staffData &&
+          "items" in staffData &&
+          Array.isArray(staffData.items)
+        ) {
+          // If it returns a paged result
+          setStaff(staffData.items);
         } else if (staffData) {
           // If it's a single object, wrap it in an array
           setStaff([staffData]);
@@ -86,19 +166,57 @@ const UnallocatedOrdersList: React.FC = () => {
           // If it's null or undefined, set an empty array
           setStaff([]);
         }
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Failed to load unallocated orders. Please try again later.");
-        // Ensure orders is an empty array in case of error
-        setOrders([]);
-      } finally {
-        setLoading(false);
+      } catch (staffErr) {
+        console.error("Error fetching staff data:", staffErr);
+        // Don't fail the whole operation if staff data fails
+        setStaff([]);
       }
-    };
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError("Failed to load unallocated orders. Please try again later.");
+      // Ensure orders is an empty array in case of error
+      setOrders([]);
+      setTotalCount(0);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Handle search
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  // Apply search
+  const applySearch = () => {
+    setPageNumber(1); // Reset to first page when searching
     fetchData();
-  }, []);
+  };
+
+  // Handle page change
+  const handlePageChange = (_event: unknown, newPage: number) => {
+    setPageNumber(newPage + 1); // MUI pagination is 0-based, our API is 1-based
+  };
+
+  // Handle rows per page change
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setPageSize(parseInt(event.target.value, 10));
+    setPageNumber(1);
+  };
+
+  // Handle sort change
+  const handleSortChange = (column: string) => {
+    if (sortBy === column) {
+      // Toggle sort direction if clicking the same column
+      setSortDescending(!sortDescending);
+    } else {
+      // Set new sort column and default to descending
+      setSortBy(column);
+      setSortDescending(true);
+    }
+  };
 
   const handleAllocateClick = (order: Order) => {
     setSelectedOrder(order);
@@ -130,10 +248,10 @@ const UnallocatedOrdersList: React.FC = () => {
         orderId: selectedOrder.orderId,
         staffId: selectedStaffId,
       });
-      // Remove the allocated order from the list
-      setOrders(
-        orders.filter((order) => order.orderId !== selectedOrder.orderId)
-      );
+
+      // Refresh the data after allocation
+      fetchData();
+
       setSnackbar({
         open: true,
         message: `Order #${selectedOrder.orderId} successfully allocated`,
@@ -158,7 +276,7 @@ const UnallocatedOrdersList: React.FC = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  if (loading) {
+  if (loading && orders.length === 0) {
     return (
       <LoadingContainer>
         <CircularProgress />
@@ -176,94 +294,188 @@ const UnallocatedOrdersList: React.FC = () => {
     );
   }
 
-  // Safe check for orders array
-  const ordersList = orders || [];
-
-  if (ordersList.length === 0) {
-    return (
-      <EmptyStateContainer>
-        <EmptyStateTitle variant="h6">
-          No unallocated orders found
-        </EmptyStateTitle>
-        <EmptyStateSubtitle variant="body2">
-          All orders have been allocated to staff members
-        </EmptyStateSubtitle>
-      </EmptyStateContainer>
-    );
-  }
-
   return (
     <OrdersListContainer>
-      <ListTitle variant="h6">
-        Unallocated Orders <CountBadge>{ordersList.length}</CountBadge>
-      </ListTitle>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
+        <ListTitle variant="h6">
+          Unallocated Orders <CountBadge>{totalCount}</CountBadge>
+        </ListTitle>
+
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <TextField
+            placeholder="Search orders..."
+            size="small"
+            value={searchTerm}
+            onChange={handleSearch}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+                endAdornment: searchTerm && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setSearchTerm("");
+                        applySearch();
+                      }}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: { borderRadius: 2 },
+              },
+            }}
+            onKeyUp={(e) => {
+              if (e.key === "Enter") {
+                applySearch();
+              }
+            }}
+          />
+        </Box>
+      </Box>
 
       <StyledPaper>
-        <StyledTableContainer>
-          <Table stickyHeader>
-            <TableHead>
-              <TableRow>
-                <StyledHeaderCell>Order ID</StyledHeaderCell>
-                <StyledHeaderCell>Customer</StyledHeaderCell>
-                <StyledHeaderCell>Date</StyledHeaderCell>
-                <StyledHeaderCell>Total</StyledHeaderCell>
-                <StyledHeaderCell>Status</StyledHeaderCell>
-                <StyledHeaderCell>Items</StyledHeaderCell>
-                <StyledHeaderCell>Actions</StyledHeaderCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {ordersList.map((order) => (
-                <StyledTableRow key={order.orderId}>
-                  <IdCell>#{order.orderId}</IdCell>
-                  <StyledHeaderCell>
-                    <CustomerName>
-                      {order.user?.fullName || "Unknown"}
-                    </CustomerName>
-                    <CustomerPhone>
-                      {order.user?.phoneNumber || "No phone"}
-                    </CustomerPhone>
-                  </StyledHeaderCell>
-                  <StyledHeaderCell>
-                    {formatDate(order.createdAt)}
-                  </StyledHeaderCell>
-                  <StyledHeaderCell>
-                    {formatCurrency(order.totalPrice)}
-                  </StyledHeaderCell>
-                  <StyledHeaderCell>
-                    <StatusChip
-                      label={getOrderStatusLabel(order.status)}
-                      size="small"
-                      statuscolor={getOrderStatusColor(order.status)}
-                    />
-                  </StyledHeaderCell>
-                  <StyledHeaderCell>
-                    {order.hasSellItems && (
-                      <OrderTypeChip label="Sell" size="small" />
-                    )}
-                    {order.hasRentItems && (
-                      // src/pages/OrderManagement/components/UnallocatedOrdersList.tsx (continued)
-                      <OrderTypeChip
-                        label="Rent"
-                        size="small"
-                        color="secondary"
-                      />
-                    )}
-                  </StyledHeaderCell>
-                  <StyledHeaderCell>
-                    <AllocateButton
-                      variant="contained"
-                      size="small"
-                      onClick={() => handleAllocateClick(order)}
-                    >
-                      Allocate
-                    </AllocateButton>
-                  </StyledHeaderCell>
-                </StyledTableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </StyledTableContainer>
+        {orders.length === 0 ? (
+          <EmptyStateContainer>
+            <EmptyStateTitle variant="h6">
+              No unallocated orders found
+            </EmptyStateTitle>
+            <EmptyStateSubtitle variant="body2">
+              All orders have been allocated to staff members
+            </EmptyStateSubtitle>
+          </EmptyStateContainer>
+        ) : (
+          <>
+            <StyledTableContainer>
+              <Table stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    <StyledHeaderCell>Order ID</StyledHeaderCell>
+                    <StyledHeaderCell>
+                      <TableSortLabel
+                        active={sortBy === "customer"}
+                        direction={sortDescending ? "desc" : "asc"}
+                        onClick={() => handleSortChange("customer")}
+                      >
+                        Customer
+                      </TableSortLabel>
+                    </StyledHeaderCell>
+                    <StyledHeaderCell>
+                      <TableSortLabel
+                        active={sortBy === "date"}
+                        direction={sortDescending ? "desc" : "asc"}
+                        onClick={() => handleSortChange("date")}
+                      >
+                        Date
+                      </TableSortLabel>
+                    </StyledHeaderCell>
+                    <StyledHeaderCell>
+                      <TableSortLabel
+                        active={sortBy === "totalprice"}
+                        direction={sortDescending ? "desc" : "asc"}
+                        onClick={() => handleSortChange("totalprice")}
+                      >
+                        Total
+                      </TableSortLabel>
+                    </StyledHeaderCell>
+                    <StyledHeaderCell>Status</StyledHeaderCell>
+                    <StyledHeaderCell>Items</StyledHeaderCell>
+                    <StyledHeaderCell>Actions</StyledHeaderCell>
+                    //
+                    src/pages/OrderManagement/components/UnallocatedOrdersList.tsx
+                    (continued)
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {orders.map((order) => (
+                    <StyledTableRow key={order.orderId}>
+                      <IdCell>#{order.orderId}</IdCell>
+                      <StyledTableCell>
+                        <CustomerName>
+                          {order.user?.fullName || "Unknown"}
+                        </CustomerName>
+                        <CustomerPhone>
+                          {order.user?.phoneNumber || "No phone"}
+                        </CustomerPhone>
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        {formatDate(order.createdAt)}
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        {formatCurrency(order.totalPrice)}
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        <StatusChip
+                          label={getOrderStatusLabel(order.status)}
+                          size="small"
+                          statuscolor={getOrderStatusColor(order.status)}
+                        />
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        {order.hasSellItems && (
+                          <OrderTypeChip label="Sell" size="small" />
+                        )}
+                        {order.hasRentItems && (
+                          <OrderTypeChip
+                            label="Rent"
+                            size="small"
+                            color="secondary"
+                          />
+                        )}
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        <AllocateButton
+                          variant="contained"
+                          size="small"
+                          onClick={() => handleAllocateClick(order)}
+                        >
+                          Allocate
+                        </AllocateButton>
+                      </StyledTableCell>
+                    </StyledTableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </StyledTableContainer>
+
+            {/* Pagination */}
+            <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
+              <TablePagination
+                component="div"
+                count={totalCount}
+                page={pageNumber - 1} // Convert 1-based to 0-based for MUI
+                onPageChange={handlePageChange}
+                rowsPerPage={pageSize}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                labelRowsPerPage="Rows:"
+                labelDisplayedRows={({ from, to, count }) =>
+                  `${from}-${to} of ${count !== -1 ? count : `more than ${to}`}`
+                }
+                sx={{
+                  ".MuiTablePagination-select": {
+                    borderRadius: 1,
+                  },
+                  ".MuiTablePagination-selectIcon": {
+                    color: "primary.main",
+                  },
+                }}
+              />
+            </Box>
+          </>
+        )}
       </StyledPaper>
 
       {/* Allocation Dialog */}

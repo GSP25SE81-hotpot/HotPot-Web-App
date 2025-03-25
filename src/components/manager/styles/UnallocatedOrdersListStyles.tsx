@@ -1,4 +1,3 @@
-// src/styles/UnallocatedOrdersListStyles.tsx
 import {
   Box,
   Button,
@@ -196,4 +195,10 @@ export const DialogActionButton = styled(Button)(({ theme }) => ({
   "&:hover": {
     transform: "translateY(-2px)",
   },
+}));
+
+// Table cell with proper styling
+export const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  fontSize: "0.9rem",
+  padding: theme.spacing(1.5, 2),
 }));
