@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosClient from "../axiosInstance";
 
 const API_URL = "/manager/order-management";
@@ -12,15 +14,20 @@ export enum OrderStatus {
   Completed = 7,
 }
 
-export interface User {
+// User interfaces
+export interface UserDTO {
   userId: number;
-  username: string;
-  email: string;
-  phoneNumber: string;
-  fullName: string;
-  roleId: number;
+  name: string;
+  email?: string;
+  phoneNumber?: string;
 }
 
+export interface StaffDTO {
+  staffId: number;
+  name: string;
+}
+
+// Order item interfaces
 export interface OrderItem {
   id: number;
   name: string;
@@ -28,41 +35,111 @@ export interface OrderItem {
   price: number;
 }
 
-export interface Order {
+// Shipping interfaces
+export interface ShippingInfoDTO {
+  shippingOrderId: number;
+  deliveryTime?: string;
+  isDelivered: boolean;
+  deliveryNotes?: string;
+  staff?: StaffDTO;
+}
+
+export interface ShippingDetailDTO {
+  shippingOrderId: number;
+  staffId: number;
+  staffName: string;
+  deliveryTime?: string;
+  deliveryNotes?: string;
+  isDelivered: boolean;
+}
+
+export interface OrderWithDetailsDTO {
   orderId: number;
   address: string;
   notes?: string;
   totalPrice: number;
   status: OrderStatus;
-  userId: number;
-  discountId?: number;
   hasSellItems: boolean;
   hasRentItems: boolean;
-  user?: User;
-  shippingOrder?: ShippingOrder;
-  sellOrder?: {
-    sellOrderDetails: OrderItem[];
-  };
-  rentOrder?: {
-    rentOrderDetails: OrderItem[];
-  };
-  createdAt: string;
+  userId: number;
+  userName: string;
+  shippingInfo?: ShippingInfoDTO;
 }
 
-export interface ShippingOrder {
+export interface OrderDetailDTO {
+  orderId: number;
+  address: string;
+  notes?: string;
+  totalPrice: number;
+  status: OrderStatus;
+  createdAt: string;
+  updatedAt?: string;
+  userId: number;
+  userName: string;
+  shippingInfo?: ShippingDetailDTO;
+}
+
+export interface PendingDeliveryDTO {
   shippingOrderId: number;
   orderId: number;
-  staffId: number;
+  deliveryTime?: string;
+  deliveryNotes?: string;
+  address: string;
+  notes?: string;
+  totalPrice: number;
+  status: OrderStatus;
+  userId: number;
+  userName: string;
+}
+
+export interface StaffShippingOrderDTO {
+  shippingOrderId: number;
+  orderId: number;
   deliveryTime?: string;
   deliveryNotes?: string;
   isDelivered: boolean;
-  proofImage?: string;
-  proofImageType?: string;
-  proofTimestamp?: string;
-  order?: Order;
-  staff?: User;
+  address: string;
+  notes?: string;
+  totalPrice: number;
+  status: OrderStatus;
+  customerId: number;
+  customerName: string;
+  hasSellItems: boolean;
+  hasRentItems: boolean;
 }
 
+export interface ShippingOrderAllocationDTO {
+  shippingOrderId: number;
+  orderId: number;
+  staffId: number;
+  staffName: string;
+  isDelivered: boolean;
+  createdAt: string;
+}
+
+export interface OrderStatusUpdateDTO {
+  orderId: number;
+  status: OrderStatus;
+  updatedAt: string;
+}
+
+export interface DeliveryStatusUpdateDTO {
+  shippingOrderId: number;
+  orderId: number;
+  isDelivered: boolean;
+  deliveryTime?: string;
+  deliveryNotes?: string;
+  updatedAt: string;
+}
+
+export interface DeliveryTimeUpdateDTO {
+  shippingOrderId: number;
+  orderId: number;
+  deliveryTime: string;
+  updatedAt: string;
+}
+
+// Request interfaces
 export interface AllocateOrderRequest {
   orderId: number;
   staffId: number;
@@ -81,6 +158,7 @@ export interface DeliveryTimeUpdateRequest {
   deliveryTime: string;
 }
 
+// API response interfaces
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -91,11 +169,12 @@ export interface ApiResponse<T> {
 export interface PagedResult<T> {
   items: T[];
   totalCount: number;
-  PageNumber: number;
-  PageSize: number;
-  totalPages?: number; // Calculated field
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
 }
 
+// Query parameter interfaces
 export interface PaginationParams {
   pageNumber: number;
   pageSize: number;
@@ -121,78 +200,63 @@ export interface ShippingOrderQueryParams extends PaginationParams {
   toDate?: string;
 }
 
+export interface OrderCountsDTO {
+  pendingCount: number;
+  processingCount: number;
+  shippedCount: number;
+  deliveredCount: number;
+  cancelledCount: number;
+  returningCount: number;
+  completedCount: number;
+  totalCount: number;
+}
+export interface UnallocatedOrderDTO {
+  orderId: number;
+  address: string;
+  notes: string | null;
+  totalPrice: number;
+  status: OrderStatus;
+  userId: number;
+  userName: string;
+  hasSellItems: boolean;
+  hasRentItems: boolean;
+}
+
+// Service implementation
 export const orderManagementService = {
   // Order allocation
   allocateOrderToStaff: async (
     request: AllocateOrderRequest
-  ): Promise<ShippingOrder> => {
-    const response = await axiosClient.post<ApiResponse<ShippingOrder>>(
-      `${API_URL}/allocate`,
-      request
-    );
+  ): Promise<ShippingOrderAllocationDTO> => {
+    const response = await axiosClient.post<
+      ApiResponse<ShippingOrderAllocationDTO>
+    >(`${API_URL}/allocate`, request);
     return response.data.data;
   },
 
-  async getUnallocatedOrders(
-    queryParams: OrderQueryParams = { pageNumber: 1, pageSize: 10 }
-  ): Promise<PagedResult<Order>> {
-    try {
-      // Convert query params to URL search params
-      const params = new URLSearchParams();
-
-      // Add pagination params
-      params.append("pageNumber", queryParams.pageNumber.toString());
-      params.append("pageSize", queryParams.pageSize.toString());
-
-      // Add sorting params
-      if (queryParams.sortBy) {
-        params.append("sortBy", queryParams.sortBy);
-        params.append(
-          "sortDescending",
-          queryParams.sortDescending ? "true" : "false"
-        );
-      }
-
-      // Add filtering params
-      if (queryParams.searchTerm)
-        params.append("searchTerm", queryParams.searchTerm);
-      if (queryParams.fromDate) params.append("fromDate", queryParams.fromDate);
-      if (queryParams.toDate) params.append("toDate", queryParams.toDate);
-      if (queryParams.customerId)
-        params.append("customerId", queryParams.customerId.toString());
-
-      const response = await axiosClient.get<ApiResponse<PagedResult<Order>>>(
-        `${API_URL}/unallocated?${params.toString()}`
-      );
-
-      return response.data.data;
-    } catch (error) {
-      console.error("Error fetching unallocated orders:", error);
-      throw error;
-    }
-  },
-
-  getOrdersByStaff: async (staffId: number): Promise<ShippingOrder[]> => {
-    const response = await axiosClient.get<ApiResponse<ShippingOrder[]>>(
-      `${API_URL}/staff/${staffId}`
-    );
+  getOrdersByStaff: async (
+    staffId: number
+  ): Promise<StaffShippingOrderDTO[]> => {
+    const response = await axiosClient.get<
+      ApiResponse<StaffShippingOrderDTO[]>
+    >(`${API_URL}/staff/${staffId}`);
     return response.data.data;
   },
 
   // Order status tracking
   updateOrderStatus: async (
     orderId: number,
-    request: OrderStatusUpdateRequest
-  ): Promise<Order> => {
-    const response = await axiosClient.put<ApiResponse<Order>>(
+    status: OrderStatus
+  ): Promise<OrderStatusUpdateDTO> => {
+    const response = await axiosClient.put<ApiResponse<OrderStatusUpdateDTO>>(
       `${API_URL}/status/${orderId}`,
-      request
+      { status } // Send as object to match backend
     );
     return response.data.data;
   },
 
-  getOrderWithDetails: async (orderId: number): Promise<Order> => {
-    const response = await axiosClient.get<ApiResponse<Order>>(
+  getOrderWithDetails: async (orderId: number): Promise<OrderDetailDTO> => {
+    const response = await axiosClient.get<ApiResponse<OrderDetailDTO>>(
       `${API_URL}/details/${orderId}`
     );
     return response.data.data;
@@ -204,15 +268,17 @@ export const orderManagementService = {
       pageNumber: 1,
       pageSize: 10,
     }
-  ): Promise<PagedResult<Order>> {
+  ): Promise<PagedResult<OrderWithDetailsDTO>> {
     try {
+      console.log(
+        `Making API call for status ${status} with params:`,
+        queryParams
+      );
       // Convert query params to URL search params
       const params = new URLSearchParams();
-
       // Add pagination params
       params.append("pageNumber", queryParams.pageNumber.toString());
       params.append("pageSize", queryParams.pageSize.toString());
-
       // Add sorting params
       if (queryParams.sortBy) {
         params.append("sortBy", queryParams.sortBy);
@@ -221,7 +287,6 @@ export const orderManagementService = {
           queryParams.sortDescending ? "true" : "false"
         );
       }
-
       // Add filtering params
       if (queryParams.searchTerm)
         params.append("searchTerm", queryParams.searchTerm);
@@ -230,36 +295,37 @@ export const orderManagementService = {
       if (queryParams.customerId)
         params.append("customerId", queryParams.customerId.toString());
 
-      // If we only need the count, add a parameter to indicate this
-      if (queryParams.pageSize === 1) {
-        params.append("countOnly", "true");
-      }
+      const url = `${API_URL}/status/${status}?${params.toString()}`;
+      console.log(`API URL: ${url}`);
 
-      const response = await axiosClient.get<ApiResponse<PagedResult<Order>>>(
-        `${API_URL}/status/${status}?${params.toString()}`
-      );
+      const response = await axiosClient.get<
+        ApiResponse<PagedResult<OrderWithDetailsDTO>>
+      >(url);
 
-      // Check if the response has the expected structure
+      console.log(`Raw API response for status ${status}:`, response);
+
+      // Directly return the data from the response without any additional processing
       if (response && response.data && response.data.data) {
+        console.log(`Response data for status ${status}:`, response.data.data);
         return response.data.data;
       } else {
-        // If the response doesn't have the expected structure, return an empty paged result
-        console.error("Unexpected API response format:", response);
+        console.warn(`No data property in response for status ${status}`);
         return {
           items: [],
           totalCount: 0,
-          PageNumber: queryParams.pageNumber,
-          PageSize: queryParams.pageSize,
+          pageNumber: queryParams.pageNumber,
+          pageSize: queryParams.pageSize,
+          totalPages: 0,
         };
       }
     } catch (error) {
-      console.error("Error fetching orders by status:", error);
-      // Return an empty paged result in case of error
+      console.error(`Error fetching orders by status ${status}:`, error);
       return {
         items: [],
         totalCount: 0,
-        PageNumber: queryParams.pageNumber,
-        PageSize: queryParams.pageSize,
+        pageNumber: queryParams.pageNumber,
+        pageSize: queryParams.pageSize,
+        totalPages: 0,
       };
     }
   },
@@ -268,26 +334,124 @@ export const orderManagementService = {
   updateDeliveryStatus: async (
     shippingOrderId: number,
     request: DeliveryStatusUpdateRequest
-  ): Promise<ShippingOrder> => {
-    const response = await axiosClient.put<ApiResponse<ShippingOrder>>(
-      `${API_URL}/delivery/status/${shippingOrderId}`,
-      request
-    );
+  ): Promise<DeliveryStatusUpdateDTO> => {
+    const response = await axiosClient.put<
+      ApiResponse<DeliveryStatusUpdateDTO>
+    >(`${API_URL}/delivery/status/${shippingOrderId}`, request);
     return response.data.data;
   },
 
   async getPendingDeliveries(
     queryParams: ShippingOrderQueryParams = { pageNumber: 1, pageSize: 10 }
-  ): Promise<PagedResult<ShippingOrder>> {
+  ): Promise<PagedResult<PendingDeliveryDTO>> {
     try {
-      // Convert query params to URL search params
       const params = new URLSearchParams();
 
       // Add pagination params
       params.append("pageNumber", queryParams.pageNumber.toString());
       params.append("pageSize", queryParams.pageSize.toString());
 
-      // Add sorting params
+      // Add optional params
+      if (queryParams.sortBy) {
+        params.append("sortBy", queryParams.sortBy);
+        params.append(
+          "sortDescending",
+          queryParams.sortDescending ? "true" : "false"
+        );
+      }
+      if (queryParams.searchTerm)
+        params.append("searchTerm", queryParams.searchTerm);
+      if (queryParams.fromDate) params.append("fromDate", queryParams.fromDate);
+      if (queryParams.toDate) params.append("toDate", queryParams.toDate);
+      if (queryParams.staffId)
+        params.append("staffId", queryParams.staffId.toString());
+      if (queryParams.isDelivered !== undefined) {
+        params.append("isDelivered", queryParams.isDelivered.toString());
+      }
+
+      // The interceptor will return response.data (ApiResponse<PagedResult<PendingDeliveryDTO>>)
+      const apiResponse = await axiosClient.get<
+        ApiResponse<PagedResult<PendingDeliveryDTO>>
+      >(`${API_URL}/pending-deliveries?${params.toString()}`);
+
+      // Since the interceptor strips the Axios wrapper, apiResponse is actually the ApiResponse
+      const responseData = apiResponse as unknown as ApiResponse<
+        PagedResult<PendingDeliveryDTO>
+      >;
+
+      if (!responseData.success) {
+        throw new Error(
+          responseData.message || "Failed to fetch pending deliveries"
+        );
+      }
+
+      return responseData.data;
+    } catch (error: any) {
+      console.error("Error fetching pending deliveries:", error);
+      throw new Error(
+        error.response?.data?.message ||
+          "You don't have permission to view pending deliveries or the service is unavailable"
+      );
+    }
+  },
+
+  updateDeliveryTime: async (
+    shippingOrderId: number,
+    request: DeliveryTimeUpdateRequest
+  ): Promise<DeliveryTimeUpdateDTO> => {
+    const response = await axiosClient.put<ApiResponse<DeliveryTimeUpdateDTO>>(
+      `${API_URL}/delivery/time/${shippingOrderId}`,
+      request
+    );
+    return response.data.data;
+  },
+
+  getOrderCounts: async (): Promise<OrderCountsDTO> => {
+    try {
+      // console.log(`Making API request to: ${API_URL}/counts`);
+
+      // Use any to bypass TypeScript's type checking for the response
+      const response: any = await axiosClient.get(`${API_URL}/counts`);
+
+      // console.log("API response:", response);
+
+      // Create a new object with the expected properties
+      const counts: OrderCountsDTO = {
+        pendingCount: response?.pendingCount || 0,
+        processingCount: response?.processingCount || 0,
+        shippedCount: response?.shippedCount || 0,
+        deliveredCount: response?.deliveredCount || 0,
+        cancelledCount: response?.cancelledCount || 0,
+        returningCount: response?.returningCount || 0,
+        completedCount: response?.completedCount || 0,
+        totalCount: response?.totalCount || 0,
+      };
+
+      // console.log("Extracted counts:", counts);
+      return counts;
+    } catch (error) {
+      // console.error("Error fetching order counts:", error);
+      return {
+        pendingCount: 0,
+        processingCount: 0,
+        shippedCount: 0,
+        deliveredCount: 0,
+        cancelledCount: 0,
+        returningCount: 0,
+        completedCount: 0,
+        totalCount: 0,
+      };
+    }
+  },
+
+  async getUnallocatedOrders(
+    queryParams: OrderQueryParams = { pageNumber: 1, pageSize: 10 }
+  ): Promise<PagedResult<UnallocatedOrderDTO>> {
+    try {
+      const params = new URLSearchParams();
+      params.append("pageNumber", queryParams.pageNumber.toString());
+      params.append("pageSize", queryParams.pageSize.toString());
+
       if (queryParams.sortBy) {
         params.append("sortBy", queryParams.sortBy);
         params.append(
@@ -296,47 +460,44 @@ export const orderManagementService = {
         );
       }
 
-      // Add filtering params
       if (queryParams.searchTerm)
         params.append("searchTerm", queryParams.searchTerm);
       if (queryParams.fromDate) params.append("fromDate", queryParams.fromDate);
       if (queryParams.toDate) params.append("toDate", queryParams.toDate);
-      if (queryParams.staffId)
-        params.append("staffId", queryParams.staffId.toString());
-      if (queryParams.isDelivered !== undefined)
-        params.append("isDelivered", queryParams.isDelivered.toString());
+      if (queryParams.customerId)
+        params.append("customerId", queryParams.customerId.toString());
 
-      const response = await axiosClient.get<
-        ApiResponse<PagedResult<ShippingOrder>>
-      >(`${API_URL}/pending-deliveries?${params.toString()}`);
+      // The interceptor returns response.data (ApiResponse<PagedResult<UnallocatedOrderDTO>>)
+      const apiResponse = await axiosClient.get<
+        ApiResponse<PagedResult<UnallocatedOrderDTO>>
+      >(`${API_URL}/unallocated?${params.toString()}`);
 
-      return response.data.data;
+      // Since the interceptor strips the Axios wrapper, apiResponse is actually the ApiResponse
+      const responseData = apiResponse as unknown as ApiResponse<
+        PagedResult<UnallocatedOrderDTO>
+      >;
+
+      if (responseData.success) {
+        return responseData.data; // This is the PagedResult<UnallocatedOrderDTO>
+      }
+
+      console.warn("API request was not successful:", responseData);
+      return this.getEmptyPagedResult(queryParams);
     } catch (error) {
-      console.error("Error fetching pending deliveries:", error);
-      throw error;
+      console.error("Error fetching unallocated orders:", error);
+      return this.getEmptyPagedResult(queryParams);
     }
   },
 
-  updateDeliveryTime: async (
-    shippingOrderId: number,
-    request: DeliveryTimeUpdateRequest
-  ): Promise<ShippingOrder> => {
-    const response = await axiosClient.put<ApiResponse<ShippingOrder>>(
-      `${API_URL}/delivery/time/${shippingOrderId}`,
-      request
-    );
-    return response.data.data;
-  },
-
-  // Add a method for marking an order as delivered
-  markOrderAsDelivered: async (request: {
-    shippingOrderId: number;
-    deliveryNotes?: string;
-  }): Promise<ShippingOrder> => {
-    const response = await axiosClient.post<ApiResponse<ShippingOrder>>(
-      `${API_URL}/delivery/mark-delivered`,
-      request
-    );
-    return response.data.data;
+  getEmptyPagedResult(
+    queryParams: OrderQueryParams
+  ): PagedResult<UnallocatedOrderDTO> {
+    return {
+      items: [],
+      totalCount: 0,
+      pageNumber: queryParams.pageNumber,
+      pageSize: queryParams.pageSize,
+      totalPages: 0,
+    };
   },
 };

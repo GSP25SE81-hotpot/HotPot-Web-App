@@ -33,9 +33,9 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useEffect, useState } from "react";
 import {
-  Order,
   OrderQueryParams,
   OrderStatus,
+  OrderWithDetailsDTO,
   orderManagementService,
 } from "../../../api/Services/orderManagementService";
 import {
@@ -57,40 +57,30 @@ import {
   StyledTableRow,
   StyledTabs,
   UnallocatedChip,
-  UpdateStatusButton,
   ViewDetailsButton,
 } from "../../../components/manager/styles/OrdersByStatusListStyles";
-import {
-  formatCurrency,
-  formatDate,
-  getOrderStatusLabel,
-} from "../../../utils/formatters";
+import { formatCurrency, getOrderStatusLabel } from "../../../utils/formatters";
 
 const OrdersByStatusList: React.FC = () => {
   // State for active tab
   const [activeTab, setActiveTab] = useState(0);
-
   // State for orders data
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderWithDetailsDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   // Pagination state
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
-
   // Sorting state
   const [sortBy, setSortBy] = useState<string>("date");
   const [sortDescending, setSortDescending] = useState(true);
-
   // Filtering state
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [fromDate, setFromDate] = useState<Date | null>(null);
   const [toDate, setToDate] = useState<Date | null>(null);
   const [customerId, setCustomerId] = useState<number | null>(null);
-
   // Snackbar state
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -119,7 +109,6 @@ const OrdersByStatusList: React.FC = () => {
     try {
       setLoading(true);
       const status = tabToStatus[activeTab];
-
       // Create query params object
       const queryParams: Omit<OrderQueryParams, "status"> = {
         pageNumber,
@@ -131,12 +120,10 @@ const OrdersByStatusList: React.FC = () => {
         toDate: toDate ? toDate.toISOString() : undefined,
         customerId: customerId || undefined,
       };
-
       const response = await orderManagementService.getOrdersByStatus(
         status,
         queryParams
       );
-
       // Update state with paginated data
       setOrders(response.items);
       setTotalCount(response.totalCount);
@@ -339,7 +326,6 @@ const OrdersByStatusList: React.FC = () => {
           <StyledTab label="Cancelled" />
           <StyledTab label="Returning" />
         </StyledTabs>
-
         {/* Search and filter toolbar */}
         <Box
           sx={{
@@ -377,7 +363,6 @@ const OrdersByStatusList: React.FC = () => {
               </Box>
             </Box>
           </Box>
-
           <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
               placeholder="Search orders..."
@@ -411,7 +396,6 @@ const OrdersByStatusList: React.FC = () => {
                 }
               }}
             />
-
             <Tooltip title="Advanced filters">
               <Button
                 variant={showFilters ? "contained" : "outlined"}
@@ -429,10 +413,8 @@ const OrdersByStatusList: React.FC = () => {
             </Tooltip>
           </Box>
         </Box>
-
         {/* Filters section */}
         {renderFilters()}
-
         {/* Loading state */}
         {loading && orders.length === 0 ? (
           <LoadingContainer>
@@ -500,15 +482,11 @@ const OrdersByStatusList: React.FC = () => {
                       <OrderIdCell>#{order.orderId}</OrderIdCell>
                       <StyledTableCell>
                         <CustomerName>
-                          {order.user?.fullName || "Unknown"}
+                          {order.userName || "Unknown"}
                         </CustomerName>
-                        <CustomerPhone>
-                          {order.user?.phoneNumber || "No phone"}
-                        </CustomerPhone>
+                        <CustomerPhone>ID: {order.userId}</CustomerPhone>
                       </StyledTableCell>
-                      <StyledTableCell>
-                        {formatDate(order.createdAt)}
-                      </StyledTableCell>
+
                       <StyledTableCell>
                         {formatCurrency(order.totalPrice)}
                       </StyledTableCell>
@@ -525,20 +503,20 @@ const OrdersByStatusList: React.FC = () => {
                         )}
                       </StyledTableCell>
                       <StyledTableCell>
-                        {order.shippingOrder ? (
+                        {order.shippingInfo ? (
                           <Tooltip
                             title={`Assigned to ${
-                              order.shippingOrder.staff?.fullName || "Unknown"
+                              order.shippingInfo.staff?.name || "Unknown"
                             }`}
                           >
                             <ShippingStatusChip
                               label={
-                                order.shippingOrder.isDelivered
+                                order.shippingInfo.isDelivered
                                   ? "Delivered"
                                   : "Pending"
                               }
                               size="small"
-                              delivered={order.shippingOrder.isDelivered}
+                              delivered={order.shippingInfo.isDelivered}
                             />
                           </Tooltip>
                         ) : (
@@ -547,16 +525,6 @@ const OrdersByStatusList: React.FC = () => {
                       </StyledTableCell>
                       <StyledTableCell>
                         <ActionsContainer>
-                          <UpdateStatusButton
-                            variant="outlined"
-                            size="small"
-                            onClick={() => {
-                              // Navigate to order details for updating
-                              window.location.href = `/orders/${order.orderId}/edit`;
-                            }}
-                          >
-                            Update
-                          </UpdateStatusButton>
                           <Tooltip title="View order details">
                             <ViewDetailsButton
                               size="small"
@@ -575,7 +543,6 @@ const OrdersByStatusList: React.FC = () => {
                 </TableBody>
               </Table>
             </StyledTableContainer>
-
             {/* Pagination */}
             <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
               <TablePagination
@@ -603,7 +570,6 @@ const OrdersByStatusList: React.FC = () => {
           </>
         )}
       </StyledPaper>
-
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}

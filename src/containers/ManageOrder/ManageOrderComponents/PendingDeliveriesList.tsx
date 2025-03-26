@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/pages/OrderManagement/components/PendingDeliveriesList.tsx
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -27,7 +28,8 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import {
-  ShippingOrder,
+  DeliveryStatusUpdateRequest,
+  PendingDeliveryDTO,
   ShippingOrderQueryParams,
   orderManagementService,
 } from "../../../api/Services/orderManagementService";
@@ -54,11 +56,11 @@ import {
 import { formatDate } from "../../../utils/formatters";
 
 const PendingDeliveriesList: React.FC = () => {
-  const [deliveries, setDeliveries] = useState<ShippingOrder[]>([]);
+  const [deliveries, setDeliveries] = useState<PendingDeliveryDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDelivery, setSelectedDelivery] =
-    useState<ShippingOrder | null>(null);
+    useState<PendingDeliveryDTO | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [deliveryNotes, setDeliveryNotes] = useState("");
   const [snackbar, setSnackbar] = useState({
@@ -86,7 +88,6 @@ const PendingDeliveriesList: React.FC = () => {
   const fetchDeliveries = async () => {
     try {
       setLoading(true);
-
       // Create query params
       const queryParams: ShippingOrderQueryParams = {
         pageNumber,
@@ -126,7 +127,7 @@ const PendingDeliveriesList: React.FC = () => {
   };
 
   // Handle page change
-  const handlePageChange = (event: unknown, newPage: number) => {
+  const handlePageChange = (_event: unknown, newPage: number) => {
     setPageNumber(newPage + 1); // MUI pagination is 0-based, our API is 1-based
   };
 
@@ -151,10 +152,45 @@ const PendingDeliveriesList: React.FC = () => {
   };
 
   // Handle mark as delivered click
-  const handleMarkAsDeliveredClick = (delivery: ShippingOrder) => {
+  const handleMarkAsDeliveredClick = (delivery: PendingDeliveryDTO) => {
     setSelectedDelivery(delivery);
     setDeliveryNotes("");
     setOpenDialog(true);
+  };
+
+  // Handle confirm delivery
+  const handleConfirmDelivery = async () => {
+    if (!selectedDelivery) return;
+
+    try {
+      const request: DeliveryStatusUpdateRequest = {
+        isDelivered: true,
+        notes: deliveryNotes || undefined,
+      };
+
+      await orderManagementService.updateDeliveryStatus(
+        selectedDelivery.shippingOrderId,
+        request
+      );
+
+      // Show success message
+      setSnackbar({
+        open: true,
+        message: `Order #${selectedDelivery.orderId} marked as delivered successfully`,
+        severity: "success",
+      });
+
+      // Close dialog and refresh list
+      setOpenDialog(false);
+      fetchDeliveries();
+    } catch (err) {
+      console.error("Error updating delivery status:", err);
+      setSnackbar({
+        open: true,
+        message: "Failed to update delivery status. Please try again.",
+        severity: "error",
+      });
+    }
   };
 
   // Handle close dialog
@@ -206,7 +242,6 @@ const PendingDeliveriesList: React.FC = () => {
         <ListTitle variant="h6">
           Pending Deliveries <CountBadge>{totalCount}</CountBadge>
         </ListTitle>
-
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
             placeholder="Search deliveries..."
@@ -242,7 +277,6 @@ const PendingDeliveriesList: React.FC = () => {
               }
             }}
           />
-
           <Button
             variant="contained"
             color="primary"
@@ -294,42 +328,28 @@ const PendingDeliveriesList: React.FC = () => {
                         Delivery Time
                       </TableSortLabel>
                     </StyledHeaderCell>
-                    <StyledHeaderCell>
-                      <TableSortLabel
-                        active={sortBy === "staff"}
-                        direction={sortDescending ? "desc" : "asc"}
-                        onClick={() => handleSortChange("staff")}
-                      >
-                        Assigned To
-                      </TableSortLabel>
-                    </StyledHeaderCell>
                     <StyledHeaderCell>Address</StyledHeaderCell>
-                    <StyledHeaderCell>Items</StyledHeaderCell>
+                    <StyledHeaderCell>Status</StyledHeaderCell>
                     <StyledHeaderCell>Actions</StyledHeaderCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {deliveries.map((delivery) => (
                     <StyledTableRow key={delivery.shippingOrderId}>
-                      <IdCell>#{delivery.order?.orderId}</IdCell>
+                      <IdCell>#{delivery.orderId}</IdCell>
                       <StyledTableCell>
                         <CustomerName>
-                          {delivery.order?.user?.fullName || "Unknown"}
+                          {delivery.userName || "Unknown"}
                         </CustomerName>
-                        <CustomerPhone>
-                          {delivery.order?.user?.phoneNumber || "No phone"}
-                        </CustomerPhone>
+                        <CustomerPhone>ID: {delivery.userId}</CustomerPhone>
                       </StyledTableCell>
                       <StyledTableCell>
                         {delivery.deliveryTime
                           ? formatDate(delivery.deliveryTime)
                           : "Not scheduled"}
                       </StyledTableCell>
-                      <StyledTableCell>
-                        {delivery.staff?.fullName || "Unassigned"}
-                      </StyledTableCell>
                       <StyledTableCell sx={{ maxWidth: 200 }}>
-                        <Tooltip title={delivery.order?.address || ""}>
+                        <Tooltip title={delivery.address || ""}>
                           <Box
                             sx={{
                               whiteSpace: "nowrap",
@@ -337,21 +357,15 @@ const PendingDeliveriesList: React.FC = () => {
                               textOverflow: "ellipsis",
                             }}
                           >
-                            {delivery.order?.address || "No address"}
+                            {delivery.address || "No address"}
                           </Box>
                         </Tooltip>
                       </StyledTableCell>
                       <StyledTableCell>
-                        {delivery.order?.hasSellItems && (
-                          <OrderTypeChip label="Sell" size="small" />
-                        )}
-                        {delivery.order?.hasRentItems && (
-                          <OrderTypeChip
-                            label="Rent"
-                            size="small"
-                            color="secondary"
-                          />
-                        )}
+                        <OrderTypeChip
+                          label={delivery.status.toString()}
+                          size="small"
+                        />
                       </StyledTableCell>
                       <StyledTableCell>
                         <ActionsContainer>
@@ -375,7 +389,7 @@ const PendingDeliveriesList: React.FC = () => {
                               color="primary"
                               onClick={() => {
                                 // Navigate to order details
-                                window.location.href = `/orders/${delivery.order?.orderId}`;
+                                window.location.href = `/orders/${delivery.orderId}`;
                               }}
                               sx={{
                                 backgroundColor: (theme) =>
@@ -396,7 +410,6 @@ const PendingDeliveriesList: React.FC = () => {
                 </TableBody>
               </Table>
             </StyledTableContainer>
-
             {/* Pagination */}
             <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
               <TablePagination
@@ -429,11 +442,13 @@ const PendingDeliveriesList: React.FC = () => {
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
-            padding: 1,
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 3,
+              boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
+              padding: 1,
+            },
           },
         }}
       >
@@ -444,7 +459,7 @@ const PendingDeliveriesList: React.FC = () => {
             pb: 1,
           }}
         >
-          Mark Order #{selectedDelivery?.order?.orderId} as Delivered
+          Mark Order #{selectedDelivery?.orderId} as Delivered
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3, pb: 2 }}>
           <Box sx={{ mt: 1, minWidth: 300 }}>
@@ -476,6 +491,19 @@ const PendingDeliveriesList: React.FC = () => {
             }}
           >
             Cancel
+          </DialogActionButton>
+          <DialogActionButton
+            onClick={handleConfirmDelivery}
+            variant="contained"
+            color="success"
+            sx={{
+              fontWeight: 600,
+              "&:hover": {
+                backgroundColor: (theme) => theme.palette.success.dark,
+              },
+            }}
+          >
+            Confirm Delivery
           </DialogActionButton>
         </DialogActions>
       </Dialog>

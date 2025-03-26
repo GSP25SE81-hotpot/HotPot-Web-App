@@ -29,8 +29,9 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import {
-  Order,
+  AllocateOrderRequest,
   OrderQueryParams,
+  UnallocatedOrderDTO,
   orderManagementService,
 } from "../../../api/Services/orderManagementService";
 import staffService from "../../../api/Services/staffService";
@@ -64,12 +65,13 @@ import {
 } from "../../../utils/formatters";
 
 const UnallocatedOrdersList: React.FC = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<UnallocatedOrderDTO[]>([]);
   const [staff, setStaff] = useState<StaffAvailabilityDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [allocating, setAllocating] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] =
+    useState<UnallocatedOrderDTO | null>(null);
   const [selectedStaffId, setSelectedStaffId] = useState<number>(0);
   const [openDialog, setOpenDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -90,97 +92,79 @@ const UnallocatedOrdersList: React.FC = () => {
   // Search state
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    fetchData();
-  }, [pageNumber, pageSize, sortBy, sortDescending]);
-
+  // Fetch data function
   const fetchData = async () => {
     try {
       setLoading(true);
+      setError(null);
 
-      // Create query params
+      // Prepare query parameters
       const queryParams: OrderQueryParams = {
         pageNumber,
         pageSize,
         sortBy,
         sortDescending,
-        searchTerm: searchTerm || undefined,
+        searchTerm: searchTerm.trim() || undefined,
       };
 
-      // Get unallocated orders
-      const ordersResponse = await orderManagementService.getUnallocatedOrders(
+      // Call the API
+      const result = await orderManagementService.getUnallocatedOrders(
         queryParams
       );
 
-      // Check if the response has the expected structure
-      if (ordersResponse && typeof ordersResponse === "object") {
-        // Handle different response formats
-        if (Array.isArray(ordersResponse)) {
-          // If the API returns an array instead of a paged result
-          setOrders(ordersResponse);
-          setTotalCount(ordersResponse.length);
-        } else if (
-          "items" in ordersResponse &&
-          Array.isArray(ordersResponse.items)
-        ) {
-          // If the API returns a paged result with items
-          setOrders(ordersResponse.items);
-          setTotalCount(
-            ordersResponse.totalCount || ordersResponse.items.length
-          );
-        } else {
-          // Unexpected response format
-          console.error("Unexpected response format:", ordersResponse);
-          setError("Received unexpected data format from server");
-          setOrders([]);
-          setTotalCount(0);
-        }
-      } else {
-        // Handle null or undefined response
-        console.error("Invalid response:", ordersResponse);
-        setError(
-          "Failed to load unallocated orders. Invalid response from server."
-        );
-        setOrders([]);
-        setTotalCount(0);
-      }
+      // Update state with the response data
+      setOrders(result.items);
+      setTotalCount(result.totalCount);
 
-      // Get available staff
-      try {
-        const staffData = await staffService.getAvailableStaff();
-
-        // Check if staffData is an array, if not, convert it to an array
-        if (Array.isArray(staffData)) {
-          setStaff(staffData);
-        } else if (
-          staffData &&
-          "items" in staffData &&
-          Array.isArray(staffData.items)
-        ) {
-          // If it returns a paged result
-          setStaff(staffData.items);
-        } else if (staffData) {
-          // If it's a single object, wrap it in an array
-          setStaff([staffData]);
-        } else {
-          // If it's null or undefined, set an empty array
-          setStaff([]);
-        }
-      } catch (staffErr) {
-        console.error("Error fetching staff data:", staffErr);
-        // Don't fail the whole operation if staff data fails
-        setStaff([]);
-      }
+      // Also fetch staff members for allocation
+      fetchStaffMembers();
     } catch (err) {
-      console.error("Error fetching data:", err);
-      setError("Failed to load unallocated orders. Please try again later.");
-      // Ensure orders is an empty array in case of error
-      setOrders([]);
-      setTotalCount(0);
+      console.error("Error fetching unallocated orders:", err);
+      setError(
+        err instanceof Error
+          ? `Failed to load unallocated orders: ${err.message}`
+          : "Failed to load unallocated orders"
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  // Fetch staff members
+  const fetchStaffMembers = async () => {
+    try {
+      const staffData = await staffService.getAvailableStaff();
+
+      // Filter staff to only include those with isAvailable = true
+      const availableStaff = Array.isArray(staffData)
+        ? staffData.filter((staff) => staff.isAvailable === true)
+        : [];
+
+      setStaff(availableStaff);
+
+      // Log how many staff members are available
+      console.log(
+        `Found ${availableStaff.length} available staff members out of ${staffData.length} total`
+      );
+    } catch (err) {
+      console.error("Error fetching staff members:", err);
+      setStaff([]);
+
+      // Only show error message if we're opening the dialog
+      if (openDialog) {
+        setSnackbar({
+          open: true,
+          message:
+            "Failed to load staff availability data. Please try again later.",
+          severity: "error",
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [pageNumber, pageSize, sortBy, sortDescending]);
 
   // Handle search
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -218,7 +202,7 @@ const UnallocatedOrdersList: React.FC = () => {
     }
   };
 
-  const handleAllocateClick = (order: Order) => {
+  const handleAllocateClick = (order: UnallocatedOrderDTO) => {
     setSelectedOrder(order);
     setSelectedStaffId(0);
     setOpenDialog(true);
@@ -242,12 +226,14 @@ const UnallocatedOrdersList: React.FC = () => {
       });
       return;
     }
+
     try {
       setAllocating(true);
-      await orderManagementService.allocateOrderToStaff({
+      const request: AllocateOrderRequest = {
         orderId: selectedOrder.orderId,
         staffId: selectedStaffId,
-      });
+      };
+      await orderManagementService.allocateOrderToStaff(request);
 
       // Refresh the data after allocation
       fetchData();
@@ -307,35 +293,32 @@ const UnallocatedOrdersList: React.FC = () => {
         <ListTitle variant="h6">
           Unallocated Orders <CountBadge>{totalCount}</CountBadge>
         </ListTitle>
-
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
             placeholder="Search orders..."
             size="small"
             value={searchTerm}
             onChange={handleSearch}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-                endAdornment: searchTerm && (
-                  <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setSearchTerm("");
-                        applySearch();
-                      }}
-                    >
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                sx: { borderRadius: 2 },
-              },
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+              endAdornment: searchTerm && (
+                <InputAdornment position="end">
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setSearchTerm("");
+                      applySearch();
+                    }}
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+              sx: { borderRadius: 2 },
             }}
             onKeyUp={(e) => {
               if (e.key === "Enter") {
@@ -393,9 +376,6 @@ const UnallocatedOrdersList: React.FC = () => {
                     <StyledHeaderCell>Status</StyledHeaderCell>
                     <StyledHeaderCell>Items</StyledHeaderCell>
                     <StyledHeaderCell>Actions</StyledHeaderCell>
-                    //
-                    src/pages/OrderManagement/components/UnallocatedOrdersList.tsx
-                    (continued)
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -404,14 +384,13 @@ const UnallocatedOrdersList: React.FC = () => {
                       <IdCell>#{order.orderId}</IdCell>
                       <StyledTableCell>
                         <CustomerName>
-                          {order.user?.fullName || "Unknown"}
+                          {order.userName || "Unknown"}
                         </CustomerName>
-                        <CustomerPhone>
-                          {order.user?.phoneNumber || "No phone"}
-                        </CustomerPhone>
+                        <CustomerPhone>ID: {order.userId}</CustomerPhone>
                       </StyledTableCell>
                       <StyledTableCell>
-                        {formatDate(order.createdAt)}
+                        {formatDate(new Date().toISOString())}{" "}
+                        {/* Use current date as fallback */}
                       </StyledTableCell>
                       <StyledTableCell>
                         {formatCurrency(order.totalPrice)}
@@ -449,7 +428,6 @@ const UnallocatedOrdersList: React.FC = () => {
                 </TableBody>
               </Table>
             </StyledTableContainer>
-
             {/* Pagination */}
             <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
               <TablePagination
@@ -477,16 +455,17 @@ const UnallocatedOrdersList: React.FC = () => {
           </>
         )}
       </StyledPaper>
-
       {/* Allocation Dialog */}
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
-            padding: 1,
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 3,
+              boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
+              padding: 1,
+            },
           },
         }}
       >
@@ -521,8 +500,8 @@ const UnallocatedOrdersList: React.FC = () => {
                 </MenuItem>
                 {staff.map((staffMember) => (
                   <MenuItem
-                    key={staffMember.staffId}
-                    value={staffMember.staffId}
+                    key={staffMember.id}
+                    value={staffMember.id}
                     sx={{
                       borderRadius: 1,
                       my: 0.5,
@@ -581,7 +560,6 @@ const UnallocatedOrdersList: React.FC = () => {
           </DialogActionButton>
         </DialogActions>
       </Dialog>
-
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}

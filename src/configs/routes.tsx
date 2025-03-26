@@ -18,6 +18,7 @@ export const managerRoutes = {
   rentalHistory: "/rental-history",
   calculateLateFee: "/calculate-late-fee",
   adjustReturnDate: "/adjust-return-date",
+  orderDetail: "/orders/:orderId",
 };
 
 export const authRoutes = {

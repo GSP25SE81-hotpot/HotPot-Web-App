@@ -6,7 +6,6 @@ import {
   alpha,
   Box,
   Button,
-  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -15,9 +14,6 @@ import {
   Divider,
   FormControl,
   InputLabel,
-  List,
-  ListItem,
-  ListItemText,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -32,16 +28,18 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  Order,
-  orderManagementService,
+  AllocateOrderRequest,
+  DeliveryStatusUpdateRequest,
+  DeliveryTimeUpdateRequest,
+  OrderDetailDTO,
   OrderStatus,
+  orderManagementService,
 } from "../../api/Services/orderManagementService";
 import staffService from "../../api/Services/staffService";
 import {
   ActionButton,
   ActionButtonsContainer,
   BackButton,
-  CustomerEmail,
   CustomerName,
   DeliveryChip,
   DetailCard,
@@ -53,7 +51,6 @@ import {
   HeaderPaper,
   InfoLabel,
   InfoValue,
-  ItemSectionTitle,
   LoadingContainer,
   OrderInfoGrid,
   OrderInfoItem,
@@ -77,7 +74,7 @@ import {
 const OrderDetailView: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<OrderDetailDTO | null>(null);
   const [staff, setStaff] = useState<StaffAvailabilityDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -130,16 +127,15 @@ const OrderDetailView: React.FC = () => {
 
         // Initialize form states based on order data
         setNewStatus(orderData.status);
-        if (orderData.shippingOrder) {
-          setIsDelivered(orderData.shippingOrder.isDelivered);
-          setDeliveryNotes(orderData.shippingOrder.deliveryNotes || "");
-          // src/pages/OrderManagement/OrderDetailView.tsx (continued)
+        if (orderData.shippingInfo) {
+          setIsDelivered(orderData.shippingInfo.isDelivered);
+          setDeliveryNotes(orderData.shippingInfo.deliveryNotes || "");
           setDeliveryTime(
-            orderData.shippingOrder.deliveryTime
-              ? new Date(orderData.shippingOrder.deliveryTime)
+            orderData.shippingInfo.deliveryTime
+              ? new Date(orderData.shippingInfo.deliveryTime)
               : null
           );
-          setSelectedStaffId(orderData.shippingOrder.staffId);
+          setSelectedStaffId(orderData.shippingInfo.staffId);
         }
         setError(null);
       } catch (err) {
@@ -206,7 +202,7 @@ const OrderDetailView: React.FC = () => {
       setUpdating(true);
       const updatedOrder = await orderManagementService.updateOrderStatus(
         order.orderId,
-        { status: newStatus }
+        newStatus
       );
       setOrder({ ...order, ...updatedOrder });
       setSnackbar({
@@ -240,17 +236,24 @@ const OrderDetailView: React.FC = () => {
     }
     try {
       setUpdating(true);
-      const shippingOrder = await orderManagementService.allocateOrderToStaff({
+      const request: AllocateOrderRequest = {
         orderId: order.orderId,
         staffId: selectedStaffId,
-      });
-      // Update the order with the new shipping order
-      setOrder({ ...order, shippingOrder });
+      };
+
+      const shippingOrder = await orderManagementService.allocateOrderToStaff(
+        request
+      );
+
+      // Update the order with the new shipping info
+      setOrder({ ...order, shippingInfo: shippingOrder });
+
       setSnackbar({
         open: true,
         message: `Order successfully allocated to staff`,
         severity: "success",
       });
+
       handleCloseAllocateDialog();
     } catch (err) {
       console.error("Error allocating order:", err);
@@ -267,24 +270,40 @@ const OrderDetailView: React.FC = () => {
   };
 
   const handleUpdateDeliveryStatus = async () => {
-    if (!order?.shippingOrder) return;
+    if (!order?.shippingInfo) return;
     try {
       setUpdating(true);
-      const updatedShippingOrder =
+
+      const request: DeliveryStatusUpdateRequest = {
+        isDelivered,
+        notes: deliveryNotes || undefined,
+      };
+
+      const updatedDeliveryStatus =
         await orderManagementService.updateDeliveryStatus(
-          order.shippingOrder.shippingOrderId,
-          {
-            isDelivered,
-            notes: deliveryNotes,
-          }
+          order.shippingInfo.shippingOrderId,
+          request
         );
-      // Update the order with the updated shipping order
-      setOrder({ ...order, shippingOrder: updatedShippingOrder });
+
+      // Merge the updated delivery status with the existing shipping info
+      // instead of replacing the entire object
+      const updatedShippingInfo = {
+        ...order.shippingInfo,
+        isDelivered: updatedDeliveryStatus.isDelivered,
+        notes:
+          updatedDeliveryStatus.deliveryNotes ||
+          order.shippingInfo.deliveryNotes,
+      };
+
+      // Update the order with the merged shipping info
+      setOrder({ ...order, shippingInfo: updatedShippingInfo });
+
       setSnackbar({
         open: true,
         message: `Delivery status updated successfully`,
         severity: "success",
       });
+
       handleCloseDeliveryStatusDialog();
     } catch (err) {
       console.error("Error updating delivery status:", err);
@@ -301,23 +320,36 @@ const OrderDetailView: React.FC = () => {
   };
 
   const handleUpdateDeliveryTime = async () => {
-    if (!order?.shippingOrder || !deliveryTime) return;
+    if (!order?.shippingInfo || !deliveryTime) return;
     try {
       setUpdating(true);
-      const updatedShippingOrder =
+
+      const request: DeliveryTimeUpdateRequest = {
+        deliveryTime: deliveryTime.toISOString(),
+      };
+
+      const updatedDeliveryTime =
         await orderManagementService.updateDeliveryTime(
-          order.shippingOrder.shippingOrderId,
-          {
-            deliveryTime: deliveryTime.toISOString(),
-          }
+          order.shippingInfo.shippingOrderId,
+          request
         );
-      // Update the order with the updated shipping order
-      setOrder({ ...order, shippingOrder: updatedShippingOrder });
+
+      // Merge the updated delivery time with the existing shipping info
+      // instead of replacing the entire object
+      const updatedShippingInfo = {
+        ...order.shippingInfo,
+        deliveryTime: updatedDeliveryTime.deliveryTime,
+      };
+
+      // Update the order with the merged shipping info
+      setOrder({ ...order, shippingInfo: updatedShippingInfo });
+
       setSnackbar({
         open: true,
         message: `Delivery time updated successfully`,
         severity: "success",
       });
+
       handleCloseDeliveryTimeDialog();
     } catch (err) {
       console.error("Error updating delivery time:", err);
@@ -384,29 +416,18 @@ const OrderDetailView: React.FC = () => {
                 status={order.status}
               />
             </HeaderContainer>
-
             <OrderInfoGrid>
               <OrderInfoItem>
                 <InfoLabel>Order Date</InfoLabel>
-                <InfoValue>{formatDate(order.createdAt)}</InfoValue>
+                <InfoValue>
+                  {formatDate(order.createdAt || new Date().toISOString())}
+                </InfoValue>
               </OrderInfoItem>
-
               <OrderInfoItem>
                 <InfoLabel>Total Amount</InfoLabel>
                 <InfoValue>{formatCurrency(order.totalPrice)}</InfoValue>
               </OrderInfoItem>
-
-              <OrderInfoItem>
-                <InfoLabel>Order Type</InfoLabel>
-                <Box sx={{ display: "flex", gap: 1, mt: 0.5 }}>
-                  {order.hasSellItems && <Chip label="Sell" size="small" />}
-                  {order.hasRentItems && (
-                    <Chip label="Rent" size="small" color="secondary" />
-                  )}
-                </Box>
-              </OrderInfoItem>
             </OrderInfoGrid>
-
             <ActionButtonsContainer>
               <ActionButton
                 variant="outlined"
@@ -415,8 +436,7 @@ const OrderDetailView: React.FC = () => {
               >
                 Update Status
               </ActionButton>
-
-              {!order.shippingOrder ? (
+              {!order.shippingInfo ? (
                 <ActionButton
                   variant="contained"
                   color="primary"
@@ -453,22 +473,14 @@ const OrderDetailView: React.FC = () => {
             <Divider />
             <StyledCardContent>
               <CustomerName>
-                {order.user?.fullName || "Unknown Customer"}
+                {order.userName || "Unknown Customer"}
               </CustomerName>
-              <CustomerEmail>
-                {order.user?.email || "No email provided"}
-              </CustomerEmail>
-
-              <SectionTitle>Phone Number</SectionTitle>
-              <SectionValue>
-                {order.user?.phoneNumber || "No phone number provided"}
-              </SectionValue>
-
+              <SectionTitle>User ID</SectionTitle>
+              <SectionValue>{order.userId || "No ID provided"}</SectionValue>
               <SectionTitle>Shipping Address</SectionTitle>
               <SectionValue>
                 {order.address || "No address provided"}
               </SectionValue>
-
               {order.notes && (
                 <>
                   <SectionTitle>Order Notes</SectionTitle>
@@ -485,7 +497,7 @@ const OrderDetailView: React.FC = () => {
             <StyledCardHeader
               title="Shipping Information"
               action={
-                !order.shippingOrder && (
+                !order.shippingInfo && (
                   <Button
                     variant="contained"
                     size="small"
@@ -504,39 +516,35 @@ const OrderDetailView: React.FC = () => {
             />
             <Divider />
             <StyledCardContent>
-              {order.shippingOrder ? (
+              {order.shippingInfo ? (
                 <>
                   <SectionTitle>Assigned Staff</SectionTitle>
                   <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                    {order.shippingOrder.staff?.fullName || "Unknown Staff"}
+                    {order.shippingInfo.staffName || "Unknown Staff"}
                   </Typography>
-
                   <SectionTitle>Delivery Status</SectionTitle>
                   <DeliveryChip
                     label={
-                      order.shippingOrder.isDelivered
+                      order.shippingInfo.isDelivered
                         ? "Delivered"
                         : "Pending Delivery"
                     }
-                    delivered={order.shippingOrder.isDelivered}
+                    delivered={order.shippingInfo.isDelivered}
                   />
-
                   <SectionTitle>Scheduled Delivery Time</SectionTitle>
                   <SectionValue>
-                    {order.shippingOrder.deliveryTime
-                      ? formatDate(order.shippingOrder.deliveryTime)
+                    {order.shippingInfo.deliveryTime
+                      ? formatDate(order.shippingInfo.deliveryTime)
                       : "Not scheduled yet"}
                   </SectionValue>
-
-                  {order.shippingOrder.deliveryNotes && (
+                  {order.shippingInfo.deliveryNotes && (
                     <>
                       <SectionTitle>Delivery Notes</SectionTitle>
                       <SectionValue>
-                        {order.shippingOrder.deliveryNotes}
+                        {order.shippingInfo.deliveryNotes}
                       </SectionValue>
                     </>
                   )}
-
                   <ActionButtonsContainer>
                     <ActionButton
                       variant="outlined"
@@ -578,107 +586,6 @@ const OrderDetailView: React.FC = () => {
             <Divider />
             <StyledCardContent>
               <OrderItemsContainer>
-                {/* Sell Items */}
-                {order.sellOrder &&
-                  order.sellOrder.sellOrderDetails.length > 0 && (
-                    <>
-                      <ItemSectionTitle>Sell Items</ItemSectionTitle>
-                      <List
-                        sx={{
-                          bgcolor: (theme) =>
-                            alpha(theme.palette.background.paper, 0.5),
-                          borderRadius: 2,
-                          overflow: "hidden",
-                        }}
-                      >
-                        {order.sellOrder.sellOrderDetails.map((item, index) => (
-                          <ListItem
-                            key={`sell-${index}`}
-                            divider={
-                              index !==
-                              order.sellOrder!.sellOrderDetails.length - 1
-                            }
-                            sx={{
-                              py: 1.5,
-                              transition: "all 0.2s",
-                              "&:hover": {
-                                bgcolor: (theme) =>
-                                  alpha(theme.palette.primary.main, 0.05),
-                              },
-                            }}
-                          >
-                            <ListItemText
-                              primary={
-                                <Typography fontWeight="600">
-                                  {item.name}
-                                </Typography>
-                              }
-                              secondary={`Quantity: ${item.quantity}`}
-                            />
-                            <Typography
-                              variant="body1"
-                              fontWeight="medium"
-                              color="primary"
-                            >
-                              {formatCurrency(item.price)}
-                            </Typography>
-                          </ListItem>
-                        ))}
-                      </List>
-                    </>
-                  )}
-
-                {/* Rent Items */}
-                {order.rentOrder &&
-                  order.rentOrder.rentOrderDetails.length > 0 && (
-                    <>
-                      <ItemSectionTitle>Rent Items</ItemSectionTitle>
-                      <List
-                        sx={{
-                          bgcolor: (theme) =>
-                            alpha(theme.palette.background.paper, 0.5),
-                          borderRadius: 2,
-                          overflow: "hidden",
-                        }}
-                      >
-                        {order.rentOrder.rentOrderDetails.map((item, index) => (
-                          <ListItem
-                            key={`rent-${index}`}
-                            divider={
-                              index !==
-                              order.rentOrder!.rentOrderDetails.length - 1
-                            }
-                            // src/pages/OrderManagement/OrderDetailView.tsx (continued)
-                            sx={{
-                              py: 1.5,
-                              transition: "all 0.2s",
-                              "&:hover": {
-                                bgcolor: (theme) =>
-                                  alpha(theme.palette.primary.main, 0.05),
-                              },
-                            }}
-                          >
-                            <ListItemText
-                              primary={
-                                <Typography fontWeight="600">
-                                  {item.name}
-                                </Typography>
-                              }
-                              secondary={`Quantity: ${item.quantity}`}
-                            />
-                            <Typography
-                              variant="body1"
-                              fontWeight="medium"
-                              color="primary"
-                            >
-                              {formatCurrency(item.price)}
-                            </Typography>
-                          </ListItem>
-                        ))}
-                      </List>
-                    </>
-                  )}
-
                 {/* Order Summary */}
                 <OrderTotalContainer>
                   <OrderTotal>
@@ -695,10 +602,12 @@ const OrderDetailView: React.FC = () => {
       <Dialog
         open={openStatusDialog}
         onClose={handleCloseStatusDialog}
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 3,
+              boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
+            },
           },
         }}
       >
@@ -772,10 +681,12 @@ const OrderDetailView: React.FC = () => {
       <Dialog
         open={openAllocateDialog}
         onClose={handleCloseAllocateDialog}
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 3,
+              boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
+            },
           },
         }}
       >
@@ -809,10 +720,7 @@ const OrderDetailView: React.FC = () => {
                   Select a staff member
                 </MenuItem>
                 {staff.map((staffMember) => (
-                  <MenuItem
-                    key={staffMember.staffId}
-                    value={staffMember.staffId}
-                  >
+                  <MenuItem key={staffMember.id} value={staffMember.id}>
                     {staffMember.name}
                   </MenuItem>
                 ))}
@@ -930,8 +838,8 @@ const OrderDetailView: React.FC = () => {
             variant="contained"
             disabled={
               updating ||
-              (order.shippingOrder?.isDelivered === isDelivered &&
-                order.shippingOrder?.deliveryNotes === deliveryNotes)
+              (order.shippingInfo?.isDelivered === isDelivered &&
+                order.shippingInfo?.deliveryNotes === deliveryNotes)
             }
             sx={{
               borderRadius: 2,
@@ -951,10 +859,12 @@ const OrderDetailView: React.FC = () => {
         <Dialog
           open={openDeliveryTimeDialog}
           onClose={handleCloseDeliveryTimeDialog}
-          PaperProps={{
-            sx: {
-              borderRadius: 3,
-              boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
+          slotProps={{
+            paper: {
+              sx: {
+                borderRadius: 3,
+                boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
+              },
             },
           }}
         >

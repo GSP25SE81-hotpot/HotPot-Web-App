@@ -5,6 +5,7 @@ import {
   People as PeopleIcon,
   Inventory as InventoryIcon,
   Settings as SettingsIcon,
+  Assignment as AssignmentIcon,
 } from "@mui/icons-material";
 import { MenuItem } from "../../../types/menu";
 import { RoleTypes } from "../../../types/roles";

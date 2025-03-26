@@ -1,27 +1,25 @@
-// src/pages/OrderManagement/OrderManagementDashboard.tsx
-import React, { useState, useEffect } from "react";
-import { CircularProgress, Alert } from "@mui/material";
-import OrderStatusCard from "./ManageOrderComponents/OrderStatusCard";
-import UnallocatedOrdersList from "./ManageOrderComponents/UnallocatedOrdersList";
-import PendingDeliveriesList from "./ManageOrderComponents/PendingDeliveriesList";
-import OrdersByStatusList from "./ManageOrderComponents/OrdersByStatusList";
+import React, { useEffect, useState } from "react";
+import { Alert, CircularProgress } from "@mui/material";
 import {
-  Order,
   OrderStatus,
-  PagedResult,
   orderManagementService,
+  OrderCountsDTO,
 } from "../../api/Services/orderManagementService";
 import {
-  DashboardWrapper,
   DashboardTitle,
+  DashboardWrapper,
+  ErrorContainer,
+  LoadingContainer,
   StatusCardsGrid,
-  StyledTabsContainer,
-  StyledTabs,
   StyledTab,
   StyledTabPanel,
-  LoadingContainer,
-  ErrorContainer,
+  StyledTabs,
+  StyledTabsContainer,
 } from "../../components/manager/styles/OrderManagementStyles";
+import OrdersByStatusList from "./ManageOrderComponents/OrdersByStatusList";
+import OrderStatusCard from "./ManageOrderComponents/OrderStatusCard";
+import PendingDeliveriesList from "./ManageOrderComponents/PendingDeliveriesList";
+import UnallocatedOrdersList from "./ManageOrderComponents/UnallocatedOrdersList";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -44,66 +42,56 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
+// Default counts to use when API fails
+const defaultCounts: OrderCountsDTO = {
+  pendingCount: 0,
+  processingCount: 0,
+  shippedCount: 0,
+  deliveredCount: 0,
+  cancelledCount: 0,
+  returningCount: 0,
+  completedCount: 0,
+  totalCount: 0,
+};
+
 const ManageOrder: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
-  const [orderCounts, setOrderCounts] = useState<Record<OrderStatus, number>>({
-    [OrderStatus.Pending]: 0,
-    [OrderStatus.Processing]: 0,
-    [OrderStatus.Shipping]: 0,
-    [OrderStatus.Delivered]: 0,
-    [OrderStatus.Cancelled]: 0,
-    [OrderStatus.Returning]: 0,
-    [OrderStatus.Completed]: 0,
-  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [orderCounts, setOrderCounts] = useState<OrderCountsDTO>(defaultCounts);
+
+  // Add this effect to log state changes
+  useEffect(() => {
+    console.log("orderCounts state updated:", orderCounts);
+  }, [orderCounts]);
 
   useEffect(() => {
     const fetchOrderCounts = async () => {
       try {
         setLoading(true);
-        const counts: Record<OrderStatus, number> = {
-          [OrderStatus.Pending]: 0,
-          [OrderStatus.Processing]: 0,
-          [OrderStatus.Shipping]: 0,
-          [OrderStatus.Delivered]: 0,
-          [OrderStatus.Cancelled]: 0,
-          [OrderStatus.Returning]: 0,
-          [OrderStatus.Completed]: 0,
+        console.log("Fetching order counts...");
+
+        const counts = await orderManagementService.getOrderCounts();
+        console.log("API returned counts:", counts);
+
+        // Create a new object to ensure React detects the state change
+        const newCounts: OrderCountsDTO = {
+          pendingCount: counts.pendingCount || 0,
+          processingCount: counts.processingCount || 0,
+          shippedCount: counts.shippedCount || 0,
+          deliveredCount: counts.deliveredCount || 0,
+          cancelledCount: counts.cancelledCount || 0,
+          returningCount: counts.returningCount || 0,
+          completedCount: counts.completedCount || 0,
+          totalCount: counts.totalCount || 0,
         };
 
-        // Fetch counts for each status
-        for (const status of Object.values(OrderStatus)) {
-          if (typeof status === "number") {
-            try {
-              // Explicitly type the response
-              const response: PagedResult<Order> =
-                await orderManagementService.getOrdersByStatus(
-                  status as OrderStatus
-                );
-
-              // Now TypeScript knows that response has an 'items' property
-              if (response && "items" in response) {
-                counts[status as OrderStatus] =
-                  response.totalCount || response.items.length;
-              } else {
-                counts[status as OrderStatus] = 0;
-              }
-            } catch (statusError) {
-              console.error(
-                `Error fetching orders for status ${status}:`,
-                statusError
-              );
-              // Continue with other statuses even if one fails
-            }
-          }
-        }
-
-        setOrderCounts(counts);
+        console.log("Setting order counts to:", newCounts);
+        setOrderCounts(newCounts);
         setError(null);
       } catch (err) {
-        console.error("Error fetching order counts:", err);
-        setError("Failed to load order statistics. Please try again later.");
+        console.error("Error in fetchOrderCounts:", err);
+        setError("Failed to load order counts. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -119,36 +107,46 @@ const ManageOrder: React.FC = () => {
   return (
     <DashboardWrapper>
       <DashboardTitle variant="h4">Order Management</DashboardTitle>
-
       {loading ? (
         <LoadingContainer>
           <CircularProgress />
         </LoadingContainer>
       ) : error ? (
-        <ErrorContainer>
-          <Alert severity="error">{error}</Alert>
-        </ErrorContainer>
-      ) : (
         <>
+          <ErrorContainer>
+            <Alert severity="error">{error}</Alert>
+          </ErrorContainer>
+          {/* Still show the UI with default counts even if there's an error */}
           <StatusCardsGrid>
             <OrderStatusCard
               status={OrderStatus.Pending}
-              count={orderCounts[OrderStatus.Pending]}
+              count={orderCounts.pendingCount}
             />
             <OrderStatusCard
               status={OrderStatus.Processing}
-              count={orderCounts[OrderStatus.Processing]}
+              count={orderCounts.processingCount}
             />
             <OrderStatusCard
               status={OrderStatus.Shipping}
-              count={orderCounts[OrderStatus.Shipping]}
+              count={orderCounts.shippedCount}
             />
             <OrderStatusCard
               status={OrderStatus.Delivered}
-              count={orderCounts[OrderStatus.Delivered]}
+              count={orderCounts.deliveredCount}
+            />
+            <OrderStatusCard
+              status={OrderStatus.Cancelled}
+              count={orderCounts.cancelledCount}
+            />
+            <OrderStatusCard
+              status={OrderStatus.Returning}
+              count={orderCounts.returningCount}
+            />
+            <OrderStatusCard
+              status={OrderStatus.Completed}
+              count={orderCounts.completedCount}
             />
           </StatusCardsGrid>
-
           <StyledTabsContainer>
             <StyledTabs
               value={activeTab}
@@ -161,7 +159,49 @@ const ManageOrder: React.FC = () => {
               <StyledTab label="Pending Deliveries" />
               <StyledTab label="All Orders" />
             </StyledTabs>
-
+            <TabPanel value={activeTab} index={0}>
+              <UnallocatedOrdersList />
+            </TabPanel>
+            <TabPanel value={activeTab} index={1}>
+              <PendingDeliveriesList />
+            </TabPanel>
+            <TabPanel value={activeTab} index={2}>
+              <OrdersByStatusList />
+            </TabPanel>
+          </StyledTabsContainer>
+        </>
+      ) : (
+        <>
+          <StatusCardsGrid>
+            <OrderStatusCard
+              status={OrderStatus.Pending}
+              count={orderCounts.pendingCount}
+            />
+            <OrderStatusCard
+              status={OrderStatus.Processing}
+              count={orderCounts.processingCount}
+            />
+            <OrderStatusCard
+              status={OrderStatus.Shipping}
+              count={orderCounts.shippedCount}
+            />
+            <OrderStatusCard
+              status={OrderStatus.Delivered}
+              count={orderCounts.deliveredCount}
+            />
+          </StatusCardsGrid>
+          <StyledTabsContainer>
+            <StyledTabs
+              value={activeTab}
+              onChange={handleTabChange}
+              indicatorColor="primary"
+              textColor="primary"
+              variant="fullWidth"
+            >
+              <StyledTab label="Unallocated Orders" />
+              <StyledTab label="Pending Deliveries" />
+              <StyledTab label="All Orders" />
+            </StyledTabs>
             <TabPanel value={activeTab} index={0}>
               <UnallocatedOrdersList />
             </TabPanel>
