@@ -116,7 +116,10 @@ const OrderDetailView: React.FC = () => {
         const staffData = await staffService.getAvailableStaff();
         // Check if staffData is an array, if not, convert it to an array
         if (Array.isArray(staffData)) {
-          setStaff(staffData);
+          const availableStaff = staffData.filter(
+            (staff) => staff.isAvailable === true
+          );
+          setStaff(availableStaff);
         } else if (staffData) {
           // If it's a single object, wrap it in an array
           setStaff([staffData]);
