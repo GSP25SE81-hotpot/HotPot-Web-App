@@ -37,6 +37,23 @@ type NotificationCallback = (
   createdAt: Date
 ) => void;
 
+type LowStockAlertCallback = (
+  equipmentType: string,
+  equipmentName: string,
+  currentQuantity: number,
+  threshold: number,
+  timestamp: Date
+) => void;
+
+type StatusChangeAlertCallback = (
+  equipmentType: string,
+  equipmentId: number,
+  equipmentName: string,
+  isAvailable: boolean,
+  reason: string,
+  timestamp: Date
+) => void;
+
 // Chat Hub Service
 export const chatHubService = {
   connect: async (userId: number, userType: string) => {
@@ -184,7 +201,69 @@ export const equipmentStockHubService = {
     );
   },
 
-  // Add equipment stock-specific methods here
+  // Register as admin to receive notifications
+  registerAdminConnection: async (adminId: number) => {
+    await signalRService.ensureConnection(EQUIPMENT_STOCK_HUB);
+    await signalRService.invoke(
+      EQUIPMENT_STOCK_HUB,
+      "RegisterAdminConnection",
+      adminId
+    );
+  },
+
+  // Listen for low stock alerts
+  onReceiveLowStockAlert: (callback: LowStockAlertCallback) => {
+    signalRService.on(
+      EQUIPMENT_STOCK_HUB,
+      "ReceiveLowStockAlert",
+      callback as HubCallback
+    );
+  },
+
+  // Listen for status change alerts
+  onReceiveStatusChangeAlert: (callback: StatusChangeAlertCallback) => {
+    signalRService.on(
+      EQUIPMENT_STOCK_HUB,
+      "ReceiveStatusChangeAlert",
+      callback as HubCallback
+    );
+  },
+
+  // Send low stock notification directly
+  notifyLowStock: async (
+    equipmentType: string,
+    equipmentName: string,
+    currentQuantity: number,
+    threshold: number
+  ) => {
+    await signalRService.invoke(
+      EQUIPMENT_STOCK_HUB,
+      "NotifyLowStock",
+      equipmentType,
+      equipmentName,
+      currentQuantity,
+      threshold
+    );
+  },
+
+  // Send status change notification directly
+  notifyStatusChange: async (
+    equipmentType: string,
+    equipmentId: number,
+    equipmentName: string,
+    isAvailable: boolean,
+    reason: string
+  ) => {
+    await signalRService.invoke(
+      EQUIPMENT_STOCK_HUB,
+      "NotifyStatusChange",
+      equipmentType,
+      equipmentId,
+      equipmentName,
+      isAvailable,
+      reason
+    );
+  },
 
   disconnect: async () => {
     await signalRService.stopConnection(EQUIPMENT_STOCK_HUB);
