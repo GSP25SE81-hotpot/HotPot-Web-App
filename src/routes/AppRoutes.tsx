@@ -5,8 +5,7 @@ import Home from "../pages/Home/Home";
 import StaffLayout from "../layouts/StaffLayout/StaffLayout";
 // import Home from "../pages/Home/HomePage";
 
-import { ManageRentalsPage } from "../pages/Manager/ManageRental/ManageRentalsPage";
-import { ManageRentalStatusPage } from "../pages/Manager/ManageRental/ManageRentalStatusPage";
+import { ManageEquipmentStockPage } from "../pages/Manager/ManageRental/ManageEquipmentStockPage";
 import { EquipmentAvailabilityPage } from "../pages/Manager/ManageRental/EquipmentAvailabilityPage";
 import { CheckDeviceAfterReturnPage } from "../pages/Staff/CheckDeviceAfterReturn/CheckDeviceAfterReturnPage";
 import { ChatWithCustomerPage } from "../pages/Manager/ChatWithCustomer/ChatWithCustomerPage";
@@ -51,6 +50,7 @@ import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
 import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
 import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
 import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
+import { LowStockUtensilsPage } from "../pages/Manager/ManageRental/LowStockUtensilsPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -67,12 +67,8 @@ const AppRoute: React.FC = () => {
         element={<ManagerLayout />}
       >
         <Route
-          path={config.managerRoutes.manageRentals}
-          element={<ManageRentalsPage />}
-        />
-        <Route
-          path={config.managerRoutes.manageRentalStatus}
-          element={<ManageRentalStatusPage />}
+          path={config.managerRoutes.manageEquipmentStock}
+          element={<ManageEquipmentStockPage />}
         />
         <Route
           path={config.managerRoutes.equipmentAvailability}
@@ -137,6 +133,10 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.orderDetail}
           element={<OrderDetailViewPage />}
+        />
+        <Route
+          path={config.managerRoutes.lowStockUtensil}
+          element={<LowStockUtensilsPage />}
         />
       </Route>
 

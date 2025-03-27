@@ -1,8 +1,8 @@
 export const managerRoutes = {
   home: "/",
-  manageRentals: "/manage-rentals",
-  manageRentalStatus: "/manage-rental-status",
+  manageEquipmentStock: "/manage-equipment-stock",
   equipmentAvailability: "/equipment-availability",
+  lowStockUtensil: "/low-stock-utensil",
   workAssignment: "/work-assignment",
   manageOrder: "/manage-order",
   customerChat: "/chat",

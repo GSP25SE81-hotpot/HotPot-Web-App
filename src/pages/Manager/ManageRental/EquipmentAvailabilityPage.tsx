@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import EquipmentAvailability from "../../../containers/ManageRental/EquipmentAvailability";
+import EquipmentAvailability from "../../../containers/ManageEquipmentStock/EquipmentAvailability";
 
 export const EquipmentAvailabilityPage = () => {
   return (

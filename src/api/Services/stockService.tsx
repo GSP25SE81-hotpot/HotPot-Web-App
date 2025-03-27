@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/services/stockService.ts
 import axiosClient from "../axiosInstance";
 import {
@@ -189,18 +190,58 @@ const stockService = {
   },
 
   // Stock Status Endpoints
-  getLowStockUtensils: async (threshold = 5): Promise<UtensilDto[]> => {
+  getLowStockUtensils: async (
+    threshold = 80
+  ): Promise<ApiResponse<UtensilDto[]>> => {
     try {
+      // Make the API request with proper typing
       const response = await axiosClient.get<ApiResponse<UtensilDto[]>>(
         `${BASE_URL}/low-stock`,
-        {
-          params: { threshold },
-        }
+        { params: { threshold } }
       );
-      return response.data.data;
-    } catch (error) {
-      console.error("Error fetching low stock utensils:", error);
-      throw error;
+
+      // Debug the raw response
+      console.log("Raw API response:", response);
+
+      // Case 1: Response is already in correct ApiResponse format
+      if (
+        response.data &&
+        typeof response.data.success === "boolean" &&
+        "data" in response.data &&
+        "message" in response.data
+      ) {
+        return response.data;
+      }
+
+      // Case 2: Response is just the array (without ApiResponse wrapper)
+      if (Array.isArray(response.data)) {
+        return {
+          success: true,
+          message: "Low stock utensils retrieved successfully",
+          data: response.data,
+          errors: null,
+        };
+      }
+
+      // If we get here, the response format is unexpected
+      console.error("Unexpected response format:", response.data);
+      return {
+        success: false,
+        message: "Invalid server response format",
+        data: [],
+        errors: ["The server returned data in an unexpected format"],
+      };
+    } catch (error: any) {
+      console.error("API request failed:", error);
+      return {
+        success: false,
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          "Failed to fetch low stock utensils",
+        data: [],
+        errors: [error.response?.data?.message || "Unknown error occurred"],
+      };
     }
   },
 
@@ -218,13 +259,25 @@ const stockService = {
 
   notifyAdminDirectly: async (
     request: NotifyAdminStockRequest
-  ): Promise<boolean> => {
+  ): Promise<ApiResponse<boolean>> => {
     try {
       const response = await axiosClient.post<ApiResponse<boolean>>(
         `${BASE_URL}/notify-admin`,
         request
       );
-      return response.data.data;
+
+      // If the response is already properly formatted
+      if (response.data && typeof response.data.success === "boolean") {
+        return response.data;
+      }
+
+      // Fallback for unwrapped responses
+      return {
+        success: true,
+        message: "Success",
+        data: true, // Assuming the operation was successful
+        errors: null,
+      };
     } catch (error) {
       console.error("Error notifying admin:", error);
       throw error;
@@ -255,15 +308,66 @@ const stockService = {
     }
   },
 
-  getEquipmentDashboard: async (): Promise<EquipmentDashboardResponse> => {
+  getEquipmentDashboard: async (): Promise<
+    ApiResponse<EquipmentDashboardResponse>
+  > => {
     try {
-      const response = await axiosClient.get<
-        ApiResponse<EquipmentDashboardResponse>
-      >(`${BASE_URL}/dashboard`);
-      return response.data.data;
+      const response = await axiosClient.get(`${BASE_URL}/dashboard`);
+
+      // Case 1: Response is already properly formatted ApiResponse
+      if (response.data && typeof response.data.success === "boolean") {
+        return response.data;
+      }
+
+      // Case 2: Response is the raw dashboard data
+      if (
+        response.data &&
+        typeof response.data.totalEquipmentCount === "number"
+      ) {
+        return {
+          success: true,
+          message: "Success",
+          data: response.data,
+          errors: null,
+        };
+      }
+
+      // Handle invalid response format
+      console.error("Invalid dashboard response format:", response.data);
+      return {
+        success: false,
+        message: "Invalid dashboard data format",
+        data: {
+          statusSummary: [],
+          lowStockUtensils: [],
+          unavailableHotPots: [],
+          unavailableUtensils: [],
+          totalEquipmentCount: 0,
+          totalAvailableCount: 0,
+          totalUnavailableCount: 0,
+          totalLowStockCount: 0,
+        },
+        errors: ["Received invalid dashboard data format from server"],
+      };
     } catch (error) {
-      console.error("Error fetching equipment dashboard data:", error);
-      throw error;
+      console.error("Error fetching equipment dashboard:", error);
+      return {
+        success: false,
+        message: "Failed to fetch dashboard data",
+        data: {
+          statusSummary: [],
+          lowStockUtensils: [],
+          unavailableHotPots: [],
+          unavailableUtensils: [],
+          totalEquipmentCount: 0,
+          totalAvailableCount: 0,
+          totalUnavailableCount: 0,
+          totalLowStockCount: 0,
+        },
+        errors: [
+          error instanceof Error ? error.message : "Unknown error occurred",
+        ],
+      };
     }
   },
 };
