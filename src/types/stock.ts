@@ -1,16 +1,15 @@
-// Common API Response wrapper
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
   data: T;
-  errors?: string[];
+  errors: string[] | null;
 }
 
 // HotPot Inventory Interfaces
 export interface HotPotInventoryDto {
   hotPotInventoryId: number;
   seriesNumber: string;
-  status: boolean;
+  status: string;
   hotpotName: string;
 }
 
@@ -62,7 +61,9 @@ export interface EquipmentStatusDto {
 
 // Request Interfaces
 export interface UpdateEquipmentStatusRequest {
-  status: boolean;
+  // Changed to match backend properties
+  hotpotStatus?: number; // Enum value for HotpotStatus
+  isAvailable?: boolean; // For utensils
   reason: string;
 }
 
@@ -103,4 +104,11 @@ export interface EquipmentDashboardResponse {
   totalAvailableCount: number;
   totalUnavailableCount: number;
   totalLowStockCount: number;
+}
+
+// Add HotpotStatus enum to match backend
+export enum HotpotStatus {
+  Available = 0,
+  Rented = 1,
+  Damaged = 2,
 }

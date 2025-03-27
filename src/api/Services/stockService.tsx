@@ -13,18 +13,28 @@ import {
   EquipmentUnavailableResponse,
   EquipmentAvailableResponse,
   EquipmentDashboardResponse,
+  HotpotStatus,
 } from "../../types/stock";
 
 const BASE_URL = "/manager/equipment-stock";
 
 const stockService = {
   // HotPot Inventory Endpoints
-  getAllHotPotInventory: async (): Promise<HotPotInventoryDto[]> => {
+  getAllHotPotInventory: async (): Promise<
+    ApiResponse<HotPotInventoryDto[]>
+  > => {
     try {
-      const response = await axiosClient.get<ApiResponse<HotPotInventoryDto[]>>(
-        `${BASE_URL}/hotpot`
-      );
-      return response.data.data;
+      const response = await axiosClient.get(`${BASE_URL}/hotpot`);
+      // Handle both wrapped and unwrapped responses
+      if (response.data && Array.isArray(response.data)) {
+        return {
+          success: true,
+          message: "Success",
+          data: response.data,
+          errors: null,
+        };
+      }
+      return response.data; // if it's already wrapped
     } catch (error) {
       console.error("Error fetching hotpot inventory:", error);
       throw error;
@@ -33,12 +43,12 @@ const stockService = {
 
   getHotPotInventoryById: async (
     id: number
-  ): Promise<HotPotInventoryDetailDto> => {
+  ): Promise<ApiResponse<HotPotInventoryDetailDto>> => {
     try {
       const response = await axiosClient.get<
         ApiResponse<HotPotInventoryDetailDto>
       >(`${BASE_URL}/hotpot/${id}`);
-      return response.data.data;
+      return response.data;
     } catch (error) {
       console.error(`Error fetching hotpot inventory with ID ${id}:`, error);
       throw error;
@@ -64,9 +74,15 @@ const stockService = {
 
   updateHotPotInventoryStatus: async (
     id: number,
-    request: UpdateEquipmentStatusRequest
+    status: HotpotStatus,
+    reason: string
   ): Promise<HotPotInventoryDetailDto> => {
     try {
+      const request: UpdateEquipmentStatusRequest = {
+        hotpotStatus: status,
+        reason,
+      };
+
       const response = await axiosClient.put<
         ApiResponse<HotPotInventoryDetailDto>
       >(`${BASE_URL}/hotpot/${id}/status`, request);
@@ -81,24 +97,39 @@ const stockService = {
   },
 
   // Utensil Endpoints
-  getAllUtensils: async (): Promise<UtensilDto[]> => {
+  getAllUtensils: async (): Promise<ApiResponse<UtensilDto[]>> => {
     try {
-      const response = await axiosClient.get<ApiResponse<UtensilDto[]>>(
-        `${BASE_URL}/utensil`
-      );
-      return response.data.data;
+      const response = await axiosClient.get(`${BASE_URL}/utensil`);
+      // Handle both wrapped and unwrapped responses
+      if (response.data && Array.isArray(response.data)) {
+        return {
+          success: true,
+          message: "Success",
+          data: response.data,
+          errors: null,
+        };
+      }
+      return response.data; // if it's already wrapped
     } catch (error) {
       console.error("Error fetching utensils:", error);
       throw error;
     }
   },
 
-  getUtensilById: async (id: number): Promise<UtensilDetailDto> => {
+  getUtensilById: async (
+    id: number
+  ): Promise<ApiResponse<UtensilDetailDto[]>> => {
     try {
-      const response = await axiosClient.get<ApiResponse<UtensilDetailDto>>(
-        `${BASE_URL}/utensil/${id}`
-      );
-      return response.data.data;
+      const response = await axiosClient.get(`${BASE_URL}/utensil/${id}`);
+      if (response.data && Array.isArray(response.data)) {
+        return {
+          success: true,
+          message: "Success",
+          data: response.data,
+          errors: null,
+        };
+      }
+      return response.data;
     } catch (error) {
       console.error(`Error fetching utensil with ID ${id}:`, error);
       throw error;
@@ -119,9 +150,11 @@ const stockService = {
 
   updateUtensilQuantity: async (
     id: number,
-    request: UpdateUtensilQuantityRequest
+    quantity: number
   ): Promise<UtensilDetailDto> => {
     try {
+      const request: UpdateUtensilQuantityRequest = { quantity };
+
       const response = await axiosClient.put<ApiResponse<UtensilDetailDto>>(
         `${BASE_URL}/utensil/${id}/quantity`,
         request
@@ -135,9 +168,15 @@ const stockService = {
 
   updateUtensilStatus: async (
     id: number,
-    request: UpdateEquipmentStatusRequest
+    isAvailable: boolean,
+    reason: string
   ): Promise<UtensilDetailDto> => {
     try {
+      const request: UpdateEquipmentStatusRequest = {
+        isAvailable,
+        reason,
+      };
+
       const response = await axiosClient.put<ApiResponse<UtensilDetailDto>>(
         `${BASE_URL}/utensil/${id}/status`,
         request

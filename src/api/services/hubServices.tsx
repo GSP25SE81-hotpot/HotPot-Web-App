@@ -203,7 +203,6 @@ export const equipmentStockHubService = {
 
   // Register as admin to receive notifications
   registerAdminConnection: async (adminId: number) => {
-    await signalRService.ensureConnection(EQUIPMENT_STOCK_HUB);
     await signalRService.invoke(
       EQUIPMENT_STOCK_HUB,
       "RegisterAdminConnection",
