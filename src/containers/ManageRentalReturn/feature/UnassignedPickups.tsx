@@ -13,13 +13,11 @@ import { format } from "date-fns";
 import { getUnassignedPickups } from "../../../api/Services/rentalService";
 import { PagedResult, RentOrderDetail } from "../../../types/rentalTypes";
 import AssignStaffDialog from "../dialog/AssignStaffDialog";
-
 // Import styled components
 import {
   StyledContainer,
   StyledPaper,
 } from "../../../components/StyledComponents";
-
 // Import unassigned pickups specific styled components
 import {
   PageTitle,
@@ -36,13 +34,12 @@ import {
 } from "../../../components/manager/styles/UnassignedPickupsStyles";
 
 const UnassignedPickups: React.FC = () => {
-  const [pickups, setPickups] = useState<PagedResult<RentOrderDetail> | null>(
+  const [pickups, setPickups] = useState<PagedResult<RentOrderDetail[]> | null>(
     null
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
-  // Changed default rowsPerPage to match one of the options in rowsPerPageOptions
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedPickup, setSelectedPickup] = useState<RentOrderDetail | null>(
     null
@@ -53,14 +50,24 @@ const UnassignedPickups: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getUnassignedPickups(page + 1, rowsPerPage);
-      setPickups(data);
+      const response = await getUnassignedPickups(page + 1, rowsPerPage);
+
+      // Check if the API call was successful and data exists
+      if (response.success && response.data) {
+        // Extract just the PagedResult part from the ApiResponse
+        setPickups(response.data);
+      } else {
+        // Handle the case where the API call was successful but no data was returned
+        setError(response.message || "No data returned from the server");
+        setPickups(null);
+      }
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
           : "An error occurred while fetching pickups"
       );
+      setPickups(null);
     } finally {
       setLoading(false);
     }

@@ -25,8 +25,11 @@ class SignalRService {
    */
   private getOrCreateHubConnection(hubUrl: string): signalR.HubConnection {
     if (!this.hubConnections.has(hubUrl)) {
+      // Get the API base URL from environment or config
+      const apiBaseUrl = process.env.REACT_APP_API_URL || "";
+
       const connection = new signalR.HubConnectionBuilder()
-        .withUrl(hubUrl)
+        .withUrl(`${apiBaseUrl}${hubUrl}`)
         .withAutomaticReconnect(this.reconnectPolicy)
         .configureLogging(signalR.LogLevel.Information)
         .build();
@@ -51,7 +54,6 @@ class SignalRService {
 
       this.hubConnections.set(hubUrl, connection);
     }
-
     return this.hubConnections.get(hubUrl)!;
   }
 

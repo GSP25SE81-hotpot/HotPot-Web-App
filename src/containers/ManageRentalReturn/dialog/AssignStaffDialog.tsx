@@ -22,10 +22,8 @@ import {
   Staff,
   PickupAssignmentRequestDto,
 } from "../../../types/rentalTypes";
-import {
-  getAvailableStaff,
-  allocateStaffForPickup,
-} from "../../../api/Services/rentalService";
+import { allocateStaffForPickup } from "../../../api/Services/rentalService";
+import staffService from "../../../api/Services/staffService";
 import { format } from "date-fns";
 
 interface AssignStaffDialogProps {
@@ -52,7 +50,7 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
     const fetchStaff = async () => {
       setStaffLoading(true);
       try {
-        const availableStaff = await getAvailableStaff();
+        const availableStaff = await staffService.getAvailableStaff();
         setStaff(availableStaff);
       } catch (error) {
         setError("Failed to load available staff");

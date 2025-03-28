@@ -29,6 +29,7 @@ type ApprovedFeedbackCallback = (
   adminName: string,
   approvalDate: Date
 ) => void;
+type ConnectionRegisteredCallback = (userId: number) => void;
 type NotificationCallback = (
   notificationId: number,
   title: string,
@@ -36,7 +37,6 @@ type NotificationCallback = (
   type: string,
   createdAt: Date
 ) => void;
-
 type LowStockAlertCallback = (
   equipmentType: string,
   equipmentName: string,
@@ -44,7 +44,6 @@ type LowStockAlertCallback = (
   threshold: number,
   timestamp: Date
 ) => void;
-
 type StatusChangeAlertCallback = (
   equipmentType: string,
   equipmentId: number,
@@ -81,6 +80,16 @@ export const feedbackHubService = {
     await signalRService.registerUserConnection(FEEDBACK_HUB, userId, userType);
   },
 
+  // Listen for connection registration confirmation
+  onConnectionRegistered: (callback: ConnectionRegisteredCallback) => {
+    signalRService.on(
+      FEEDBACK_HUB,
+      "ConnectionRegistered",
+      callback as HubCallback
+    );
+  },
+
+  // Listen for feedback response notifications
   onReceiveFeedbackResponse: (callback: FeedbackResponseCallback) => {
     signalRService.on(
       FEEDBACK_HUB,
@@ -89,6 +98,7 @@ export const feedbackHubService = {
     );
   },
 
+  // Listen for new feedback notifications (for admins)
   onReceiveNewFeedback: (callback: NewFeedbackCallback) => {
     signalRService.on(
       FEEDBACK_HUB,
@@ -97,6 +107,7 @@ export const feedbackHubService = {
     );
   },
 
+  // Listen for approved feedback notifications (for managers)
   onReceiveApprovedFeedback: (callback: ApprovedFeedbackCallback) => {
     signalRService.on(
       FEEDBACK_HUB,
@@ -105,6 +116,7 @@ export const feedbackHubService = {
     );
   },
 
+  // Send feedback response notification
   notifyFeedbackResponse: async (
     userId: number,
     feedbackId: number,
@@ -121,6 +133,7 @@ export const feedbackHubService = {
     );
   },
 
+  // Send new feedback notification
   notifyNewFeedback: async (
     feedbackId: number,
     customerName: string,
@@ -131,6 +144,21 @@ export const feedbackHubService = {
       "NotifyNewFeedback",
       feedbackId,
       customerName,
+      feedbackTitle
+    );
+  },
+
+  // Send feedback approved notification
+  notifyFeedbackApproved: async (
+    feedbackId: number,
+    adminName: string,
+    feedbackTitle: string
+  ) => {
+    await signalRService.invoke(
+      FEEDBACK_HUB,
+      "NotifyFeedbackApproved",
+      feedbackId,
+      adminName,
       feedbackTitle
     );
   },

@@ -32,7 +32,6 @@ axiosClient.interceptors.request.use(
 
 axiosClient.interceptors.response.use(
   (response) => response.data,
-  // return response.data;
 
   async (error) => {
     const prevRequest = error?.config;

@@ -1,5 +1,4 @@
-// src/components/manager/RentalHistory.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Table,
@@ -15,15 +14,14 @@ import {
   getRentalHistoryByUser,
   getRentalHistoryByUtensil,
   getRentalHistoryByHotpot,
+  getAllRentalHistory,
 } from "../../../api/Services/rentalService";
 import { RentalHistoryItem } from "../../../types/rentalTypes";
-
 // Import styled components
 import {
   StyledContainer,
   StyledPaper,
 } from "../../../components/StyledComponents";
-
 // Import rental history specific styled components
 import {
   HistoryTitle,
@@ -67,16 +65,51 @@ const RentalHistory: React.FC = () => {
   const [userId, setUserId] = useState("");
   const [utensilId, setUtensilId] = useState("");
   const [hotpotId, setHotpotId] = useState("");
+  // Initialize with an empty array to avoid undefined
   const [rentalHistory, setRentalHistory] = useState<RentalHistoryItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchPerformed, setSearchPerformed] = useState(false);
 
+  // Load all rental history when component mounts
+  useEffect(() => {
+    loadAllRentalHistory();
+  }, []);
+
+  const loadAllRentalHistory = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const history = await getAllRentalHistory();
+      // Ensure history is an array
+      setRentalHistory(Array.isArray(history) ? history : []);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch rental history"
+      );
+      setRentalHistory([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
-    setRentalHistory([]);
-    setError(null);
+    // Reset search state when changing tabs
     setSearchPerformed(false);
+    setError(null);
+
+    // Reset the appropriate search field based on the tab
+    if (newValue === 0) {
+      setUserId("");
+    } else if (newValue === 1) {
+      setUtensilId("");
+    } else if (newValue === 2) {
+      setHotpotId("");
+    }
+
+    // Load all rental history again
+    loadAllRentalHistory();
   };
 
   const handleUserSearch = async () => {
@@ -88,7 +121,8 @@ const RentalHistory: React.FC = () => {
     setError(null);
     try {
       const history = await getRentalHistoryByUser(parseInt(userId, 10));
-      setRentalHistory(history);
+      // Ensure history is an array
+      setRentalHistory(Array.isArray(history) ? history : []);
       setSearchPerformed(true);
     } catch (err) {
       setError(
@@ -109,7 +143,8 @@ const RentalHistory: React.FC = () => {
     setError(null);
     try {
       const history = await getRentalHistoryByUtensil(parseInt(utensilId, 10));
-      setRentalHistory(history);
+      // Ensure history is an array
+      setRentalHistory(Array.isArray(history) ? history : []);
       setSearchPerformed(true);
     } catch (err) {
       setError(
@@ -130,7 +165,8 @@ const RentalHistory: React.FC = () => {
     setError(null);
     try {
       const history = await getRentalHistoryByHotpot(parseInt(hotpotId, 10));
-      setRentalHistory(history);
+      // Ensure history is an array
+      setRentalHistory(Array.isArray(history) ? history : []);
       setSearchPerformed(true);
     } catch (err) {
       setError(
@@ -142,13 +178,26 @@ const RentalHistory: React.FC = () => {
     }
   };
 
+  const handleClearSearch = () => {
+    setSearchPerformed(false);
+    loadAllRentalHistory();
+
+    // Clear the search field based on the current tab
+    if (tabValue === 0) {
+      setUserId("");
+    } else if (tabValue === 1) {
+      setUtensilId("");
+    } else if (tabValue === 2) {
+      setHotpotId("");
+    }
+  };
+
   return (
     <StyledContainer maxWidth="xl">
       <StyledPaper elevation={0} sx={{ p: 0 }}>
         <Box sx={{ p: 4 }}>
           <HistoryTitle variant="h4">Rental History</HistoryTitle>
         </Box>
-
         <StyledTabs
           value={tabValue}
           onChange={handleTabChange}
@@ -160,7 +209,6 @@ const RentalHistory: React.FC = () => {
           <StyledTab label="By Utensil" />
           <StyledTab label="By Hotpot" />
         </StyledTabs>
-
         <TabPanel value={tabValue} index={0}>
           <SearchContainer>
             <SearchField
@@ -187,9 +235,18 @@ const RentalHistory: React.FC = () => {
             >
               {loading ? "Searching..." : "Search"}
             </SearchButton>
+            {searchPerformed && (
+              <SearchButton
+                variant="outlined"
+                color="secondary"
+                onClick={handleClearSearch}
+                disabled={loading}
+              >
+                Clear Search
+              </SearchButton>
+            )}
           </SearchContainer>
         </TabPanel>
-
         <TabPanel value={tabValue} index={1}>
           <SearchContainer>
             <SearchField
@@ -216,9 +273,18 @@ const RentalHistory: React.FC = () => {
             >
               {loading ? "Searching..." : "Search"}
             </SearchButton>
+            {searchPerformed && (
+              <SearchButton
+                variant="outlined"
+                color="secondary"
+                onClick={handleClearSearch}
+                disabled={loading}
+              >
+                Clear Search
+              </SearchButton>
+            )}
           </SearchContainer>
         </TabPanel>
-
         <TabPanel value={tabValue} index={2}>
           <SearchContainer>
             <SearchField
@@ -245,9 +311,18 @@ const RentalHistory: React.FC = () => {
             >
               {loading ? "Searching..." : "Search"}
             </SearchButton>
+            {searchPerformed && (
+              <SearchButton
+                variant="outlined"
+                color="secondary"
+                onClick={handleClearSearch}
+                disabled={loading}
+              >
+                Clear Search
+              </SearchButton>
+            )}
           </SearchContainer>
         </TabPanel>
-
         <ResultsContainer>
           {error && (
             <Alert
@@ -263,9 +338,14 @@ const RentalHistory: React.FC = () => {
               {error}
             </Alert>
           )}
-          {searchPerformed && (
+          {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
             <>
-              {rentalHistory.length === 0 ? (
+              {/* Use optional chaining and nullish coalescing to safely check length */}
+              {!rentalHistory?.length ? (
                 <Alert
                   severity="info"
                   sx={{
@@ -293,41 +373,53 @@ const RentalHistory: React.FC = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {rentalHistory.map((rental) => (
-                        <StyledTableRow key={rental.id}>
-                          <BodyTableCell>{rental.id}</BodyTableCell>
-                          <BodyTableCell>{rental.orderId}</BodyTableCell>
-                          <BodyTableCell>{rental.customerName}</BodyTableCell>
-                          <BodyTableCell>{rental.equipmentName}</BodyTableCell>
-                          <BodyTableCell>
-                            {format(
-                              new Date(rental.rentalStartDate),
-                              "MMM dd, yyyy"
-                            )}
-                          </BodyTableCell>
-                          <BodyTableCell>
-                            {format(
-                              new Date(rental.expectedReturnDate),
-                              "MMM dd, yyyy"
-                            )}
-                          </BodyTableCell>
-                          <BodyTableCell>
-                            {rental.actualReturnDate
-                              ? format(
-                                  new Date(rental.actualReturnDate),
-                                  "MMM dd, yyyy"
-                                )
-                              : "Not returned yet"}
-                          </BodyTableCell>
-                          <BodyTableCell>
-                            <StatusChip
-                              label={rental.status}
-                              status={rental.status.toLowerCase()}
-                              size="small"
-                            />
-                          </BodyTableCell>
-                        </StyledTableRow>
-                      ))}
+                      {/* Only map if rentalHistory is an array */}
+                      {Array.isArray(rentalHistory) &&
+                        rentalHistory.map((rental) => (
+                          <StyledTableRow key={rental?.id || "unknown"}>
+                            <BodyTableCell>{rental?.id}</BodyTableCell>
+                            <BodyTableCell>{rental?.orderId}</BodyTableCell>
+                            <BodyTableCell>
+                              {rental?.customerName}
+                            </BodyTableCell>
+                            <BodyTableCell>
+                              {rental?.equipmentName}
+                            </BodyTableCell>
+                            <BodyTableCell>
+                              {rental?.rentalStartDate
+                                ? format(
+                                    new Date(rental.rentalStartDate),
+                                    "MMM dd, yyyy"
+                                  )
+                                : "N/A"}
+                            </BodyTableCell>
+                            <BodyTableCell>
+                              {rental?.expectedReturnDate
+                                ? format(
+                                    new Date(rental.expectedReturnDate),
+                                    "MMM dd, yyyy"
+                                  )
+                                : "N/A"}
+                            </BodyTableCell>
+                            <BodyTableCell>
+                              {rental?.actualReturnDate
+                                ? format(
+                                    new Date(rental.actualReturnDate),
+                                    "MMM dd, yyyy"
+                                  )
+                                : "Not returned yet"}
+                            </BodyTableCell>
+                            <BodyTableCell>
+                              {rental?.status && (
+                                <StatusChip
+                                  label={rental.status}
+                                  status={rental.status.toLowerCase()}
+                                  size="small"
+                                />
+                              )}
+                            </BodyTableCell>
+                          </StyledTableRow>
+                        ))}
                     </TableBody>
                   </Table>
                 </StyledTableContainer>

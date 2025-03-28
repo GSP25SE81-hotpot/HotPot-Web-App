@@ -41,8 +41,9 @@ import {
 } from "../../../components/manager/styles/AssignmentStyles";
 
 const CurrentAssignments: React.FC = () => {
-  const [assignments, setAssignments] =
-    useState<PagedResult<StaffPickupAssignmentDto> | null>(null);
+  const [assignments, setAssignments] = useState<PagedResult<
+    StaffPickupAssignmentDto[]
+  > | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
@@ -53,8 +54,17 @@ const CurrentAssignments: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getCurrentAssignments(page + 1, rowsPerPage);
-      setAssignments(data);
+      const response = await getCurrentAssignments(page + 1, rowsPerPage);
+
+      // Check if the API call was successful and data exists
+      if (response.success && response.data) {
+        // Extract just the PagedResult part from the ApiResponse
+        setAssignments(response.data);
+      } else {
+        // Handle the case where the API call was successful but no data was returned
+        setError(response.message || "No data returned from the server");
+        setAssignments(null);
+      }
     } catch (err) {
       setError(
         err instanceof Error
