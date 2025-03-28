@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/pages/LowStockUtensils.tsx
 import {
   CheckCircleOutline as CheckCircleOutlineIcon,

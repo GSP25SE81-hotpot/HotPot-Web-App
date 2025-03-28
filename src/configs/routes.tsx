@@ -7,7 +7,6 @@ export const managerRoutes = {
   manageOrder: "/manage-order",
   customerChat: "/chat",
   feedback: "/feedback",
-  resolveEquipmentFailure: "/resolve-equipment-failure",
   equipmentConditionLog: "/equipment-condition-log",
   equipmentStatusReport: "/equipment-status-report",
   feedbackManagement: "/feedback-management",

@@ -5,13 +5,12 @@ import Home from "../pages/Home/Home";
 import StaffLayout from "../layouts/StaffLayout/StaffLayout";
 // import Home from "../pages/Home/HomePage";
 
-import { ManageEquipmentStockPage } from "../pages/Manager/ManageRental/ManageEquipmentStockPage";
-import { EquipmentAvailabilityPage } from "../pages/Manager/ManageRental/EquipmentAvailabilityPage";
+import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/ManageEquipmentStockPage";
+import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock/EquipmentAvailabilityPage";
 import { CheckDeviceAfterReturnPage } from "../pages/Staff/CheckDeviceAfterReturn/CheckDeviceAfterReturnPage";
 import { ChatWithCustomerPage } from "../pages/Manager/ChatWithCustomer/ChatWithCustomerPage";
 import { DepositConfirmationPage } from "../pages/Staff/DepositConfirmation/DepositConfirmationPage";
 import { PaymentManagementPage } from "../pages/Staff/PaymentManagement/PaymentManagementPage";
-import { ResolveEquipmentFailurePage } from "../pages/Manager/ResolveEquipmentFailure/ResolveEquipmentFailurePage";
 import { EquipmentConditionLogPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionLogPage";
 import { EquipmentStatusReportPage } from "../pages/Manager/EquipmentStatusReport/EquipmentStatusReportPage";
 import { OrderHistoryPage } from "../pages/Staff/OrderHistory/OrderHistoryPage";
@@ -50,7 +49,7 @@ import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
 import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
 import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
 import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
-import { LowStockUtensilsPage } from "../pages/Manager/ManageRental/LowStockUtensilsPage";
+import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -85,10 +84,6 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.customerChat}
           element={<ChatWithCustomerPage />}
-        />
-        <Route
-          path={config.managerRoutes.resolveEquipmentFailure}
-          element={<ResolveEquipmentFailurePage />}
         />
         <Route
           path={config.managerRoutes.equipmentConditionLog}

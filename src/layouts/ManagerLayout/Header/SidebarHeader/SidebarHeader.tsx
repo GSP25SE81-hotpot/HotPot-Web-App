@@ -175,12 +175,6 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
 
   const maintenanceItems = [
     {
-      id: "FE-09",
-      text: "Resolve Equipment Failure",
-      icon: <EngineeringIcon />,
-      route: managerRoutes.resolveEquipmentFailure,
-    },
-    {
       id: "FE-10",
       text: "Equipment Condition Log",
       icon: <AssignmentIcon />,

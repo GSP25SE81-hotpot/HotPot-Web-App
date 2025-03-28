@@ -151,7 +151,144 @@ export const equipmentHubService = {
     );
   },
 
-  // Add equipment-specific methods here
+  // Register for replacement-related events
+  onReceiveReplacementReview: (
+    callback: (id: number, isApproved: boolean, reviewNotes: string) => void
+  ) => {
+    signalRService.on(
+      EQUIPMENT_HUB,
+      "ReceiveReplacementReview",
+      callback as HubCallback
+    );
+  },
+
+  onReceiveAssignmentUpdate: (
+    callback: (
+      id: number,
+      staffId: number,
+      equipmentName: string,
+      status: string,
+      timestamp: Date
+    ) => void
+  ) => {
+    signalRService.on(
+      EQUIPMENT_HUB,
+      "ReceiveAssignmentUpdate",
+      callback as HubCallback
+    );
+  },
+
+  onReceiveNewAssignment: (
+    callback: (
+      id: number,
+      equipmentName: string,
+      requestReason: string,
+      status: string
+    ) => void
+  ) => {
+    signalRService.on(
+      EQUIPMENT_HUB,
+      "ReceiveNewAssignment",
+      callback as HubCallback
+    );
+  },
+
+  onReceiveReplacementUpdate: (
+    callback: (
+      id: number,
+      equipmentName: string,
+      status: string,
+      message: string
+    ) => void
+  ) => {
+    signalRService.on(
+      EQUIPMENT_HUB,
+      "ReceiveReplacementUpdate",
+      callback as HubCallback
+    );
+  },
+
+  onReceiveDirectNotification: (
+    callback: (
+      conditionLogId: number,
+      message: string,
+      estimatedResolutionTime: Date
+    ) => void
+  ) => {
+    signalRService.on(
+      EQUIPMENT_HUB,
+      "ReceiveDirectNotification",
+      callback as HubCallback
+    );
+  },
+
+  onReceiveResolutionUpdate: (
+    callback: (
+      conditionLogId: number,
+      status: string,
+      estimatedResolutionTime: Date,
+      message: string
+    ) => void
+  ) => {
+    signalRService.on(
+      EQUIPMENT_HUB,
+      "ReceiveResolutionUpdate",
+      callback as HubCallback
+    );
+  },
+
+  onReceiveEquipmentUpdate: (
+    callback: (
+      conditionLogId: number,
+      equipmentName: string,
+      status: string,
+      estimatedResolutionTime: Date,
+      message: string
+    ) => void
+  ) => {
+    signalRService.on(
+      EQUIPMENT_HUB,
+      "ReceiveEquipmentUpdate",
+      callback as HubCallback
+    );
+  },
+
+  // Methods to send updates
+  sendResolutionUpdate: async (
+    conditionLogId: number,
+    status: string,
+    estimatedResolutionTime: Date,
+    message: string
+  ) => {
+    await signalRService.invoke(
+      EQUIPMENT_HUB,
+      "SendResolutionUpdate",
+      conditionLogId,
+      status,
+      estimatedResolutionTime,
+      message
+    );
+  },
+
+  sendCustomerUpdate: async (
+    customerId: number,
+    conditionLogId: number,
+    equipmentName: string,
+    status: string,
+    estimatedResolutionTime: Date,
+    message: string
+  ) => {
+    await signalRService.invoke(
+      EQUIPMENT_HUB,
+      "SendCustomerUpdate",
+      customerId,
+      conditionLogId,
+      equipmentName,
+      status,
+      estimatedResolutionTime,
+      message
+    );
+  },
 
   disconnect: async () => {
     await signalRService.stopConnection(EQUIPMENT_HUB);
