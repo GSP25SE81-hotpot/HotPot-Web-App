@@ -1,4 +1,13 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import BuildIcon from "@mui/icons-material/Build";
+import CancelIcon from "@mui/icons-material/Cancel";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import HistoryIcon from "@mui/icons-material/History";
+import InfoIcon from "@mui/icons-material/Info";
+import PendingIcon from "@mui/icons-material/Pending";
+import TimelineIcon from "@mui/icons-material/Timeline";
 import {
   Alert,
   Box,
@@ -17,7 +26,7 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import equipmentConditionService, {
   EquipmentConditionDetailDto,
   MaintenanceStatus,
@@ -36,14 +45,6 @@ import {
   TableRow,
   getStatusText,
 } from "../../components/manager/styles/EquipmentConditionLogStyles";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import HistoryIcon from "@mui/icons-material/History";
-import BuildIcon from "@mui/icons-material/Build";
-import InfoIcon from "@mui/icons-material/Info";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import PendingIcon from "@mui/icons-material/Pending";
-import CancelIcon from "@mui/icons-material/Cancel";
-import TimelineIcon from "@mui/icons-material/Timeline";
 
 // Interface for tab panel props
 interface TabPanelProps {
@@ -74,7 +75,6 @@ const EquipmentConditionDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const theme = useTheme();
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [conditionDetail, setConditionDetail] =
@@ -171,7 +171,7 @@ const EquipmentConditionDetails: React.FC = () => {
   };
 
   // Handle tab change
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
@@ -206,7 +206,11 @@ const EquipmentConditionDetails: React.FC = () => {
     <StyledBox>
       {/* Breadcrumb navigation */}
       <Breadcrumbs sx={{ mb: 3 }}>
-        <Link component={RouterLink} to="/equipment-condition-log" color="inherit">
+        <Link
+          component={RouterLink}
+          to="/equipment-condition-log"
+          color="inherit"
+        >
           Equipment Condition
         </Link>
         <Typography color="text.primary">Details</Typography>

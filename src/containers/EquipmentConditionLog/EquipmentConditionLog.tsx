@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
@@ -46,6 +46,7 @@ import {
   StyledTextField,
   getStatusText,
 } from "../../components/manager/styles/EquipmentConditionLogStyles";
+import NotificationDescriptionDialog from "./NotificationDescriptionDialog";
 
 // Define column configuration for sorting
 interface ColumnConfig {
@@ -85,6 +86,11 @@ const EquipmentConditionLog: React.FC = () => {
     name: false,
     equipmentId: false,
   });
+  const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
+  const [currentNotificationLog, setCurrentNotificationLog] =
+    useState<any>(null);
+  const [notificationScheduleType, setNotificationScheduleType] =
+    useState<MaintenanceScheduleType>(MaintenanceScheduleType.Regular);
 
   // Define sortable columns
   const columns: ColumnConfig[] = [
@@ -251,32 +257,69 @@ const EquipmentConditionLog: React.FC = () => {
   };
 
   // Handle notify admin
-  const handleNotifyAdmin = async (conditionLog: any) => {
+  const handleNotifyAdmin = (conditionLog: any) => {
+    setCurrentNotificationLog(conditionLog);
+    setNotificationScheduleType(MaintenanceScheduleType.Regular);
+    setNotificationDialogOpen(true);
+  };
+
+  const handleEmergencyNotify = (conditionLog: any) => {
+    setCurrentNotificationLog(conditionLog);
+    setNotificationScheduleType(MaintenanceScheduleType.Emergency);
+    setNotificationDialogOpen(true);
+  };
+
+  const handleNotificationSubmit = async (description: string) => {
+    if (!currentNotificationLog) return;
+
     try {
       setLoading(true);
+
+      // Create the notification request with the provided description
       const notifyRequest: NotifyAdminRequest = {
-        conditionLogId: conditionLog.damageDeviceId,
-        equipmentType: conditionLog.equipmentType,
-        equipmentName: conditionLog.equipmentName,
-        issueName: conditionLog.name,
-        description: conditionLog.description,
-        scheduleType: MaintenanceScheduleType.Regular,
+        conditionLogId: currentNotificationLog.damageDeviceId,
+        equipmentType: currentNotificationLog.equipmentType,
+        equipmentName: currentNotificationLog.equipmentName,
+        issueName: currentNotificationLog.name,
+        description: description, // Use the description from the dialog
+        scheduleType: notificationScheduleType,
       };
+
+      // Send the notification through the API
       const response = await equipmentConditionService.notifyAdministrators(
         notifyRequest
       );
+
       if (response.success) {
         // Show success message
-        setSuccessMessage("Administrators have been notified");
+        setSuccessMessage(
+          notificationScheduleType === MaintenanceScheduleType.Emergency
+            ? "Emergency notification sent to administrators"
+            : "Administrators have been notified"
+        );
+
         // Clear success message after 5 seconds
         setTimeout(() => {
           setSuccessMessage(null);
         }, 5000);
+
+        // Close the dialog
+        setNotificationDialogOpen(false);
       } else {
         setError(response.message || "Failed to notify administrators");
       }
-    } catch (err) {
-      setError("An error occurred while notifying administrators");
+    } catch (err: any) {
+      // Handle validation errors specifically
+      if (err.response && err.response.status === 400) {
+        const errorData = err.response.data;
+        if (errorData.errors && errorData.errors.Description) {
+          setError(`Validation error: ${errorData.errors.Description[0]}`);
+        } else {
+          setError("Invalid request: Please check all required fields");
+        }
+      } else {
+        setError("An error occurred while notifying administrators");
+      }
       console.error("Error notifying administrators:", err);
     } finally {
       setLoading(false);
@@ -534,7 +577,6 @@ const EquipmentConditionLog: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           <Box sx={{ display: "flex", gap: 1 }}>
-                            {/* Add View Details button */}
                             <StyledButton
                               size="small"
                               variant="outlined"
@@ -553,6 +595,16 @@ const EquipmentConditionLog: React.FC = () => {
                             >
                               Notify Admin
                             </StyledButton>
+                            {log.status === MaintenanceStatus.Pending && (
+                              <StyledButton
+                                size="small"
+                                variant="outlined"
+                                color="error"
+                                onClick={() => handleEmergencyNotify(log)}
+                              >
+                                Emergency
+                              </StyledButton>
+                            )}
                             {log.status !== MaintenanceStatus.Completed && (
                               <StyledButton
                                 size="small"
@@ -799,6 +851,14 @@ const EquipmentConditionLog: React.FC = () => {
             </StyledButton>
           </DialogActions>
         </StyledDialog>
+        <NotificationDescriptionDialog
+          open={notificationDialogOpen}
+          onClose={() => setNotificationDialogOpen(false)}
+          onSubmit={handleNotificationSubmit}
+          issueName={currentNotificationLog?.name || ""}
+          equipmentName={currentNotificationLog?.equipmentName || ""}
+          scheduleType={notificationScheduleType}
+        />
       </StyledBox>
     </LocalizationProvider>
   );

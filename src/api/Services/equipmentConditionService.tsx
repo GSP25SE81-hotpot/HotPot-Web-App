@@ -68,7 +68,7 @@ export interface NotifyAdminRequest {
   equipmentType: string;
   equipmentName: string;
   issueName: string;
-  description?: string;
+  description: string;
   scheduleType: MaintenanceScheduleType;
 }
 
