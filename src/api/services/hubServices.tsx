@@ -1,5 +1,5 @@
 import signalRService, { HubCallback } from "./signalrService";
-
+import { MaintenanceScheduleType } from "./equipmentConditionService";
 // Hub URLs
 const CHAT_HUB = "/chatHub";
 const EQUIPMENT_HUB = "/equipmentHub";
@@ -50,6 +50,34 @@ type StatusChangeAlertCallback = (
   equipmentName: string,
   isAvailable: boolean,
   reason: string,
+  timestamp: Date
+) => void;
+type ConditionAlertCallback = (
+  conditionLogId: number,
+  equipmentType: string,
+  equipmentName: string,
+  issueName: string,
+  description: string,
+  scheduleType: string,
+  timestamp: Date
+) => void;
+
+type StatusUpdateCallback = (
+  conditionLogId: number,
+  equipmentType: string,
+  equipmentName: string,
+  issueName: string,
+  status: string,
+  timestamp: Date
+) => void;
+
+type DirectNotificationCallback = (
+  conditionLogId: number,
+  equipmentType: string,
+  equipmentName: string,
+  issueName: string,
+  description: string,
+  scheduleType: string,
   timestamp: Date
 ) => void;
 
@@ -346,9 +374,85 @@ export const equipmentConditionHubService = {
       userId,
       userType
     );
+
+    // If user is an admin, register as admin
+    if (
+      userType.toLowerCase() === "admin" ||
+      userType.toLowerCase() === "administrator"
+    ) {
+      await signalRService.invoke(
+        EQUIPMENT_CONDITION_HUB,
+        "RegisterAdminConnection",
+        userId
+      );
+    }
   },
 
-  // Add equipment condition-specific methods here
+  // Listen for connection registration confirmation
+  onConnectionRegistered: (callback: (userId: number) => void) => {
+    signalRService.on(
+      EQUIPMENT_CONDITION_HUB,
+      "ConnectionRegistered",
+      callback as HubCallback
+    );
+  },
+
+  // Listen for condition alerts
+  onReceiveConditionAlert: (callback: ConditionAlertCallback) => {
+    signalRService.on(
+      EQUIPMENT_CONDITION_HUB,
+      "ReceiveConditionAlert",
+      callback as HubCallback
+    );
+  },
+
+  // Listen for status updates
+  onReceiveStatusUpdate: (callback: StatusUpdateCallback) => {
+    signalRService.on(
+      EQUIPMENT_CONDITION_HUB,
+      "ReceiveStatusUpdate",
+      callback as HubCallback
+    );
+  },
+
+  // Listen for direct notifications
+  onReceiveDirectNotification: (callback: DirectNotificationCallback) => {
+    signalRService.on(
+      EQUIPMENT_CONDITION_HUB,
+      "ReceiveDirectNotification",
+      callback as HubCallback
+    );
+  },
+
+  // Send condition issue notification
+  notifyConditionIssue: async (
+    conditionLogId: number,
+    equipmentType: string,
+    equipmentName: string,
+    issueName: string,
+    description: string,
+    scheduleType: MaintenanceScheduleType
+  ) => {
+    await signalRService.invoke(
+      EQUIPMENT_CONDITION_HUB,
+      "NotifyConditionIssue",
+      conditionLogId,
+      equipmentType,
+      equipmentName,
+      issueName,
+      description,
+      scheduleType
+    );
+  },
+
+  // Join administrator group
+  joinAdministratorGroup: async () => {
+    await signalRService.invoke(
+      EQUIPMENT_CONDITION_HUB,
+      "JoinGroup",
+      "Administrators"
+    );
+  },
 
   disconnect: async () => {
     await signalRService.stopConnection(EQUIPMENT_CONDITION_HUB);

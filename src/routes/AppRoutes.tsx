@@ -50,6 +50,7 @@ import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
 import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
 import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
 import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
+import { EquipmentConditionDetailPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionDetailPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -88,6 +89,10 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.equipmentConditionLog}
           element={<EquipmentConditionLogPage />}
+        />
+        <Route
+          path={config.managerRoutes.equipmentConditionDetail}
+          element={<EquipmentConditionDetailPage />}
         />
         <Route
           path={config.managerRoutes.equipmentStatusReport}
