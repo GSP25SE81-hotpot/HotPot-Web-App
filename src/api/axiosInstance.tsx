@@ -4,8 +4,8 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const axiosClient = axios.create({
-  // baseURL: `https://hpty.vinhuser.one/api`,
-  baseURL: `https://localhost:7163/api`,
+  baseURL: `https://hpty.vinhuser.one/api`,
+  // baseURL: `https://localhost:7163/api`,
 
   headers: {
     "Content-Type": "application/json",
@@ -20,7 +20,7 @@ axiosClient.interceptors.request.use(
   async (config) => {
     const userDataLocal = localStorage.getItem("userInfor");
     const userData = userDataLocal ? JSON.parse(userDataLocal) : null;
-    console.log("ber: ", userData);
+    // console.log("ber: ", userData);
     if (userData) {
       config.headers.Authorization = `Bearer ${userData?.accessToken}`;
     }

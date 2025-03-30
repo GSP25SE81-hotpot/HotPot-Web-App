@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext({});
 
@@ -9,18 +10,32 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const jsonString = localStorage.getItem("userInfor");
-  const user = jsonString ? JSON.parse(jsonString) : null;
+  const userStorage = jsonString ? JSON.parse(jsonString) : null;
   let navigate = useNavigate();
-  const accessToken = user?.accessToken;
-  const [auth, setAuth] = useState(
-    user && accessToken ? { user, accessToken } : {}
-  );
+  const accessToken = userStorage?.accessToken;
+
+  const [auth, setAuth] = useState({ user: {}, accessToken: "" });
+
+  useEffect(() => {
+    if (accessToken) {
+      try {
+        const decoded = jwtDecode(accessToken);
+        console.log("Decoded Token:", decoded);
+        setAuth({ user: decoded, accessToken });
+      } catch (error) {
+        console.error("Lỗi giải mã token:", error);
+        setAuth({ user: {}, accessToken: "" });
+      }
+    } else {
+      setAuth({ user: {}, accessToken: "" });
+    }
+  }, [accessToken]); // Chạy lại khi accessToken thay đổi
 
   useEffect(() => {
     if (!accessToken) {
-      navigate("/auth");
+      navigate("/");
     }
-  }, [accessToken]);
+  }, [accessToken, navigate]);
 
   return (
     <AuthContext.Provider value={{ auth, setAuth }}>

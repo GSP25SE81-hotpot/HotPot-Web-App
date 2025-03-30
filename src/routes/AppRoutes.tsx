@@ -1,8 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import config from "../configs";
-import Home from "../pages/Home/Home";
-import StaffLayout from "../layouts/StaffLayout/StaffLayout";
 // import Home from "../pages/Home/HomePage";
 
 import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/ManageEquipmentStockPage";
@@ -15,7 +13,6 @@ import { EquipmentConditionLogPage } from "../pages/Manager/EquipmentConditionLo
 import { EquipmentStatusReportPage } from "../pages/Manager/EquipmentStatusReport/EquipmentStatusReportPage";
 import { OrderHistoryPage } from "../pages/Staff/OrderHistory/OrderHistoryPage";
 import { FeedbackManagementPage } from "../pages/Manager/FeedbackManagement/FeedbackManagementPage";
-import AdminLayout from "../layouts/AdminLayout/LayoutAdmin";
 import FeedbackDetailPage from "../pages/Admin/Feedback/FeedbackDetailPage";
 import FeedbackPage from "../pages/Admin/Feedback/FeedbackPage";
 import CreateComboPage from "../pages/Admin/Combohotpot/CreateComboPage";
@@ -30,6 +27,7 @@ import CreateHotpotPage from "../pages/Admin/CreateHotpot/CreateHotpotPage";
 import DashboardPage from "../pages/Admin/Dashboard/DashboardPage";
 import OrderPage from "../pages/Admin/ManageOrder/OrderPage";
 import HotpotComboDetailPage from "../pages/Admin/ComboDetail/HotpotComboDetailPage";
+import TableIngredientTypePage from "../pages/Admin/TableIngredientType/TableIngredientTypePage";
 
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
@@ -48,6 +46,9 @@ import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
 import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
 import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
 import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
+import OrderDetail from "../containers/ManageOrder/SubPage/OrderDetail";
+import TableHotpotDetailPage from "../pages/Admin/TableHotpotDetail/TableHotpotDetailPage";
+import TableMaintenanceHotpotDetailPage from "../pages/Admin/TableMaintenanceHotpot/TableMaintenanceHopotPage";
 import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
 import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
 import { EquipmentConditionDetailPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionDetailPage";
@@ -57,15 +58,11 @@ const AppRoute: React.FC = () => {
     <Routes>
       <Route
         key={"Login"}
-        path={config.authRoutes.authenticate}
+        path={config.managerRoutes.home}
         element={<AuthenticatePage />}
       />
 
-      <Route
-        key="layoutManager"
-        path={config.managerRoutes.home}
-        element={<ManagerLayout />}
-      >
+      <Route key="layoutManager" element={<ManagerLayout />}>
         <Route
           path={config.managerRoutes.manageEquipmentStock}
           element={<ManageEquipmentStockPage />}
@@ -143,7 +140,7 @@ const AppRoute: React.FC = () => {
       <Route
         key="layoutAdmin"
         path={config.adminRoutes.dashboard}
-        element={<AdminLayout />}
+        element={<ManagerLayout />}
       >
         <Route
           key="dashboard"
@@ -159,6 +156,11 @@ const AppRoute: React.FC = () => {
           key={"manageUser"}
           path={config.adminRoutes.manageUsers}
           element={<ManageUserPage />}
+        />
+        <Route
+          key={"orderDetail"}
+          path={config.adminRoutes.orderDetail}
+          element={<OrderDetail />}
         />
         <Route
           key="feedbackTable"
@@ -212,6 +214,22 @@ const AppRoute: React.FC = () => {
           key={"manageUser"}
           path={config.adminRoutes.manageUsers}
           element={<ManageUserPage />}
+        />
+
+        <Route
+          key="ingredientType"
+          path={config.adminRoutes.ingredientType}
+          element={<TableIngredientTypePage />}
+        />
+        <Route
+          key="maintenanceHotpot"
+          path={config.adminRoutes.MaintenanceHotpot}
+          element={<TableMaintenanceHotpotDetailPage />}
+        />
+        <Route
+          key="hotpotTypeDetail"
+          path={config.adminRoutes.DetailHotpotType}
+          element={<TableHotpotDetailPage />}
         />
       </Route>
       {/* <Route key="layout" path={config.routes.home} element={<StaffLayout />}>

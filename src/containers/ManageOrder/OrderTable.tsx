@@ -67,12 +67,7 @@ const OrderTable = () => {
         data={orderData}
         tableHeaderTitle={tableOrderHeader}
         title="Quản lý đơn hàng"
-        menuAction={
-          <MenuActionTableOrder
-            orderData={selectOrderdata}
-            onOpenDetail={selecteData}
-          />
-        }
+        menuAction={<MenuActionTableOrder orderData={selectOrderdata} />}
         selectedData={selecteData}
         size={size}
         page={page}

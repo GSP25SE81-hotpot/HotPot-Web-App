@@ -41,7 +41,10 @@ const MenuActionTableFeedback: React.FC<MenuActionTableFeedbackProps> = ({
     console.log(feedbackData, "detail");
 
     navigate(
-      config.adminRoutes.feedbackDetail.replace(":id", feedbackData.feedbackId)
+      config.adminRoutes.feedbackDetail.replace(
+        ":feedbackId",
+        feedbackData.feedbackId
+      )
     );
   };
 

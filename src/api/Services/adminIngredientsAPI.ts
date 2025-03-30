@@ -12,6 +12,16 @@ const adminIngredientsAPI = {
     });
   },
 
+  getListIngredientsDetail: (params?: any) => {
+    const url = "/admin/ingredients/id";
+    const newUrl = url.replace("id", params);
+    return axiosClient.get(newUrl, {
+      paramsSerializer: {
+        indexes: null, // by default: false
+      },
+    });
+  },
+
   getListIngredientsType: (params?: any) => {
     const url = "/admin/ingredient-types";
     return axiosClient.get(url, {
@@ -24,6 +34,15 @@ const adminIngredientsAPI = {
 
   createNewIngredients: (params?: any) => {
     const url = "/admin/ingredients";
+    return axiosClient.post(url, params, {
+      paramsSerializer: {
+        indexes: null, // by default: false
+      },
+    });
+  },
+
+  createNewIngredientType: (params?: any) => {
+    const url = "/admin/ingredient-types";
     return axiosClient.post(url, params, {
       paramsSerializer: {
         indexes: null, // by default: false

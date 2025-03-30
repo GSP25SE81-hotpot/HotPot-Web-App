@@ -12,6 +12,12 @@ const orderManagementAPI =  {
             },
           } );
         },
+
+    getOrderById: ( id: any ) =>
+          {
+            const url = `/admin/dashboard/orders/${id}`;
+            return axiosClient.get( url );
+          },
 }
 
 export default orderManagementAPI;

@@ -41,12 +41,11 @@ const TableCombo = () => {
   }, [page, size]);
 
   const tableHeader = [
-    { id: "id", label: "#", align: "left" },
     { id: "name", label: "Tên món lẩu", align: "center" },
     { id: "imageURLs", label: "Hình ảnh", align: "center" },
     { id: "isCustomizable", label: "Tự tạo mới", align: "center" },
     { id: "appliedDiscountPercentage", label: "Giảm giá", align: "center" },
-    { id: "createdAt", label: "Ngày tạo", align: "center" },
+    { id: "createdAt", label: "Ngày tạo", align: "center", format: "date" },
   ];
 
   // Handle pagination
@@ -61,15 +60,22 @@ const TableCombo = () => {
     setPage(0);
   };
 
+  const EventAction = () => {
+    return (
+      <>
+        <Button
+          startIcon={<AddIcon />}
+          variant="contained"
+          onClick={() => navigate(config.adminRoutes.createHotPotCombo)}
+        >
+          Tạo bombo mới
+        </Button>
+      </>
+    );
+  };
+
   return (
     <>
-      <Button
-        startIcon={<AddIcon />}
-        variant="contained"
-        onClick={() => navigate(config.adminRoutes.createHotPotCombo)}
-      >
-        Tạo bombo mới
-      </Button>
       <CTable
         data={dataCombo}
         tableHeaderTitle={tableHeader}
@@ -80,6 +86,7 @@ const TableCombo = () => {
             onOpenDetail={selecteData}
           />
         }
+        eventAction={<EventAction />}
         selectedData={selecteData}
         size={size}
         page={page}

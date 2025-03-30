@@ -6,23 +6,24 @@ import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import * as React from "react";
-import OrderDetailPopup from "../../../containers/ManageOrder/Popup/OrderDetailPopup";
+import { useNavigate } from "react-router";
+import { IOrder } from "../../../types/order";
 
 interface MenuActionTableOrderProps {
-  orderData: any;
+  orderData: IOrder;
   onOpenUpdate?: any;
-  onOpenDetail?: any;
+
   onOpenDelete?: any;
 }
 
 const MenuActionTableOrder: React.FC<MenuActionTableOrderProps> = ({
   orderData,
   onOpenUpdate,
-  onOpenDetail,
+
   onOpenDelete,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<any>(null);
-  const [openDetail, setOpenDetail] = React.useState<boolean>(false);
+  const nav = useNavigate();
   const open = Boolean(anchorEl);
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
@@ -35,13 +36,11 @@ const MenuActionTableOrder: React.FC<MenuActionTableOrderProps> = ({
     setAnchorEl(null);
   };
   const handleDetail = () => {
-    onOpenDetail(orderData);
-    setOpenDetail(true);
+    // onOpenDetail(orderData);
+    nav(`/dashboard/order/${orderData?.orderId}`);
     setAnchorEl(null);
   };
-  const handleCloseDetail = () => {
-    setOpenDetail(false);
-  };
+
   const handleDelete = () => {
     onOpenDelete(orderData);
     setAnchorEl(null);
@@ -82,7 +81,7 @@ const MenuActionTableOrder: React.FC<MenuActionTableOrderProps> = ({
           <InfoIcon sx={{ mr: "4px" }} color="info" />
           <span>Chi Tiết</span>
         </MenuItem>
-        <MenuItem onClick={() => handleUpdate()}>
+        {/* <MenuItem onClick={() => handleUpdate()}>
           <EditIcon sx={{ mr: "4px", color: "#9ADE7B" }} />
           <span>Cập nhật</span>
         </MenuItem>
@@ -90,20 +89,20 @@ const MenuActionTableOrder: React.FC<MenuActionTableOrderProps> = ({
         <MenuItem onClick={() => handleDelete()}>
           <BlockIcon sx={{ mr: "4px" }} color="error" />
           <span>Xóa</span>
-        </MenuItem>
+        </MenuItem> */}
 
         {/* <MenuItem onClick={() => handleStartFeedBack(id)}>
           <FeedbackOutlinedIcon sx={{ mr: "4px" }} color="success" />
           <span>Mở phản hồi</span>
         </MenuItem> */}
       </Menu>
-      {orderData && (
+      {/* {openDetail == true && (
         <OrderDetailPopup
           handleOpen={openDetail}
           handleClose={handleCloseDetail}
           detailData={orderData}
         />
-      )}
+      )} */}
     </div>
   );
 };
