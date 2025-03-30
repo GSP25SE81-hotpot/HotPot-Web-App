@@ -34,6 +34,7 @@ import {
   OrderQueryParams,
   UnallocatedOrderDTO,
   orderManagementService,
+  OrderStatus,
 } from "../../../api/Services/orderManagementService";
 import staffService from "../../../api/Services/staffService";
 import {
@@ -63,6 +64,45 @@ import {
   formatDate,
   getOrderStatusColor,
 } from "../../../utils/formatters";
+
+// Helper function to translate order status into Vietnamese
+const getVietnameseOrderStatusLabel = (status: any): string => {
+  // If status is a number, convert to enum OrderStatus
+  if (typeof status === "number") {
+    // Map from number to enum name
+    const statusEnum = OrderStatus[status];
+    if (statusEnum) {
+      // If enum name is found, use it to look up in translation table
+      const statusMap: Record<string, string> = {
+        Pending: "Chờ xử lý",
+        Processing: "Đang xử lý",
+        Shipping: "Đang giao",
+        Delivered: "Đã giao",
+        Completed: "Hoàn thành",
+        Cancelled: "Đã hủy",
+        Returning: "Đang trả",
+      };
+      return statusMap[statusEnum] || statusEnum;
+    }
+  }
+
+  // If status is a string, use it directly
+  if (typeof status === "string") {
+    const statusMap: Record<string, string> = {
+      Pending: "Chờ xử lý",
+      Processing: "Đang xử lý",
+      Shipping: "Đang giao",
+      Delivered: "Đã giao",
+      Completed: "Hoàn thành",
+      Cancelled: "Đã hủy",
+      Returning: "Đang trả",
+    };
+    return statusMap[status] || status;
+  }
+
+  // Otherwise, convert to string and return
+  return String(status);
+};
 
 const UnallocatedOrdersList: React.FC = () => {
   const [orders, setOrders] = useState<UnallocatedOrderDTO[]>([]);
@@ -285,28 +325,26 @@ const UnallocatedOrdersList: React.FC = () => {
             size="small"
             value={searchTerm}
             onChange={handleSearch}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-                endAdornment: searchTerm && (
-                  <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setSearchTerm("");
-                        applySearch();
-                      }}
-                    >
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                sx: { borderRadius: 2 },
-              },
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+              endAdornment: searchTerm && (
+                <InputAdornment position="end">
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setSearchTerm("");
+                      applySearch();
+                    }}
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+              sx: { borderRadius: 2 },
             }}
             onKeyUp={(e) => {
               if (e.key === "Enter") {
@@ -569,22 +607,6 @@ const UnallocatedOrdersList: React.FC = () => {
       </Snackbar>
     </OrdersListContainer>
   );
-};
-
-// Hàm trợ giúp để dịch trạng thái đơn hàng sang tiếng Việt
-const getVietnameseOrderStatusLabel = (status: any): string => {
-  const statusMap: Record<string, string> = {
-    Pending: "Chờ xử lý",
-    Processing: "Đang xử lý",
-    Shipping: "Đang giao",
-    Delivered: "Đã giao",
-    Completed: "Hoàn thành",
-    Cancelled: "Đã hủy",
-    Returning: "Đang trả",
-  };
-
-  const statusString = typeof status === "string" ? status : String(status);
-  return statusMap[statusString] || statusString;
 };
 
 export default UnallocatedOrdersList;
