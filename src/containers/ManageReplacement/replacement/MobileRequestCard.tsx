@@ -23,8 +23,7 @@ const MobileRequestCard: React.FC<MobileRequestCardProps> = ({
         borderLeft: `4px solid ${
           request.status === "Pending"
             ? theme.palette.warning.main
-            : request.status === "InProgress" ||
-              request.status === "In Progress"
+            : request.status === "InProgress"
             ? theme.palette.primary.main
             : request.status === "Completed"
             ? theme.palette.success.main

@@ -1,13 +1,13 @@
 // src/components/replacement/AssignStaff.tsx
 import { Paper, Typography, Stack } from "@mui/material";
-import { StaffDto } from "../../../types/staff";
+import { StaffAvailabilityDto } from "../../../types/staff";
 import StaffSelection from "./StaffSelection";
 import { AnimatedButton } from "../../../components/StyledComponents";
 
 interface AssignStaffProps {
   selectedStaffId: number | null;
   setSelectedStaffId: (id: number | null) => void;
-  staff: StaffDto[];
+  staff: StaffAvailabilityDto[];
   loading: boolean;
   onAssign: () => void;
 }

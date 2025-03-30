@@ -7,13 +7,11 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useState } from "react";
 import { calculateLateFee } from "../../../api/Services/rentalService";
 import { alpha } from "@mui/material/styles";
-
 // Import styled components
 import {
   StyledContainer,
   StyledPaper,
 } from "../../../components/StyledComponents";
-
 // Import calculator-specific styled components
 import {
   CalculateButton,
@@ -36,11 +34,11 @@ const LateFeeCalculator: React.FC = () => {
 
   const handleCalculate = async () => {
     if (!rentalId) {
-      setError("Please enter a rental ID");
+      setError("Vui lòng nhập mã thuê");
       return;
     }
     if (!returnDate) {
-      setError("Please select a return date");
+      setError("Vui lòng chọn ngày trả");
       return;
     }
 
@@ -56,7 +54,7 @@ const LateFeeCalculator: React.FC = () => {
       setLateFee(fee);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to calculate late fee"
+        err instanceof Error ? err.message : "Không thể tính phí trễ hạn"
       );
     } finally {
       setLoading(false);
@@ -66,8 +64,7 @@ const LateFeeCalculator: React.FC = () => {
   return (
     <StyledContainer maxWidth="md">
       <StyledPaper elevation={0} sx={{ p: 4 }}>
-        <CalculatorTitle variant="h4">Late Fee Calculator</CalculatorTitle>
-
+        <CalculatorTitle variant="h4">Máy tính phí trễ hạn</CalculatorTitle>
         {error && (
           <Alert
             severity="error"
@@ -82,17 +79,16 @@ const LateFeeCalculator: React.FC = () => {
             {error}
           </Alert>
         )}
-
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 6 }}>
             <StyledTextField
-              label="Rental ID"
+              label="Mã thuê"
               variant="outlined"
               fullWidth
               value={rentalId}
               onChange={(e) => setRentalId(e.target.value)}
               disabled={loading}
-              placeholder="Enter the rental ID"
+              placeholder="Nhập mã thuê"
               slotProps={{
                 input: { sx: { borderRadius: 3 } },
               }}
@@ -101,7 +97,7 @@ const LateFeeCalculator: React.FC = () => {
           <Grid size={{ xs: 12, md: 6 }}>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
-                label="Actual Return Date"
+                label="Ngày trả thực tế"
                 value={returnDate}
                 onChange={(newValue) => setReturnDate(newValue)}
                 disabled={loading}
@@ -132,23 +128,22 @@ const LateFeeCalculator: React.FC = () => {
                 loading ? <CircularProgress size={20} color="inherit" /> : null
               }
             >
-              {loading ? "Calculating..." : "Calculate Late Fee"}
+              {loading ? "Đang tính..." : "Tính phí trễ hạn"}
             </CalculateButton>
           </Grid>
         </Grid>
-
         {lateFee !== null && (
           <ResultContainer>
             <ResultDivider />
-            <ResultTitle variant="h6">Calculation Result</ResultTitle>
+            <ResultTitle variant="h6">Kết quả tính toán</ResultTitle>
             <ResultBox>
               <ResultItem variant="body1">
-                <strong>Rental ID:</strong> {rentalId}
+                <strong>Mã thuê:</strong> {rentalId}
               </ResultItem>
               <ResultItem variant="body1">
-                <strong>Return Date:</strong> {returnDate?.toLocaleDateString()}
+                <strong>Ngày trả:</strong> {returnDate?.toLocaleDateString()}
               </ResultItem>
-              <FeeAmount>Late Fee: ${lateFee.toFixed(2)}</FeeAmount>
+              <FeeAmount>Phí trễ hạn: {lateFee.toFixed(2)}đ</FeeAmount>
             </ResultBox>
           </ResultContainer>
         )}

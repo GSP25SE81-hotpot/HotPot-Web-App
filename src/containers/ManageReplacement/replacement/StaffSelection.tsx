@@ -11,18 +11,17 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { StaffDto } from "../../../types/staff";
+import { StaffAvailabilityDto } from "../../../types/staff";
 import { StyledFormControl } from "../../../components/StyledComponents";
 import {
   getStaffAvailabilityStatus,
   getStaffDisplayName,
-  getStaffWorkload,
 } from "../../../utils/replacementUtils";
 
 interface StaffSelectionProps {
   selectedStaffId: number | null;
   setSelectedStaffId: (id: number | null) => void;
-  staff: StaffDto[];
+  staff: StaffAvailabilityDto[];
   loading: boolean;
 }
 
@@ -68,8 +67,8 @@ const StaffSelection: React.FC<StaffSelectionProps> = ({
 
             return (
               <MenuItem
-                key={s.staffId}
-                value={s.staffId}
+                key={s.id}
+                value={s.id}
                 disabled={!availabilityStatus.available}
               >
                 <Stack
@@ -87,13 +86,10 @@ const StaffSelection: React.FC<StaffSelectionProps> = ({
                         : "error.light",
                     }}
                   >
-                    {s.user.name.charAt(0)}
+                    {s.name.charAt(0)}
                   </Avatar>
                   <Box sx={{ flexGrow: 1 }}>
-                    <Typography>{s.user.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {getStaffWorkload(s.staffId, staff)}
-                    </Typography>
+                    <Typography>{s.name}</Typography>
                   </Box>
                   <Chip
                     size="small"

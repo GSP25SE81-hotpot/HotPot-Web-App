@@ -3,8 +3,8 @@ import {
   Inventory as InventoryIcon,
   People as PeopleIcon,
   Settings as SettingsIcon,
+  Assignment as AssignmentIcon,
 } from "@mui/icons-material";
-import AssignmentIcon from "@mui/icons-material/Assignment";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -104,7 +104,7 @@ export const menuItems: MenuItemLayout[] = [
           {
             label: "Equipment Stock Status",
             icon: <InventoryIcon />,
-            path: managerRoutes.manageRentals,
+            path: managerRoutes.rentalDashboard,
           },
           {
             label: "Equipment Status Report",
@@ -142,11 +142,7 @@ export const menuItems: MenuItemLayout[] = [
         icon: <EngineeringIcon />,
         path: "#",
         children: [
-          {
-            label: "Resolve Equipment Failure",
-            icon: <EngineeringIcon />,
-            path: managerRoutes.resolveEquipmentFailure,
-          },
+      
           {
             label: "Equipment Condition Log",
             icon: <AssignmentIcon />,

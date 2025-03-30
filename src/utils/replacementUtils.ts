@@ -1,4 +1,4 @@
-import { StaffDto, StaffAvailabilityStatus } from "../types/staff";
+import { StaffAvailabilityStatus, StaffAvailabilityDto } from "../types/staff";
 
 // Format date for display
 export const formatDate = (dateString?: string): string => {
@@ -27,67 +27,36 @@ export const getAvailableActions = (status: string) => {
 
 // Get staff availability status with reason
 export const getStaffAvailabilityStatus = (
-  staffMember: StaffDto | undefined
+  staffMember: StaffAvailabilityDto | undefined
 ): StaffAvailabilityStatus => {
   if (!staffMember) {
     return { available: false, reason: "Staff not found" };
   }
 
-  // If staff has no shipping orders array, they're available
-  if (!staffMember.shippingOrders) {
+  // Use the isAvailable property directly from the backend
+  if (staffMember.isAvailable) {
     return { available: true, reason: "Available" };
+  } else {
+    return { available: false, reason: "Not available" };
   }
-
-  // Check if staff has fewer than 5 active orders (this is a simplified example)
-  const activeOrderCount = staffMember.shippingOrders.length;
-
-  if (activeOrderCount >= 5) {
-    return { available: false, reason: "Too many active orders" };
-  }
-
-  // Check if staff is working today (based on workDays)
-  // This is a simplified example - you might want to implement more complex logic
-  // For example, workDays could be a bitmask where each bit represents a day of the week
-  const today = new Date().getDay(); // 0 = Sunday, 1 = Monday, etc.
-  const isWorkingToday = (staffMember.workDays & (1 << today)) !== 0;
-
-  if (!isWorkingToday) {
-    return { available: false, reason: "Not scheduled to work today" };
-  }
-
-  return { available: true, reason: "Available" };
 };
 
 // Simplified version that just returns boolean
 export const isStaffAvailable = (
   staffId: number,
-  staffList: StaffDto[]
+  staffList: StaffAvailabilityDto[]
 ): boolean => {
-  const staffMember = staffList.find((s) => s.staffId === staffId);
+  const staffMember = staffList.find((s) => s.id === staffId);
   return getStaffAvailabilityStatus(staffMember).available;
-};
-
-// Get staff workload for display
-export const getStaffWorkload = (
-  staffId: number,
-  staffList: StaffDto[]
-): string => {
-  const staffMember = staffList.find((s) => s.staffId === staffId);
-
-  if (!staffMember) return "Unknown";
-
-  if (!staffMember.shippingOrders) return "No active orders";
-
-  return `${staffMember.shippingOrders.length} active orders`;
 };
 
 // Get staff display name
 export const getStaffDisplayName = (
   staffId: number | null,
-  staffList: StaffDto[]
+  staffList: StaffAvailabilityDto[]
 ): string => {
   if (staffId === null) return "Not assigned";
 
-  const staffMember = staffList.find((s) => s.staffId === staffId);
-  return staffMember ? staffMember.user.name : "Unknown Staff";
+  const staffMember = staffList.find((s) => s.id === staffId);
+  return staffMember ? staffMember.name : "Unknown Staff";
 };
