@@ -1,14 +1,13 @@
 import { Box } from "@mui/material";
 import ManageOrder from "../../../containers/ManageOrder/ManageOrder";
-// import { AuthContextProvider } from "../../../context/AuthContext";
-import OverrideMuiTheme from "../../../theme/override";
+import ErrorBoundary from "../../../components/ErrorBoundary";
 
 export const ManageOrderPage = () => {
   return (
-    <OverrideMuiTheme>
+    <ErrorBoundary>
       <Box>
         <ManageOrder />
       </Box>
-    </OverrideMuiTheme>
+    </ErrorBoundary>
   );
 };

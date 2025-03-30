@@ -5,14 +5,12 @@ import Home from "../pages/Home/Home";
 import StaffLayout from "../layouts/StaffLayout/StaffLayout";
 // import Home from "../pages/Home/HomePage";
 
-import { ManageRentalsPage } from "../pages/Manager/ManageRental/ManageRentalsPage";
-import { ManageRentalStatusPage } from "../pages/Manager/ManageRental/ManageRentalStatusPage";
-import { EquipmentAvailabilityPage } from "../pages/Manager/ManageRental/EquipmentAvailabilityPage";
+import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/ManageEquipmentStockPage";
+import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock/EquipmentAvailabilityPage";
 import { CheckDeviceAfterReturnPage } from "../pages/Staff/CheckDeviceAfterReturn/CheckDeviceAfterReturnPage";
 import { ChatWithCustomerPage } from "../pages/Manager/ChatWithCustomer/ChatWithCustomerPage";
 import { DepositConfirmationPage } from "../pages/Staff/DepositConfirmation/DepositConfirmationPage";
 import { PaymentManagementPage } from "../pages/Staff/PaymentManagement/PaymentManagementPage";
-import { ResolveEquipmentFailurePage } from "../pages/Manager/ResolveEquipmentFailure/ResolveEquipmentFailurePage";
 import { EquipmentConditionLogPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionLogPage";
 import { EquipmentStatusReportPage } from "../pages/Manager/EquipmentStatusReport/EquipmentStatusReportPage";
 import { OrderHistoryPage } from "../pages/Staff/OrderHistory/OrderHistoryPage";
@@ -50,6 +48,9 @@ import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
 import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
 import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
 import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
+import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
+import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
+import { EquipmentConditionDetailPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionDetailPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -60,19 +61,14 @@ const AppRoute: React.FC = () => {
         element={<AuthenticatePage />}
       />
 
-
       <Route
         key="layoutManager"
         path={config.managerRoutes.home}
         element={<ManagerLayout />}
       >
         <Route
-          path={config.managerRoutes.manageRentals}
-          element={<ManageRentalsPage />}
-        />
-        <Route
-          path={config.managerRoutes.manageRentalStatus}
-          element={<ManageRentalStatusPage />}
+          path={config.managerRoutes.manageEquipmentStock}
+          element={<ManageEquipmentStockPage />}
         />
         <Route
           path={config.managerRoutes.equipmentAvailability}
@@ -91,12 +87,12 @@ const AppRoute: React.FC = () => {
           element={<ChatWithCustomerPage />}
         />
         <Route
-          path={config.managerRoutes.resolveEquipmentFailure}
-          element={<ResolveEquipmentFailurePage />}
-        />
-        <Route
           path={config.managerRoutes.equipmentConditionLog}
           element={<EquipmentConditionLogPage />}
+        />
+        <Route
+          path={config.managerRoutes.equipmentConditionDetail}
+          element={<EquipmentConditionDetailPage />}
         />
         <Route
           path={config.managerRoutes.equipmentStatusReport}
@@ -134,6 +130,14 @@ const AppRoute: React.FC = () => {
           path={config.managerRoutes.adjustReturnDate}
           element={<ReturnDateAdjustmentPage />}
         />
+        <Route
+          path={config.managerRoutes.orderDetail}
+          element={<OrderDetailViewPage />}
+        />
+        <Route
+          path={config.managerRoutes.lowStockUtensil}
+          element={<LowStockUtensilsPage />}
+        />
       </Route>
 
       <Route
@@ -150,10 +154,8 @@ const AppRoute: React.FC = () => {
           key="order"
           path={config.adminRoutes.orders}
           element={<OrderPage />}
-
         />
-           <Route
-
+        <Route
           key={"manageUser"}
           path={config.adminRoutes.manageUsers}
           element={<ManageUserPage />}

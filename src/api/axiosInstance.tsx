@@ -1,8 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import axios from "axios";
 import { toast } from "react-toastify";
 
 const axiosClient = axios.create({
-  baseURL: `https://hpty.vinhuser.one/api`,
+  // baseURL: `https://hpty.vinhuser.one/api`,
+  baseURL: `https://localhost:7163/api`,
+
   headers: {
     "Content-Type": "application/json",
     "Access-Control-Allow-Methods": "*",
@@ -28,6 +32,7 @@ axiosClient.interceptors.request.use(
 
 axiosClient.interceptors.response.use(
   (response) => response.data,
+
   async (error) => {
     const prevRequest = error?.config;
 

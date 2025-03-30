@@ -1,14 +1,14 @@
 export const managerRoutes = {
   home: "/",
-  manageRentals: "/manage-rentals",
-  manageRentalStatus: "/manage-rental-status",
+  manageEquipmentStock: "/manage-equipment-stock",
   equipmentAvailability: "/equipment-availability",
+  lowStockUtensil: "/low-stock-utensil",
   workAssignment: "/work-assignment",
   manageOrder: "/manage-order",
   customerChat: "/chat",
   feedback: "/feedback",
-  resolveEquipmentFailure: "/resolve-equipment-failure",
   equipmentConditionLog: "/equipment-condition-log",
+  equipmentConditionDetail: "/equipment-condition-log/:id",
   equipmentStatusReport: "/equipment-status-report",
   feedbackManagement: "/feedback-management",
   manageReplacement: "/manage-replacement",
@@ -18,6 +18,7 @@ export const managerRoutes = {
   rentalHistory: "/rental-history",
   calculateLateFee: "/calculate-late-fee",
   adjustReturnDate: "/adjust-return-date",
+  orderDetail: "/orders/:orderId",
 };
 
 export const authRoutes = {

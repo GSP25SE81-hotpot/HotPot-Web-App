@@ -13,13 +13,11 @@ import { format } from "date-fns";
 import { getUnassignedPickups } from "../../../api/Services/rentalService";
 import { PagedResult, RentOrderDetail } from "../../../types/rentalTypes";
 import AssignStaffDialog from "../dialog/AssignStaffDialog";
-
 // Import styled components
 import {
   StyledContainer,
   StyledPaper,
 } from "../../../components/StyledComponents";
-
 // Import unassigned pickups specific styled components
 import {
   PageTitle,
@@ -36,13 +34,12 @@ import {
 } from "../../../components/manager/styles/UnassignedPickupsStyles";
 
 const UnassignedPickups: React.FC = () => {
-  const [pickups, setPickups] = useState<PagedResult<RentOrderDetail> | null>(
+  const [pickups, setPickups] = useState<PagedResult<RentOrderDetail[]> | null>(
     null
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
-  // Changed default rowsPerPage to match one of the options in rowsPerPageOptions
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedPickup, setSelectedPickup] = useState<RentOrderDetail | null>(
     null
@@ -53,14 +50,23 @@ const UnassignedPickups: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getUnassignedPickups(page + 1, rowsPerPage);
-      setPickups(data);
+      const response = await getUnassignedPickups(page + 1, rowsPerPage);
+      // Check if the API call was successful and data exists
+      if (response.success && response.data) {
+        // Extract just the PagedResult part from the ApiResponse
+        setPickups(response.data);
+      } else {
+        // Handle the case where the API call was successful but no data was returned
+        setError(response.message || "Không có dữ liệu trả về từ máy chủ");
+        setPickups(null);
+      }
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : "An error occurred while fetching pickups"
+          : "Đã xảy ra lỗi khi tải danh sách lấy hàng"
       );
+      setPickups(null);
     } finally {
       setLoading(false);
     }
@@ -95,8 +101,7 @@ const UnassignedPickups: React.FC = () => {
   return (
     <StyledContainer maxWidth="xl">
       <Box sx={{ p: 3 }}>
-        <PageTitle variant="h4">Unassigned Pickups</PageTitle>
-
+        <PageTitle variant="h4">Danh sách lấy hàng chưa phân công</PageTitle>
         {error && (
           <Alert
             severity="error"
@@ -111,7 +116,6 @@ const UnassignedPickups: React.FC = () => {
             {error}
           </Alert>
         )}
-
         <StyledPaper elevation={0}>
           {loading && !pickups ? (
             <LoadingContainer>
@@ -124,12 +128,12 @@ const UnassignedPickups: React.FC = () => {
                   <TableHead>
                     <TableRow>
                       <HeaderTableCell>ID</HeaderTableCell>
-                      <HeaderTableCell>Customer</HeaderTableCell>
-                      <HeaderTableCell>Equipment</HeaderTableCell>
-                      <HeaderTableCell>Type</HeaderTableCell>
-                      <HeaderTableCell>Return Date</HeaderTableCell>
-                      <HeaderTableCell>Status</HeaderTableCell>
-                      <HeaderTableCell>Actions</HeaderTableCell>
+                      <HeaderTableCell>Khách hàng</HeaderTableCell>
+                      <HeaderTableCell>Thiết bị</HeaderTableCell>
+                      <HeaderTableCell>Loại</HeaderTableCell>
+                      <HeaderTableCell>Ngày trả</HeaderTableCell>
+                      <HeaderTableCell>Trạng thái</HeaderTableCell>
+                      <HeaderTableCell>Thao tác</HeaderTableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -137,7 +141,7 @@ const UnassignedPickups: React.FC = () => {
                       <StyledTableRow>
                         <BodyTableCell colSpan={7}>
                           <EmptyMessage>
-                            No unassigned pickups found
+                            Không tìm thấy lấy hàng nào chưa được phân công
                           </EmptyMessage>
                         </BodyTableCell>
                       </StyledTableRow>
@@ -158,12 +162,12 @@ const UnassignedPickups: React.FC = () => {
                           <BodyTableCell>
                             {format(
                               new Date(pickup.expectedReturnDate),
-                              "MMM dd, yyyy"
+                              "dd/MM/yyyy"
                             )}
                           </BodyTableCell>
                           <BodyTableCell>
                             <StatusChip
-                              label={pickup.status}
+                              label={getStatusTranslation(pickup.status)}
                               status={pickup.status.toLowerCase()}
                               size="small"
                             />
@@ -175,7 +179,7 @@ const UnassignedPickups: React.FC = () => {
                               size="small"
                               onClick={() => handleAssignClick(pickup)}
                             >
-                              Assign Staff
+                              Phân công nhân viên
                             </AssignButton>
                           </BodyTableCell>
                         </StyledTableRow>
@@ -184,7 +188,6 @@ const UnassignedPickups: React.FC = () => {
                   </TableBody>
                 </Table>
               </StyledTableContainer>
-
               <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25]}
@@ -194,6 +197,10 @@ const UnassignedPickups: React.FC = () => {
                   page={page}
                   onPageChange={handleChangePage}
                   onRowsPerPageChange={handleChangeRowsPerPage}
+                  labelRowsPerPage="Số hàng mỗi trang:"
+                  labelDisplayedRows={({ from, to, count }) =>
+                    `${from}-${to} của ${count}`
+                  }
                   sx={{
                     borderRadius: 2,
                     "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
@@ -206,7 +213,6 @@ const UnassignedPickups: React.FC = () => {
             </>
           )}
         </StyledPaper>
-
         {selectedPickup && (
           <AssignStaffDialog
             open={assignDialogOpen}
@@ -218,6 +224,20 @@ const UnassignedPickups: React.FC = () => {
       </Box>
     </StyledContainer>
   );
+};
+
+// Hàm trợ giúp để dịch trạng thái
+const getStatusTranslation = (status: string): string => {
+  const statusMap: Record<string, string> = {
+    Active: "Đang hoạt động",
+    Completed: "Hoàn thành",
+    Overdue: "Quá hạn",
+    Cancelled: "Đã hủy",
+    Pending: "Đang chờ",
+    // Thêm các trạng thái khác nếu cần
+  };
+
+  return statusMap[status] || status;
 };
 
 export default UnassignedPickups;

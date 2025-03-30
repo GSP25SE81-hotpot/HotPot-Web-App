@@ -7,7 +7,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { Alert, Box, CircularProgress, TablePagination } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-
 import { format, formatDistanceToNow } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { getCurrentAssignments } from "../../../api/Services/rentalService";
@@ -15,13 +14,11 @@ import {
   PagedResult,
   StaffPickupAssignmentDto,
 } from "../../../types/rentalTypes";
-
 // Import styled components
 import {
   StyledPaper,
   StyledContainer,
 } from "../../../components/StyledComponents";
-
 // Import assignment-specific styled components
 import {
   AssignmentCard,
@@ -41,25 +38,34 @@ import {
 } from "../../../components/manager/styles/AssignmentStyles";
 
 const CurrentAssignments: React.FC = () => {
-  const [assignments, setAssignments] =
-    useState<PagedResult<StaffPickupAssignmentDto> | null>(null);
+  const [assignments, setAssignments] = useState<PagedResult<
+    StaffPickupAssignmentDto[]
+  > | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const rowsPerPageOptions = [6, 12, 24];
+  const rowsPerPageOptions = [5, 10, 25];
 
   const fetchAssignments = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getCurrentAssignments(page + 1, rowsPerPage);
-      setAssignments(data);
+      const response = await getCurrentAssignments(page + 1, rowsPerPage);
+      // Check if the API call was successful and data exists
+      if (response.success && response.data) {
+        // Extract just the PagedResult part from the ApiResponse
+        setAssignments(response.data);
+      } else {
+        // Handle the case where the API call was successful but no data was returned
+        setError(response.message || "Không có dữ liệu trả về từ máy chủ");
+        setAssignments(null);
+      }
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : "An error occurred while fetching assignments"
+          : "Đã xảy ra lỗi khi tải danh sách phân công"
       );
     } finally {
       setLoading(false);
@@ -84,14 +90,12 @@ const CurrentAssignments: React.FC = () => {
   return (
     <StyledContainer maxWidth="xl">
       <StyledPaper elevation={0} sx={{ p: 4 }}>
-        <PageTitle variant="h4">Current Staff Assignments</PageTitle>
-
+        <PageTitle variant="h4">Phân công nhân viên hiện tại</PageTitle>
         {error && (
           <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
             {error}
           </Alert>
         )}
-
         {loading && !assignments ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
             <CircularProgress />
@@ -109,10 +113,10 @@ const CurrentAssignments: React.FC = () => {
                       mb: 2,
                     }}
                   />
-                  <PageTitle variant="h5">No Current Assignments</PageTitle>
+                  <PageTitle variant="h5">Không có phân công nào</PageTitle>
                   <InfoText>
-                    There are currently no active staff assignments for
-                    equipment pickups.
+                    Hiện tại không có phân công nhân viên nào cho việc lấy thiết
+                    bị.
                   </InfoText>
                 </Box>
               </EmptyStateContainer>
@@ -130,8 +134,8 @@ const CurrentAssignments: React.FC = () => {
                             <StatusChip
                               label={
                                 assignment.completedDate
-                                  ? "Completed"
-                                  : "In Progress"
+                                  ? "Hoàn thành"
+                                  : "Đang thực hiện"
                               }
                               status={
                                 assignment.completedDate
@@ -141,14 +145,13 @@ const CurrentAssignments: React.FC = () => {
                               size="small"
                             />
                             <TimeAgo>
-                              Assigned{" "}
+                              Đã phân công{" "}
                               {formatDistanceToNow(
                                 new Date(assignment.assignedDate),
                                 { addSuffix: true }
                               )}
                             </TimeAgo>
                           </AssignmentHeader>
-
                           <Box
                             sx={{
                               display: "flex",
@@ -164,49 +167,42 @@ const CurrentAssignments: React.FC = () => {
                                 {assignment.staffName}
                               </StaffName>
                               <StaffId variant="body2">
-                                Staff ID: {assignment.staffId}
+                                Mã nhân viên: {assignment.staffId}
                               </StaffId>
                             </StaffInfo>
                           </Box>
-
                           <StyledDivider />
-
                           <InfoItem>
                             <InventoryIcon />
                             <InfoText>{assignment.equipmentName}</InfoText>
                           </InfoItem>
-
                           <InfoItem>
                             <PersonIcon />
                             <InfoText>{assignment.customerName}</InfoText>
                           </InfoItem>
-
                           <InfoItem>
                             <LocationOnIcon />
                             <InfoText>
-                              {assignment.customerAddress ||
-                                "Address not provided"}
+                              {assignment.customerAddress || "Không có địa chỉ"}
                             </InfoText>
                           </InfoItem>
-
                           <InfoItem>
                             <PhoneIcon />
                             <InfoText>
-                              {assignment.customerPhone || "Phone not provided"}
+                              {assignment.customerPhone ||
+                                "Không có số điện thoại"}
                             </InfoText>
                           </InfoItem>
-
                           <InfoItem>
                             <EventIcon />
                             <InfoText>
-                              Expected Return:{" "}
+                              Ngày trả dự kiến:{" "}
                               {format(
                                 new Date(assignment.expectedReturnDate),
-                                "MMM dd, yyyy"
+                                "dd/MM/yyyy"
                               )}
                             </InfoText>
                           </InfoItem>
-
                           {assignment.notes && (
                             <NotesContainer>
                               <NoteIcon
@@ -221,7 +217,6 @@ const CurrentAssignments: React.FC = () => {
                     </Grid>
                   ))}
                 </Grid>
-
                 <Box
                   sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}
                 >
@@ -233,6 +228,10 @@ const CurrentAssignments: React.FC = () => {
                     rowsPerPage={rowsPerPage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     rowsPerPageOptions={rowsPerPageOptions}
+                    labelRowsPerPage="Số hàng mỗi trang:"
+                    labelDisplayedRows={({ from, to, count }) =>
+                      `${from}-${to} của ${count}`
+                    }
                     sx={{
                       borderRadius: 2,
                       "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":

@@ -1,99 +1,216 @@
-// src/components/order-management/ManageOrder.tsx
-
-import { LocalShipping } from "@mui/icons-material";
+import React, { useEffect, useState } from "react";
+import { Alert, CircularProgress } from "@mui/material";
 import {
-  Alert,
-  Box,
-  LinearProgress,
-  Snackbar,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import Grid from "@mui/material/Grid2";
-import React from "react";
-import { useOrderManagement } from "../../hooks/useOrderManagement";
-import OrderList from "./ManageOrderComponents/OrderList";
-import OrderDetails from "./ManageOrderComponents/OrderDetails";
+  OrderStatus,
+  orderManagementService,
+  OrderCountsDTO,
+} from "../../api/Services/orderManagementService";
+import {
+  DashboardTitle,
+  DashboardWrapper,
+  ErrorContainer,
+  LoadingContainer,
+  StatusCardsGrid,
+  StyledTab,
+  StyledTabPanel,
+  StyledTabs,
+  StyledTabsContainer,
+} from "../../components/manager/styles/OrderManagementStyles";
+import OrdersByStatusList from "./ManageOrderComponents/OrdersByStatusList";
+import OrderStatusCard from "./ManageOrderComponents/OrderStatusCard";
+import PendingDeliveriesList from "./ManageOrderComponents/PendingDeliveriesList";
+import UnallocatedOrdersList from "./ManageOrderComponents/UnallocatedOrdersList";
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+  return (
+    <StyledTabPanel
+      role="tabpanel"
+      hidden={value !== index}
+      id={`order-tabpanel-${index}`}
+      aria-labelledby={`order-tab-${index}`}
+      {...other}
+    >
+      {value === index && children}
+    </StyledTabPanel>
+  );
+}
+
+// Default counts to use when API fails
+const defaultCounts: OrderCountsDTO = {
+  pendingCount: 0,
+  processingCount: 0,
+  shippedCount: 0,
+  deliveredCount: 0,
+  cancelledCount: 0,
+  returningCount: 0,
+  completedCount: 0,
+  totalCount: 0,
+};
 
 const ManageOrder: React.FC = () => {
-  const theme = useTheme();
-  const {
-    orders,
-    staffList,
-    selectedOrder,
-    loading,
-    snackbar,
-    setSelectedOrder,
-    handleAssignStaff,
-    handleScheduleDelivery,
-    handleStatusUpdate,
-    handleSnackbarClose,
-  } = useOrderManagement();
+  const [activeTab, setActiveTab] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [orderCounts, setOrderCounts] = useState<OrderCountsDTO>(defaultCounts);
+
+  // Add this effect to log state changes
+  useEffect(() => {
+    console.log("orderCounts state updated:", orderCounts);
+  }, [orderCounts]);
+
+  useEffect(() => {
+    const fetchOrderCounts = async () => {
+      try {
+        setLoading(true);
+        console.log("Đang tải số lượng đơn hàng...");
+        const counts = await orderManagementService.getOrderCounts();
+        console.log("API trả về số lượng:", counts);
+        // Create a new object to ensure React detects the state change
+        const newCounts: OrderCountsDTO = {
+          pendingCount: counts.pendingCount || 0,
+          processingCount: counts.processingCount || 0,
+          shippedCount: counts.shippedCount || 0,
+          deliveredCount: counts.deliveredCount || 0,
+          cancelledCount: counts.cancelledCount || 0,
+          returningCount: counts.returningCount || 0,
+          completedCount: counts.completedCount || 0,
+          totalCount: counts.totalCount || 0,
+        };
+        console.log("Cập nhật số lượng đơn hàng thành:", newCounts);
+        setOrderCounts(newCounts);
+        setError(null);
+      } catch (err) {
+        console.error("Lỗi trong fetchOrderCounts:", err);
+        setError("Không thể tải số lượng đơn hàng. Vui lòng thử lại sau.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrderCounts();
+  }, []);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography
-        variant="h4"
-        gutterBottom
-        sx={{
-          fontWeight: 700,
-          mb: 3,
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}
-      >
-        <LocalShipping sx={{ mr: 1 }} />
-        Quản lý Đơn hàng
-      </Typography>
-
+    <DashboardWrapper>
+      <DashboardTitle variant="h4">Quản lý đơn hàng</DashboardTitle>
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
-          <LinearProgress sx={{ width: "50%" }} />
-        </Box>
+        <LoadingContainer>
+          <CircularProgress />
+        </LoadingContainer>
+      ) : error ? (
+        <>
+          <ErrorContainer>
+            <Alert severity="error">{error}</Alert>
+          </ErrorContainer>
+          {/* Still show the UI with default counts even if there's an error */}
+          <StatusCardsGrid>
+            <OrderStatusCard
+              status={OrderStatus.Pending}
+              count={orderCounts.pendingCount}
+            />
+            <OrderStatusCard
+              status={OrderStatus.Processing}
+              count={orderCounts.processingCount}
+            />
+            <OrderStatusCard
+              status={OrderStatus.Shipping}
+              count={orderCounts.shippedCount}
+            />
+            <OrderStatusCard
+              status={OrderStatus.Delivered}
+              count={orderCounts.deliveredCount}
+            />
+            <OrderStatusCard
+              status={OrderStatus.Cancelled}
+              count={orderCounts.cancelledCount}
+            />
+            <OrderStatusCard
+              status={OrderStatus.Returning}
+              count={orderCounts.returningCount}
+            />
+            <OrderStatusCard
+              status={OrderStatus.Completed}
+              count={orderCounts.completedCount}
+            />
+          </StatusCardsGrid>
+          <StyledTabsContainer>
+            <StyledTabs
+              value={activeTab}
+              onChange={handleTabChange}
+              indicatorColor="primary"
+              textColor="primary"
+              variant="fullWidth"
+            >
+              <StyledTab label="Đơn hàng chưa phân công" />
+              <StyledTab label="Giao hàng đang chờ" />
+              <StyledTab label="Tất cả đơn hàng" />
+            </StyledTabs>
+            <TabPanel value={activeTab} index={0}>
+              <UnallocatedOrdersList />
+            </TabPanel>
+            <TabPanel value={activeTab} index={1}>
+              <PendingDeliveriesList />
+            </TabPanel>
+            <TabPanel value={activeTab} index={2}>
+              <OrdersByStatusList />
+            </TabPanel>
+          </StyledTabsContainer>
+        </>
       ) : (
-        <Grid container spacing={3}>
-          {/* Order List */}
-          <Grid size={{ xs: 12, md: 5 }}>
-            <OrderList
-              orders={orders}
-              selectedOrder={selectedOrder}
-              onOrderSelect={setSelectedOrder}
+        <>
+          <StatusCardsGrid>
+            <OrderStatusCard
+              status={OrderStatus.Pending}
+              count={orderCounts.pendingCount}
             />
-          </Grid>
-
-          {/* Order Details */}
-          <Grid size={{ xs: 12, md: 7 }}>
-            <OrderDetails
-              selectedOrder={selectedOrder}
-              staffList={staffList}
-              onAssignStaff={handleAssignStaff}
-              onScheduleDelivery={handleScheduleDelivery}
-              onUpdateStatus={handleStatusUpdate}
+            <OrderStatusCard
+              status={OrderStatus.Processing}
+              count={orderCounts.processingCount}
             />
-          </Grid>
-        </Grid>
+            <OrderStatusCard
+              status={OrderStatus.Shipping}
+              count={orderCounts.shippedCount}
+            />
+            <OrderStatusCard
+              status={OrderStatus.Delivered}
+              count={orderCounts.deliveredCount}
+            />
+          </StatusCardsGrid>
+          <StyledTabsContainer>
+            <StyledTabs
+              value={activeTab}
+              onChange={handleTabChange}
+              indicatorColor="primary"
+              textColor="primary"
+              variant="fullWidth"
+            >
+              <StyledTab label="Đơn hàng chưa phân công" />
+              <StyledTab label="Giao hàng đang chờ" />
+              <StyledTab label="Tất cả đơn hàng" />
+            </StyledTabs>
+            <TabPanel value={activeTab} index={0}>
+              <UnallocatedOrdersList />
+            </TabPanel>
+            <TabPanel value={activeTab} index={1}>
+              <PendingDeliveriesList />
+            </TabPanel>
+            <TabPanel value={activeTab} index={2}>
+              <OrdersByStatusList />
+            </TabPanel>
+          </StyledTabsContainer>
+        </>
       )}
-
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+    </DashboardWrapper>
   );
 };
 

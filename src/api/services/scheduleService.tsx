@@ -1,12 +1,10 @@
-// src/services/scheduleService.ts
-
-// import { axiosClient } from "../axiosInstance";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   StaffSchedule,
   StaffScheduleDto,
-  WorkShiftDto,
   WorkDays,
   StaffDto,
+  ManagerWorkShiftDto,
 } from "../../types/scheduleInterfaces";
 import axiosClient from "../axiosInstance";
 
@@ -15,22 +13,31 @@ const SCHEDULE_URL = "manager/schedule";
 // Helper function to determine shift type based on start time
 const getShiftType = (shiftStartTime: string): string => {
   const hour = parseInt(shiftStartTime.split(":")[0], 10);
-
   if (hour >= 5 && hour < 12) return "Morning Shift";
   if (hour >= 12 && hour < 15) return "Evening Shift";
   return "Overnight Shift";
 };
 
-// Helper function to convert WorkDays enum to day of week
-const getDayOfWeek = (dayFlag: number): number => {
-  if (dayFlag & WorkDays.Monday) return 1;
-  if (dayFlag & WorkDays.Tuesday) return 2;
-  if (dayFlag & WorkDays.Wednesday) return 4;
-  if (dayFlag & WorkDays.Thursday) return 8;
-  if (dayFlag & WorkDays.Friday) return 16;
-  if (dayFlag & WorkDays.Saturday) return 32;
-  if (dayFlag & WorkDays.Sunday) return 64;
-  return 0;
+// Helper function to convert WorkDays enum to day index (0-6)
+const getDayIndex = (dayFlag: WorkDays): number => {
+  switch (dayFlag) {
+    case WorkDays.Sunday:
+      return 0;
+    case WorkDays.Monday:
+      return 1;
+    case WorkDays.Tuesday:
+      return 2;
+    case WorkDays.Wednesday:
+      return 3;
+    case WorkDays.Thursday:
+      return 4;
+    case WorkDays.Friday:
+      return 5;
+    case WorkDays.Saturday:
+      return 6;
+    default:
+      return -1;
+  }
 };
 
 // Transform API response to component format
@@ -54,14 +61,16 @@ const transformToStaffSchedule = (
     // Fill in the shifts
     staffSchedule.workShifts.forEach((shift) => {
       // Check which days this shift applies to
-      for (let flag = 1; flag <= 64; flag *= 2) {
-        if (shift.daysOfWeek & flag) {
-          const dayIndex = getDayOfWeek(flag);
-          if (dayIndex >= 0) {
-            schedule[dayIndex] = getShiftType(shift.shiftStartTime);
+      Object.values(WorkDays).forEach((day) => {
+        if (typeof day === "number" && day !== 0) {
+          if ((shift.daysOfWeek & day) !== 0) {
+            const dayIndex = getDayIndex(day);
+            if (dayIndex >= 0) {
+              schedule[dayIndex] = getShiftType(shift.shiftStartTime);
+            }
           }
         }
-      }
+      });
     });
 
     // Get current week
@@ -85,7 +94,7 @@ const transformToStaffSchedule = (
 // Get manager's own schedule
 export const getManagerSchedule = async (): Promise<StaffSchedule> => {
   try {
-    const response = await axiosClient.get<WorkShiftDto[]>(
+    const response = await axiosClient.get<any, ManagerWorkShiftDto[]>(
       `${SCHEDULE_URL}/my-schedule`
     );
 
@@ -101,16 +110,18 @@ export const getManagerSchedule = async (): Promise<StaffSchedule> => {
     ];
 
     // Fill in the shifts
-    response.data.forEach((shift) => {
+    response.forEach((shift) => {
       // Check which days this shift applies to
-      for (let flag = 1; flag <= 64; flag *= 2) {
-        if (shift.daysOfWeek & flag) {
-          const dayIndex = getDayOfWeek(flag);
-          if (dayIndex >= 0) {
-            schedule[dayIndex] = getShiftType(shift.shiftStartTime);
+      Object.values(WorkDays).forEach((day) => {
+        if (typeof day === "number" && day !== 0) {
+          if ((shift.daysOfWeek & day) !== 0) {
+            const dayIndex = getDayIndex(day);
+            if (dayIndex >= 0) {
+              schedule[dayIndex] = getShiftType(shift.shiftStartTime);
+            }
           }
         }
-      }
+      });
     });
 
     // Get current week
@@ -126,11 +137,11 @@ export const getManagerSchedule = async (): Promise<StaffSchedule> => {
     // Get manager name from first shift if available
     let managerName = "Current Manager";
     if (
-      response.data.length > 0 &&
-      response.data[0].managers &&
-      response.data[0].managers.length > 0
+      response.length > 0 &&
+      response[0].managers &&
+      response[0].managers.length > 0
     ) {
-      managerName = response.data[0].managers[0].userName || "Current Manager";
+      managerName = response[0].managers[0].userName || "Current Manager";
     }
 
     return {
@@ -147,10 +158,10 @@ export const getManagerSchedule = async (): Promise<StaffSchedule> => {
 // Get all staff schedules
 export const getAllStaffSchedules = async (): Promise<StaffSchedule[]> => {
   try {
-    const response = await axiosClient.get<StaffScheduleDto[]>(
+    const response = await axiosClient.get<any, StaffScheduleDto[]>(
       `${SCHEDULE_URL}/staff-schedules`
     );
-    return transformToStaffSchedule(response.data);
+    return transformToStaffSchedule(response);
   } catch (error) {
     console.error("Error fetching staff schedules:", error);
     throw error;
@@ -162,10 +173,10 @@ export const getStaffSchedule = async (
   staffId: number
 ): Promise<StaffSchedule> => {
   try {
-    const response = await axiosClient.get<StaffScheduleDto>(
+    const response = await axiosClient.get<any, StaffScheduleDto>(
       `${SCHEDULE_URL}/staff-schedules/${staffId}`
     );
-    const transformed = transformToStaffSchedule([response.data]);
+    const transformed = transformToStaffSchedule([response]);
     return transformed[0];
   } catch (error) {
     console.error(`Error fetching schedule for staff ${staffId}:`, error);
@@ -176,27 +187,12 @@ export const getStaffSchedule = async (
 // Get staff working on a specific day
 export const getStaffByDay = async (day: WorkDays): Promise<StaffDto[]> => {
   try {
-    const response = await axiosClient.get<StaffDto[]>(
+    const response = await axiosClient.get<any, StaffDto[]>(
       `${SCHEDULE_URL}/staff-by-day?day=${day}`
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error(`Error fetching staff for day ${day}:`, error);
-    throw error;
-  }
-};
-
-// Get shifts for a specific day
-export const getShiftsByDay = async (
-  day: WorkDays
-): Promise<WorkShiftDto[]> => {
-  try {
-    const response = await axiosClient.get<WorkShiftDto[]>(
-      `${SCHEDULE_URL}/shifts-by-day?day=${day}`
-    );
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching shifts for day ${day}:`, error);
     throw error;
   }
 };
@@ -206,5 +202,4 @@ export default {
   getAllStaffSchedules,
   getStaffSchedule,
   getStaffByDay,
-  getShiftsByDay,
 };

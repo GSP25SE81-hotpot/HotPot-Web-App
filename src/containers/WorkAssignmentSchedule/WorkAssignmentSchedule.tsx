@@ -1,5 +1,4 @@
-// src/components/WorkScheduleTable.tsx (updated with custom hook)
-
+// src/components/WorkScheduleTable.tsx
 import {
   Box,
   Card,
@@ -18,15 +17,13 @@ import {
 } from "@mui/material";
 import React from "react";
 import { shiftTypes } from "../../types/scheduleInterfaces";
-import { useSchedule } from "../../hooks/useSchedule";
-import useAuth from "../../hooks/useAuth";
+import {
+  useManagerSchedule,
+  useAllStaffSchedules,
+} from "../../hooks/useSchedule";
 
 const WorkAssignmentSchedule: React.FC = () => {
   const theme = useTheme();
-  const { auth } = useAuth();
-
-  const { loading, error, schedules, personalSchedule } = useSchedule();
-
   const days = [
     "Monday",
     "Tuesday",
@@ -36,6 +33,21 @@ const WorkAssignmentSchedule: React.FC = () => {
     "Saturday",
     "Sunday",
   ];
+
+  // Use our custom hooks
+  const {
+    schedule: personalSchedule,
+    loading: loadingPersonal,
+    error: personalError,
+  } = useManagerSchedule();
+  const {
+    schedules: allSchedules,
+    loading: loadingAll,
+    error: allError,
+  } = useAllStaffSchedules();
+
+  const loading = loadingPersonal || loadingAll;
+  const error = personalError || allError;
 
   const ShiftCell: React.FC<{ shift: string }> = ({ shift }) => {
     const shiftType = shiftTypes[shift];
@@ -184,7 +196,7 @@ const WorkAssignmentSchedule: React.FC = () => {
           </Box>
         )}
 
-        {(auth?.user?.role === "Manager" || auth?.user?.role === "Admin") && schedules.length > 1 && (
+        {allSchedules.length > 1 && (
           <>
             <Typography variant="h6" sx={{ mb: 2 }}>
               Lịch của tất cả nhân viên
@@ -230,7 +242,7 @@ const WorkAssignmentSchedule: React.FC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {schedules
+                  {allSchedules
                     .filter(
                       (staff) =>
                         staff.employeeName !== personalSchedule?.employeeName

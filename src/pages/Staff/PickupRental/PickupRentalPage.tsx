@@ -1,10 +1,10 @@
-import { Box } from "@mui/material";
 import { PickupRental } from "../../../containers/PickupRental/PickupRental";
+import ErrorBoundary from "../../../components/ErrorBoundary";
 
 export const PickupRentalPage = () => {
   return (
-      <Box>
-        <PickupRental />
-      </Box>
+    <ErrorBoundary>
+      <PickupRental />
+    </ErrorBoundary>
   );
 };

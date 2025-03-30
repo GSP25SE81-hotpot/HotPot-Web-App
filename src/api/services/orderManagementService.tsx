@@ -1,215 +1,503 @@
-import { WorkDays } from "../../types/scheduleInterfaces";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosClient from "../axiosInstance";
 
 const API_URL = "/manager/order-management";
 
+export enum OrderStatus {
+  Pending = 1,
+  Processing = 2,
+  Shipping = 3,
+  Delivered = 4,
+  Cancelled = 5,
+  Returning = 6,
+  Completed = 7,
+}
+
+// User interfaces
+export interface UserDTO {
+  userId: number;
+  name: string;
+  email?: string;
+  phoneNumber?: string;
+}
+
+export interface StaffDTO {
+  staffId: number;
+  name: string;
+}
+
+// Order item interfaces
+export interface OrderItem {
+  id: number;
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+// Shipping interfaces
+export interface ShippingInfoDTO {
+  shippingOrderId: number;
+  deliveryTime?: string;
+  isDelivered: boolean;
+  deliveryNotes?: string;
+  staff?: StaffDTO;
+}
+
+export interface ShippingDetailDTO {
+  shippingOrderId: number;
+  staffId: number;
+  staffName: string;
+  deliveryTime?: string;
+  deliveryNotes?: string;
+  isDelivered: boolean;
+}
+
+export interface OrderWithDetailsDTO {
+  orderId: number;
+  address: string;
+  notes?: string;
+  totalPrice: number;
+  status: OrderStatus;
+  hasSellItems: boolean;
+  hasRentItems: boolean;
+  userId: number;
+  userName: string;
+  shippingInfo?: ShippingInfoDTO;
+}
+
+export interface OrderDetailDTO {
+  orderId: number;
+  address: string;
+  notes?: string;
+  totalPrice: number;
+  status: OrderStatus;
+  createdAt: string;
+  updatedAt?: string;
+  userId: number;
+  userName: string;
+  shippingInfo?: ShippingDetailDTO;
+}
+
+export interface PendingDeliveryDTO {
+  shippingOrderId: number;
+  orderId: number;
+  deliveryTime?: string;
+  deliveryNotes?: string;
+  address: string;
+  notes?: string;
+  totalPrice: number;
+  status: OrderStatus;
+  userId: number;
+  userName: string;
+}
+
+export interface StaffShippingOrderDTO {
+  shippingOrderId: number;
+  orderId: number;
+  deliveryTime?: string;
+  deliveryNotes?: string;
+  isDelivered: boolean;
+  address: string;
+  notes?: string;
+  totalPrice: number;
+  status: OrderStatus;
+  customerId: number;
+  customerName: string;
+  hasSellItems: boolean;
+  hasRentItems: boolean;
+}
+
+export interface ShippingOrderAllocationDTO {
+  shippingOrderId: number;
+  orderId: number;
+  staffId: number;
+  staffName: string;
+  isDelivered: boolean;
+  createdAt: string;
+}
+
+export interface OrderStatusUpdateDTO {
+  orderId: number;
+  status: OrderStatus;
+  updatedAt: string;
+}
+
+export interface DeliveryStatusUpdateDTO {
+  shippingOrderId: number;
+  orderId: number;
+  isDelivered: boolean;
+  deliveryTime?: string;
+  deliveryNotes?: string;
+  updatedAt: string;
+}
+
+export interface DeliveryTimeUpdateDTO {
+  shippingOrderId: number;
+  orderId: number;
+  deliveryTime: string;
+  updatedAt: string;
+}
+
+// Request interfaces
 export interface AllocateOrderRequest {
   orderId: number;
   staffId: number;
 }
 
-export interface UpdateDeliveryStatusRequest {
+export interface OrderStatusUpdateRequest {
+  status: OrderStatus;
+}
+
+export interface DeliveryStatusUpdateRequest {
   isDelivered: boolean;
-  notes: string;
+  notes?: string;
 }
 
-export interface UpdateDeliveryTimeRequest {
-  deliveryTime: string; // ISO date string
+export interface DeliveryTimeUpdateRequest {
+  deliveryTime: string;
 }
 
-export interface UpdateOrderStatusRequest {
-  status: string;
+// API response interfaces
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  errors?: string[];
 }
 
-export interface ShippingOrder {
-  shippingOrderId: number;
-  orderId: number;
-  staffId: number;
-  deliveryTime?: string;
-  deliveryNotes?: string;
-  isDelivered: boolean;
-  proofImage?: string;
-  proofImageType?: string;
-  signatureData?: string;
-  proofTimestamp?: string;
-  createdAt: string;
-  updatedAt: string;
-  staff?: StaffDto;
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
 }
 
-export interface OrderDetail {
-  orderDetailId: number;
-  orderId: number;
-  productId: number;
-  quantity: number;
-  price: number;
-  productName: string;
+// Query parameter interfaces
+export interface PaginationParams {
+  pageNumber: number;
+  pageSize: number;
 }
 
-export interface UserDto {
-  userId: number;
-  name: string;
-  email: string;
-  phoneNumber: string;
-  address: string | null;
-  roleName: string | null;
-  imageURL: string | null;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
+export interface OrderQueryParams extends PaginationParams {
+  sortBy?: string;
+  sortDescending?: boolean;
+  searchTerm?: string;
+  status?: OrderStatus;
+  fromDate?: string;
+  toDate?: string;
+  customerId?: number;
 }
 
-export interface StaffDto {
-  id: number;
-  workDays: number;
-  user: UserDto;
-  shippingOrders: ShippingOrder[] | null;
+export interface ShippingOrderQueryParams extends PaginationParams {
+  sortBy?: string;
+  sortDescending?: boolean;
+  searchTerm?: string;
+  isDelivered?: boolean;
+  staffId?: number;
+  fromDate?: string;
+  toDate?: string;
 }
 
-export interface Order {
+export interface OrderCountsDTO {
+  pendingCount: number;
+  processingCount: number;
+  shippedCount: number;
+  deliveredCount: number;
+  cancelledCount: number;
+  returningCount: number;
+  completedCount: number;
+  totalCount: number;
+}
+export interface UnallocatedOrderDTO {
   orderId: number;
   address: string;
-  notes?: string;
+  notes: string | null;
   totalPrice: number;
-  status: string;
-  ingredientsDeposit: number;
-  hotpotDeposit: number;
+  status: OrderStatus;
   userId: number;
-  discountId?: number;
-  createdAt: string;
-  updatedAt: string;
   userName: string;
-  userEmail: string;
-  userPhone: string;
-  orderDetails: OrderDetail[];
-  shippingOrder?: ShippingOrder;
+  hasSellItems: boolean;
+  hasRentItems: boolean;
 }
 
-export interface StaffWorkload {
-  staffId: number;
-  staffName: string;
-  activeDeliveries: number;
-}
-
-const orderManagementService = {
-  // Allocate order to staff
+// Service implementation
+export const orderManagementService = {
+  // Order allocation
   allocateOrderToStaff: async (
     request: AllocateOrderRequest
-  ): Promise<ShippingOrder> => {
-    const response = await axiosClient.post<ApiResponse<ShippingOrder>>(
-      `${API_URL}/allocate`,
-      request
-    );
+  ): Promise<ShippingOrderAllocationDTO> => {
+    const response = await axiosClient.post<
+      ApiResponse<ShippingOrderAllocationDTO>
+    >(`${API_URL}/allocate`, request);
     return response.data.data;
   },
 
-  // Update delivery status
-  updateDeliveryStatus: async (
-    id: number,
-    request: UpdateDeliveryStatusRequest
-  ): Promise<boolean> => {
-    const response = await axiosClient.put<ApiResponse<boolean>>(
-      `${API_URL}/delivery/status/${id}`,
-      request
-    );
+  getOrdersByStaff: async (
+    staffId: number
+  ): Promise<StaffShippingOrderDTO[]> => {
+    const response = await axiosClient.get<
+      ApiResponse<StaffShippingOrderDTO[]>
+    >(`${API_URL}/staff/${staffId}`);
     return response.data.data;
   },
 
-  // Update delivery time
-  updateDeliveryTime: async (
-    id: number,
-    request: UpdateDeliveryTimeRequest
-  ): Promise<boolean> => {
-    const response = await axiosClient.put<ApiResponse<boolean>>(
-      `${API_URL}/delivery/time/${id}`,
-      request
-    );
-    return response.data.data;
-  },
-
-  // Get order details
-  getOrderDetails: async (id: number): Promise<Order> => {
-    const response = await axiosClient.get<ApiResponse<Order>>(
-      `${API_URL}/details/${id}`
-    );
-    return response.data.data;
-  },
-
-  // Get pending deliveries
-  getPendingDeliveries: async (): Promise<Order[]> => {
-    const response = await axiosClient.get<ApiResponse<Order[]>>(
-      `${API_URL}/pending-deliveries`
-    );
-    return response.data.data;
-  },
-
-  // Get staff workload
-  getStaffWorkload: async (staffId: number): Promise<StaffWorkload> => {
-    const response = await axiosClient.get<ApiResponse<StaffWorkload>>(
-      `/staff/${staffId}`
-    );
-    return response.data.data;
-  },
-
-  // Update order status
+  // Order status tracking
   updateOrderStatus: async (
-    id: number,
-    request: UpdateOrderStatusRequest
-  ): Promise<boolean> => {
-    const response = await axiosClient.put<ApiResponse<boolean>>(
-      `${API_URL}/status/${id}`,
-      request
+    orderId: number,
+    status: OrderStatus
+  ): Promise<OrderStatusUpdateDTO> => {
+    const response = await axiosClient.put<ApiResponse<OrderStatusUpdateDTO>>(
+      `${API_URL}/status/${orderId}`,
+      { status } // Send as object to match backend
     );
     return response.data.data;
   },
 
-  // Get available statuses
-  getAvailableStatuses: async (): Promise<string[]> => {
-    const response = await axiosClient.get<ApiResponse<string[]>>(
-      `${API_URL}/status/available`
+  getOrderWithDetails: async (orderId: number): Promise<OrderDetailDTO> => {
+    const response = await axiosClient.get<ApiResponse<OrderDetailDTO>>(
+      `${API_URL}/details/${orderId}`
     );
     return response.data.data;
   },
 
-  // Get unallocated orders
-  getUnallocatedOrders: async (): Promise<Order[]> => {
-    const response = await axiosClient.get<ApiResponse<Order[]>>(
-      `${API_URL}/unallocated`
-    );
-    return response.data.data;
-  },
-
-  // Get all staff
-  getAllStaff: async (): Promise<StaffDto[]> => {
+  async getOrdersByStatus(
+    status: OrderStatus,
+    queryParams: Omit<OrderQueryParams, "status"> = {
+      pageNumber: 1,
+      pageSize: 10,
+    }
+  ): Promise<PagedResult<OrderWithDetailsDTO>> {
     try {
-      const response = await axiosClient.get<ApiResponse<StaffDto[]>>(
-        `staff/all`
+      console.log(
+        `Making API call for status ${status} with params:`,
+        queryParams
       );
+      // Convert query params to URL search params
+      const params = new URLSearchParams();
+      // Add pagination params
+      params.append("pageNumber", queryParams.pageNumber.toString());
+      params.append("pageSize", queryParams.pageSize.toString());
+      // Add sorting params
+      if (queryParams.sortBy) {
+        params.append("sortBy", queryParams.sortBy);
+        params.append(
+          "sortDescending",
+          queryParams.sortDescending ? "true" : "false"
+        );
+      }
+      // Add filtering params
+      if (queryParams.searchTerm)
+        params.append("searchTerm", queryParams.searchTerm);
+      if (queryParams.fromDate) params.append("fromDate", queryParams.fromDate);
+      if (queryParams.toDate) params.append("toDate", queryParams.toDate);
+      if (queryParams.customerId)
+        params.append("customerId", queryParams.customerId.toString());
 
-      // Check if response.data and response.data.data exist before returning
-      if (response?.data?.data && Array.isArray(response.data.data)) {
+      const url = `${API_URL}/status/${status}?${params.toString()}`;
+      console.log(`API URL: ${url}`);
+
+      const response = await axiosClient.get<
+        ApiResponse<PagedResult<OrderWithDetailsDTO>>
+      >(url);
+
+      console.log(`Raw API response for status ${status}:`, response);
+
+      // Directly return the data from the response without any additional processing
+      if (response && response.data && response.data.data) {
+        console.log(`Response data for status ${status}:`, response.data.data);
         return response.data.data;
       } else {
-        console.warn(
-          "API response for staff doesn't contain expected data structure"
-        );
-        return []; // Return empty array as fallback
+        console.warn(`No data property in response for status ${status}`);
+        return {
+          items: [],
+          totalCount: 0,
+          pageNumber: queryParams.pageNumber,
+          pageSize: queryParams.pageSize,
+          totalPages: 0,
+        };
       }
     } catch (error) {
-      console.error("Error fetching staff:", error);
-      return []; // Return empty array in case of error
+      console.error(`Error fetching orders by status ${status}:`, error);
+      return {
+        items: [],
+        totalCount: 0,
+        pageNumber: queryParams.pageNumber,
+        pageSize: queryParams.pageSize,
+        totalPages: 0,
+      };
     }
   },
+
+  // Delivery progress monitoring
+  updateDeliveryStatus: async (
+    shippingOrderId: number,
+    request: DeliveryStatusUpdateRequest
+  ): Promise<DeliveryStatusUpdateDTO> => {
+    const response = await axiosClient.put<
+      ApiResponse<DeliveryStatusUpdateDTO>
+    >(`${API_URL}/delivery/status/${shippingOrderId}`, request);
+    return response.data.data;
+  },
+
+  async getPendingDeliveries(
+    queryParams: ShippingOrderQueryParams = { pageNumber: 1, pageSize: 10 }
+  ): Promise<PagedResult<PendingDeliveryDTO>> {
+    try {
+      const params = new URLSearchParams();
+
+      // Add pagination params
+      params.append("pageNumber", queryParams.pageNumber.toString());
+      params.append("pageSize", queryParams.pageSize.toString());
+
+      // Add optional params
+      if (queryParams.sortBy) {
+        params.append("sortBy", queryParams.sortBy);
+        params.append(
+          "sortDescending",
+          queryParams.sortDescending ? "true" : "false"
+        );
+      }
+      if (queryParams.searchTerm)
+        params.append("searchTerm", queryParams.searchTerm);
+      if (queryParams.fromDate) params.append("fromDate", queryParams.fromDate);
+      if (queryParams.toDate) params.append("toDate", queryParams.toDate);
+      if (queryParams.staffId)
+        params.append("staffId", queryParams.staffId.toString());
+      if (queryParams.isDelivered !== undefined) {
+        params.append("isDelivered", queryParams.isDelivered.toString());
+      }
+
+      // The interceptor will return response.data (ApiResponse<PagedResult<PendingDeliveryDTO>>)
+      const apiResponse = await axiosClient.get<
+        ApiResponse<PagedResult<PendingDeliveryDTO>>
+      >(`${API_URL}/pending-deliveries?${params.toString()}`);
+
+      // Since the interceptor strips the Axios wrapper, apiResponse is actually the ApiResponse
+      const responseData = apiResponse as unknown as ApiResponse<
+        PagedResult<PendingDeliveryDTO>
+      >;
+
+      if (!responseData.success) {
+        throw new Error(
+          responseData.message || "Failed to fetch pending deliveries"
+        );
+      }
+
+      return responseData.data;
+    } catch (error: any) {
+      console.error("Error fetching pending deliveries:", error);
+      throw new Error(
+        error.response?.data?.message ||
+          "You don't have permission to view pending deliveries or the service is unavailable"
+      );
+    }
+  },
+
+  updateDeliveryTime: async (
+    shippingOrderId: number,
+    request: DeliveryTimeUpdateRequest
+  ): Promise<DeliveryTimeUpdateDTO> => {
+    const response = await axiosClient.put<ApiResponse<DeliveryTimeUpdateDTO>>(
+      `${API_URL}/delivery/time/${shippingOrderId}`,
+      request
+    );
+    return response.data.data;
+  },
+
+  getOrderCounts: async (): Promise<OrderCountsDTO> => {
+    try {
+      // console.log(`Making API request to: ${API_URL}/counts`);
+
+      // Use any to bypass TypeScript's type checking for the response
+      const response: any = await axiosClient.get(`${API_URL}/counts`);
+
+      // console.log("API response:", response);
+
+      // Create a new object with the expected properties
+      const counts: OrderCountsDTO = {
+        pendingCount: response?.pendingCount || 0,
+        processingCount: response?.processingCount || 0,
+        shippedCount: response?.shippedCount || 0,
+        deliveredCount: response?.deliveredCount || 0,
+        cancelledCount: response?.cancelledCount || 0,
+        returningCount: response?.returningCount || 0,
+        completedCount: response?.completedCount || 0,
+        totalCount: response?.totalCount || 0,
+      };
+
+      // console.log("Extracted counts:", counts);
+      return counts;
+    } catch (error) {
+      // console.error("Error fetching order counts:", error);
+      return {
+        pendingCount: 0,
+        processingCount: 0,
+        shippedCount: 0,
+        deliveredCount: 0,
+        cancelledCount: 0,
+        returningCount: 0,
+        completedCount: 0,
+        totalCount: 0,
+      };
+    }
+  },
+
+  async getUnallocatedOrders(
+    queryParams: OrderQueryParams = { pageNumber: 1, pageSize: 10 }
+  ): Promise<PagedResult<UnallocatedOrderDTO>> {
+    try {
+      const params = new URLSearchParams();
+      params.append("pageNumber", queryParams.pageNumber.toString());
+      params.append("pageSize", queryParams.pageSize.toString());
+
+      if (queryParams.sortBy) {
+        params.append("sortBy", queryParams.sortBy);
+        params.append(
+          "sortDescending",
+          queryParams.sortDescending ? "true" : "false"
+        );
+      }
+
+      if (queryParams.searchTerm)
+        params.append("searchTerm", queryParams.searchTerm);
+      if (queryParams.fromDate) params.append("fromDate", queryParams.fromDate);
+      if (queryParams.toDate) params.append("toDate", queryParams.toDate);
+      if (queryParams.customerId)
+        params.append("customerId", queryParams.customerId.toString());
+
+      // The interceptor returns response.data (ApiResponse<PagedResult<UnallocatedOrderDTO>>)
+      const apiResponse = await axiosClient.get<
+        ApiResponse<PagedResult<UnallocatedOrderDTO>>
+      >(`${API_URL}/unallocated?${params.toString()}`);
+
+      // Since the interceptor strips the Axios wrapper, apiResponse is actually the ApiResponse
+      const responseData = apiResponse as unknown as ApiResponse<
+        PagedResult<UnallocatedOrderDTO>
+      >;
+
+      if (responseData.success) {
+        return responseData.data; // This is the PagedResult<UnallocatedOrderDTO>
+      }
+
+      console.warn("API request was not successful:", responseData);
+      return this.getEmptyPagedResult(queryParams);
+    } catch (error) {
+      console.error("Error fetching unallocated orders:", error);
+      return this.getEmptyPagedResult(queryParams);
+    }
+  },
+
+  getEmptyPagedResult(
+    queryParams: OrderQueryParams
+  ): PagedResult<UnallocatedOrderDTO> {
+    return {
+      items: [],
+      totalCount: 0,
+      pageNumber: queryParams.pageNumber,
+      pageSize: queryParams.pageSize,
+      totalPages: 0,
+    };
+  },
 };
-
-export default orderManagementService;
-
-// Define the API response interface
-interface ApiResponse<T> {
-  data: T;
-  message: string;
-  success: boolean;
-}
-
-export function worksOnDay(staff: StaffDto, day: WorkDays): boolean {
-  return (staff.workDays & day) !== 0;
-}
