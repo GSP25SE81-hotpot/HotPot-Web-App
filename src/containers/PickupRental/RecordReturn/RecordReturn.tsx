@@ -16,7 +16,7 @@ import {
 import Grid from "@mui/material/Grid2";
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { rentalService } from "../../../api/services/pickupService";
+import { rentalService } from "../../../api/Services/pickupService";
 import {
   AnimatedButton,
   CardTitle,

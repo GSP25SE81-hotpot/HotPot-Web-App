@@ -44,7 +44,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick, isSidebarCollapsed }) => {
   const handleLogout = () => {
     localStorage.removeItem("userInfor");
     setAuth(null);
-    navigate(config.authRoute.authenticate);
+    navigate(config.authRoutes.authenticate);
   };
 
   const open = Boolean(anchorEl);

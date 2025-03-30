@@ -24,3 +24,7 @@ export interface IngredientAddSchema {
   price: number;
   minStockLevel: number;
 }
+
+export interface IngredientTypeSchema {
+  name: string;
+}

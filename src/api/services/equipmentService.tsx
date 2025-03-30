@@ -3,8 +3,7 @@
 import { MaintenanceStatus } from "../../types/equipmentFailure";
 import axiosClient from "../axiosInstance";
 
-
-const API_URL = "manager/equipment";
+const API_URL = "/manager/equipment";
 
 export interface EquipmentFailureDto {
   name: string;

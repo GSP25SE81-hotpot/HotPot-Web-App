@@ -4,7 +4,7 @@ import {
   Order as ApiOrder,
   StaffDto as ApiStaff,
   OrderDetail,
-} from "../api/services/orderManagementService";
+} from "../api/Services/orderManagementService";
 import {
   FrontendOrder,
   FrontendStaff,
@@ -119,4 +119,4 @@ export const formatDate = (dateString: string): string => {
 };
 
 // Re-export the service for convenience
-export { default as orderManagementService } from "../api/services/orderManagementService";
+export { default as orderManagementService } from "../api/Services/orderManagementService";

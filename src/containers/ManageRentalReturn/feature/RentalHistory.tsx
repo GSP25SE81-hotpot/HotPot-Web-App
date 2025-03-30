@@ -15,7 +15,7 @@ import {
   getRentalHistoryByUser,
   getRentalHistoryByUtensil,
   getRentalHistoryByHotpot,
-} from "../../../api/services/rentalService";
+} from "../../../api/Services/rentalService";
 import { RentalHistoryItem } from "../../../types/rentalTypes";
 
 // Import styled components

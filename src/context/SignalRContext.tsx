@@ -6,8 +6,6 @@ import React, {
   useState,
   ReactNode,
 } from "react";
-// import unifiedHubService from "../api/services/unifiedHubService";
-// import { useAuthContext } from "./AuthContext";
 import { Role } from "../routes/Roles";
 import useAuth from "../hooks/useAuth";
 import unifiedHubService from "../api/Services/unifiedHubService";
@@ -31,16 +29,10 @@ export const SignalRProvider: React.FC<{ children: ReactNode }> = ({
 
   // Initialize hub connections when the user logs in
   useEffect(() => {
-    // Don't try to initialize if still loading auth state
-    // if (isLoading) {
-    //   return;
-    // }
-
     const initializeHubs = async () => {
-      if (auth) {
+      if (auth?.user) {
         setIsConnecting(true);
         setError(null);
-
         try {
           // Determine which hubs to connect to based on user role
           const hubsToConnect: string[] = ["notification"]; // Everyone gets notifications
@@ -56,15 +48,31 @@ export const SignalRProvider: React.FC<{ children: ReactNode }> = ({
             );
           }
 
-          // Parse auth as number if it's a string
-          const userId =
-            typeof auth?.user?.userId === "string" ? parseInt(auth?.user?.userId, 10) : auth?.user?.userId;
+          // Extract and validate user ID
+          let userId: number;
+          const rawUserId = auth.user.userId;
 
+          if (typeof rawUserId === "string") {
+            // Convert string ID to number
+            userId = parseInt(rawUserId, 10);
+            if (isNaN(userId)) {
+              throw new Error(`Invalid user ID format: ${rawUserId}`);
+            }
+          } else if (typeof rawUserId === "number") {
+            // Use numeric ID directly
+            userId = rawUserId;
+          } else {
+            console.error("User ID is missing or invalid:", auth.user);
+            throw new Error("User ID is required for SignalR connection");
+          }
+
+          // Initialize hubs with the validated user ID
           await unifiedHubService.initializeHubs(
             userId,
-            auth?.user?.role || "guest",
+            auth.user.role || "guest",
             hubsToConnect
           );
+
           setIsInitialized(true);
         } catch (err) {
           setError(

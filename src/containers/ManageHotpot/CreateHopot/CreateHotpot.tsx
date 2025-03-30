@@ -16,12 +16,15 @@ import {
   RHFTextField,
   RHFUploadMultiFile,
   RHFSelect,
+  RHFTextFieldNumber,
 } from "../../../components/hook-form";
 import { LoadingButton } from "@mui/lab";
 import { uploadImageToFirebase } from "../../../firebase/uploadImageToFirebase";
 import { CreateHotPotSchema, SizeData } from "../../../types/hotpot";
 import adminHotpot from "../../../api/Services/adminHotpot";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
+import config from "../../../configs";
 
 // Define form schema
 const validationSchema = Yup.object().shape({
@@ -41,6 +44,8 @@ const validationSchema = Yup.object().shape({
 });
 
 const CreateHotpot: React.FC = () => {
+  const navigate = useNavigate();
+
   const defaultValues = {
     name: "",
     material: "",
@@ -74,8 +79,10 @@ const CreateHotpot: React.FC = () => {
   const onSubmit = async (values: CreateHotPotSchema) => {
     try {
       const res = await adminHotpot.createHotpot(values);
-      toast.success("Thêm lẩu mới thành công");
       console.log(res);
+
+      toast.success("Thêm lẩu mới thành công");
+      navigate(config.adminRoutes.hotpotType);
     } catch (error) {
       console.error(error);
     }
@@ -126,13 +133,13 @@ const CreateHotpot: React.FC = () => {
                   </option>
                 ))}
               </RHFSelect>
-              <RHFTextField
+              <RHFTextFieldNumber
                 name="price"
                 label="Giá"
                 type="number"
                 sx={{ mb: 2 }}
               />
-              <RHFTextField
+              <RHFTextFieldNumber
                 name="basePrice"
                 label="Giá gốc"
                 type="number"

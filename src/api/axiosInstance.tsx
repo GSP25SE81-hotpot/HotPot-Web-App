@@ -16,7 +16,7 @@ axiosClient.interceptors.request.use(
   async (config) => {
     const userDataLocal = localStorage.getItem("userInfor");
     const userData = userDataLocal ? JSON.parse(userDataLocal) : null;
-    console.log("ber: ", userData);
+    // console.log("ber: ", userData);
     if (userData) {
       config.headers.Authorization = `Bearer ${userData?.accessToken}`;
     }

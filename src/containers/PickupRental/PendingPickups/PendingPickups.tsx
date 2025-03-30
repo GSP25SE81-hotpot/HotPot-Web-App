@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { rentalService } from "../../../api/services/pickupService";
+import { rentalService } from "../../../api/Services/pickupService";
 import ErrorAlert from "../../../components/errorAlert/ErrorAlert";
 import LoadingSpinner from "../../../components/loadingSpinner/LoadingSpinner";
 import {

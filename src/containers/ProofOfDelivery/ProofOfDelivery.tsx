@@ -11,7 +11,7 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import ProofOfDeliveryForm from "./Form/ProofOfDeliveryForm";
-import { getShippingDetail } from "../../api/services/proofOfDeliveryService";
+import { getShippingDetail } from "../../api/Services/proofOfDeliveryService";
 import { ShippingListDto } from "../../types/proofOfDelivery";
 
 const ProofOfDelivery: React.FC = () => {

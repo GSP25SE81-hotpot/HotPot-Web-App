@@ -11,8 +11,11 @@ const CreateHotpotPage: React.FC = () => {
         <HeaderBreadcrumbs
           heading="Thêm nồi lẩu"
           links={[
-            { name: config.Vntext.Dashboard.dashboard },
-            { name: "Bảng nồi lẩu" },
+            {
+              name: config.Vntext.Dashboard.dashboard,
+              href: config.adminRoutes.dashboard,
+            },
+            { name: "Bảng nồi lẩu", href: config.adminRoutes.hotpotType },
             { name: "Thêm nồi lẩu" },
           ]}
         />

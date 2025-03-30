@@ -1,4 +1,6 @@
-// src/api/services/feedbackService.ts
+import axiosClient from "../axiosInstance";
+
+const API_URL = "manager/feedback";
 
 export interface User {
   id: number;
@@ -68,11 +70,10 @@ const feedbackService = {
     pageSize: number = 10
   ): Promise<ApiResponse<PaginatedResult<Feedback>>> => {
     try {
-      const response = await fetch(
-        `/api/feedback?pageNumber=${pageNumber}&pageSize=${pageSize}`
+      const response = await axiosClient.get(
+        `${API_URL}?pageNumber=${pageNumber}&pageSize=${pageSize}`
       );
-      const data = await response.json();
-      return data;
+      return response.data;
     } catch (error) {
       console.error("Error fetching all feedback:", error);
       return {
@@ -88,11 +89,10 @@ const feedbackService = {
     pageSize: number = 10
   ): Promise<ApiResponse<PaginatedResult<Feedback>>> => {
     try {
-      const response = await fetch(
-        `/api/feedback/unresponded?pageNumber=${pageNumber}&pageSize=${pageSize}`
+      const response = await axiosClient.get(
+        `${API_URL}/unresponded?pageNumber=${pageNumber}&pageSize=${pageSize}`
       );
-      const data = await response.json();
-      return data;
+      return response.data;
     } catch (error) {
       console.error("Error fetching unresponded feedback:", error);
       return {
@@ -105,9 +105,8 @@ const feedbackService = {
 
   getFeedbackStats: async (): Promise<ApiResponse<FeedbackStats>> => {
     try {
-      const response = await fetch("/api/feedback/stats");
-      const data = await response.json();
-      return data;
+      const response = await axiosClient.get(`${API_URL}/stats`);
+      return response.data;
     } catch (error) {
       console.error("Error fetching feedback stats:", error);
       return {
@@ -128,15 +127,11 @@ const feedbackService = {
     feedbackResponse: FeedbackResponse
   ): Promise<ApiResponse<Feedback>> => {
     try {
-      const response = await fetch(`/api/feedback/${feedbackId}/respond`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(feedbackResponse),
-      });
-      const data = await response.json();
-      return data;
+      const response = await axiosClient.post(
+        `${API_URL}/${feedbackId}/respond`,
+        feedbackResponse
+      );
+      return response.data;
     } catch (error) {
       console.error("Error responding to feedback:", error);
       return {

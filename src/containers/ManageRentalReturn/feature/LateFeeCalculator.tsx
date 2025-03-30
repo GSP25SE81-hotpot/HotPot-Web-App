@@ -5,7 +5,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useState } from "react";
-import { calculateLateFee } from "../../../api/services/rentalService";
+import { calculateLateFee } from "../../../api/Services/rentalService";
 import { alpha } from "@mui/material/styles";
 
 // Import styled components

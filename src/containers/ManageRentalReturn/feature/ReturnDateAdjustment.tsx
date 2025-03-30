@@ -5,7 +5,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useState } from "react";
-import { adjustReturnDateForException } from "../../../api/services/rentalService";
+import { adjustReturnDateForException } from "../../../api/Services/rentalService";
 import { UpdateRentOrderDetailRequest } from "../../../types/rentalTypes";
 
 // Import styled components

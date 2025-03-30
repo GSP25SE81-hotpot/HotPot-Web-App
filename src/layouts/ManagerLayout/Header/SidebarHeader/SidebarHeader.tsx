@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   AppBar,
   Avatar,
@@ -19,72 +20,63 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LogoContainer from "../../../../components/Logo/Logo";
-
-// Icons
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import EngineeringIcon from "@mui/icons-material/Engineering";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import FeedbackIcon from "@mui/icons-material/Feedback";
-import InventoryIcon from "@mui/icons-material/Inventory";
+import { menuItems } from "../../../AdminLayout/Sidebar/MenuItems";
+import LogoContainer from "../../../../components/Logo/Logo";
+// // Icons
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import PaymentIcon from "@mui/icons-material/Payment";
 import PersonIcon from "@mui/icons-material/Person";
-import ReceiptIcon from "@mui/icons-material/Receipt";
-import ScheduleIcon from "@mui/icons-material/Schedule";
-import SupportAgentIcon from "@mui/icons-material/SupportAgent";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-
-import { managerRoutes, staffRoutes } from "../../../../configs/routes";
+import useAuth from "../../../../hooks/useAuth";
 
 export const drawerWidth = 280;
-
-interface SidebarHeaderProps {
+interface SidebarDrawerProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
 interface Notification {
   id: number;
   message: string;
   time: string;
   read: boolean;
 }
-
-const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
+const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const { auth } = useAuth();
 
-  // State for menu categories
-  const [openInventory, setOpenInventory] = useState(true);
-  const [openOrders, setOpenOrders] = useState(true);
-  const [openMaintenance, setOpenMaintenance] = useState(false);
-  const [openReports, setOpenReports] = useState(false);
+  const role = auth?.user?.role;
+  console.log("role: ", role);
+  // State for expanding/collapsing menu categories
+  const [openCategories, setOpenCategories] = useState<{
+    [key: string]: boolean;
+  }>({});
+
+  // User data (replace with actual user data)
+
+  const userData = auth?.user;
+
+  // Toggle category open/close
+  const handleCategoryToggle = (label: string) => {
+    setOpenCategories((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
 
   // User menu state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const userMenuOpen = Boolean(anchorEl);
-
+  const drawerVariant = isMobile ? "temporary" : "persistent";
   // Notification state
   const [notificationAnchorEl, setNotificationAnchorEl] =
     useState<null | HTMLElement>(null);
-
-  // Mock user data (replace with actual user data)
-  const userData = {
-    name: "Manager",
-    role: "Store Manager",
-    avatar: null, // URL to avatar image if available
-  };
-
-  // Use "temporary" drawer on mobile so it overlays the content
-  const drawerVariant = isMobile ? "temporary" : "persistent";
 
   // Handle navigation
   const handleNavigation = (route: string) => {
@@ -105,7 +97,7 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
     // Add logout logic here
     handleUserMenuClose();
     // navigate to login page
-    navigate("/auth");
+    navigate("/");
   };
   const [notifications] = useState([
     {
@@ -136,114 +128,9 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
   const handleNotificationClose = () => {
     setNotificationAnchorEl(null);
   };
-  // Menu categories
-  const inventoryItems = [
-    {
-      id: "FE-02",
-      text: "Equipment Stock Status",
-      icon: <InventoryIcon />,
-      route: managerRoutes.manageRentals,
-    },
-    {
-      id: "FE-11",
-      text: "Equipment Status Report",
-      icon: <AssignmentIcon />,
-      route: managerRoutes.equipmentStatusReport,
-    },
-  ];
-
-  const orderItems = [
-    {
-      id: "FE-04",
-      text: "View Assigned Orders",
-      icon: <ReceiptIcon />,
-      route: staffRoutes.assignOrder,
-    },
-    {
-      id: "FE-05",
-      text: "Manage Orders",
-      icon: <InventoryIcon />,
-      route: managerRoutes.manageOrder,
-    },
-    {
-      id: "FE-13",
-      text: "Order History",
-      icon: <AssignmentIcon />,
-      route: staffRoutes.orderHistory,
-    },
-  ];
-
-  const maintenanceItems = [
-    {
-      id: "FE-09",
-      text: "Resolve Equipment Failure",
-      icon: <EngineeringIcon />,
-      route: managerRoutes.resolveEquipmentFailure,
-    },
-    {
-      id: "FE-10",
-      text: "Equipment Condition Log",
-      icon: <AssignmentIcon />,
-      route: managerRoutes.equipmentConditionLog,
-    },
-    {
-      id: "FE-15",
-      text: "Replacement Management",
-      icon: <SwapHorizIcon />,
-      route: managerRoutes.manageReplacement,
-    },
-  ];
-
-  const reportItems = [
-    {
-      id: "FE-12",
-      text: "View Feedback",
-      icon: <FeedbackIcon />,
-      route: managerRoutes.feedbackManagement,
-    },
-    {
-      id: "FE-14",
-      text: "Work Schedule",
-      icon: <ScheduleIcon />,
-      route: managerRoutes.workAssignment,
-    },
-  ];
-
-  const paymentItems = [
-    {
-      id: "FE-06",
-      text: "Confirm Deposits",
-      icon: <PaymentIcon />,
-      route: staffRoutes.depositConfirmation,
-    },
-    {
-      id: "FE-07",
-      text: "Manage Payment",
-      icon: <PaymentIcon />,
-      route: staffRoutes.paymentManagement,
-    },
-  ];
-
-  const customerItems = [
-    {
-      id: "FE-03",
-      text: "Retrieve Rental Equipment",
-      icon: <InventoryIcon />,
-      route: staffRoutes.checkDeviceAfterReturn,
-    },
-    {
-      id: "FE-16",
-      text: "Manage Return Rental",
-      icon: <InventoryIcon />,
-      route: managerRoutes.rentalDashboard,
-    },
-    {
-      id: "FE-08",
-      text: "Chat with Customer",
-      icon: <SupportAgentIcon />,
-      route: managerRoutes.customerChat,
-    },
-  ];
+  // Find menu items for the current user role
+  const currentRoleMenuItems =
+    menuItems.find((item) => item.role == role)?.menu || [];
 
   return (
     <>
@@ -462,15 +349,15 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Chip
               avatar={
-                userData.avatar ? (
-                  <Avatar alt={userData.name} src={userData.avatar} />
+                userData?.avatar ? (
+                  <Avatar alt={userData?.name} src={userData?.avatar} />
                 ) : (
                   <Avatar>
                     <AccountCircleIcon />
                   </Avatar>
                 )
               }
-              label={userData.name}
+              label={userData?.name}
               onClick={handleUserMenuOpen}
               sx={{
                 height: 40,
@@ -515,12 +402,10 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
           "& .MuiDrawer-paper": {
             width: drawerWidth,
             boxSizing: "border-box",
-            paddingTop: 2,
+            paddingTop: 12,
           },
         }}
       >
-        <Toolbar />
-
         {/* User welcome section */}
         <Box sx={{ p: 2, textAlign: "center" }}>
           <Avatar
@@ -531,150 +416,76 @@ const SidebarHeader: React.FC<SidebarHeaderProps> = ({ open, setOpen }) => {
               bgcolor: theme.palette.primary.main,
             }}
           >
-            <Typography variant="h4">{userData.name.charAt(0)}</Typography>
+            <Typography variant="h4">{userData?.name?.charAt(0)}</Typography>
           </Avatar>
           <Typography variant="h6" sx={{ mt: 2, fontWeight: "bold" }}>
-            Welcome, {userData.name}
+            Xin chào, {userData?.name}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {userData.role}
+            {userData?.role}
           </Typography>
         </Box>
 
         <Divider sx={{ my: 2 }} />
 
         <List component="nav" sx={{ px: 1 }}>
-          {/* Dashboard */}
-          <ListItemButton onClick={() => handleNavigation(managerRoutes.home)}>
-            <ListItemIcon>
-              <DashboardIcon />
-            </ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItemButton>
-
-          <Divider sx={{ my: 1 }} />
-
-          {/* Inventory Category */}
-          <ListItemButton onClick={() => setOpenInventory(!openInventory)}>
-            <ListItemIcon>
-              <InventoryIcon />
-            </ListItemIcon>
-            <ListItemText primary="Inventory Management" />
-            {openInventory ? <ExpandLess /> : <ExpandMore />}
-          </ListItemButton>
-          <Collapse in={openInventory} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {inventoryItems.map((item) => (
+          {currentRoleMenuItems.map((menuItem, index) => {
+            // If menu item has no children, render a simple list item
+            if (!menuItem.children) {
+              return (
                 <ListItemButton
-                  key={item.id}
-                  sx={{ pl: 4 }}
-                  onClick={() => handleNavigation(item.route)}
+                  key={`${menuItem.label}-${index}`}
+                  onClick={() =>
+                    menuItem.path !== "#" && handleNavigation(menuItem.path)
+                  }
                 >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.text} />
+                  <ListItemIcon>{menuItem.icon}</ListItemIcon>
+                  <ListItemText primary={menuItem.label} />
                 </ListItemButton>
-              ))}
-            </List>
-          </Collapse>
+              );
+            }
 
-          {/* Orders Category */}
-          <ListItemButton onClick={() => setOpenOrders(!openOrders)}>
-            <ListItemIcon>
-              <ReceiptIcon />
-            </ListItemIcon>
-            <ListItemText primary="Order Management" />
-            {openOrders ? <ExpandLess /> : <ExpandMore />}
-          </ListItemButton>
-          <Collapse in={openOrders} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {orderItems.map((item) => (
+            // If menu item has children, render expandable category
+            return (
+              <React.Fragment key={`${menuItem.label}-${index}`}>
                 <ListItemButton
-                  key={item.id}
-                  sx={{ pl: 4 }}
-                  onClick={() => handleNavigation(item.route)}
+                  onClick={() => handleCategoryToggle(menuItem.label)}
                 >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.text} />
+                  <ListItemIcon>{menuItem.icon}</ListItemIcon>
+                  <ListItemText primary={menuItem.label} />
+                  {openCategories[menuItem.label] ? (
+                    <ExpandLess />
+                  ) : (
+                    <ExpandMore />
+                  )}
                 </ListItemButton>
-              ))}
-            </List>
-          </Collapse>
-
-          {/* Maintenance Category */}
-          <ListItemButton onClick={() => setOpenMaintenance(!openMaintenance)}>
-            <ListItemIcon>
-              <EngineeringIcon />
-            </ListItemIcon>
-            <ListItemText primary="Maintenance" />
-            {openMaintenance ? <ExpandLess /> : <ExpandMore />}
-          </ListItemButton>
-          <Collapse in={openMaintenance} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {maintenanceItems.map((item) => (
-                <ListItemButton
-                  key={item.id}
-                  sx={{ pl: 4 }}
-                  onClick={() => handleNavigation(item.route)}
+                <Collapse
+                  in={openCategories[menuItem.label]}
+                  timeout="auto"
+                  unmountOnExit
                 >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItemButton>
-              ))}
-            </List>
-          </Collapse>
-
-          {/* Customer Service */}
-          <ListItemButton onClick={() => setOpenReports(!openReports)}>
-            <ListItemIcon>
-              <SupportAgentIcon />
-            </ListItemIcon>
-            <ListItemText primary="Customer Service" />
-            {openReports ? <ExpandLess /> : <ExpandMore />}
-          </ListItemButton>
-          <Collapse in={openReports} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {customerItems.map((item) => (
-                <ListItemButton
-                  key={item.id}
-                  sx={{ pl: 4 }}
-                  onClick={() => handleNavigation(item.route)}
-                >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItemButton>
-              ))}
-            </List>
-          </Collapse>
-
-          <Divider sx={{ my: 1 }} />
-
-          {/* Payment Items */}
-          {paymentItems.map((item) => (
-            <ListItemButton
-              key={item.id}
-              onClick={() => handleNavigation(item.route)}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          ))}
-
-          <Divider sx={{ my: 1 }} />
-
-          {/* Reports and Schedules */}
-          {reportItems.map((item) => (
-            <ListItemButton
-              key={item.id}
-              onClick={() => handleNavigation(item.route)}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          ))}
+                  <List component="div" disablePadding>
+                    {menuItem.children.map((childItem, childIndex) => (
+                      <ListItemButton
+                        key={`${childItem.label}-${childIndex}`}
+                        sx={{ pl: 4 }}
+                        onClick={() => handleNavigation(childItem.path)}
+                      >
+                        <ListItemIcon>
+                          {childItem.icon || menuItem.icon}
+                        </ListItemIcon>
+                        <ListItemText primary={childItem.label} />
+                      </ListItemButton>
+                    ))}
+                  </List>
+                </Collapse>
+              </React.Fragment>
+            );
+          })}
         </List>
       </Drawer>
     </>
   );
 };
 
-export default SidebarHeader;
+export default SidebarDrawer;

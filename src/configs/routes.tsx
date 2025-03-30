@@ -27,7 +27,7 @@ export const authRoutes = {
 export const adminRoutes = {
   dashboard: "/dashboard",
   orders: "/dashboard/orders",
-  feedbackDetail: "/dashboard/feedback/:id",
+  feedbackDetail: "/dashboard/feedback/:feedbackId",
   feedback: "/dashboard/feedback",
   tableHotPotCombo: "/dashboard/hotpotCombo",
   createHotPotCombo: "/dashboard/createCombo",
@@ -38,6 +38,10 @@ export const adminRoutes = {
   hotpotType: "/dashboard/hotpot",
   addHotpot: "/dashboard/addHotpot",
   HotpotDetail: "/dashboard/hotpotCombo/detail/:comboId",
+  orderDetail: "/dashboard/order/:orderId",
+  ingredientType: "/dashboard/ingredientType",
+  DetailHotpotType: "/dashboard/hotpotType/detail/:hotpotId",
+  MaintenanceHotpot: "/dashboard/hotpotMaintenance",
 };
 
 export const staffRoutes = {

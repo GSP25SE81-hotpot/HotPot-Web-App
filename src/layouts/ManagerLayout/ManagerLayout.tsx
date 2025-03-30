@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { Box, Toolbar } from "@mui/material";
 import { Outlet } from "react-router-dom";
-// import Footer from "./Footer/Footer";
 import SidebarHeader, {
   drawerWidth,
 } from "./Header/SidebarHeader/SidebarHeader";
@@ -27,7 +26,6 @@ const ManagerLayout: React.FC = () => {
         {/* This Toolbar pushes the content below the AppBar */}
         <Toolbar />
         <Outlet />
-        {/* <Footer /> */}
       </Box>
     </div>
   );

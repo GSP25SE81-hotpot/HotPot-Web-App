@@ -143,7 +143,10 @@ const TableUsers = () => {
         menuAction={
           <MenuActionTableUser
             userData={selectUserdata}
+            fetchData={getUserList}
             onOpenDetail={selecteData}
+            onOpenUpdate={selecteData}
+            onOpenDelete={selecteData}
           />
         }
         selectedData={selecteData}

@@ -1,4 +1,3 @@
-// src/services/hubServices.ts
 import signalRService, { HubCallback } from "./signalrService";
 
 // Hub URLs

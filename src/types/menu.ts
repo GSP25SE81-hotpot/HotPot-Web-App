@@ -3,5 +3,10 @@ export interface MenuItem {
   label: string;
   path: string;
   children?: MenuItem[];
-  role?:  string[];
+  role?: string[];
+}
+
+export interface MenuItemLayout {
+  role: string;
+  menu: MenuItem[];
 }

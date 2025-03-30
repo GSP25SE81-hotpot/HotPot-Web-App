@@ -19,6 +19,7 @@ import {
   TypographyProps,
   TableContainer,
   TablePagination,
+  Stack,
 } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import { OrderStatus } from "../types/orderManagement";
@@ -460,4 +461,120 @@ export const DateCell = styled(Typography)(({ theme }) => ({
     fontSize: "1rem",
     color: theme.palette.info.main,
   },
+}));
+
+// Container for the entire feedback management page
+export const FeedbackContainer = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(4),
+  background: `linear-gradient(135deg, ${alpha(
+    theme.palette.background.default,
+    0.95
+  )}, ${alpha(theme.palette.background.paper, 0.95)})`,
+  minHeight: "100vh",
+}));
+
+// Title for the feedback management page
+export const FeedbackTitle = styled(Typography)(({ theme }) => ({
+  fontWeight: 700,
+  marginBottom: theme.spacing(4),
+}));
+
+// Stats container
+export const StatsContainer = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(4),
+  padding: theme.spacing(2),
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius * 2,
+}));
+
+// Stats item
+export const StatItem = styled(Box)(() => ({
+  display: "flex",
+  flexDirection: "column",
+}));
+
+// Loading container
+export const LoadingContainer = styled(Box)(() => ({
+  display: "flex",
+  justifyContent: "center",
+  margin: "2rem 0",
+}));
+
+// Empty state message
+export const EmptyStateMessage = styled(Typography)(() => ({
+  textAlign: "center",
+  margin: "2rem 0",
+}));
+
+// Feedback list container
+export const FeedbackList = styled(Stack)(() => ({
+  spacing: 3,
+}));
+
+// Response input container
+export const ResponseInputContainer = styled(Stack)(({ theme }) => ({
+  spacing: theme.spacing(2),
+}));
+
+// Response actions container
+export const ResponseActionsContainer = styled(Stack)(({ theme }) => ({
+  flexDirection: "row",
+  spacing: theme.spacing(2),
+  justifyContent: "flex-end",
+}));
+
+// Pagination container
+export const PaginationContainer = styled(Box)(() => ({
+  display: "flex",
+  justifyContent: "center",
+  marginTop: "2rem",
+}));
+
+// Submit button
+export const SubmitButton = styled(Button)(({ theme }) => ({
+  backgroundColor: theme.palette.success.main,
+  borderRadius: 8,
+  textTransform: "none",
+  fontWeight: 600,
+  boxShadow: "none",
+  "&:hover": {
+    backgroundColor: theme.palette.success.dark,
+    boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+  },
+}));
+
+// Response button
+export const ResponseButton = styled(Button)(() => ({
+  alignSelf: "flex-start",
+  marginTop: "0.5rem",
+}));
+
+// Feedback response section
+export const ResponseSection = styled(Stack)(({ theme }) => ({
+  spacing: theme.spacing(1),
+}));
+
+// Feedback date text
+export const DateText = styled(Typography)(({ theme }) => ({
+  fontSize: "0.75rem",
+  color: theme.palette.text.secondary,
+}));
+
+// Rating container
+export const RatingContainer = styled(Box)(() => ({
+  display: "flex",
+  alignItems: "center",
+  gap: "0.25rem",
+}));
+
+// Rating score text
+export const RatingScoreText = styled(Typography)(({ theme }) => ({
+  fontSize: "0.875rem",
+  color: theme.palette.text.secondary,
+}));
+
+// Order info text
+export const OrderInfoText = styled(Typography)(({ theme }) => ({
+  fontSize: "0.75rem",
+  color: theme.palette.text.secondary,
 }));
