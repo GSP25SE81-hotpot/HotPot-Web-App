@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { HubConnectionState } from "@microsoft/signalr";
 import {
   Alert,

@@ -49,7 +49,7 @@ import {
   StyledTableContainer,
   StyledTableHead,
   StyledTableRow,
-} from "../../components/manager/styles/lowStockUtensilStyles";
+} from "../../components/manager/styles/LowStockUtensilStyles";
 import { NotifyAdminStockRequest, UtensilDto } from "../../types/stock";
 
 // Types

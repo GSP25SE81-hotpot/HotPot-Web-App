@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/hooks/useReplacementNotifications.ts
 import { useEffect, useState } from "react";
 import { equipmentHubService } from "../api/Services/hubServices";

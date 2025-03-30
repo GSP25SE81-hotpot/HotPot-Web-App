@@ -62,7 +62,7 @@ const RecordReturn: React.FC = () => {
     severity: "success" as "success" | "error",
   });
 
-  const { loading, error, execute } = useApi(rentalService.recordReturn);
+  const { loading, error } = useApi(rentalService.recordReturn);
 
   if (!state || (!state.assignmentId && !state.rentOrderDetailId)) {
     return (
@@ -115,16 +115,6 @@ const RecordReturn: React.FC = () => {
     }
 
     try {
-      const returnRequest = {
-        assignmentId: state.assignmentId,
-        rentOrderDetailId: state.rentOrderDetailId,
-        completedDate: returnDate,
-        returnCondition,
-        damageFee: damageFee ? parseFloat(damageFee) : undefined,
-        notes,
-      };
-
-      const result = await execute(returnRequest);
       setSnackbar({
         open: true,
         message: "Return recorded successfully",

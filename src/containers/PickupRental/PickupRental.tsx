@@ -57,7 +57,7 @@ export const PickupRental: React.FC = () => {
     }
   }, [location.search]);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
     // Update URL with the new tab value without reloading the page
     navigate(`?tab=${newValue}`, { replace: true });

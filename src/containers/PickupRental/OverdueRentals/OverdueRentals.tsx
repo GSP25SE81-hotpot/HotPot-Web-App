@@ -48,7 +48,7 @@ const OverdueRentals: React.FC = () => {
     execute(page + 1, rowsPerPage);
   }, [execute, page, rowsPerPage]);
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
