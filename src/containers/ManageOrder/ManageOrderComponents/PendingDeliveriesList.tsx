@@ -68,16 +68,13 @@ const PendingDeliveriesList: React.FC = () => {
     message: "",
     severity: "success" as "success" | "error",
   });
-
   // Pagination state
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
-
   // Sorting state
   const [sortBy, setSortBy] = useState<string>("deliverytime");
   const [sortDescending, setSortDescending] = useState(true);
-
   // Search state
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -97,18 +94,18 @@ const PendingDeliveriesList: React.FC = () => {
         searchTerm: searchTerm || undefined,
         isDelivered: false, // Only get pending deliveries
       };
-
       const response = await orderManagementService.getPendingDeliveries(
         queryParams
       );
-
       // Update state with paginated data
       setDeliveries(response.items);
       setTotalCount(response.totalCount);
       setError(null);
     } catch (err) {
       console.error("Error fetching pending deliveries:", err);
-      setError("Failed to load pending deliveries. Please try again later.");
+      setError(
+        "Không thể tải danh sách giao hàng đang chờ. Vui lòng thử lại sau."
+      );
       setDeliveries([]);
     } finally {
       setLoading(false);
@@ -161,25 +158,21 @@ const PendingDeliveriesList: React.FC = () => {
   // Handle confirm delivery
   const handleConfirmDelivery = async () => {
     if (!selectedDelivery) return;
-
     try {
       const request: DeliveryStatusUpdateRequest = {
         isDelivered: true,
         notes: deliveryNotes || undefined,
       };
-
       await orderManagementService.updateDeliveryStatus(
         selectedDelivery.shippingOrderId,
         request
       );
-
       // Show success message
       setSnackbar({
         open: true,
-        message: `Order #${selectedDelivery.orderId} marked as delivered successfully`,
+        message: `Đơn hàng #${selectedDelivery.orderId} đã được đánh dấu là đã giao thành công`,
         severity: "success",
       });
-
       // Close dialog and refresh list
       setOpenDialog(false);
       fetchDeliveries();
@@ -187,7 +180,7 @@ const PendingDeliveriesList: React.FC = () => {
       console.error("Error updating delivery status:", err);
       setSnackbar({
         open: true,
-        message: "Failed to update delivery status. Please try again.",
+        message: "Không thể cập nhật trạng thái giao hàng. Vui lòng thử lại.",
         severity: "error",
       });
     }
@@ -240,11 +233,11 @@ const PendingDeliveriesList: React.FC = () => {
         }}
       >
         <ListTitle variant="h6">
-          Pending Deliveries <CountBadge>{totalCount}</CountBadge>
+          Giao hàng đang chờ <CountBadge>{totalCount}</CountBadge>
         </ListTitle>
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
-            placeholder="Search deliveries..."
+            placeholder="Tìm kiếm giao hàng..."
             size="small"
             value={searchTerm}
             onChange={handleSearch}
@@ -287,20 +280,19 @@ const PendingDeliveriesList: React.FC = () => {
               fontWeight: 600,
             }}
           >
-            Refresh
+            Làm mới
           </Button>
         </Box>
       </Box>
-
       <StyledPaper>
         {deliveries.length === 0 ? (
           <EmptyStateContainer>
             <EmptyStateTitle variant="h6">
-              No pending deliveries found
+              Không tìm thấy giao hàng đang chờ
             </EmptyStateTitle>
             <EmptyStateSubtitle variant="body2">
-              All orders have been delivered or no orders have been allocated
-              for delivery
+              Tất cả đơn hàng đã được giao hoặc không có đơn hàng nào được phân
+              công giao
             </EmptyStateSubtitle>
           </EmptyStateContainer>
         ) : (
@@ -309,14 +301,14 @@ const PendingDeliveriesList: React.FC = () => {
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>
-                    <StyledHeaderCell>Order ID</StyledHeaderCell>
+                    <StyledHeaderCell>Mã đơn hàng</StyledHeaderCell>
                     <StyledHeaderCell>
                       <TableSortLabel
                         active={sortBy === "customer"}
                         direction={sortDescending ? "desc" : "asc"}
                         onClick={() => handleSortChange("customer")}
                       >
-                        Customer
+                        Khách hàng
                       </TableSortLabel>
                     </StyledHeaderCell>
                     <StyledHeaderCell>
@@ -325,12 +317,12 @@ const PendingDeliveriesList: React.FC = () => {
                         direction={sortDescending ? "desc" : "asc"}
                         onClick={() => handleSortChange("deliverytime")}
                       >
-                        Delivery Time
+                        Thời gian giao hàng
                       </TableSortLabel>
                     </StyledHeaderCell>
-                    <StyledHeaderCell>Address</StyledHeaderCell>
-                    <StyledHeaderCell>Status</StyledHeaderCell>
-                    <StyledHeaderCell>Actions</StyledHeaderCell>
+                    <StyledHeaderCell>Địa chỉ</StyledHeaderCell>
+                    <StyledHeaderCell>Trạng thái</StyledHeaderCell>
+                    <StyledHeaderCell>Thao tác</StyledHeaderCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -339,14 +331,14 @@ const PendingDeliveriesList: React.FC = () => {
                       <IdCell>#{delivery.orderId}</IdCell>
                       <StyledTableCell>
                         <CustomerName>
-                          {delivery.userName || "Unknown"}
+                          {delivery.userName || "Không xác định"}
                         </CustomerName>
                         <CustomerPhone>ID: {delivery.userId}</CustomerPhone>
                       </StyledTableCell>
                       <StyledTableCell>
                         {delivery.deliveryTime
                           ? formatDate(delivery.deliveryTime)
-                          : "Not scheduled"}
+                          : "Chưa lên lịch"}
                       </StyledTableCell>
                       <StyledTableCell sx={{ maxWidth: 200 }}>
                         <Tooltip title={delivery.address || ""}>
@@ -357,13 +349,15 @@ const PendingDeliveriesList: React.FC = () => {
                               textOverflow: "ellipsis",
                             }}
                           >
-                            {delivery.address || "No address"}
+                            {delivery.address || "Không có địa chỉ"}
                           </Box>
                         </Tooltip>
                       </StyledTableCell>
                       <StyledTableCell>
                         <OrderTypeChip
-                          label={delivery.status.toString()}
+                          label={getStatusTranslation(
+                            delivery.status.toString()
+                          )}
                           size="small"
                         />
                       </StyledTableCell>
@@ -381,15 +375,15 @@ const PendingDeliveriesList: React.FC = () => {
                               fontWeight: 600,
                             }}
                           >
-                            Delivered
+                            Đã giao
                           </Button>
-                          <Tooltip title="View order details">
+                          <Tooltip title="Xem chi tiết đơn hàng">
                             <IconButton
                               size="small"
                               color="primary"
                               onClick={() => {
                                 // Navigate to order details
-                                window.location.href = `/orders/${delivery.orderId}`;
+                                window.location.href = `/manage-order/${delivery.orderId}`;
                               }}
                               sx={{
                                 backgroundColor: (theme) =>
@@ -420,9 +414,9 @@ const PendingDeliveriesList: React.FC = () => {
                 rowsPerPage={pageSize}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 rowsPerPageOptions={[5, 10, 25, 50]}
-                labelRowsPerPage="Rows:"
+                labelRowsPerPage="Số hàng:"
                 labelDisplayedRows={({ from, to, count }) =>
-                  `${from}-${to} of ${count !== -1 ? count : `more than ${to}`}`
+                  `${from}-${to} của ${count !== -1 ? count : `hơn ${to}`}`
                 }
                 sx={{
                   ".MuiTablePagination-select": {
@@ -437,7 +431,6 @@ const PendingDeliveriesList: React.FC = () => {
           </>
         )}
       </StyledPaper>
-
       {/* Mark as Delivered Dialog */}
       <Dialog
         open={openDialog}
@@ -459,18 +452,18 @@ const PendingDeliveriesList: React.FC = () => {
             pb: 1,
           }}
         >
-          Mark Order #{selectedDelivery?.orderId} as Delivered
+          Đánh dấu đơn hàng #{selectedDelivery?.orderId} là đã giao
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3, pb: 2 }}>
           <Box sx={{ mt: 1, minWidth: 300 }}>
             <TextField
-              label="Delivery Notes (Optional)"
+              label="Ghi chú giao hàng (Tùy chọn)"
               multiline
               rows={4}
               fullWidth
               value={deliveryNotes}
               onChange={handleDeliveryNotesChange}
-              placeholder="Enter any notes about the delivery..."
+              placeholder="Nhập ghi chú về việc giao hàng..."
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
@@ -490,7 +483,7 @@ const PendingDeliveriesList: React.FC = () => {
               },
             }}
           >
-            Cancel
+            Hủy bỏ
           </DialogActionButton>
           <DialogActionButton
             onClick={handleConfirmDelivery}
@@ -503,11 +496,10 @@ const PendingDeliveriesList: React.FC = () => {
               },
             }}
           >
-            Confirm Delivery
+            Xác nhận đã giao
           </DialogActionButton>
         </DialogActions>
       </Dialog>
-
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
@@ -530,6 +522,21 @@ const PendingDeliveriesList: React.FC = () => {
       </Snackbar>
     </OrdersListContainer>
   );
+};
+
+// Hàm trợ giúp để dịch trạng thái sang tiếng Việt
+const getStatusTranslation = (status: string): string => {
+  const statusMap: Record<string, string> = {
+    Pending: "Đang chờ",
+    Processing: "Đang xử lý",
+    Shipping: "Đang giao",
+    Delivered: "Đã giao",
+    Completed: "Hoàn thành",
+    Cancelled: "Đã hủy",
+    Returning: "Đang trả",
+  };
+
+  return statusMap[status] || status;
 };
 
 export default PendingDeliveriesList;

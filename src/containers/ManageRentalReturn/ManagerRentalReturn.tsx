@@ -25,7 +25,6 @@ import {
 
 const ManagerRentalDashboard: React.FC = () => {
   const navigate = useNavigate();
-
   const navigateTo = (path: string) => {
     navigate(path);
   };
@@ -35,13 +34,11 @@ const ManagerRentalDashboard: React.FC = () => {
       <StyledPaper elevation={0}>
         <DashboardContainer>
           <Typography variant="h4" gutterBottom>
-            Rental Management Dashboard
+            Bảng điều khiển quản lý cho thuê
           </Typography>
-
           <SectionContainer>
-            <SectionHeading variant="h5">Pickup Management</SectionHeading>
+            <SectionHeading variant="h5">Quản lý lấy hàng</SectionHeading>
             <StyledDivider />
-
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                 <StyledCard sx={{ height: "100%" }}>
@@ -50,11 +47,11 @@ const ManagerRentalDashboard: React.FC = () => {
                       <CardIcon>
                         <AssignmentIcon />
                       </CardIcon>
-                      <CardTitle>Unassigned Pickups</CardTitle>
+                      <CardTitle>Lấy hàng chưa phân công</CardTitle>
                     </Box>
                     <CardDescription>
-                      View and assign staff to equipment pickups that need to be
-                      retrieved from customers.
+                      Xem và phân công nhân viên cho việc lấy thiết bị cần thu
+                      hồi từ khách hàng.
                     </CardDescription>
                   </CardContent>
                   <CardActions sx={{ p: 2, pt: 0 }}>
@@ -64,12 +61,11 @@ const ManagerRentalDashboard: React.FC = () => {
                       fullWidth
                       onClick={() => navigateTo("/unassigned-pickups")}
                     >
-                      Manage Unassigned Pickups
+                      Quản lý lấy hàng chưa phân công
                     </AnimatedButton>
                   </CardActions>
                 </StyledCard>
               </Grid>
-
               <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                 <StyledCard sx={{ height: "100%" }}>
                   <CardContent sx={{ flexGrow: 1 }}>
@@ -77,11 +73,11 @@ const ManagerRentalDashboard: React.FC = () => {
                       <CardIcon>
                         <PersonAddIcon />
                       </CardIcon>
-                      <CardTitle>Assign Staff</CardTitle>
+                      <CardTitle>Phân công nhân viên</CardTitle>
                     </Box>
                     <CardDescription>
-                      Directly assign staff members to pickup tasks and provide
-                      them with instructions.
+                      Trực tiếp phân công nhân viên cho nhiệm vụ lấy hàng và
+                      cung cấp hướng dẫn cho họ.
                     </CardDescription>
                   </CardContent>
                   <CardActions sx={{ p: 2, pt: 0 }}>
@@ -91,12 +87,11 @@ const ManagerRentalDashboard: React.FC = () => {
                       fullWidth
                       onClick={() => navigateTo("/unassigned-pickups")}
                     >
-                      Assign Staff
+                      Phân công nhân viên
                     </AnimatedButton>
                   </CardActions>
                 </StyledCard>
               </Grid>
-
               <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                 <StyledCard sx={{ height: "100%" }}>
                   <CardContent sx={{ flexGrow: 1 }}>
@@ -104,11 +99,11 @@ const ManagerRentalDashboard: React.FC = () => {
                       <CardIcon>
                         <ListAltIcon />
                       </CardIcon>
-                      <CardTitle>Current Assignments</CardTitle>
+                      <CardTitle>Phân công hiện tại</CardTitle>
                     </Box>
                     <CardDescription>
-                      View all current staff assignments and track their
-                      progress.
+                      Xem tất cả các phân công nhân viên hiện tại và theo dõi
+                      tiến độ của họ.
                     </CardDescription>
                   </CardContent>
                   <CardActions sx={{ p: 2, pt: 0 }}>
@@ -118,18 +113,16 @@ const ManagerRentalDashboard: React.FC = () => {
                       fullWidth
                       onClick={() => navigateTo("/current-assignments")}
                     >
-                      View Current Assignments
+                      Xem phân công hiện tại
                     </AnimatedButton>
                   </CardActions>
                 </StyledCard>
               </Grid>
             </Grid>
           </SectionContainer>
-
           <SectionContainer>
-            <SectionHeading variant="h5">Rental History</SectionHeading>
+            <SectionHeading variant="h5">Lịch sử cho thuê</SectionHeading>
             <StyledDivider />
-
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                 <StyledCard sx={{ height: "100%" }}>
@@ -138,11 +131,11 @@ const ManagerRentalDashboard: React.FC = () => {
                       <CardIcon>
                         <HistoryIcon />
                       </CardIcon>
-                      <CardTitle>Rental History</CardTitle>
+                      <CardTitle>Lịch sử cho thuê</CardTitle>
                     </Box>
                     <CardDescription>
-                      Search and view rental history by equipment, customer, or
-                      hotpot inventory.
+                      Tìm kiếm và xem lịch sử cho thuê theo thiết bị, khách hàng
+                      hoặc kho lẩu.
                     </CardDescription>
                   </CardContent>
                   <CardActions sx={{ p: 2, pt: 0 }}>
@@ -152,18 +145,16 @@ const ManagerRentalDashboard: React.FC = () => {
                       fullWidth
                       onClick={() => navigateTo("/rental-history")}
                     >
-                      View Rental History
+                      Xem lịch sử cho thuê
                     </AnimatedButton>
                   </CardActions>
                 </StyledCard>
               </Grid>
             </Grid>
           </SectionContainer>
-
           <SectionContainer>
-            <SectionHeading variant="h5">Management Tools</SectionHeading>
+            <SectionHeading variant="h5">Công cụ quản lý</SectionHeading>
             <StyledDivider />
-
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                 <StyledCard sx={{ height: "100%" }}>
@@ -172,11 +163,11 @@ const ManagerRentalDashboard: React.FC = () => {
                       <CardIcon>
                         <CalculateIcon />
                       </CardIcon>
-                      <CardTitle>Late Fee Calculator</CardTitle>
+                      <CardTitle>Máy tính phí trễ hạn</CardTitle>
                     </Box>
                     <CardDescription>
-                      Calculate late fees for overdue rentals based on actual
-                      return date.
+                      Tính phí trễ hạn cho các đơn thuê quá hạn dựa trên ngày
+                      trả thực tế.
                     </CardDescription>
                   </CardContent>
                   <CardActions sx={{ p: 2, pt: 0 }}>
@@ -186,12 +177,11 @@ const ManagerRentalDashboard: React.FC = () => {
                       fullWidth
                       onClick={() => navigateTo("/calculate-late-fee")}
                     >
-                      Calculate Late Fees
+                      Tính phí trễ hạn
                     </AnimatedButton>
                   </CardActions>
                 </StyledCard>
               </Grid>
-
               <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                 <StyledCard sx={{ height: "100%" }}>
                   <CardContent sx={{ flexGrow: 1 }}>
@@ -199,10 +189,10 @@ const ManagerRentalDashboard: React.FC = () => {
                       <CardIcon>
                         <EventIcon />
                       </CardIcon>
-                      <CardTitle>Adjust Return Date</CardTitle>
+                      <CardTitle>Điều chỉnh ngày trả</CardTitle>
                     </Box>
                     <CardDescription>
-                      Adjust return dates for exceptional circumstances only.
+                      Điều chỉnh ngày trả chỉ dành cho các trường hợp đặc biệt.
                     </CardDescription>
                   </CardContent>
                   <CardActions sx={{ p: 2, pt: 0 }}>
@@ -212,7 +202,7 @@ const ManagerRentalDashboard: React.FC = () => {
                       fullWidth
                       onClick={() => navigateTo("/adjust-return-date")}
                     >
-                      Adjust Return Date
+                      Điều chỉnh ngày trả
                     </AnimatedButton>
                   </CardActions>
                 </StyledCard>

@@ -13,80 +13,77 @@ import axiosClient from "../axiosInstance";
 
 const replacementService = {
   // Get all replacement requests
-  getAllReplacements: async (): Promise<
-    ApiResponse<ReplacementRequestSummaryDto[]>
-  > => {
+  getAllReplacements: async (): Promise<ReplacementRequestSummaryDto[]> => {
     const response = await axiosClient.get<
       any,
       ApiResponse<ReplacementRequestSummaryDto[]>
     >("/manager/replacement/all");
-    return response;
+    return response.data;
   },
 
   // Get replacement requests by status
   getReplacementsByStatus: async (
     status: string
-  ): Promise<ApiResponse<ReplacementRequestSummaryDto[]>> => {
+  ): Promise<ReplacementRequestSummaryDto[]> => {
     const response = await axiosClient.get<
       any,
       ApiResponse<ReplacementRequestSummaryDto[]>
     >(`/manager/replacement/status/${status}`);
-    return response;
+    return response.data;
   },
 
   // Get replacement request by ID
   getReplacementById: async (
     id: number
-  ): Promise<ApiResponse<ReplacementRequestDetailDto[]>> => {
+  ): Promise<ReplacementRequestDetailDto> => {
     const response = await axiosClient.get<
       any,
       ApiResponse<ReplacementRequestDetailDto[]>
     >(`/manager/replacement/id/${id}`);
-    return response;
+    // Assuming the API returns an array but we want the first item
+    return response.data[0];
   },
 
   // Review a replacement request (approve/reject)
   reviewReplacement: async (
     id: number,
     data: ReviewReplacementRequestDto
-  ): Promise<ApiResponse<ReplacementRequestDetailDto[]>> => {
+  ): Promise<ReplacementRequestDetailDto> => {
     const response = await axiosClient.put<
       any,
       ApiResponse<ReplacementRequestDetailDto[]>
     >(`/manager/replacement/${id}/review`, data);
-    return response;
+    return response.data[0];
   },
 
   // Assign staff to a replacement request
   assignStaff: async (
     id: number,
     data: AssignStaffDto
-  ): Promise<ApiResponse<ReplacementRequestDetailDto[]>> => {
+  ): Promise<ReplacementRequestDetailDto> => {
     const response = await axiosClient.put<
       any,
       ApiResponse<ReplacementRequestDetailDto[]>
     >(`/manager/replacement/${id}/assign-staff`, data);
-    return response;
+    return response.data[0];
   },
 
   // Get dashboard data for replacements
-  getDashboard: async (): Promise<ApiResponse<ReplacementDashboardDto[]>> => {
+  getDashboard: async (): Promise<ReplacementDashboardDto[]> => {
     const response = await axiosClient.get<
       any,
       ApiResponse<ReplacementDashboardDto[]>
     >(`/manager/replacement/dashboard`);
-    return response;
+    return response.data;
   },
 
   // Notify customer directly
-  notifyCustomer: async (
-    data: NotifyCustomerRequest
-  ): Promise<ApiResponse<boolean>> => {
+  notifyCustomer: async (data: NotifyCustomerRequest): Promise<boolean> => {
     const response = await axiosClient.post<any, ApiResponse<boolean>>(
       `/manager/replacement/notify-customer`,
       data
     );
-    return response;
+    return response.data;
   },
 };
 

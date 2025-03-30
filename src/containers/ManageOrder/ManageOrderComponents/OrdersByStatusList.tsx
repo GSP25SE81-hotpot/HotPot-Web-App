@@ -59,7 +59,7 @@ import {
   UnallocatedChip,
   ViewDetailsButton,
 } from "../../../components/manager/styles/OrdersByStatusListStyles";
-import { formatCurrency, getOrderStatusLabel } from "../../../utils/formatters";
+import { formatCurrency } from "../../../utils/formatters";
 
 const OrdersByStatusList: React.FC = () => {
   // State for active tab
@@ -130,7 +130,7 @@ const OrdersByStatusList: React.FC = () => {
       setError(null);
     } catch (err) {
       console.error("Error fetching orders:", err);
-      setError(`Failed to load orders. Please try again later.`);
+      setError(`Không thể tải đơn hàng. Vui lòng thử lại sau.`);
       setOrders([]);
     } finally {
       setLoading(false);
@@ -215,7 +215,7 @@ const OrdersByStatusList: React.FC = () => {
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
-                label="From Date"
+                label="Từ ngày"
                 value={fromDate}
                 onChange={(newValue) => setFromDate(newValue)}
                 slotProps={{
@@ -235,7 +235,7 @@ const OrdersByStatusList: React.FC = () => {
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
-                label="To Date"
+                label="Đến ngày"
                 value={toDate}
                 onChange={(newValue) => setToDate(newValue)}
                 slotProps={{
@@ -254,10 +254,10 @@ const OrdersByStatusList: React.FC = () => {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <FormControl fullWidth size="small">
-              <InputLabel>Customer</InputLabel>
+              <InputLabel>Khách hàng</InputLabel>
               <Select
                 value={customerId || ""}
-                label="Customer"
+                label="Khách hàng"
                 onChange={(e) =>
                   setCustomerId((e.target.value as number) || null)
                 }
@@ -269,7 +269,7 @@ const OrdersByStatusList: React.FC = () => {
                   },
                 }}
               >
-                <MenuItem value="">All Customers</MenuItem>
+                <MenuItem value="">Tất cả khách hàng</MenuItem>
                 {/* Add customer options here */}
               </Select>
             </FormControl>
@@ -286,7 +286,7 @@ const OrdersByStatusList: React.FC = () => {
                   fontWeight: 600,
                 }}
               >
-                Apply
+                Áp dụng
               </Button>
               <Button
                 variant="outlined"
@@ -298,7 +298,7 @@ const OrdersByStatusList: React.FC = () => {
                   fontWeight: 600,
                 }}
               >
-                Clear
+                Xóa bộ lọc
               </Button>
             </Box>
           </Grid>
@@ -318,13 +318,13 @@ const OrdersByStatusList: React.FC = () => {
           scrollButtons="auto"
           aria-label="order status tabs"
         >
-          <StyledTab label="Pending" />
-          <StyledTab label="Processing" />
-          <StyledTab label="Shipping" />
-          <StyledTab label="Delivered" />
-          <StyledTab label="Completed" />
-          <StyledTab label="Cancelled" />
-          <StyledTab label="Returning" />
+          <StyledTab label="Chờ xử lý" />
+          <StyledTab label="Đang xử lý" />
+          <StyledTab label="Đang giao" />
+          <StyledTab label="Đã giao" />
+          <StyledTab label="Hoàn thành" />
+          <StyledTab label="Đã hủy" />
+          <StyledTab label="Đang trả" />
         </StyledTabs>
         {/* Search and filter toolbar */}
         <Box
@@ -346,7 +346,7 @@ const OrdersByStatusList: React.FC = () => {
                 alignItems: "center",
               }}
             >
-              {getOrderStatusLabel(tabToStatus[activeTab])} Orders
+              Đơn hàng {getVietnameseOrderStatusLabel(tabToStatus[activeTab])}
               <Box
                 sx={{
                   ml: 1,
@@ -365,7 +365,7 @@ const OrdersByStatusList: React.FC = () => {
           </Box>
           <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
-              placeholder="Search orders..."
+              placeholder="Tìm kiếm đơn hàng..."
               size="small"
               value={searchTerm}
               onChange={handleSearch}
@@ -396,7 +396,7 @@ const OrdersByStatusList: React.FC = () => {
                 }
               }}
             />
-            <Tooltip title="Advanced filters">
+            <Tooltip title="Bộ lọc nâng cao">
               <Button
                 variant={showFilters ? "contained" : "outlined"}
                 color="primary"
@@ -408,7 +408,7 @@ const OrdersByStatusList: React.FC = () => {
                   fontWeight: 600,
                 }}
               >
-                Filters
+                Bộ lọc
               </Button>
             </Tooltip>
           </Box>
@@ -429,11 +429,13 @@ const OrdersByStatusList: React.FC = () => {
         ) : orders.length === 0 ? (
           <EmptyStateContainer>
             <EmptyStateText variant="h6">
-              No {getOrderStatusLabel(tabToStatus[activeTab]).toLowerCase()}{" "}
-              orders found
+              Không tìm thấy đơn hàng{" "}
+              {getVietnameseOrderStatusLabel(
+                tabToStatus[activeTab]
+              ).toLowerCase()}
             </EmptyStateText>
             <EmptyStateText variant="body2" sx={{ mt: 1 }}>
-              Try adjusting your filters or search criteria
+              Hãy thử điều chỉnh bộ lọc hoặc tiêu chí tìm kiếm
             </EmptyStateText>
           </EmptyStateContainer>
         ) : (
@@ -443,14 +445,14 @@ const OrdersByStatusList: React.FC = () => {
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>
-                    <StyledHeaderCell>Order ID</StyledHeaderCell>
+                    <StyledHeaderCell>Mã đơn hàng</StyledHeaderCell>
                     <StyledHeaderCell>
                       <TableSortLabel
                         active={sortBy === "customer"}
                         direction={sortDescending ? "desc" : "asc"}
                         onClick={() => handleSortChange("customer")}
                       >
-                        Customer
+                        Khách hàng
                       </TableSortLabel>
                     </StyledHeaderCell>
                     <StyledHeaderCell>
@@ -459,7 +461,7 @@ const OrdersByStatusList: React.FC = () => {
                         direction={sortDescending ? "desc" : "asc"}
                         onClick={() => handleSortChange("date")}
                       >
-                        Date
+                        Ngày đặt
                       </TableSortLabel>
                     </StyledHeaderCell>
                     <StyledHeaderCell>
@@ -468,12 +470,12 @@ const OrdersByStatusList: React.FC = () => {
                         direction={sortDescending ? "desc" : "asc"}
                         onClick={() => handleSortChange("totalprice")}
                       >
-                        Total
+                        Tổng tiền
                       </TableSortLabel>
                     </StyledHeaderCell>
-                    <StyledHeaderCell>Items</StyledHeaderCell>
-                    <StyledHeaderCell>Shipping</StyledHeaderCell>
-                    <StyledHeaderCell>Actions</StyledHeaderCell>
+                    <StyledHeaderCell>Sản phẩm</StyledHeaderCell>
+                    <StyledHeaderCell>Vận chuyển</StyledHeaderCell>
+                    <StyledHeaderCell>Thao tác</StyledHeaderCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -482,21 +484,20 @@ const OrdersByStatusList: React.FC = () => {
                       <OrderIdCell>#{order.orderId}</OrderIdCell>
                       <StyledTableCell>
                         <CustomerName>
-                          {order.userName || "Unknown"}
+                          {order.userName || "Không xác định"}
                         </CustomerName>
                         <CustomerPhone>ID: {order.userId}</CustomerPhone>
                       </StyledTableCell>
-
                       <StyledTableCell>
                         {formatCurrency(order.totalPrice)}
                       </StyledTableCell>
                       <StyledTableCell>
                         {order.hasSellItems && (
-                          <OrderTypeChip label="Sell" size="small" />
+                          <OrderTypeChip label="Bán" size="small" />
                         )}
                         {order.hasRentItems && (
                           <OrderTypeChip
-                            label="Rent"
+                            label="Thuê"
                             size="small"
                             color="secondary"
                           />
@@ -505,27 +506,30 @@ const OrdersByStatusList: React.FC = () => {
                       <StyledTableCell>
                         {order.shippingInfo ? (
                           <Tooltip
-                            title={`Assigned to ${
-                              order.shippingInfo.staff?.name || "Unknown"
+                            title={`Được giao bởi ${
+                              order.shippingInfo.staff?.name || "Không xác định"
                             }`}
                           >
                             <ShippingStatusChip
                               label={
                                 order.shippingInfo.isDelivered
-                                  ? "Delivered"
-                                  : "Pending"
+                                  ? "Đã giao"
+                                  : "Đang chờ"
                               }
                               size="small"
                               delivered={order.shippingInfo.isDelivered}
                             />
                           </Tooltip>
                         ) : (
-                          <UnallocatedChip label="Not Assigned" size="small" />
+                          <UnallocatedChip
+                            label="Chưa phân công"
+                            size="small"
+                          />
                         )}
                       </StyledTableCell>
                       <StyledTableCell>
                         <ActionsContainer>
-                          <Tooltip title="View order details">
+                          <Tooltip title="Xem chi tiết đơn hàng">
                             <ViewDetailsButton
                               size="small"
                               onClick={() => {
@@ -553,9 +557,9 @@ const OrdersByStatusList: React.FC = () => {
                 rowsPerPage={pageSize}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 rowsPerPageOptions={[5, 10, 25, 50]}
-                labelRowsPerPage="Rows:"
+                labelRowsPerPage="Số hàng:"
                 labelDisplayedRows={({ from, to, count }) =>
-                  `${from}-${to} of ${count !== -1 ? count : `more than ${to}`}`
+                  `${from}-${to} của ${count !== -1 ? count : `hơn ${to}`}`
                 }
                 sx={{
                   ".MuiTablePagination-select": {
@@ -592,6 +596,21 @@ const OrdersByStatusList: React.FC = () => {
       </Snackbar>
     </OrdersListContainer>
   );
+};
+
+// Hàm trợ giúp để dịch trạng thái đơn hàng sang tiếng Việt
+const getVietnameseOrderStatusLabel = (status: OrderStatus): string => {
+  const statusMap: Record<OrderStatus, string> = {
+    [OrderStatus.Pending]: "Chờ xử lý",
+    [OrderStatus.Processing]: "Đang xử lý",
+    [OrderStatus.Shipping]: "Đang giao",
+    [OrderStatus.Delivered]: "Đã giao",
+    [OrderStatus.Completed]: "Hoàn thành",
+    [OrderStatus.Cancelled]: "Đã hủy",
+    [OrderStatus.Returning]: "Đang trả",
+  };
+
+  return statusMap[status] || "Không xác định";
 };
 
 export default OrdersByStatusList;

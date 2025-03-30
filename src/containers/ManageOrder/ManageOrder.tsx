@@ -69,11 +69,9 @@ const ManageOrder: React.FC = () => {
     const fetchOrderCounts = async () => {
       try {
         setLoading(true);
-        console.log("Fetching order counts...");
-
+        console.log("Đang tải số lượng đơn hàng...");
         const counts = await orderManagementService.getOrderCounts();
-        console.log("API returned counts:", counts);
-
+        console.log("API trả về số lượng:", counts);
         // Create a new object to ensure React detects the state change
         const newCounts: OrderCountsDTO = {
           pendingCount: counts.pendingCount || 0,
@@ -85,18 +83,16 @@ const ManageOrder: React.FC = () => {
           completedCount: counts.completedCount || 0,
           totalCount: counts.totalCount || 0,
         };
-
-        console.log("Setting order counts to:", newCounts);
+        console.log("Cập nhật số lượng đơn hàng thành:", newCounts);
         setOrderCounts(newCounts);
         setError(null);
       } catch (err) {
-        console.error("Error in fetchOrderCounts:", err);
-        setError("Failed to load order counts. Please try again later.");
+        console.error("Lỗi trong fetchOrderCounts:", err);
+        setError("Không thể tải số lượng đơn hàng. Vui lòng thử lại sau.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchOrderCounts();
   }, []);
 
@@ -106,7 +102,7 @@ const ManageOrder: React.FC = () => {
 
   return (
     <DashboardWrapper>
-      <DashboardTitle variant="h4">Order Management</DashboardTitle>
+      <DashboardTitle variant="h4">Quản lý đơn hàng</DashboardTitle>
       {loading ? (
         <LoadingContainer>
           <CircularProgress />
@@ -155,9 +151,9 @@ const ManageOrder: React.FC = () => {
               textColor="primary"
               variant="fullWidth"
             >
-              <StyledTab label="Unallocated Orders" />
-              <StyledTab label="Pending Deliveries" />
-              <StyledTab label="All Orders" />
+              <StyledTab label="Đơn hàng chưa phân công" />
+              <StyledTab label="Giao hàng đang chờ" />
+              <StyledTab label="Tất cả đơn hàng" />
             </StyledTabs>
             <TabPanel value={activeTab} index={0}>
               <UnallocatedOrdersList />
@@ -198,9 +194,9 @@ const ManageOrder: React.FC = () => {
               textColor="primary"
               variant="fullWidth"
             >
-              <StyledTab label="Unallocated Orders" />
-              <StyledTab label="Pending Deliveries" />
-              <StyledTab label="All Orders" />
+              <StyledTab label="Đơn hàng chưa phân công" />
+              <StyledTab label="Giao hàng đang chờ" />
+              <StyledTab label="Tất cả đơn hàng" />
             </StyledTabs>
             <TabPanel value={activeTab} index={0}>
               <UnallocatedOrdersList />
