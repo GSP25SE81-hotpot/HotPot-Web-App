@@ -25,13 +25,11 @@ class SignalRService {
    */
   private getOrCreateHubConnection(hubUrl: string): signalR.HubConnection {
     if (!this.hubConnections.has(hubUrl)) {
-      // Get the API base URL from environment or config
-      const apiBaseUrl = process.env.REACT_APP_API_URL || "";
-
+      const apiBaseUrl = "https://localhost:7163";
       const connection = new signalR.HubConnectionBuilder()
         .withUrl(`${apiBaseUrl}${hubUrl}`)
         .withAutomaticReconnect(this.reconnectPolicy)
-        .configureLogging(signalR.LogLevel.Information)
+        .configureLogging(signalR.LogLevel.Debug) // Change to Debug for more details
         .build();
 
       // Set up connection state change handlers
@@ -47,6 +45,11 @@ class SignalRService {
 
       connection.onclose((error) => {
         console.log(`Connection to ${hubUrl} closed.`, error);
+        // Log more details about the error
+        if (error) {
+          console.error("Connection closed due to error:", error);
+        }
+
         // Remove from our maps when closed
         this.hubConnections.delete(hubUrl);
         this.connectionPromises.delete(hubUrl);
@@ -219,8 +222,24 @@ class SignalRService {
     userId: number,
     userType: string
   ): Promise<void> {
+    // Validate parameters
+    if (userId === undefined || userId === null || isNaN(userId)) {
+      throw new Error(`Invalid userId: ${userId}. Must be a valid number.`);
+    }
+
+    if (!userType) {
+      throw new Error("userType cannot be null or empty");
+    }
+
+    // Ensure userId is an integer
+    const userIdInt = Math.floor(userId);
+
+    console.log(
+      `Registering connection with userId: ${userIdInt} (type: ${typeof userIdInt}), userType: ${userType} (type: ${typeof userType})`
+    );
+
     await this.ensureConnection(hubUrl);
-    await this.invoke(hubUrl, "RegisterConnection", userId, userType);
+    await this.invoke(hubUrl, "RegisterConnection", userIdInt, userType);
   }
 
   /**
