@@ -9,7 +9,6 @@ export const managerRoutes = {
   feedback: "/feedback",
   equipmentConditionLog: "/equipment-condition-log",
   equipmentConditionDetail: "/equipment-condition-log/:id",
-  equipmentStatusReport: "/equipment-status-report",
   feedbackManagement: "/feedback-management",
   manageReplacement: "/manage-replacement",
   rentalDashboard: "/rental-dashboard",

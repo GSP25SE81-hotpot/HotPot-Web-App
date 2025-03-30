@@ -10,7 +10,6 @@ import { ChatWithCustomerPage } from "../pages/Manager/ChatWithCustomer/ChatWith
 import { DepositConfirmationPage } from "../pages/Staff/DepositConfirmation/DepositConfirmationPage";
 import { PaymentManagementPage } from "../pages/Staff/PaymentManagement/PaymentManagementPage";
 import { EquipmentConditionLogPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionLogPage";
-import { EquipmentStatusReportPage } from "../pages/Manager/EquipmentStatusReport/EquipmentStatusReportPage";
 import { OrderHistoryPage } from "../pages/Staff/OrderHistory/OrderHistoryPage";
 import { FeedbackManagementPage } from "../pages/Manager/FeedbackManagement/FeedbackManagementPage";
 import FeedbackDetailPage from "../pages/Admin/Feedback/FeedbackDetailPage";
@@ -90,10 +89,6 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.equipmentConditionDetail}
           element={<EquipmentConditionDetailPage />}
-        />
-        <Route
-          path={config.managerRoutes.equipmentStatusReport}
-          element={<EquipmentStatusReportPage />}
         />
         <Route
           path={config.managerRoutes.feedbackManagement}

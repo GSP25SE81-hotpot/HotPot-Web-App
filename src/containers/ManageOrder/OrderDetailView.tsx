@@ -7,7 +7,6 @@ import {
   alpha,
   Box,
   Button,
-  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -16,15 +15,12 @@ import {
   Divider,
   FormControl,
   InputLabel,
-  List,
-  ListItem,
-  ListItemText,
   MenuItem,
   Select,
   SelectChangeEvent,
   Snackbar,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
@@ -33,7 +29,6 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-
   AllocateOrderRequest,
   DeliveryStatusUpdateRequest,
   DeliveryTimeUpdateRequest,
@@ -46,7 +41,6 @@ import {
   ActionButton,
   ActionButtonsContainer,
   BackButton,
-  CustomerEmail,
   CustomerName,
   DeliveryChip,
   DetailCard,
@@ -58,7 +52,6 @@ import {
   HeaderPaper,
   InfoLabel,
   InfoValue,
-  ItemSectionTitle,
   LoadingContainer,
   OrderInfoGrid,
   OrderInfoItem,
@@ -70,7 +63,7 @@ import {
   SectionValue,
   StatusChip,
   StyledCardContent,
-  StyledCardHeader,
+  StyledCardHeader
 } from "../../components/manager/styles/OrderDetailStyles";
 import { StaffAvailabilityDto } from "../../types/staff";
 import { formatCurrency, formatDate } from "../../utils/formatters";

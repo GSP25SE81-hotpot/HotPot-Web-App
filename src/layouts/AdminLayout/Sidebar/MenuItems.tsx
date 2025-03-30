@@ -106,11 +106,6 @@ export const menuItems: MenuItemLayout[] = [
             icon: <InventoryIcon />,
             path: managerRoutes.rentalDashboard,
           },
-          {
-            label: "Equipment Status Report",
-            icon: <AssignmentIcon />,
-            path: managerRoutes.equipmentStatusReport,
-          },
         ],
       },
       //order
@@ -142,7 +137,6 @@ export const menuItems: MenuItemLayout[] = [
         icon: <EngineeringIcon />,
         path: "#",
         children: [
-      
           {
             label: "Equipment Condition Log",
             icon: <AssignmentIcon />,

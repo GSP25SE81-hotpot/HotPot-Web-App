@@ -25,7 +25,6 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { menuItems } from "../../../AdminLayout/Sidebar/MenuItems";
 import LogoContainer from "../../../../components/Logo/Logo";
-// // Icons
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
