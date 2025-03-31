@@ -23,13 +23,29 @@ class SignalRService {
    * @param hubUrl The URL of the hub to connect to
    * @returns The hub connection
    */
-  private getOrCreateHubConnection(hubUrl: string): signalR.HubConnection {
+  // src/services/signalrService.ts (partial update)
+
+  /**
+   * Get or create a hub connection
+   * @param hubUrl The URL of the hub to connect to
+   * @returns The hub connection
+   */
+  private getOrCreateHubConnection(
+    hubUrl: string,
+    token?: string
+  ): signalR.HubConnection {
     if (!this.hubConnections.has(hubUrl)) {
-      const apiBaseUrl = "https://localhost:7163";
+      const apiBaseUrl = "https://localhost:7163"; // Update with your API base URL
+
+      // Get the JWT token from the parameter or try to get it from localStorage
+      const authToken = token || this.getAuthToken();
+
       const connection = new signalR.HubConnectionBuilder()
-        .withUrl(`${apiBaseUrl}${hubUrl}`)
+        .withUrl(`${apiBaseUrl}${hubUrl}`, {
+          accessTokenFactory: () => authToken || "",
+        })
         .withAutomaticReconnect(this.reconnectPolicy)
-        .configureLogging(signalR.LogLevel.Debug) // Change to Debug for more details
+        .configureLogging(signalR.LogLevel.Debug) // Keep Debug for troubleshooting
         .build();
 
       // Set up connection state change handlers
@@ -49,7 +65,6 @@ class SignalRService {
         if (error) {
           console.error("Connection closed due to error:", error);
         }
-
         // Remove from our maps when closed
         this.hubConnections.delete(hubUrl);
         this.connectionPromises.delete(hubUrl);
@@ -61,31 +76,61 @@ class SignalRService {
   }
 
   /**
+   * Get the authentication token from localStorage
+   * @returns The authentication token or null if not found
+   */
+  private getAuthToken(): string | null {
+    try {
+      // Try to get the token from userInfor in localStorage
+      const userInfor = localStorage.getItem("userInfor");
+      if (userInfor) {
+        const parsedUserInfo = JSON.parse(userInfor);
+        return parsedUserInfo.accessToken || null;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error getting auth token:", error);
+      return null;
+    }
+  }
+
+  /**
    * Start a connection to a hub
    * @param hubUrl The URL of the hub to connect to
    * @returns A promise that resolves when the connection is established
    */
-  public async startConnection(hubUrl: string): Promise<void> {
-    // If we already have a connection promise for this hub, return it
+  public async startConnection(hubUrl: string, token?: string): Promise<void> {
+    // If we already have a promise for this connection, return it
     if (this.connectionPromises.has(hubUrl)) {
       return this.connectionPromises.get(hubUrl)!;
     }
 
-    const connection = this.getOrCreateHubConnection(hubUrl);
+    // Create a new promise for this connection
+    const connectionPromise = new Promise<void>((resolve, reject) => {
+      const connection = this.getOrCreateHubConnection(hubUrl, token);
 
-    // Create a new connection promise
-    const connectionPromise = connection
-      .start()
-      .then(() => {
-        console.log(`Connected to hub: ${hubUrl}`);
-      })
-      .catch((err) => {
-        console.error(`Error connecting to hub ${hubUrl}:`, err);
-        this.connectionPromises.delete(hubUrl);
-        throw err;
-      });
+      // If the connection is already connected, resolve immediately
+      if (connection.state === signalR.HubConnectionState.Connected) {
+        resolve();
+        return;
+      }
 
+      // Start the connection
+      connection
+        .start()
+        .then(() => {
+          console.log(`Connected to ${hubUrl}`);
+          resolve();
+        })
+        .catch((error) => {
+          console.error(`Error connecting to ${hubUrl}:`, error);
+          reject(error);
+        });
+    });
+
+    // Store the promise so we can reuse it
     this.connectionPromises.set(hubUrl, connectionPromise);
+
     return connectionPromise;
   }
 
@@ -217,29 +262,9 @@ class SignalRService {
    * @param userId The user ID
    * @param userType The user type (e.g., 'manager', 'admin', 'customer')
    */
-  public async registerUserConnection(
-    hubUrl: string,
-    userId: number,
-    userType: string
-  ): Promise<void> {
-    // Validate parameters
-    if (userId === undefined || userId === null || isNaN(userId)) {
-      throw new Error(`Invalid userId: ${userId}. Must be a valid number.`);
-    }
-
-    if (!userType) {
-      throw new Error("userType cannot be null or empty");
-    }
-
-    // Ensure userId is an integer
-    const userIdInt = Math.floor(userId);
-
-    console.log(
-      `Registering connection with userId: ${userIdInt} (type: ${typeof userIdInt}), userType: ${userType} (type: ${typeof userType})`
-    );
-
+  public async registerUserConnection(hubUrl: string): Promise<void> {
     await this.ensureConnection(hubUrl);
-    await this.invoke(hubUrl, "RegisterConnection", userIdInt, userType);
+    await this.invoke(hubUrl, "RegisterConnection");
   }
 
   /**

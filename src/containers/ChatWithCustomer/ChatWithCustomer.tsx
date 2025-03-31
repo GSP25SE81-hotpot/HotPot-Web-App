@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/components/Chat/ChatWithCustomer.tsx
 import { MoreVert, Send } from "@mui/icons-material";
 import {
@@ -30,11 +31,11 @@ import {
   StyledBadge,
   StyledInput,
   StyledPaper,
-  TypingIndicator,
 } from "../../components/manager/styles/ChatStyles"; // Extract styled components to a separate file
 import useAuth from "../../hooks/useAuth";
 import { useChatRealTime } from "../../hooks/useChatRealTime";
 import { ChatMessageDto, ChatSessionDto } from "../../types/chat";
+import chatRealTimeService from "../../api/Services/chatRealTimeService";
 
 // Memoized Components
 const ChatListItem = React.memo(
@@ -153,6 +154,7 @@ const ChatWithCustomer: React.FC = () => {
   const [input, setInput] = useState("");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showDebug, setShowDebug] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -163,14 +165,37 @@ const ChatWithCustomer: React.FC = () => {
     loading,
     chatSessions,
     getSessionMessages,
-    isUserTyping,
     sendMessage,
     markMessageAsRead,
-    sendTypingIndicator,
     endChatSession,
-    assignManagerToSession,
     loadSessionMessages,
-  } = useChatRealTime(user?.uid, "manager");
+    acceptChat,
+    refreshSessions,
+  } = useChatRealTime(user?.uid);
+
+  // Add a reconnect function
+  const handleReconnect = useCallback(async () => {
+    setError(null);
+    try {
+      const token = auth.accessToken;
+      if (!token) {
+        // Extract the message from the Error object
+        setError("Authentication token not found. Please log in again.");
+        return;
+      }
+
+      await chatRealTimeService.disconnect();
+      await chatRealTimeService.initializeConnection(token);
+      await refreshSessions();
+    } catch (err) {
+      // Extract the message from the Error object
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to reconnect to chat service"
+      );
+    }
+  }, [refreshSessions, auth.accessToken]);
 
   // Memoized values
   const selectedChat = useMemo(
@@ -181,11 +206,6 @@ const ChatWithCustomer: React.FC = () => {
   const chatMessages = useMemo(
     () => (selectedChatId ? getSessionMessages(selectedChatId) : []),
     [selectedChatId, getSessionMessages]
-  );
-
-  const isTyping = useMemo(
-    () => (selectedChatId ? isUserTyping(selectedChatId) : false),
-    [selectedChatId, isUserTyping]
   );
 
   // Sort chats by last activity
@@ -270,24 +290,8 @@ const ChatWithCustomer: React.FC = () => {
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setInput(e.target.value);
-
-      // Send typing indicator
-      if (selectedChatId) {
-        // Clear existing timeout
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
-
-        // Send typing indicator
-        sendTypingIndicator(selectedChatId, true);
-
-        // Set timeout to stop typing indicator after 3 seconds
-        typingTimeoutRef.current = setTimeout(() => {
-          sendTypingIndicator(selectedChatId, false);
-        }, 3000);
-      }
     },
-    [selectedChatId, sendTypingIndicator]
+    []
   );
 
   const handleMenuOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -316,11 +320,11 @@ const ChatWithCustomer: React.FC = () => {
     }
   }, [selectedChatId, endChatSession, handleMenuClose]);
 
-  // src/components/Chat/ChatWithCustomer.tsx (continued)
   const handleAssignManager = useCallback(
     (managerId: number) => {
-      if (selectedChatId) {
-        assignManagerToSession(selectedChatId, managerId)
+      if (selectedChatId && managerId === user?.uid) {
+        // Use acceptChat instead of assignManagerToSession
+        acceptChat(selectedChatId)
           .then((success) => {
             if (success) {
               handleMenuClose();
@@ -334,7 +338,7 @@ const ChatWithCustomer: React.FC = () => {
           });
       }
     },
-    [selectedChatId, assignManagerToSession, handleMenuClose]
+    [selectedChatId, acceptChat, handleMenuClose, user?.uid]
   );
 
   // Virtual list renderer for messages
@@ -476,11 +480,33 @@ const ChatWithCustomer: React.FC = () => {
             justifyContent: "space-between",
           }}
         >
-          <Typography variant="caption" color="text.secondary">
-            {isConnected ? "Connected" : "Disconnected"}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {chatSessions.length} active chats
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Typography
+              variant="caption"
+              color={isConnected ? "success.main" : "error.main"}
+              sx={{ mr: 1 }}
+            >
+              {isConnected ? "Connected" : "Disconnected"}
+            </Typography>
+            {!isConnected && (
+              <Button
+                size="small"
+                variant="outlined"
+                color="primary"
+                onClick={handleReconnect}
+                sx={{ fontSize: "0.7rem", py: 0.5 }}
+              >
+                Reconnect
+              </Button>
+            )}
+          </Box>
+          <Typography
+            variant="caption"
+            color={chatSessions.length > 0 ? "text.secondary" : "warning.main"}
+          >
+            {chatSessions.length > 0
+              ? `${chatSessions.length} active chats`
+              : "No active chats"}
           </Typography>
         </Box>
       </Box>
@@ -517,7 +543,7 @@ const ChatWithCustomer: React.FC = () => {
                     {selectedChat.customerName || "Customer"}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {isTyping ? "Typing..." : "Online"}
+                    Online
                   </Typography>
                 </Box>
               </Box>
@@ -536,6 +562,11 @@ const ChatWithCustomer: React.FC = () => {
                 {!selectedChat.managerId && (
                   <MenuItem onClick={() => handleAssignManager(user?.uid)}>
                     Assign to me
+                  </MenuItem>
+                )}
+                {selectedChat.managerId === user?.uid && (
+                  <MenuItem onClick={handleMenuClose}>
+                    Already assigned to me
                   </MenuItem>
                 )}
                 {selectedChat.managerId === user?.uid && (
@@ -583,15 +614,6 @@ const ChatWithCustomer: React.FC = () => {
                   {chatMessages.map((msg) => (
                     <MessageItem key={msg.chatMessageId} message={msg} />
                   ))}
-                  {isTyping && (
-                    <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
-                      <TypingIndicator>
-                        <span className="dot"></span>
-                        <span className="dot"></span>
-                        <span className="dot"></span>
-                      </TypingIndicator>
-                    </Box>
-                  )}
                 </>
               )}
               <div ref={messagesEndRef} />
@@ -692,6 +714,56 @@ const ChatWithCustomer: React.FC = () => {
           </Box>
         )}
       </Box>
+      {showDebug && (
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            right: 0,
+            bgcolor: "rgba(0,0,0,0.8)",
+            color: "white",
+            p: 2,
+            borderRadius: 1,
+            maxWidth: 400,
+            maxHeight: 300,
+            overflow: "auto",
+            zIndex: 1000,
+            fontSize: "0.75rem",
+          }}
+        >
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            Debug Info
+          </Typography>
+          <pre>
+            Connection: {isConnected ? "Connected" : "Disconnected"}\n User ID:{" "}
+            {user?.uid}\n Sessions: {chatSessions.length}\n Selected Chat:{" "}
+            {selectedChatId}\n Error: {error ? error.toString() : "None"}\n
+            Token: {auth.accessToken ? "Present" : "Missing"}\n Token from
+            localStorage:{" "}
+            {localStorage.getItem("userInfor") ? "Present" : "Missing"}
+          </pre>
+          <Button
+            size="small"
+            variant="contained"
+            color="error"
+            onClick={() => setShowDebug(false)}
+            sx={{ mt: 1 }}
+          >
+            Close
+          </Button>
+          <Box sx={{ position: "absolute", bottom: 10, right: 10 }}>
+            <IconButton
+              size="small"
+              onClick={() => setShowDebug(!showDebug)}
+              sx={{ opacity: 0.3, "&:hover": { opacity: 1 } }}
+            >
+              <span role="img" aria-label="debug">
+                🐞
+              </span>
+            </IconButton>
+          </Box>
+        </Box>
+      )}
     </StyledPaper>
   );
 };

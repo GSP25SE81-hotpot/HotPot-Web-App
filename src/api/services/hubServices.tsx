@@ -83,9 +83,9 @@ type DirectNotificationCallback = (
 
 // Chat Hub Service
 export const chatHubService = {
-  connect: async (userId: number, userType: string) => {
+  connect: async () => {
     await signalRService.startConnection(CHAT_HUB);
-    await signalRService.registerUserConnection(CHAT_HUB, userId, userType);
+    await signalRService.registerUserConnection(CHAT_HUB);
   },
 
   onReceiveMessage: (callback: ChatMessageCallback) => {
@@ -103,9 +103,9 @@ export const chatHubService = {
 
 // Feedback Hub Service
 export const feedbackHubService = {
-  connect: async (userId: number, userType: string) => {
+  connect: async () => {
     await signalRService.startConnection(FEEDBACK_HUB);
-    await signalRService.registerUserConnection(FEEDBACK_HUB, userId, userType);
+    await signalRService.registerUserConnection(FEEDBACK_HUB);
   },
 
   // Listen for connection registration confirmation
@@ -198,13 +198,9 @@ export const feedbackHubService = {
 
 // Equipment Hub Service
 export const equipmentHubService = {
-  connect: async (userId: number, userType: string) => {
+  connect: async () => {
     await signalRService.startConnection(EQUIPMENT_HUB);
-    await signalRService.registerUserConnection(
-      EQUIPMENT_HUB,
-      userId,
-      userType
-    );
+    await signalRService.registerUserConnection(EQUIPMENT_HUB);
   },
 
   // Register for replacement-related events
@@ -353,9 +349,9 @@ export const equipmentHubService = {
 
 // Schedule Hub Service
 export const scheduleHubService = {
-  connect: async (userId: number, userType: string) => {
+  connect: async () => {
     await signalRService.startConnection(SCHEDULE_HUB);
-    await signalRService.registerUserConnection(SCHEDULE_HUB, userId, userType);
+    await signalRService.registerUserConnection(SCHEDULE_HUB);
   },
 
   // Add schedule-specific methods here
@@ -369,11 +365,7 @@ export const scheduleHubService = {
 export const equipmentConditionHubService = {
   connect: async (userId: number, userType: string) => {
     await signalRService.startConnection(EQUIPMENT_CONDITION_HUB);
-    await signalRService.registerUserConnection(
-      EQUIPMENT_CONDITION_HUB,
-      userId,
-      userType
-    );
+    await signalRService.registerUserConnection(EQUIPMENT_CONDITION_HUB);
 
     // If user is an admin, register as admin
     if (
@@ -461,13 +453,9 @@ export const equipmentConditionHubService = {
 
 // Equipment Stock Hub Service
 export const equipmentStockHubService = {
-  connect: async (userId: number, userType: string) => {
+  connect: async () => {
     await signalRService.startConnection(EQUIPMENT_STOCK_HUB);
-    await signalRService.registerUserConnection(
-      EQUIPMENT_STOCK_HUB,
-      userId,
-      userType
-    );
+    await signalRService.registerUserConnection(EQUIPMENT_STOCK_HUB);
   },
 
   // Register as admin to receive notifications
@@ -540,13 +528,9 @@ export const equipmentStockHubService = {
 
 // Notification Hub Service
 export const notificationHubService = {
-  connect: async (userId: number, userType: string) => {
+  connect: async () => {
     await signalRService.startConnection(NOTIFICATION_HUB);
-    await signalRService.registerUserConnection(
-      NOTIFICATION_HUB,
-      userId,
-      userType
-    );
+    await signalRService.registerUserConnection(NOTIFICATION_HUB);
   },
 
   onReceiveNotification: (callback: NotificationCallback) => {

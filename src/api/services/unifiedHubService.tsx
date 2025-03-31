@@ -124,7 +124,7 @@ class UnifiedHubService {
       throw new Error("User ID and type must be set before connecting to hubs");
     }
 
-    await chatHubService.connect(this.userId, this.userType);
+    await chatHubService.connect();
     this.connectedHubs.add("chat");
   }
 
@@ -136,7 +136,7 @@ class UnifiedHubService {
       throw new Error("User ID and type must be set before connecting to hubs");
     }
 
-    await feedbackHubService.connect(this.userId, this.userType);
+    await feedbackHubService.connect();
     this.connectedHubs.add("feedback");
   }
 
@@ -148,7 +148,7 @@ class UnifiedHubService {
       throw new Error("User ID and type must be set before connecting to hubs");
     }
 
-    await equipmentHubService.connect(this.userId, this.userType);
+    await equipmentHubService.connect();
     this.connectedHubs.add("equipment");
   }
 
@@ -160,7 +160,7 @@ class UnifiedHubService {
       throw new Error("User ID and type must be set before connecting to hubs");
     }
 
-    await scheduleHubService.connect(this.userId, this.userType);
+    await scheduleHubService.connect();
     this.connectedHubs.add("schedule");
   }
 
@@ -184,7 +184,7 @@ class UnifiedHubService {
       throw new Error("User ID and type must be set before connecting to hubs");
     }
 
-    await equipmentStockHubService.connect(this.userId, this.userType);
+    await equipmentStockHubService.connect();
     this.connectedHubs.add("equipmentStock");
   }
 
@@ -196,7 +196,7 @@ class UnifiedHubService {
       throw new Error("User ID and type must be set before connecting to hubs");
     }
 
-    await notificationHubService.connect(this.userId, this.userType);
+    await notificationHubService.connect();
     this.connectedHubs.add("notification");
   }
 

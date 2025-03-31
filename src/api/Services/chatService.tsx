@@ -17,7 +17,7 @@ export class ChatService {
       const response = await axiosClient.get<
         any,
         ApiResponse<ChatSessionDto[]>
-      >("/api/manager/chat/sessions/active");
+      >("/manager/chat/sessions/active");
       return response || [];
     } catch (error) {
       console.error("Error fetching active sessions:", error);
@@ -33,7 +33,7 @@ export class ChatService {
       const response = await axiosClient.get<
         any,
         ApiResponse<ChatSessionDto[]>
-      >(`/api/manager/chat/sessions/manager/${managerId}`);
+      >(`/manager/chat/sessions/manager/${managerId}`);
       return response || [];
     } catch (error) {
       console.error("Error fetching manager chat history:", error);
@@ -49,7 +49,7 @@ export class ChatService {
     try {
       const request: AssignManagerRequest = { managerId };
       const response = await axiosClient.put<any, ApiResponse<ChatSessionDto>>(
-        `/api/manager/chat/sessions/${sessionId}/assign`,
+        `/manager/chat/sessions/${sessionId}/assign`,
         request
       );
       return response;
@@ -72,7 +72,7 @@ export class ChatService {
         any,
         ApiResponse<ChatMessageDto[]>
       >(
-        `/api/manager/chat/messages/session/${sessionId}?pageNumber=${pageNumber}&pageSize=${pageSize}`
+        `/manager/chat/messages/session/${sessionId}?pageNumber=${pageNumber}&pageSize=${pageSize}`
       );
       return response || [];
     } catch (error) {
@@ -89,7 +89,7 @@ export class ChatService {
       const response = await axiosClient.get<
         any,
         ApiResponse<ChatMessageDto[]>
-      >(`/api/manager/chat/messages/unread/${userId}`);
+      >(`/manager/chat/messages/unread/${userId}`);
       return response || [];
     } catch (error) {
       console.error("Error fetching unread messages:", error);
@@ -103,7 +103,7 @@ export class ChatService {
   ): Promise<ApiResponse<number>> {
     try {
       const response = await axiosClient.get<any, ApiResponse<number>>(
-        `/api/manager/chat/messages/unread/count/${userId}`
+        `/manager/chat/messages/unread/count/${userId}`
       );
       return response || 0;
     } catch (error) {
@@ -118,7 +118,7 @@ export class ChatService {
   ): Promise<ApiResponse<ChatSessionDto>> {
     try {
       const response = await axiosClient.put<any, ApiResponse<ChatSessionDto>>(
-        `/api/manager/chat/sessions/${sessionId}/end`,
+        `/manager/chat/sessions/${sessionId}/end`,
         {}
       );
       return response!;
@@ -137,7 +137,7 @@ export class ChatService {
     try {
       const request: SendMessageRequest = { senderId, receiverId, message };
       const response = await axiosClient.post<any, ApiResponse<ChatMessageDto>>(
-        "/api/manager/chat/messages",
+        "/manager/chat/messages",
         request
       );
       return response;
@@ -153,7 +153,7 @@ export class ChatService {
   ): Promise<ApiResponse<boolean>> {
     try {
       const response = await axiosClient.put<any, ApiResponse<boolean>>(
-        `/api/manager/chat/messages/${messageId}/read`,
+        `/manager/chat/messages/${messageId}/read`,
         {}
       );
       return response || false;
@@ -171,7 +171,7 @@ export class ChatService {
       const response = await axiosClient.get<
         any,
         ApiResponse<ChatSessionDetailDto>
-      >(`/api/manager/chat/sessions/${sessionId}`);
+      >(`/manager/chat/sessions/${sessionId}`);
       return response;
     } catch (error) {
       console.error("Error fetching chat session:", error);
@@ -189,7 +189,7 @@ export class ChatService {
     try {
       const request: CreateChatSessionRequest = { customerId, topic };
       const response = await axiosClient.post<any, ApiResponse<ChatSessionDto>>(
-        "/api/customer/chat/sessions",
+        "/customer/chat/sessions",
         request
       );
       return response;
