@@ -1,4 +1,4 @@
-// src/components/WorkScheduleTable.tsx
+/* eslint-disable react-hooks/exhaustive-deps */
 import {
   Box,
   Card,
@@ -14,16 +14,31 @@ import {
   Tooltip,
   Typography,
   useTheme,
+  Button, // Add Button import
 } from "@mui/material";
-import React from "react";
-import { shiftTypes } from "../../types/scheduleInterfaces";
-import {
-  useManagerSchedule,
-  useAllStaffSchedules,
-} from "../../hooks/useSchedule";
+import React, { useEffect, useState } from "react";
+import { shiftTypes, StaffSchedule } from "../../types/scheduleInterfaces";
+import useSchedule from "../../hooks/useSchedule";
+import { useNavigate } from "react-router-dom"; // Import useNavigate instead of Link
 
 const WorkAssignmentSchedule: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate(); // Initialize useNavigate hook
+
+  const {
+    loading: hookLoading,
+    error: hookError,
+    isManagerRole,
+    fetchMySchedule,
+    fetchAllStaffSchedules,
+  } = useSchedule();
+
+  const [personalSchedule, setPersonalSchedule] =
+    useState<StaffSchedule | null>(null);
+  const [allSchedules, setAllSchedules] = useState<StaffSchedule[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   const days = [
     "Monday",
     "Tuesday",
@@ -34,31 +49,87 @@ const WorkAssignmentSchedule: React.FC = () => {
     "Sunday",
   ];
 
-  // Use our custom hooks
-  const {
-    schedule: personalSchedule,
-    loading: loadingPersonal,
-    error: personalError,
-  } = useManagerSchedule();
-  const {
-    schedules: allSchedules,
-    loading: loadingAll,
-    error: allError,
-  } = useAllStaffSchedules();
+  // Navigation handler function
+  const goToStaffAssignment = () => {
+    navigate("/staff-assignment");
+  };
 
-  const loading = loadingPersonal || loadingAll;
-  const error = personalError || allError;
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch personal schedule
+        const mySchedule = await fetchMySchedule();
+        if (mySchedule) {
+          setPersonalSchedule(mySchedule);
+        }
+        // If user is a manager, fetch all staff schedules
+        if (isManagerRole) {
+          const staffSchedules = await fetchAllStaffSchedules();
+          if (mySchedule) {
+            setAllSchedules([mySchedule, ...staffSchedules]);
+          } else {
+            setAllSchedules(staffSchedules);
+          }
+        } else if (mySchedule) {
+          // For staff, only show their own schedule
+          setAllSchedules([mySchedule]);
+        }
+      } catch (err) {
+        console.error("Error fetching schedule data:", err);
+        setError("Failed to load schedule data. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [isManagerRole]);
+
+  // Update error state when hook error changes
+  useEffect(() => {
+    if (hookError) {
+      setError(hookError);
+    }
+  }, [hookError]);
+
+  // Update loading state when hook loading changes
+  useEffect(() => {
+    setLoading(hookLoading);
+  }, [hookLoading]);
 
   const ShiftCell: React.FC<{ shift: string }> = ({ shift }) => {
-    const shiftType = shiftTypes[shift];
-    return (
-      <Tooltip title={shiftType.description} arrow placement="top">
+    // Check if shift exists in shiftTypes
+    if (!shift || !shiftTypes[shift]) {
+      console.log("Unknown shift type:", shift); // For debugging
+      return (
         <Box
           sx={{
             p: 1,
             borderRadius: 1,
-            backgroundColor: shiftType.backgroundColor,
-            color: shiftType.color,
+            backgroundColor: "gray",
+            color: "white",
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 600, fontSize: "1rem" }}
+          >
+            {shift || "Unknown"}
+          </Typography>
+        </Box>
+      );
+    }
+
+    const shiftType = shiftTypes[shift];
+    return (
+      <Tooltip title={shiftType.description || ""} arrow placement="top">
+        <Box
+          sx={{
+            p: 1,
+            borderRadius: 1,
+            backgroundColor: shiftType.backgroundColor || "#f5f5f5",
+            color: shiftType.color || "#000",
             "&:hover": {
               transform: "scale(1.05)",
               boxShadow: theme.shadows[2],
@@ -69,7 +140,7 @@ const WorkAssignmentSchedule: React.FC = () => {
             variant="body2"
             sx={{ fontWeight: 600, fontSize: "1rem" }}
           >
-            {shiftType.label}
+            {shiftType.label || shift}
           </Typography>
         </Box>
       </Tooltip>
@@ -119,6 +190,26 @@ const WorkAssignmentSchedule: React.FC = () => {
           >
             Lịch hàng tuần
           </Typography>
+          {/* Replace Link with Button + onClick */}
+          {isManagerRole && (
+            <Button
+              onClick={goToStaffAssignment}
+              variant="contained"
+              color="primary"
+              sx={{
+                fontWeight: "bold",
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                boxShadow: theme.shadows[3],
+                "&:hover": {
+                  boxShadow: theme.shadows[5],
+                },
+              }}
+            >
+              Quản lý nhân viên
+            </Button>
+          )}
         </Box>
 
         {personalSchedule && (
@@ -196,11 +287,28 @@ const WorkAssignmentSchedule: React.FC = () => {
           </Box>
         )}
 
-        {allSchedules.length > 1 && (
+        {isManagerRole && allSchedules.length > 1 && (
           <>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Lịch của tất cả nhân viên
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography variant="h6">Lịch của tất cả nhân viên</Typography>
+              {/* Replace Link with Button + onClick */}
+              <Button
+                onClick={goToStaffAssignment}
+                variant="outlined"
+                color="primary"
+                size="medium"
+                sx={{ ml: 2 }}
+              >
+                Phân công lịch làm việc
+              </Button>
+            </Box>
             <TableContainer
               component={Paper}
               elevation={0}
@@ -278,6 +386,37 @@ const WorkAssignmentSchedule: React.FC = () => {
           </>
         )}
 
+        {/* Replace Link with Button + onClick for floating action button */}
+        {isManagerRole && (
+          <Box
+            sx={{
+              position: "fixed",
+              bottom: 30,
+              right: 30,
+              zIndex: 1000,
+            }}
+          >
+            <Button
+              onClick={goToStaffAssignment}
+              variant="contained"
+              color="secondary"
+              sx={{
+                borderRadius: "50%",
+                width: 64,
+                height: 64,
+                boxShadow: theme.shadows[8],
+                "&:hover": {
+                  boxShadow: theme.shadows[12],
+                },
+              }}
+            >
+              <Typography variant="body1" fontWeight="bold">
+                +
+              </Typography>
+            </Button>
+          </Box>
+        )}
+
         {/* Legend for shift types */}
         <Box sx={{ mt: 4, display: "flex", flexWrap: "wrap", gap: 2 }}>
           <Typography
@@ -307,7 +446,8 @@ const WorkAssignmentSchedule: React.FC = () => {
               >
                 {type.label}
               </Box>
-              <Typography variant="body2">{name}</Typography>
+              {/* Show the Vietnamese description instead of the English name */}
+              <Typography variant="body2">{type.description}</Typography>
             </Box>
           ))}
         </Box>

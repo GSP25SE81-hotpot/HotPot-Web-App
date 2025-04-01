@@ -23,7 +23,7 @@ export const useReplacementNotifications = (
   useEffect(() => {
     const connectToHub = async () => {
       try {
-        await equipmentHubService.connect(userId, userType);
+        await equipmentHubService.connect();
         setIsConnected(true);
         setError(null);
       } catch (err) {

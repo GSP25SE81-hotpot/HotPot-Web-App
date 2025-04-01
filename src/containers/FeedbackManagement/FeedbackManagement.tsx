@@ -83,7 +83,7 @@ const FeedbackManagement: React.FC = () => {
     const initializeSignalR = async () => {
       try {
         // Connect to the feedback hub
-        await feedbackHubService.connect(managerId, "Manager");
+        await feedbackHubService.connect();
         setHubConnectionState(HubConnectionState.Connected);
 
         // Register for connection confirmation

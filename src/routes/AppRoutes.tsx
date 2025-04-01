@@ -51,6 +51,7 @@ import TableMaintenanceHotpotDetailPage from "../pages/Admin/TableMaintenanceHot
 import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
 import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
 import { EquipmentConditionDetailPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionDetailPage";
+import StaffAssignmentPage from "../pages/Manager/WorkAssignmentSchedule/StaffAssignmentPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -77,6 +78,10 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.workAssignment}
           element={<WorkAssignmentSchedulePage />}
+        />
+        <Route
+          path={config.managerRoutes.staffAssignment}
+          element={<StaffAssignmentPage />}
         />
         <Route
           path={config.managerRoutes.customerChat}

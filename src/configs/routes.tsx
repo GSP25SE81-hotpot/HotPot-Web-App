@@ -18,6 +18,7 @@ export const managerRoutes = {
   calculateLateFee: "/calculate-late-fee",
   adjustReturnDate: "/adjust-return-date",
   orderDetail: "/orders/:orderId",
+  staffAssignment: "staff-assignment",
 };
 
 export const authRoutes = {

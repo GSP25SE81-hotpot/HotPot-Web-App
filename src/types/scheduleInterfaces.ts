@@ -1,3 +1,4 @@
+// src/types/scheduleInterfaces.ts
 export enum WorkDays {
   None = 0,
   Sunday = 1,
@@ -9,50 +10,52 @@ export enum WorkDays {
   Saturday = 64,
 }
 
+export interface TimeSpan {
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
 export interface StaffDto {
-  staffId: number;
   userId: number;
-  userName: string;
+  name: string | null;
   email: string | null;
-  workDays: WorkDays | null;
+  workDays: WorkDays;
 }
 
-export interface ManagerDto {
-  managerId: number;
+export interface ManagerSDto {
   userId: number;
-  userName: string;
+  name: string | null;
   email: string | null;
-  workDays: WorkDays | null;
 }
 
-export interface WorkShiftDto {
-  workShiftId: number;
-  shiftStartTime: string;
+export interface StaffSDto {
+  userId: number;
+  name: string | null;
+  email: string | null;
   daysOfWeek: WorkDays;
-  status: string | null;
-  staff?: StaffDto[];
-  managers?: ManagerDto[];
 }
 
 export interface ManagerWorkShiftDto {
   workShiftId: number;
-  shiftStartTime: string;
+  shiftStartTime: TimeSpan;
+  shiftEndTime: TimeSpan | null;
+  shiftName: string;
   daysOfWeek: WorkDays;
-  status: string | null;
-  managers?: ManagerDto[];
+  managers: ManagerSDto[];
 }
 
 export interface StaffWorkShiftDto {
   workShiftId: number;
-  shiftStartTime: string;
+  shiftStartTime: TimeSpan;
+  shiftEndTime: TimeSpan | null;
+  shiftName: string;
   daysOfWeek: WorkDays;
-  status: string | null;
-  staff?: StaffDto[];
+  staff?: StaffSDto[];
 }
 
 export interface StaffScheduleDto {
-  staff: StaffDto;
-  workShifts: StaffWorkShiftDto[];
+  staff: StaffSDto;
 }
 
 // Interface for the component's expected format
@@ -74,18 +77,29 @@ export const shiftTypes: Record<string, ShiftType> = {
     color: "#1a5f7a",
     backgroundColor: "#e3fafc",
     label: "OFF",
-    description: "Rest day - Not scheduled for work",
+    description: "Ngày nghỉ",
   },
   "Morning Shift": {
     color: "#974c00",
     backgroundColor: "#fff4e6",
     label: "AM",
-    description: "Morning Shift - Early hours",
+    description: "Ca sáng",
   },
   "Evening Shift": {
     color: "#087f5b",
     backgroundColor: "#e6fcf5",
     label: "PM",
-    description: "Evening Shift - Late hours",
+    description: "Ca chiều",
+  },
+  "All Day Shift": {
+    color: "#5f3dc4",
+    backgroundColor: "#f3f0ff",
+    label: "ALL",
+    description: "Ca toàn thời gian",
   },
 };
+
+export interface AssignStaffWorkDaysDto {
+  staffId: number;
+  workDays: WorkDays;
+}
