@@ -56,4 +56,6 @@ export const staffRoutes = {
   rentalDetail: "/staff/rentals/:id",
   recordReturn: "/staff/rentals/record-return",
   pickupRental: "/pickup-rental",
+  pickupReplacement: "/pickup-replacement",
+  replacementDetail: "/replacements/:id",
 };

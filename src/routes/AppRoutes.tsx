@@ -52,6 +52,8 @@ import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailVie
 import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
 import { EquipmentConditionDetailPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionDetailPage";
 import StaffAssignmentPage from "../pages/Manager/WorkAssignmentSchedule/StaffAssignmentPage";
+import { PickupReplacementPage } from "../pages/Staff/PickupReplacement/PickupReplacementPage";
+import { ReplacementDetailPage } from "../pages/Staff/PickupReplacement/ReplacementDetailPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -277,10 +279,14 @@ const AppRoute: React.FC = () => {
           path={config.staffRoutes.pickupRental}
           element={<PickupRentalPage />}
         />
-        {/* <Route
-          path={config.staffRoutes.retrieveRentalEquipment}
-          element={<RetrieveRentalEquipmentPage />}
-        /> */}
+        <Route
+          path={config.staffRoutes.pickupReplacement}
+          element={<PickupReplacementPage />}
+        />
+        <Route
+          path={config.staffRoutes.replacementDetail}
+          element={<ReplacementDetailPage />}
+        />
       </Route>
     </Routes>
   );
