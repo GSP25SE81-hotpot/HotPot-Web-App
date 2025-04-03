@@ -1,21 +1,21 @@
 // src/pages/payments/ProcessPaymentDialog.tsx
 import React from "react";
-import {
-  Alert,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from "@mui/material";
+import { CircularProgress, Dialog } from "@mui/material";
 import {
   Cancel as CancelIcon,
   CheckCircle as CheckCircleIcon,
   MoneyOff as RefundIcon,
 } from "@mui/icons-material";
 import { PaymentListItemDto, PaymentStatus } from "../../../types/staffPayment";
+import {
+  StyledDialogTitle,
+  StyledDialogContent,
+  InstructionText,
+  ErrorAlert,
+  StyledDialogActions,
+  ActionButton,
+  CloseButton,
+} from "../../../components/staff/styles/processPaymentDialogStyles";
 
 interface ProcessPaymentDialogProps {
   open: boolean;
@@ -40,19 +40,20 @@ const ProcessPaymentDialog: React.FC<ProcessPaymentDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Process Payment</DialogTitle>
-      <DialogContent>
-        <Typography>
-          Please select an action for payment #{payment.paymentId}:
-        </Typography>
+      <StyledDialogTitle>Xử lý thanh toán</StyledDialogTitle>
+
+      <StyledDialogContent>
+        <InstructionText>
+          Vui lòng chọn hành động cho thanh toán #{payment.paymentId}:
+        </InstructionText>
+
         {actionError && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {actionError.message}
-          </Alert>
+          <ErrorAlert severity="error">{actionError.message}</ErrorAlert>
         )}
-      </DialogContent>
-      <DialogActions>
-        <Button
+      </StyledDialogContent>
+
+      <StyledDialogActions>
+        <ActionButton
           onClick={() => onProcessPayment(PaymentStatus.Success)}
           color="success"
           variant="contained"
@@ -64,10 +65,12 @@ const ProcessPaymentDialog: React.FC<ProcessPaymentDialogProps> = ({
               <CheckCircleIcon />
             )
           }
+          actionType="approve"
         >
-          Approve
-        </Button>
-        <Button
+          Phê duyệt
+        </ActionButton>
+
+        <ActionButton
           onClick={() => onProcessPayment(PaymentStatus.Cancelled)}
           color="error"
           variant="contained"
@@ -79,10 +82,12 @@ const ProcessPaymentDialog: React.FC<ProcessPaymentDialogProps> = ({
               <CancelIcon />
             )
           }
+          actionType="cancel"
         >
-          Cancel
-        </Button>
-        <Button
+          Hủy bỏ
+        </ActionButton>
+
+        <ActionButton
           onClick={() => onProcessPayment(PaymentStatus.Refunded)}
           color="warning"
           variant="contained"
@@ -94,16 +99,18 @@ const ProcessPaymentDialog: React.FC<ProcessPaymentDialogProps> = ({
               <RefundIcon />
             )
           }
+          actionType="refund"
         >
-          Refund
-        </Button>
-        <Button
+          Hoàn tiền
+        </ActionButton>
+
+        <CloseButton
           onClick={onClose}
           disabled={actionLoading || processingAction !== null}
         >
-          Close
-        </Button>
-      </DialogActions>
+          Đóng
+        </CloseButton>
+      </StyledDialogActions>
     </Dialog>
   );
 };

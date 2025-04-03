@@ -1,25 +1,34 @@
 // src/pages/payments/PaymentTable.tsx
 import React from "react";
 import {
-  Box,
   CircularProgress,
-  FormControl,
   MenuItem,
   Pagination,
-  Paper,
   Select,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
-  TableHead,
   TableRow,
-  Typography,
 } from "@mui/material";
 import { PaymentListItemDto } from "../../../types/staffPayment";
 import PaymentStatusChip from "./PaymentStatusChip";
 import PaymentActions from "./PaymentActions";
 import { formatCurrency, formatDate } from "../../../utils/formatters";
+import {
+  TableWrapper,
+  StyledTableContainer,
+  TableHeader,
+  HeaderCell,
+  ClickableRow,
+  LoadingCell,
+  EmptyCell,
+  PaginationContainer,
+  PaginationInfo,
+  PaginationControls,
+  PageSizeSelector,
+  PageSizeLabel,
+  PageSizeControl,
+} from "../../../components/staff/styles/paymentTableStyles";
 
 interface PaymentTableProps {
   payments: PaymentListItemDto[];
@@ -51,46 +60,43 @@ const PaymentTable: React.FC<PaymentTableProps> = ({
   onProcessPayment,
 }) => {
   return (
-    <Paper>
-      <TableContainer>
+    <TableWrapper>
+      <StyledTableContainer>
         <Table>
-          <TableHead>
+          <TableHeader>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Transaction Code</TableCell>
-              <TableCell>Customer</TableCell>
-              <TableCell align="right">Amount</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Order ID</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell align="center">Actions</TableCell>
+              <HeaderCell>ID</HeaderCell>
+              <HeaderCell>Mã giao dịch</HeaderCell>
+              <HeaderCell>Khách hàng</HeaderCell>
+              <HeaderCell align="right">Số tiền</HeaderCell>
+              <HeaderCell>Trạng thái</HeaderCell>
+              <HeaderCell>Mã đơn hàng</HeaderCell>
+              <HeaderCell>Ngày tạo</HeaderCell>
+              <HeaderCell align="center">Thao tác</HeaderCell>
             </TableRow>
-          </TableHead>
+          </TableHeader>
+
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
+                <LoadingCell colSpan={8}>
                   <CircularProgress />
-                </TableCell>
+                </LoadingCell>
               </TableRow>
             ) : payments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} align="center">
-                  No payments found
-                </TableCell>
+                <EmptyCell colSpan={8}>Không tìm thấy thanh toán nào</EmptyCell>
               </TableRow>
             ) : (
               payments.map((payment) => (
-                <TableRow
+                <ClickableRow
                   key={payment.paymentId}
                   hover
                   onClick={() => onRowClick(payment)}
-                  sx={{ cursor: "pointer" }}
                 >
                   <TableCell>{payment.paymentId}</TableCell>
                   <TableCell>{payment.transactionCode}</TableCell>
                   <TableCell>{payment.customerName}</TableCell>
-                  // src/pages/payments/PaymentTable.tsx (continued)
                   <TableCell align="right">
                     {formatCurrency(payment.price)}
                   </TableCell>
@@ -109,32 +115,26 @@ const PaymentTable: React.FC<PaymentTableProps> = ({
                       onProcessPayment={() => onProcessPayment(payment)}
                     />
                   </TableCell>
-                </TableRow>
+                </ClickableRow>
               ))
             )}
           </TableBody>
         </Table>
-      </TableContainer>
+      </StyledTableContainer>
 
-      {/* Pagination */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          p: 2,
-        }}
-      >
-        <Typography variant="body2" color="text.secondary">
-          Showing {payments.length > 0 ? (page - 1) * pageSize + 1 : 0} -{" "}
-          {Math.min(page * pageSize, totalCount)} of {totalCount} payments
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mr: 2 }}>
-              Rows per page:
-            </Typography>
-            <FormControl variant="outlined" size="small" sx={{ minWidth: 80 }}>
+      {/* Phân trang */}
+      <PaginationContainer>
+        <PaginationInfo variant="body2">
+          Hiển thị {payments.length > 0 ? (page - 1) * pageSize + 1 : 0} -{" "}
+          {Math.min(page * pageSize, totalCount)} trong tổng số {totalCount}{" "}
+          thanh toán
+        </PaginationInfo>
+
+        <PaginationControls>
+          <PageSizeSelector>
+            <PageSizeLabel variant="body2">Số dòng mỗi trang:</PageSizeLabel>
+
+            <PageSizeControl variant="outlined" size="small">
               <Select
                 value={pageSize}
                 onChange={(e) => onPageSizeChange(Number(e.target.value))}
@@ -145,8 +145,9 @@ const PaymentTable: React.FC<PaymentTableProps> = ({
                 <MenuItem value={25}>25</MenuItem>
                 <MenuItem value={50}>50</MenuItem>
               </Select>
-            </FormControl>
-          </Box>
+            </PageSizeControl>
+          </PageSizeSelector>
+
           <Pagination
             count={totalPages}
             page={page}
@@ -158,9 +159,9 @@ const PaymentTable: React.FC<PaymentTableProps> = ({
             shape="rounded"
             variant="outlined"
           />
-        </Box>
-      </Box>
-    </Paper>
+        </PaginationControls>
+      </PaginationContainer>
+    </TableWrapper>
   );
 };
 

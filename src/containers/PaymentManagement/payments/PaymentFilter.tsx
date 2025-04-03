@@ -1,14 +1,9 @@
 // src/components/payments/PaymentFilter.tsx
 import React, { useState } from "react";
 import {
-  Paper,
-  Grid,
-  FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Button,
-  Box,
   IconButton,
   Tooltip,
   SelectChangeEvent,
@@ -22,10 +17,19 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { format } from "date-fns";
+import Grid from "@mui/material/Grid2";
 import {
   PaymentStatus,
   PaymentFilterRequest,
 } from "../../../types/staffPayment";
+import {
+  FilterContainer,
+  FilterGrid,
+  FilterFormControl,
+  ButtonsContainer,
+  SearchButton,
+  ResetButton,
+} from "../../../components/staff/styles/PaymentFilterStyles";
 
 interface PaymentFilterProps {
   onFilterChange: (filter: PaymentFilterRequest) => void;
@@ -47,7 +51,6 @@ const PaymentFilter: React.FC<PaymentFilterProps> = ({
 
   const handleFilterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     onFilterChange({
       status: statusFilter === "" ? undefined : statusFilter,
       fromDate: fromDate ? format(fromDate, "yyyy-MM-dd") : undefined,
@@ -61,44 +64,43 @@ const PaymentFilter: React.FC<PaymentFilterProps> = ({
     setStatusFilter("");
     setFromDate(null);
     setToDate(null);
-
     onFilterChange({});
   };
 
   return (
-    <Paper sx={{ p: 2, mb: 3 }}>
+    <FilterContainer>
       <form onSubmit={handleFilterSubmit}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={3}>
-            <FormControl fullWidth variant="outlined" size="small">
-              <InputLabel id="status-label">Payment Status</InputLabel>
+        <FilterGrid container spacing={2}>
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <FilterFormControl variant="outlined" size="small">
+              <InputLabel id="status-label">Trạng thái thanh toán</InputLabel>
               <Select
                 labelId="status-label"
                 value={statusFilter.toString()}
                 onChange={handleStatusChange}
-                label="Payment Status"
+                label="Trạng thái thanh toán"
               >
-                <MenuItem value="">All Statuses</MenuItem>
+                <MenuItem value="">Tất cả trạng thái</MenuItem>
                 <MenuItem value={PaymentStatus.Pending.toString()}>
-                  Pending
+                  Đang chờ
                 </MenuItem>
                 <MenuItem value={PaymentStatus.Success.toString()}>
-                  Success
+                  Thành công
                 </MenuItem>
                 <MenuItem value={PaymentStatus.Cancelled.toString()}>
-                  Cancelled
+                  Đã hủy
                 </MenuItem>
                 <MenuItem value={PaymentStatus.Refunded.toString()}>
-                  Refunded
+                  Đã hoàn tiền
                 </MenuItem>
               </Select>
-            </FormControl>
+            </FilterFormControl>
           </Grid>
 
-          <Grid item xs={12} sm={3}>
+          <Grid size={{ xs: 12, sm: 3 }}>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
-                label="From Date"
+                label="Từ ngày"
                 value={fromDate}
                 onChange={(newValue) => setFromDate(newValue)}
                 slotProps={{ textField: { size: "small", fullWidth: true } }}
@@ -106,10 +108,10 @@ const PaymentFilter: React.FC<PaymentFilterProps> = ({
             </LocalizationProvider>
           </Grid>
 
-          <Grid item xs={12} sm={3}>
+          <Grid size={{ xs: 12, sm: 3 }}>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
-                label="To Date"
+                label="Đến ngày"
                 value={toDate}
                 onChange={(newValue) => setToDate(newValue)}
                 slotProps={{ textField: { size: "small", fullWidth: true } }}
@@ -117,33 +119,34 @@ const PaymentFilter: React.FC<PaymentFilterProps> = ({
             </LocalizationProvider>
           </Grid>
 
-          <Grid item xs={12} sm={3}>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Button
+          <Grid size={{ xs: 12, sm: 3 }}>
+            <ButtonsContainer>
+              <SearchButton
                 type="submit"
                 variant="contained"
-                color="primary"
                 startIcon={<SearchIcon />}
               >
-                Search
-              </Button>
-              <Button
+                Tìm kiếm
+              </SearchButton>
+
+              <ResetButton
                 variant="outlined"
                 onClick={handleFilterReset}
                 startIcon={<ClearIcon />}
               >
-                Reset
-              </Button>
-              <Tooltip title="Refresh">
+                Đặt lại
+              </ResetButton>
+
+              <Tooltip title="Làm mới">
                 <IconButton onClick={onRefresh} color="primary">
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
-            </Box>
+            </ButtonsContainer>
           </Grid>
-        </Grid>
+        </FilterGrid>
       </form>
-    </Paper>
+    </FilterContainer>
   );
 };
 

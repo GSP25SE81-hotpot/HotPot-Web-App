@@ -123,7 +123,7 @@ const PaymentManagement: React.FC = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Payment Management
+        Quản lý thanh toán
       </Typography>
 
       {/* Filter Component */}

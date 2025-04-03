@@ -1,20 +1,25 @@
 // src/pages/payments/PaymentReceiptDialog.tsx
 import React from "react";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  IconButton,
-  Typography,
-} from "@mui/material";
+import { Dialog, DialogActions, DialogContent } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { Receipt as ReceiptIcon } from "@mui/icons-material";
 import { PaymentReceiptDto } from "../../../types/staffPayment";
 import { formatCurrency, formatDate } from "../../../utils/formatters";
+import {
+  ReceiptDialogTitle,
+  PrintIconButton,
+  ReceiptContainer,
+  ReceiptTitle,
+  ReceiptSubtitle,
+  ReceiptDate,
+  ReceiptDivider,
+  ReceiptGrid,
+  InfoLabel,
+  InfoValue,
+  ThankYouText,
+  CloseButton,
+  PrintButton,
+} from "../../../components/staff/styles/paymentReceiptDialogStyles";
 
 interface PaymentReceiptDialogProps {
   open: boolean;
@@ -33,91 +38,71 @@ const PaymentReceiptDialog: React.FC<PaymentReceiptDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        Payment Receipt
-        <IconButton
-          aria-label="print"
-          onClick={onPrint}
-          sx={{ position: "absolute", right: 8, top: 8 }}
-        >
+      <ReceiptDialogTitle>
+        Biên lai thanh toán
+        <PrintIconButton aria-label="in" onClick={onPrint}>
           <ReceiptIcon />
-        </IconButton>
-      </DialogTitle>
+        </PrintIconButton>
+      </ReceiptDialogTitle>
+
       <DialogContent dividers>
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h5" align="center" gutterBottom>
-            Payment Receipt
-          </Typography>
-          <Typography variant="subtitle1" align="center" gutterBottom>
-            Receipt #{receipt.receiptId}
-          </Typography>
-          <Typography
-            variant="body2"
-            align="center"
-            color="text.secondary"
-            gutterBottom
-          >
+        <ReceiptContainer>
+          <ReceiptTitle variant="h5">Biên lai thanh toán</ReceiptTitle>
+
+          <ReceiptSubtitle variant="subtitle1">
+            Biên lai #{receipt.receiptId}
+          </ReceiptSubtitle>
+
+          <ReceiptDate variant="body2">
             {formatDate(receipt.paymentDate)}
-          </Typography>
-          <Divider sx={{ my: 3 }} />
-          <Grid container spacing={2} sx={{ mb: 3 }}>
+          </ReceiptDate>
+
+          <ReceiptDivider />
+
+          <ReceiptGrid container spacing={2}>
             <Grid size={{ xs: 12, md: 6 }}>
-              <Typography variant="body2" color="text.secondary">
-                Transaction Code
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                {receipt.transactionCode}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Customer Name
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                {receipt.customerName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Customer Phone
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                {receipt.customerPhone}
-              </Typography>
+              <InfoLabel variant="body2">Mã giao dịch</InfoLabel>
+              <InfoValue variant="body1">{receipt.transactionCode}</InfoValue>
+
+              <InfoLabel variant="body2">Tên khách hàng</InfoLabel>
+              <InfoValue variant="body1">{receipt.customerName}</InfoValue>
+
+              <InfoLabel variant="body2">Số điện thoại khách hàng</InfoLabel>
+              <InfoValue variant="body1">{receipt.customerPhone}</InfoValue>
             </Grid>
+
             <Grid size={{ xs: 12, md: 6 }}>
-              <Typography variant="body2" color="text.secondary">
-                Order ID
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                {receipt.orderId}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Payment Method
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                {receipt.paymentMethod}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Amount
-              </Typography>
-              <Typography variant="body1" gutterBottom>
+              <InfoLabel variant="body2">Mã đơn hàng</InfoLabel>
+              <InfoValue variant="body1">{receipt.orderId}</InfoValue>
+
+              <InfoLabel variant="body2">Phương thức thanh toán</InfoLabel>
+              <InfoValue variant="body1">{receipt.paymentMethod}</InfoValue>
+
+              <InfoLabel variant="body2">Số tiền</InfoLabel>
+              <InfoValue variant="body1">
                 {formatCurrency(receipt.amount)}
-              </Typography>
+              </InfoValue>
             </Grid>
-          </Grid>
-          <Divider sx={{ my: 3 }} />
-          <Typography variant="body2" align="center" color="text.secondary">
-            Thank you for your business!
-          </Typography>
-        </Box>
+          </ReceiptGrid>
+
+          <ReceiptDivider />
+
+          <ThankYouText variant="body2">
+            Cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi!
+          </ThankYouText>
+        </ReceiptContainer>
       </DialogContent>
+
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
-        <Button
+        <CloseButton onClick={onClose}>Đóng</CloseButton>
+
+        <PrintButton
           variant="contained"
-          color="primary"
           onClick={onPrint}
           startIcon={<ReceiptIcon />}
         >
-          Print Receipt
-        </Button>
+          In biên lai
+        </PrintButton>
       </DialogActions>
     </Dialog>
   );
