@@ -47,7 +47,6 @@ export const adminRoutes = {
 
 export const staffRoutes = {
   paymentManagement: "/payment-management",
-  depositConfirmation: "/deposit-confirmation",
   retrieveRentalEquipment: "/retrieve-rental-equipment",
   checkDeviceAfterReturn: "/check-device-after-return",
   orderHistory: "/order-history",
