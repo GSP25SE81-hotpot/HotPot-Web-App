@@ -31,15 +31,13 @@ import {
 import { useApi } from "../../../hooks/useApi";
 import { RentalListing } from "../../../types/rentalPickup";
 import { formatDate, getDaysOverdue } from "../../../utils/formatters";
-
-// Additional styled component for overdue days
+// Thành phần được tạo kiểu bổ sung cho số ngày quá hạn
 import { Box } from "@mui/material";
 
 const OverdueRentals: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-
   const { data, loading, error, execute } = useApi(
     rentalService.getOverdueRentals
   );
@@ -84,15 +82,14 @@ const OverdueRentals: React.FC = () => {
     <Box>
       {loading && <LoadingSpinner />}
       {error && <ErrorAlert message={error} />}
-
       {data && data.items.length === 0 ? (
         <EmptyStateContainer>
           <Typography variant="h6" fontWeight={600}>
-            No overdue rentals found
+            Không tìm thấy thuê quá hạn
           </Typography>
           <CardDescription>
-            All rentals are currently on time. Check back later for any overdue
-            items.
+            Tất cả các đơn thuê hiện đang đúng hạn. Kiểm tra lại sau để xem các
+            mục quá hạn.
           </CardDescription>
         </EmptyStateContainer>
       ) : (
@@ -101,19 +98,18 @@ const OverdueRentals: React.FC = () => {
             <StyledTable>
               <TableHead>
                 <TableRow>
-                  <TableCell>Order ID</TableCell>
-                  <TableCell>Customer</TableCell>
-                  <TableCell>Equipment</TableCell>
-                  <TableCell>Expected Return</TableCell>
-                  <TableCell>Days Overdue</TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell>Mã đơn hàng</TableCell>
+                  <TableCell>Khách hàng</TableCell>
+                  <TableCell>Thiết bị</TableCell>
+                  <TableCell>Ngày trả dự kiến</TableCell>
+                  <TableCell>Số ngày quá hạn</TableCell>
+                  <TableCell>Hành động</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {data?.items.map((rental) => {
                   const daysOverdue = getDaysOverdue(rental.expectedReturnDate);
                   const severity = getSeverity(daysOverdue);
-
                   return (
                     <TableRow key={rental.rentOrderDetailId}>
                       <TableCell>#{rental.orderId}</TableCell>
@@ -127,7 +123,7 @@ const OverdueRentals: React.FC = () => {
                         <EquipmentCell>
                           <EquipmentName>{rental.equipmentName}</EquipmentName>
                           <EquipmentType>
-                            {rental.equipmentType} • Qty: {rental.quantity}
+                            {rental.equipmentType} • SL: {rental.quantity}
                           </EquipmentType>
                         </EquipmentCell>
                       </TableCell>
@@ -139,7 +135,7 @@ const OverdueRentals: React.FC = () => {
                       <TableCell>
                         <StatusContainer>
                           <OverdueChip
-                            label={`${daysOverdue} days`}
+                            label={`${daysOverdue} ngày`}
                             severity={severity}
                             size="small"
                           />
@@ -155,7 +151,7 @@ const OverdueRentals: React.FC = () => {
                             }
                             sx={{ minWidth: "80px" }}
                           >
-                            View
+                            Xem
                           </AnimatedButton>
                           <AnimatedButton
                             variant="contained"
@@ -164,7 +160,7 @@ const OverdueRentals: React.FC = () => {
                             onClick={() => handleRecordReturn(rental)}
                             sx={{ minWidth: "120px" }}
                           >
-                            Record Return
+                            Ghi nhận trả
                           </AnimatedButton>
                         </ActionButtonsContainer>
                       </TableCell>
@@ -174,7 +170,6 @@ const OverdueRentals: React.FC = () => {
               </TableBody>
             </StyledTable>
           </StyledTableContainer>
-
           <StyledTablePagination
             rowsPerPageOptions={[5, 10, 25]}
             count={data?.totalCount || 0}
@@ -182,6 +177,10 @@ const OverdueRentals: React.FC = () => {
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Số hàng mỗi trang:"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}-${to} của ${count}`
+            }
           />
         </>
       )}

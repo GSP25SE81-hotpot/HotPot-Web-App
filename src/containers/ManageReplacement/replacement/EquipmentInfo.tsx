@@ -1,7 +1,22 @@
 import { Paper, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
+import { styled } from "@mui/material/styles";
 import { ReplacementRequestDetailDto } from "../../../types/replacement";
 import { formatDate } from "../../../utils/replacementUtils";
+
+// Create styled components
+const EquipmentInfoContainer = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  borderRadius: theme.shape.borderRadius * 2,
+}));
+
+const EquipmentInfoTitle = styled(Typography)({
+  fontWeight: 600,
+});
+
+const EquipmentInfoField = styled(Typography)(({ theme }) => ({
+  marginBottom: theme.spacing(0.5),
+}));
 
 interface EquipmentInfoProps {
   request: ReplacementRequestDetailDto;
@@ -9,57 +24,56 @@ interface EquipmentInfoProps {
 
 const EquipmentInfo: React.FC<EquipmentInfoProps> = ({ request }) => {
   return (
-    <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-      <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-        Equipment Information
-      </Typography>
+    <EquipmentInfoContainer variant="outlined">
+      <EquipmentInfoTitle variant="subtitle1" gutterBottom>
+        Thông tin thiết bị
+      </EquipmentInfoTitle>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Typography variant="body2">
-            <strong>Type:</strong> {request.equipmentType}
-          </Typography>
+          <EquipmentInfoField variant="body2">
+            <strong>Loại:</strong> {request.equipmentType}
+          </EquipmentInfoField>
           {request.equipmentType === "HotPot" ? (
             <>
-              <Typography variant="body2">
-                <strong>HotPot Name:</strong> {request.hotPotName || "N/A"}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Series Number:</strong>{" "}
-                {request.hotPotSeriesNumber || "N/A"}
-              </Typography>
+              <EquipmentInfoField variant="body2">
+                <strong>Tên nồi lẩu:</strong> {request.hotPotName || "N/A"}
+              </EquipmentInfoField>
+              <EquipmentInfoField variant="body2">
+                <strong>Số sê-ri:</strong> {request.hotPotSeriesNumber || "N/A"}
+              </EquipmentInfoField>
             </>
           ) : (
             <>
-              <Typography variant="body2">
-                <strong>Utensil Name:</strong> {request.utensilName || "N/A"}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Utensil Type:</strong> {request.utensilType || "N/A"}
-              </Typography>
+              <EquipmentInfoField variant="body2">
+                <strong>Tên dụng cụ:</strong> {request.utensilName || "N/A"}
+              </EquipmentInfoField>
+              <EquipmentInfoField variant="body2">
+                <strong>Loại dụng cụ:</strong> {request.utensilType || "N/A"}
+              </EquipmentInfoField>
             </>
           )}
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Typography variant="body2">
-            <strong>Request Reason:</strong> {request.requestReason}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Request Date:</strong> {formatDate(request.requestDate)}
-          </Typography>
+          <EquipmentInfoField variant="body2">
+            <strong>Lý do yêu cầu:</strong> {request.requestReason}
+          </EquipmentInfoField>
+          <EquipmentInfoField variant="body2">
+            <strong>Ngày yêu cầu:</strong> {formatDate(request.requestDate)}
+          </EquipmentInfoField>
           {request.reviewDate && (
-            <Typography variant="body2">
-              <strong>Review Date:</strong> {formatDate(request.reviewDate)}
-            </Typography>
+            <EquipmentInfoField variant="body2">
+              <strong>Ngày xem xét:</strong> {formatDate(request.reviewDate)}
+            </EquipmentInfoField>
           )}
           {request.completionDate && (
-            <Typography variant="body2">
-              <strong>Completion Date:</strong>{" "}
+            <EquipmentInfoField variant="body2">
+              <strong>Ngày hoàn thành:</strong>{" "}
               {formatDate(request.completionDate)}
-            </Typography>
+            </EquipmentInfoField>
           )}
         </Grid>
       </Grid>
-    </Paper>
+    </EquipmentInfoContainer>
   );
 };
 

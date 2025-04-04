@@ -46,17 +46,16 @@ import {
   getStatusText,
 } from "../../components/manager/styles/EquipmentConditionLogStyles";
 
-// Interface for tab panel props
+// Giao diện cho thuộc tính của TabPanel
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
 }
 
-// Tab Panel component
+// Thành phần Tab Panel
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
-
   return (
     <div
       role="tabpanel"
@@ -83,21 +82,18 @@ const EquipmentConditionDetails: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
 
-  // Fetch condition log details
+  // Lấy chi tiết nhật ký điều kiện
   const fetchConditionDetail = async () => {
     if (!id) return;
-
     try {
       setLoading(true);
       setError(null);
-
       const response = await equipmentConditionService.getConditionLogById(
         parseInt(id)
       );
-
       if (response.success) {
         setConditionDetail(response.data);
-        // After getting details, fetch related logs for the same equipment
+        // Sau khi lấy chi tiết, lấy các nhật ký liên quan cho cùng thiết bị
         if (response.data.equipmentType && response.data.equipmentId) {
           fetchRelatedLogs(
             response.data.equipmentType,
@@ -105,88 +101,85 @@ const EquipmentConditionDetails: React.FC = () => {
           );
         }
       } else {
-        setError(response.message || "Failed to fetch condition log details");
+        setError(
+          response.message || "Không thể lấy chi tiết nhật ký điều kiện"
+        );
       }
     } catch (err) {
-      setError("An error occurred while fetching condition log details");
-      console.error("Error fetching condition log details:", err);
+      setError("Đã xảy ra lỗi khi lấy chi tiết nhật ký điều kiện");
+      console.error("Lỗi khi lấy chi tiết nhật ký điều kiện:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch related logs for the same equipment
+  // Lấy các nhật ký liên quan cho cùng thiết bị
   const fetchRelatedLogs = async (type: string, equipmentId: number) => {
     try {
       const paginationParams: PaginationParams = {
         pageNumber: 1,
-        pageSize: 5, // Limit to 5 most recent logs
+        pageSize: 5, // Giới hạn 5 nhật ký gần nhất
       };
-
       const response =
         await equipmentConditionService.getConditionLogsByEquipment(
           type,
           equipmentId,
           paginationParams
         );
-
       if (response.success) {
-        // Filter out the current log from related logs
+        // Lọc ra nhật ký hiện tại khỏi các nhật ký liên quan
         const filteredLogs = response.data.items.filter(
           (log) => log.damageDeviceId !== parseInt(id || "0")
         );
         setRelatedLogs(filteredLogs);
       }
     } catch (err) {
-      console.error("Error fetching related logs:", err);
+      console.error("Lỗi khi lấy các nhật ký liên quan:", err);
     }
   };
 
-  // Handle status update
+  // Xử lý cập nhật trạng thái
   const handleStatusUpdate = async (newStatus: MaintenanceStatus) => {
     if (!id) return;
-
     try {
       setStatusUpdateLoading(true);
-
       const response = await equipmentConditionService.updateConditionStatus(
         parseInt(id),
         newStatus
       );
-
       if (response.success) {
-        // Update the local state to reflect the change
+        // Cập nhật trạng thái cục bộ để phản ánh sự thay đổi
         setConditionDetail((prev) =>
           prev ? { ...prev, status: newStatus } : null
         );
       } else {
-        setError(response.message || "Failed to update status");
+        setError(response.message || "Không thể cập nhật trạng thái");
       }
     } catch (err) {
-      setError("An error occurred while updating the status");
-      console.error("Error updating status:", err);
+      setError("Đã xảy ra lỗi khi cập nhật trạng thái");
+      console.error("Lỗi khi cập nhật trạng thái:", err);
     } finally {
       setStatusUpdateLoading(false);
     }
   };
 
-  // Handle tab change
+  // Xử lý thay đổi tab
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  // Initial data load
+  // Tải dữ liệu ban đầu
   useEffect(() => {
     fetchConditionDetail();
   }, [id]);
 
-  // Format date for display
+  // Định dạng ngày để hiển thị
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleString();
   };
 
-  // Get status icon based on maintenance status
+  // Lấy biểu tượng trạng thái dựa trên trạng thái bảo trì
   const getStatusIcon = (status: MaintenanceStatus) => {
     switch (status) {
       case MaintenanceStatus.Pending:
@@ -204,29 +197,27 @@ const EquipmentConditionDetails: React.FC = () => {
 
   return (
     <StyledBox>
-      {/* Breadcrumb navigation */}
+      {/* Điều hướng Breadcrumb */}
       <Breadcrumbs sx={{ mb: 3 }}>
         <Link
           component={RouterLink}
           to="/equipment-condition-log"
           color="inherit"
         >
-          Equipment Condition
+          Điều kiện thiết bị
         </Link>
-        <Typography color="text.primary">Details</Typography>
+        <Typography color="text.primary">Chi tiết</Typography>
       </Breadcrumbs>
-
-      {/* Back button */}
+      {/* Nút quay lại */}
       <Box sx={{ mb: 3 }}>
         <StyledButton
           startIcon={<ArrowBackIcon />}
           variant="outlined"
           onClick={() => navigate("/equipment-condition-log")}
         >
-          Back to List
+          Quay lại danh sách
         </StyledButton>
       </Box>
-
       {error && (
         <Alert
           severity="error"
@@ -241,14 +232,13 @@ const EquipmentConditionDetails: React.FC = () => {
           {error}
         </Alert>
       )}
-
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
           <CircularProgress />
         </Box>
       ) : conditionDetail ? (
         <>
-          {/* Header with basic info */}
+          {/* Tiêu đề với thông tin cơ bản */}
           <StyledPaper sx={{ mb: 4, p: 3 }}>
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 8 }}>
@@ -256,7 +246,7 @@ const EquipmentConditionDetails: React.FC = () => {
                   {conditionDetail.name}
                 </Typography>
                 <Typography variant="body1" color="text.secondary" paragraph>
-                  {conditionDetail.description || "No description provided"}
+                  {conditionDetail.description || "Không có mô tả"}
                 </Typography>
                 <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
                   <Chip
@@ -280,13 +270,13 @@ const EquipmentConditionDetails: React.FC = () => {
                   />
                   <Chip
                     icon={<TimelineIcon />}
-                    label={`Logged: ${formatDate(conditionDetail.loggedDate)}`}
+                    label={`Đã ghi: ${formatDate(conditionDetail.loggedDate)}`}
                     variant="outlined"
                   />
                   {conditionDetail.updatedAt && (
                     <Chip
                       icon={<HistoryIcon />}
-                      label={`Updated: ${formatDate(
+                      label={`Cập nhật: ${formatDate(
                         conditionDetail.updatedAt
                       )}`}
                       variant="outlined"
@@ -322,7 +312,7 @@ const EquipmentConditionDetails: React.FC = () => {
                         {statusUpdateLoading ? (
                           <CircularProgress size={24} />
                         ) : (
-                          "Start Maintenance"
+                          "Bắt đầu bảo trì"
                         )}
                       </StyledButton>
                     )}
@@ -339,7 +329,7 @@ const EquipmentConditionDetails: React.FC = () => {
                         {statusUpdateLoading ? (
                           <CircularProgress size={24} />
                         ) : (
-                          "Mark as Completed"
+                          "Đánh dấu hoàn thành"
                         )}
                       </StyledButton>
                     )}
@@ -356,7 +346,7 @@ const EquipmentConditionDetails: React.FC = () => {
                         {statusUpdateLoading ? (
                           <CircularProgress size={24} />
                         ) : (
-                          "Cancel Maintenance"
+                          "Hủy bảo trì"
                         )}
                       </StyledButton>
                     )}
@@ -365,8 +355,7 @@ const EquipmentConditionDetails: React.FC = () => {
               </Grid>
             </Grid>
           </StyledPaper>
-
-          {/* Tabs for different sections */}
+          {/* Tabs cho các phần khác nhau */}
           <Paper sx={{ borderRadius: 3, overflow: "hidden" }}>
             <Tabs
               value={tabValue}
@@ -380,12 +369,11 @@ const EquipmentConditionDetails: React.FC = () => {
                 },
               }}
             >
-              <Tab icon={<InfoIcon />} label="Equipment Details" />
-              <Tab icon={<HistoryIcon />} label="Maintenance History" />
-              <Tab icon={<BuildIcon />} label="Related Issues" />
+              <Tab icon={<InfoIcon />} label="Chi tiết thiết bị" />
+              <Tab icon={<HistoryIcon />} label="Lịch sử bảo trì" />
+              <Tab icon={<BuildIcon />} label="Vấn đề liên quan" />
             </Tabs>
-
-            {/* Equipment Details Tab */}
+            {/* Tab Chi tiết thiết bị */}
             <TabPanel value={tabValue} index={0}>
               <Box sx={{ p: 3 }}>
                 <Grid container spacing={4}>
@@ -396,7 +384,7 @@ const EquipmentConditionDetails: React.FC = () => {
                     >
                       <CardContent>
                         <Typography variant="h6" gutterBottom>
-                          Equipment Information
+                          Thông tin thiết bị
                         </Typography>
                         <Divider sx={{ mb: 2 }} />
                         <Box
@@ -411,7 +399,7 @@ const EquipmentConditionDetails: React.FC = () => {
                               variant="subtitle2"
                               color="text.secondary"
                             >
-                              Equipment Type
+                              Loại thiết bị
                             </Typography>
                             <Typography variant="body1">
                               {conditionDetail.equipmentTypeName ||
@@ -423,7 +411,7 @@ const EquipmentConditionDetails: React.FC = () => {
                               variant="subtitle2"
                               color="text.secondary"
                             >
-                              Equipment Name
+                              Tên thiết bị
                             </Typography>
                             <Typography variant="body1">
                               {conditionDetail.equipmentName}
@@ -434,7 +422,7 @@ const EquipmentConditionDetails: React.FC = () => {
                               variant="subtitle2"
                               color="text.secondary"
                             >
-                              Equipment ID
+                              ID thiết bị
                             </Typography>
                             <Typography variant="body1">
                               {conditionDetail.equipmentId}
@@ -446,7 +434,7 @@ const EquipmentConditionDetails: React.FC = () => {
                                 variant="subtitle2"
                                 color="text.secondary"
                               >
-                                Serial Number
+                                Số serial
                               </Typography>
                               <Typography variant="body1">
                                 {conditionDetail.equipmentSerialNumber}
@@ -459,7 +447,7 @@ const EquipmentConditionDetails: React.FC = () => {
                                 variant="subtitle2"
                                 color="text.secondary"
                               >
-                                Material
+                                Vật liệu
                               </Typography>
                               <Typography variant="body1">
                                 {conditionDetail.equipmentMaterial}
@@ -477,12 +465,12 @@ const EquipmentConditionDetails: React.FC = () => {
                     >
                       <CardContent>
                         <Typography variant="h6" gutterBottom>
-                          Maintenance Notes
+                          Ghi chú bảo trì
                         </Typography>
                         <Divider sx={{ mb: 2 }} />
                         <Typography variant="body1">
                           {conditionDetail.maintenanceNotes ||
-                            "No maintenance notes available."}
+                            "Không có ghi chú bảo trì nào."}
                         </Typography>
                       </CardContent>
                     </Card>
@@ -490,15 +478,14 @@ const EquipmentConditionDetails: React.FC = () => {
                 </Grid>
               </Box>
             </TabPanel>
-
-            {/* Maintenance History Tab */}
+            {/* Tab Lịch sử bảo trì */}
             <TabPanel value={tabValue} index={1}>
               <Box sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Maintenance Timeline
+                  Dòng thời gian bảo trì
                 </Typography>
                 <Box sx={{ position: "relative", my: 4, mx: 2 }}>
-                  {/* Timeline visualization */}
+                  {/* Hình ảnh dòng thời gian */}
                   <Box
                     sx={{
                       position: "absolute",
@@ -509,8 +496,7 @@ const EquipmentConditionDetails: React.FC = () => {
                       bgcolor: "divider",
                     }}
                   />
-
-                  {/* Timeline events - would be populated from actual maintenance history */}
+                  {/* Sự kiện dòng thời gian - sẽ được điền từ lịch sử bảo trì thực tế */}
                   <Box sx={{ position: "relative", mb: 4, pl: 5 }}>
                     <Box
                       sx={{
@@ -533,19 +519,18 @@ const EquipmentConditionDetails: React.FC = () => {
                     <Card variant="outlined" sx={{ borderRadius: 2 }}>
                       <CardContent>
                         <Typography variant="subtitle1" fontWeight="bold">
-                          Issue Reported
+                          Vấn đề được báo cáo
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           {formatDate(conditionDetail.loggedDate)}
                         </Typography>
                         <Typography variant="body1" sx={{ mt: 1 }}>
-                          {conditionDetail.name} was reported for{" "}
+                          {conditionDetail.name} đã được báo cáo cho{" "}
                           {conditionDetail.equipmentName}.
                         </Typography>
                       </CardContent>
                     </Card>
                   </Box>
-
                   {conditionDetail.status !== MaintenanceStatus.Pending && (
                     <Box sx={{ position: "relative", mb: 4, pl: 5 }}>
                       <Box
@@ -569,21 +554,20 @@ const EquipmentConditionDetails: React.FC = () => {
                       <Card variant="outlined" sx={{ borderRadius: 2 }}>
                         <CardContent>
                           <Typography variant="subtitle1" fontWeight="bold">
-                            Maintenance Started
+                            Bắt đầu bảo trì
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
                             {conditionDetail.updatedAt
                               ? formatDate(conditionDetail.updatedAt)
-                              : "Date not recorded"}
+                              : "Ngày không được ghi lại"}
                           </Typography>
                           <Typography variant="body1" sx={{ mt: 1 }}>
-                            Maintenance work began on the equipment.
+                            Công việc bảo trì đã bắt đầu trên thiết bị.
                           </Typography>
                         </CardContent>
                       </Card>
                     </Box>
                   )}
-
                   {(conditionDetail.status === MaintenanceStatus.Completed ||
                     conditionDetail.status === MaintenanceStatus.Cancelled) && (
                     <Box sx={{ position: "relative", mb: 4, pl: 5 }}>
@@ -619,47 +603,44 @@ const EquipmentConditionDetails: React.FC = () => {
                           <Typography variant="subtitle1" fontWeight="bold">
                             {conditionDetail.status ===
                             MaintenanceStatus.Completed
-                              ? "Maintenance Completed"
-                              : "Maintenance Cancelled"}
+                              ? "Hoàn thành bảo trì"
+                              : "Hủy bảo trì"}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
                             {conditionDetail.updatedAt
                               ? formatDate(conditionDetail.updatedAt)
-                              : "Date not recorded"}
+                              : "Ngày                               không được ghi lại"}
                           </Typography>
                           <Typography variant="body1" sx={{ mt: 1 }}>
                             {conditionDetail.status ===
                             MaintenanceStatus.Completed
-                              ? "The equipment has been repaired and is now available for use."
-                              : "The maintenance was cancelled."}
+                              ? "Thiết bị đã được sửa chữa và hiện có sẵn để sử dụng."
+                              : "Bảo trì đã bị hủy bỏ."}
                           </Typography>
                         </CardContent>
                       </Card>
                     </Box>
                   )}
                 </Box>
-
                 <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
-                  Maintenance Actions
+                  Hành động bảo trì
                 </Typography>
                 <Card variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardContent>
                     <Typography variant="body1">
                       {conditionDetail.maintenanceNotes ||
-                        "No maintenance actions have been recorded."}
+                        "Không có hành động bảo trì nào được ghi lại."}
                     </Typography>
                   </CardContent>
                 </Card>
               </Box>
             </TabPanel>
-
-            {/* Related Issues Tab */}
+            {/* Tab Vấn đề liên quan */}
             <TabPanel value={tabValue} index={2}>
               <Box sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Other Issues for this Equipment
+                  Các vấn đề khác cho thiết bị này
                 </Typography>
-
                 {relatedLogs.length > 0 ? (
                   <TableContainer
                     component={Paper}
@@ -669,10 +650,10 @@ const EquipmentConditionDetails: React.FC = () => {
                       <TableHead>
                         <TableRow>
                           <TableCell>ID</TableCell>
-                          <TableCell>Issue</TableCell>
-                          <TableCell>Logged Date</TableCell>
-                          <TableCell>Status</TableCell>
-                          <TableCell>Actions</TableCell>
+                          <TableCell>Vấn đề</TableCell>
+                          <TableCell>Ngày ghi</TableCell>
+                          <TableCell>Trạng thái</TableCell>
+                          <TableCell>Hành động</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -696,7 +677,7 @@ const EquipmentConditionDetails: React.FC = () => {
                                   )
                                 }
                               >
-                                View Details
+                                Xem chi tiết
                               </StyledButton>
                             </TableCell>
                           </TableRow>
@@ -706,12 +687,11 @@ const EquipmentConditionDetails: React.FC = () => {
                   </TableContainer>
                 ) : (
                   <Alert severity="info" sx={{ borderRadius: 2 }}>
-                    No other issues have been reported for this equipment.
+                    Không có vấn đề nào khác được báo cáo cho thiết bị này.
                   </Alert>
                 )}
-
                 <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
-                  Equipment Usage Statistics
+                  Thống kê sử dụng thiết bị
                 </Typography>
                 <Grid container spacing={3}>
                   <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -721,7 +701,7 @@ const EquipmentConditionDetails: React.FC = () => {
                           {relatedLogs.length + 1}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Total Issues Reported
+                          Tổng số vấn đề được báo cáo
                         </Typography>
                       </CardContent>
                     </Card>
@@ -743,7 +723,7 @@ const EquipmentConditionDetails: React.FC = () => {
                               : 0)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Resolved Issues
+                          Vấn đề đã giải quyết
                         </Typography>
                       </CardContent>
                     </Card>
@@ -765,7 +745,7 @@ const EquipmentConditionDetails: React.FC = () => {
                               : 0)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Pending Issues
+                          Vấn đề đang chờ xử lý
                         </Typography>
                       </CardContent>
                     </Card>
@@ -783,7 +763,7 @@ const EquipmentConditionDetails: React.FC = () => {
                               : 0)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          In Progress
+                          Đang tiến hành
                         </Typography>
                       </CardContent>
                     </Card>
@@ -795,7 +775,7 @@ const EquipmentConditionDetails: React.FC = () => {
         </>
       ) : (
         <Alert severity="info" sx={{ borderRadius: 3 }}>
-          No condition log found with ID: {id}
+          Không tìm thấy nhật ký điều kiện với ID: {id}
         </Alert>
       )}
     </StyledBox>

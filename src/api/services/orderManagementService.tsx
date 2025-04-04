@@ -256,10 +256,10 @@ export const orderManagementService = {
   },
 
   getOrderWithDetails: async (orderId: number): Promise<OrderDetailDTO> => {
-    const response = await axiosClient.get<ApiResponse<OrderDetailDTO>>(
+    const response = await axiosClient.get<any, ApiResponse<OrderDetailDTO>>(
       `${API_URL}/details/${orderId}`
     );
-    return response.data.data;
+    return response.data;
   },
 
   async getOrdersByStatus(
@@ -299,15 +299,16 @@ export const orderManagementService = {
       console.log(`API URL: ${url}`);
 
       const response = await axiosClient.get<
+        any,
         ApiResponse<PagedResult<OrderWithDetailsDTO>>
       >(url);
 
       console.log(`Raw API response for status ${status}:`, response);
 
       // Directly return the data from the response without any additional processing
-      if (response && response.data && response.data.data) {
-        console.log(`Response data for status ${status}:`, response.data.data);
-        return response.data.data;
+      if (response && response.data && response.data) {
+        console.log(`Response data for status ${status}:`, response.data);
+        return response.data;
       } else {
         console.warn(`No data property in response for status ${status}`);
         return {
@@ -336,9 +337,10 @@ export const orderManagementService = {
     request: DeliveryStatusUpdateRequest
   ): Promise<DeliveryStatusUpdateDTO> => {
     const response = await axiosClient.put<
+      any,
       ApiResponse<DeliveryStatusUpdateDTO>
     >(`${API_URL}/delivery/status/${shippingOrderId}`, request);
-    return response.data.data;
+    return response.data;
   },
 
   async getPendingDeliveries(
@@ -399,11 +401,11 @@ export const orderManagementService = {
     shippingOrderId: number,
     request: DeliveryTimeUpdateRequest
   ): Promise<DeliveryTimeUpdateDTO> => {
-    const response = await axiosClient.put<ApiResponse<DeliveryTimeUpdateDTO>>(
-      `${API_URL}/delivery/time/${shippingOrderId}`,
-      request
-    );
-    return response.data.data;
+    const response = await axiosClient.put<
+      any,
+      ApiResponse<DeliveryTimeUpdateDTO>
+    >(`${API_URL}/delivery/time/${shippingOrderId}`, request);
+    return response.data;
   },
 
   getOrderCounts: async (): Promise<OrderCountsDTO> => {

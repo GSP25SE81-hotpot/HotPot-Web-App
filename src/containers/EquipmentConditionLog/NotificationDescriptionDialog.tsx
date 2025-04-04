@@ -42,29 +42,27 @@ const NotificationDescriptionDialog: React.FC<
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
         {scheduleType === MaintenanceScheduleType.Emergency
-          ? "Emergency Notification Details"
-          : "Notification Details"}
+          ? "Chi tiết thông báo khẩn cấp"
+          : "Chi tiết thông báo"}
       </DialogTitle>
       <DialogContent>
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle1" gutterBottom>
-            Issue: {issueName}
+            Vấn đề: {issueName}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Equipment: {equipmentName}
+            Thiết bị: {equipmentName}
           </Typography>
         </Box>
-
         {scheduleType === MaintenanceScheduleType.Emergency && (
           <Alert severity="warning" sx={{ mb: 2 }}>
-            This will be sent as an emergency notification to administrators.
+            Đây sẽ được gửi như một thông báo khẩn cấp đến các quản trị viên.
           </Alert>
         )}
-
         <TextField
           autoFocus
           margin="dense"
-          label="Description"
+          label="Mô tả"
           fullWidth
           multiline
           rows={4}
@@ -77,15 +75,13 @@ const NotificationDescriptionDialog: React.FC<
           }}
           error={error}
           helperText={
-            error
-              ? "Description is required"
-              : "Please provide details about the issue"
+            error ? "Mô tả là bắt buộc" : "Vui lòng cung cấp chi tiết về vấn đề"
           }
           required
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>Hủy bỏ</Button>
         <Button
           onClick={handleSubmit}
           variant="contained"
@@ -95,7 +91,7 @@ const NotificationDescriptionDialog: React.FC<
               : "primary"
           }
         >
-          Send Notification
+          Gửi thông báo
         </Button>
       </DialogActions>
     </Dialog>

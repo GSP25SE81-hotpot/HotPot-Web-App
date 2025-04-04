@@ -8,6 +8,7 @@ import {
   ReplacementRequestDetailDto,
   ReplacementRequestSummaryDto,
   ReviewReplacementRequestDto,
+  ReplacementRequestStatus,
 } from "../../types/replacement";
 import axiosClient from "../axiosInstance";
 
@@ -23,7 +24,7 @@ const replacementService = {
 
   // Get replacement requests by status
   getReplacementsByStatus: async (
-    status: string
+    status: ReplacementRequestStatus
   ): Promise<ReplacementRequestSummaryDto[]> => {
     const response = await axiosClient.get<
       any,
@@ -35,13 +36,12 @@ const replacementService = {
   // Get replacement request by ID
   getReplacementById: async (
     id: number
-  ): Promise<ReplacementRequestDetailDto> => {
+  ): Promise<ApiResponse<ReplacementRequestDetailDto>> => {
     const response = await axiosClient.get<
       any,
-      ApiResponse<ReplacementRequestDetailDto[]>
+      ApiResponse<ReplacementRequestDetailDto>
     >(`/manager/replacement/id/${id}`);
-    // Assuming the API returns an array but we want the first item
-    return response.data[0];
+    return response;
   },
 
   // Review a replacement request (approve/reject)
@@ -51,21 +51,21 @@ const replacementService = {
   ): Promise<ReplacementRequestDetailDto> => {
     const response = await axiosClient.put<
       any,
-      ApiResponse<ReplacementRequestDetailDto[]>
+      ApiResponse<ReplacementRequestDetailDto>
     >(`/manager/replacement/${id}/review`, data);
-    return response.data[0];
+    return response.data;
   },
 
   // Assign staff to a replacement request
   assignStaff: async (
     id: number,
     data: AssignStaffDto
-  ): Promise<ReplacementRequestDetailDto> => {
+  ): Promise<ReplacementRequestDetailDto[]> => {
     const response = await axiosClient.put<
       any,
       ApiResponse<ReplacementRequestDetailDto[]>
     >(`/manager/replacement/${id}/assign-staff`, data);
-    return response.data[0];
+    return response.data;
   },
 
   // Get dashboard data for replacements

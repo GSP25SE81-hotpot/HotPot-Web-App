@@ -20,6 +20,7 @@ interface TabPanelProps {
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
+
   return (
     <div
       role="tabpanel"
@@ -45,7 +46,7 @@ export const PickupRental: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Parse the tab parameter from the URL
+  // Phân tích tham số tab từ URL
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tabParam = searchParams.get("tab");
@@ -59,7 +60,7 @@ export const PickupRental: React.FC = () => {
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
-    // Update URL with the new tab value without reloading the page
+    // Cập nhật URL với giá trị tab mới mà không tải lại trang
     navigate(`?tab=${newValue}`, { replace: true });
   };
 
@@ -67,14 +68,13 @@ export const PickupRental: React.FC = () => {
     <StyledContainer maxWidth="xl">
       <Box sx={{ mt: 3, mb: 2 }}>
         <SectionHeading variant="h4" component="h1">
-          Rental Equipment Management
+          Quản lý thiết bị cho thuê
         </SectionHeading>
         <Typography variant="body1" color="text.secondary">
-          Manage rental equipment pickups, returns, and track overdue items
+          Quản lý lấy hàng, trả thiết bị cho thuê và theo dõi các mục quá hạn
         </Typography>
       </Box>
       <StyledDivider />
-
       <StyledPaper sx={{ width: "100%", mb: 2, p: 0, overflow: "hidden" }}>
         <Tabs
           value={tabValue}
@@ -93,12 +93,11 @@ export const PickupRental: React.FC = () => {
             },
           }}
         >
-          <Tab label="My Assignments" {...a11yProps(0)} />
-          <Tab label="Pending Pickups" {...a11yProps(1)} />
-          <Tab label="Overdue Rentals" {...a11yProps(2)} />
+          <Tab label="Nhiệm vụ của tôi" {...a11yProps(0)} />
+          <Tab label="Đang chờ lấy hàng" {...a11yProps(1)} />
+          <Tab label="Thuê quá hạn" {...a11yProps(2)} />
         </Tabs>
       </StyledPaper>
-
       <TabPanel value={tabValue} index={0}>
         <MyAssignments />
       </TabPanel>

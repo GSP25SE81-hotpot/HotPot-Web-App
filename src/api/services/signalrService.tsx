@@ -17,14 +17,6 @@ class SignalRService {
       return delay;
     },
   };
-
-  /**
-   * Get or create a hub connection
-   * @param hubUrl The URL of the hub to connect to
-   * @returns The hub connection
-   */
-  // src/services/signalrService.ts (partial update)
-
   /**
    * Get or create a hub connection
    * @param hubUrl The URL of the hub to connect to

@@ -29,6 +29,7 @@ import {
   StyledCheckbox,
   EmptyMessage,
 } from "../../components/manager/styles/StaffAssignmentStyles";
+
 const days = [
   "Monday",
   "Tuesday",
@@ -52,7 +53,7 @@ const StaffAssignment: React.FC = () => {
   const fetchStaffByDay = useCallback(
     async (day: WorkDays | string) => {
       if (!auth || !scheduleService.isManager(auth.user)) {
-        setError("Only managers can access this page");
+        setError("Chỉ quản lý mới có thể truy cập trang này");
         return;
       }
       setLoading(true);
@@ -61,7 +62,7 @@ const StaffAssignment: React.FC = () => {
         const staff = await scheduleService.getStaffByDay(day as WorkDays);
         setStaffList(staff);
       } catch (err) {
-        setError("Failed to fetch staff for the selected day");
+        setError("Không thể lấy danh sách nhân viên cho ngày đã chọn");
         console.error(err);
       } finally {
         setLoading(false);
@@ -81,7 +82,7 @@ const StaffAssignment: React.FC = () => {
 
   const handleCheckboxChange = async (staff: StaffSDto, dayValue: WorkDays) => {
     if (!auth || !scheduleService.isManager(auth.user)) {
-      setError("Only managers can assign work days");
+      setError("Chỉ quản lý mới có thể phân công ngày làm việc");
       return;
     }
     const newDays = staff.daysOfWeek ^ dayValue;
@@ -89,7 +90,7 @@ const StaffAssignment: React.FC = () => {
       await scheduleService.assignStaffWorkDays(staff.userId, newDays);
       await fetchStaffByDay(selectedDay);
     } catch (err) {
-      setError("Failed to update work days");
+      setError("Không thể cập nhật ngày làm việc");
       console.error(err);
     }
   };
@@ -98,7 +99,7 @@ const StaffAssignment: React.FC = () => {
     return (
       <PageContainer>
         <ErrorMessage variant="body1">
-          You do not have permission to access this page.
+          Bạn không có quyền truy cập trang này.
         </ErrorMessage>
       </PageContainer>
     );
@@ -111,33 +112,43 @@ const StaffAssignment: React.FC = () => {
         variant="contained"
         startIcon={<span>←</span>}
       >
-        Back
+        Quay lại
       </BackButton>
-
-      <PageTitle variant="h4">Staff Assignment</PageTitle>
-
+      <PageTitle variant="h4">Phân công nhân viên</PageTitle>
       <StyledFormControl fullWidth>
-        <InputLabel>Select Day</InputLabel>
+        <InputLabel>Chọn ngày</InputLabel>
         <Select
           value={selectedDay === "" ? "All" : selectedDay}
-          label="Select Day"
+          label="Chọn ngày"
           onChange={handleDayChange}
         >
-          <MenuItem value="All">All</MenuItem>
+          <MenuItem value="All">Tất cả</MenuItem>
           {Object.entries(WorkDays)
             .filter(
               ([key, value]) => isNaN(Number(key)) && value !== WorkDays.None
             )
             .map(([key, value]) => (
               <MenuItem key={key} value={value}>
-                {key}
+                {key === "Monday"
+                  ? "Thứ hai"
+                  : key === "Tuesday"
+                  ? "Thứ ba"
+                  : key === "Wednesday"
+                  ? "Thứ tư"
+                  : key === "Thursday"
+                  ? "Thứ năm"
+                  : key === "Friday"
+                  ? "Thứ sáu"
+                  : key === "Saturday"
+                  ? "Thứ bảy"
+                  : key === "Sunday"
+                  ? "Chủ nhật"
+                  : key}
               </MenuItem>
             ))}
         </Select>
       </StyledFormControl>
-
       {error && <ErrorMessage>{error}</ErrorMessage>}
-
       {loading ? (
         <LoadingContainer>
           <CircularProgress />
@@ -148,10 +159,24 @@ const StaffAssignment: React.FC = () => {
             <Table>
               <StyledTableHead>
                 <TableRow>
-                  <HeadTableCell>Staff Name</HeadTableCell>
+                  <HeadTableCell>Tên nhân viên</HeadTableCell>
                   {days.map((day) => (
                     <HeadTableCell key={day} align="center">
-                      {day}
+                      {day === "Monday"
+                        ? "Thứ hai"
+                        : day === "Tuesday"
+                        ? "Thứ ba"
+                        : day === "Wednesday"
+                        ? "Thứ tư"
+                        : day === "Thursday"
+                        ? "Thứ năm"
+                        : day === "Friday"
+                        ? "Thứ sáu"
+                        : day === "Saturday"
+                        ? "Thứ bảy"
+                        : day === "Sunday"
+                        ? "Chủ nhật"
+                        : day}
                     </HeadTableCell>
                   ))}
                 </TableRow>
@@ -179,9 +204,10 @@ const StaffAssignment: React.FC = () => {
               </TableBody>
             </Table>
           </StyledTableContainer>
-
           {staffList.length === 0 && !loading && (
-            <EmptyMessage>No staff assigned to this day.</EmptyMessage>
+            <EmptyMessage>
+              Không có nhân viên nào được phân công cho ngày này.
+            </EmptyMessage>
           )}
         </>
       )}

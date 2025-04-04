@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/components/admin/EquipmentConditionNotification.tsx
 import React, { useEffect, useState } from "react";
 import {
@@ -11,6 +12,7 @@ import {
   Box,
   Divider,
 } from "@mui/material";
+import useAuth from "../../hooks/useAuth";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import unifiedHubService from "../../api/Services/unifiedHubService";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +31,8 @@ interface ConditionNotification {
 
 const EquipmentConditionNotification: React.FC = () => {
   const navigate = useNavigate();
+  const { auth } = useAuth();
+  const user = auth.user;
   const [notifications, setNotifications] = useState<ConditionNotification[]>(
     []
   );
@@ -38,20 +42,20 @@ const EquipmentConditionNotification: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  // Connect to SignalR hub when component mounts
+  // Kết nối với SignalR hub khi component được tạo
   useEffect(() => {
     const connectToHub = async () => {
       try {
-        // Get user info from your auth system
-        const userId = 1; // Replace with actual user ID from your auth system
-        const userType = "admin"; // Replace with actual user type from your auth system
+        // Lấy thông tin người dùng từ hệ thống xác thực của bạn
+        const userId = user?.id; // Thay thế bằng ID người dùng thực tế từ hệ thống xác thực của bạn
+        const userType = "admin"; // Thay thế bằng loại người dùng thực tế từ hệ thống xác thực của bạn
 
-        // Initialize the hub connection
+        // Khởi tạo kết nối hub
         await unifiedHubService.initializeHubs(userId, userType, [
           "equipmentCondition",
         ]);
 
-        // Set up listener for direct notifications
+        // Thiết lập trình nghe cho thông báo trực tiếp
         unifiedHubService.equipmentCondition.onReceiveDirectNotification(
           (
             conditionLogId,
@@ -73,64 +77,64 @@ const EquipmentConditionNotification: React.FC = () => {
               read: false,
             };
 
-            // Add to notifications list
+            // Thêm vào danh sách thông báo
             setNotifications((prev) => [notification, ...prev]);
 
-            // Show snackbar with new notification
+            // Hiển thị snackbar với thông báo mới
             setNewNotification(notification);
             setShowSnackbar(true);
           }
         );
       } catch (error) {
-        console.error("Error connecting to SignalR hub:", error);
+        console.error("Lỗi kết nối đến SignalR hub:", error);
       }
     };
 
     connectToHub();
 
-    // Disconnect when component unmounts
+    // Ngắt kết nối khi component bị hủy
     return () => {
       unifiedHubService.disconnectAll();
     };
   }, []);
 
-  // Handle notification click
+  // Xử lý khi nhấp vào biểu tượng thông báo
   const handleNotificationClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // Handle menu close
+  // Xử lý đóng menu
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  // Handle notification item click
+  // Xử lý khi nhấp vào mục thông báo
   const handleNotificationItemClick = (notification: ConditionNotification) => {
-    // Mark as read
+    // Đánh dấu là đã đọc
     setNotifications((prev) =>
       prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
     );
 
-    // Navigate to the equipment condition details page
+    // Điều hướng đến trang chi tiết điều kiện thiết bị
     navigate(`/equipment-condition/${notification.id}`);
 
-    // Close the menu
+    // Đóng menu
     handleClose();
   };
 
-  // Count unread notifications
+  // Đếm thông báo chưa đọc
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  // Format timestamp
+  // Định dạng thời gian
   const formatTime = (date: Date) => {
     return date.toLocaleString();
   };
 
-  // Get schedule type label
+  // Lấy nhãn loại lịch trình
   const getScheduleTypeLabel = (type: string) => {
     return type === MaintenanceScheduleType.Emergency.toString()
-      ? "Emergency"
-      : "Regular";
+      ? "Khẩn cấp"
+      : "Thông thường";
   };
 
   return (
@@ -138,35 +142,33 @@ const EquipmentConditionNotification: React.FC = () => {
       <IconButton
         color="inherit"
         onClick={handleNotificationClick}
-        aria-label="notifications"
+        aria-label="thông báo"
       >
         <Badge badgeContent={unreadCount} color="error">
           <NotificationsIcon />
         </Badge>
       </IconButton>
-
       <Menu
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        PaperProps={{
-          sx: {
-            width: 350,
-            maxHeight: 400,
-            overflow: "auto",
+        slotProps={{
+          paper: {
+            sx: {
+              width: 350,
+              maxHeight: 400,
+              overflow: "auto",
+            },
           },
         }}
       >
         <Box sx={{ p: 2, bgcolor: "background.paper" }}>
-          <Typography variant="h6">
-            Equipment Condition Notifications
-          </Typography>
+          <Typography variant="h6">Thông báo điều kiện thiết bị</Typography>
         </Box>
         <Divider />
-
         {notifications.length === 0 ? (
           <MenuItem disabled>
-            <Typography variant="body2">No notifications</Typography>
+            <Typography variant="body2">Không có thông báo</Typography>
           </MenuItem>
         ) : (
           notifications.map((notification) => (
@@ -229,7 +231,6 @@ const EquipmentConditionNotification: React.FC = () => {
           ))
         )}
       </Menu>
-
       <Snackbar
         open={showSnackbar}
         autoHideDuration={6000}
@@ -247,7 +248,7 @@ const EquipmentConditionNotification: React.FC = () => {
           sx={{ width: "100%" }}
         >
           <Typography variant="subtitle2">
-            New Equipment Issue: {newNotification?.issueName}
+            Vấn đề thiết bị mới: {newNotification?.issueName}
           </Typography>
           <Typography variant="body2">
             {newNotification?.equipmentType}: {newNotification?.equipmentName}

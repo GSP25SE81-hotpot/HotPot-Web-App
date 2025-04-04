@@ -66,7 +66,7 @@ const RentalDetail: React.FC = () => {
             <ArrowBackIcon />
           </IconButton>
           <SectionHeading variant="h4" component="h1">
-            Rental Detail #{id}
+            Chi tiết thuê #{id}
           </SectionHeading>
         </Box>
 
@@ -79,7 +79,7 @@ const RentalDetail: React.FC = () => {
                   color="primary"
                   onClick={handleRecordReturn}
                 >
-                  Record Return
+                  Ghi nhận trả
                 </AnimatedButton>
               )}
             </Box>
@@ -89,13 +89,13 @@ const RentalDetail: React.FC = () => {
                 <StyledCard elevation={2} sx={{ height: "100%" }}>
                   <Box sx={{ p: 3 }}>
                     <CardTitle variant="h6" gutterBottom>
-                      Customer Information
+                      Thông tin khách hàng
                     </CardTitle>
                     <StyledDivider sx={{ my: 1.5 }} />
                     <List dense>
                       <ListItem>
                         <ListItemText
-                          primary="Name"
+                          primary="Tên"
                           secondary={data.customerName}
                           primaryTypographyProps={{
                             fontWeight: 600,
@@ -106,7 +106,7 @@ const RentalDetail: React.FC = () => {
                       </ListItem>
                       <ListItem>
                         <ListItemText
-                          primary="Address"
+                          primary="Địa chỉ"
                           secondary={data.customerAddress}
                           primaryTypographyProps={{
                             fontWeight: 600,
@@ -116,7 +116,7 @@ const RentalDetail: React.FC = () => {
                       </ListItem>
                       <ListItem>
                         <ListItemText
-                          primary="Phone"
+                          primary="Điện thoại"
                           secondary={data.customerPhone}
                           primaryTypographyProps={{
                             fontWeight: 600,
@@ -133,14 +133,14 @@ const RentalDetail: React.FC = () => {
                 <StyledCard elevation={2} sx={{ height: "100%" }}>
                   <Box sx={{ p: 3 }}>
                     <CardTitle variant="h6" gutterBottom>
-                      Equipment Information
+                      Thông tin thiết bị
                     </CardTitle>
                     <StyledDivider sx={{ my: 1.5 }} />
                     <List dense>
                       <ListItem>
                         <ListItemText
-                          primary="Type"
-                          secondary={data.utensilId ? "Utensil" : "Hotpot"}
+                          primary="Loại"
+                          secondary={data.utensilId ? "Dụng cụ" : "Nồi lẩu"}
                           primaryTypographyProps={{
                             fontWeight: 600,
                             color: "text.primary",
@@ -150,7 +150,7 @@ const RentalDetail: React.FC = () => {
                       </ListItem>
                       <ListItem>
                         <ListItemText
-                          primary="Name"
+                          primary="Tên"
                           secondary={data.utensilName || data.hotpotName}
                           primaryTypographyProps={{
                             fontWeight: 600,
@@ -161,7 +161,7 @@ const RentalDetail: React.FC = () => {
                       </ListItem>
                       <ListItem>
                         <ListItemText
-                          primary="Quantity"
+                          primary="Số lượng"
                           secondary={data.quantity}
                           primaryTypographyProps={{
                             fontWeight: 600,
@@ -179,10 +179,9 @@ const RentalDetail: React.FC = () => {
                 <StyledCard elevation={2}>
                   <Box sx={{ p: 3 }}>
                     <CardTitle variant="h6" gutterBottom>
-                      Rental Details
+                      Chi tiết thuê
                     </CardTitle>
                     <StyledDivider sx={{ my: 1.5 }} />
-
                     <Grid container spacing={2}>
                       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <Typography
@@ -190,7 +189,7 @@ const RentalDetail: React.FC = () => {
                           color="text.secondary"
                           fontWeight={500}
                         >
-                          Order ID
+                          Mã đơn hàng
                         </Typography>
                         <Typography variant="body1" fontWeight={600}>
                           {data.orderId}
@@ -202,7 +201,7 @@ const RentalDetail: React.FC = () => {
                           color="text.secondary"
                           fontWeight={500}
                         >
-                          Rental Price
+                          Giá thuê
                         </Typography>
                         <Typography variant="body1" fontWeight={600}>
                           {formatCurrency(data.rentalPrice)}
@@ -214,7 +213,7 @@ const RentalDetail: React.FC = () => {
                           color="text.secondary"
                           fontWeight={500}
                         >
-                          Rental Start Date
+                          Ngày bắt đầu thuê
                         </Typography>
                         <Typography variant="body1" fontWeight={600}>
                           {formatDate(data.rentalStartDate)}
@@ -226,7 +225,7 @@ const RentalDetail: React.FC = () => {
                           color="text.secondary"
                           fontWeight={500}
                         >
-                          Expected Return Date
+                          Ngày trả dự kiến
                         </Typography>
                         <Typography variant="body1" fontWeight={600}>
                           {formatDate(data.expectedReturnDate)}
@@ -243,12 +242,12 @@ const RentalDetail: React.FC = () => {
                           color="text.secondary"
                           fontWeight={500}
                         >
-                          Actual Return Date
+                          Ngày trả thực tế
                         </Typography>
                         <Typography variant="body1" fontWeight={600}>
                           {data.actualReturnDate
                             ? formatDate(data.actualReturnDate)
-                            : "Not returned yet"}
+                            : "Chưa trả"}
                         </Typography>
                       </Grid>
                       <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -257,10 +256,12 @@ const RentalDetail: React.FC = () => {
                           color="text.secondary"
                           fontWeight={500}
                         >
-                          Late Fee
+                          Phí trễ hạn
                         </Typography>
                         <Typography variant="body1" fontWeight={600}>
-                          {data.lateFee ? formatCurrency(data.lateFee) : "N/A"}
+                          {data.lateFee
+                            ? formatCurrency(data.lateFee)
+                            : "Không có"}
                         </Typography>
                       </Grid>
                       <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -269,12 +270,12 @@ const RentalDetail: React.FC = () => {
                           color="text.secondary"
                           fontWeight={500}
                         >
-                          Damage Fee
+                          Phí hư hỏng
                         </Typography>
                         <Typography variant="body1" fontWeight={600}>
                           {data.damageFee
                             ? formatCurrency(data.damageFee)
-                            : "N/A"}
+                            : "Không có"}
                         </Typography>
                       </Grid>
 
@@ -288,10 +289,10 @@ const RentalDetail: React.FC = () => {
                           color="text.secondary"
                           fontWeight={500}
                         >
-                          Rental Notes
+                          Ghi chú thuê
                         </Typography>
                         <Typography variant="body1">
-                          {data.rentalNotes || "No notes"}
+                          {data.rentalNotes || "Không có ghi chú"}
                         </Typography>
                       </Grid>
                       <Grid size={{ xs: 12, sm: 6 }}>
@@ -300,10 +301,10 @@ const RentalDetail: React.FC = () => {
                           color="text.secondary"
                           fontWeight={500}
                         >
-                          Return Condition
+                          Tình trạng trả
                         </Typography>
                         <Typography variant="body1">
-                          {data.returnCondition || "Not recorded yet"}
+                          {data.returnCondition || "Chưa ghi nhận"}
                         </Typography>
                       </Grid>
                     </Grid>

@@ -1,4 +1,5 @@
 import { StaffAvailabilityStatus, StaffAvailabilityDto } from "../types/staff";
+import { ReplacementRequestStatus } from "../types/replacement";
 
 // Format date for display
 export const formatDate = (dateString?: string): string => {
@@ -11,14 +12,13 @@ export const formatDate = (dateString?: string): string => {
 };
 
 // Get available actions based on request status
-export const getAvailableActions = (status: string) => {
+export const getAvailableActions = (status: ReplacementRequestStatus) => {
   switch (status) {
-    case "Pending":
+    case ReplacementRequestStatus.Pending:
       return { canReview: true, canAssign: false, canComplete: false };
-    case "Approved":
+    case ReplacementRequestStatus.Approved:
       return { canReview: false, canAssign: true, canComplete: false };
-    case "InProgress":
-    case "In Progress":
+    case ReplacementRequestStatus.InProgress:
       return { canReview: false, canAssign: false, canComplete: true };
     default:
       return { canReview: false, canAssign: false, canComplete: false };

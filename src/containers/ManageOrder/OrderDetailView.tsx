@@ -20,7 +20,7 @@ import {
   SelectChangeEvent,
   Snackbar,
   TextField,
-  Typography
+  Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
@@ -63,7 +63,7 @@ import {
   SectionValue,
   StatusChip,
   StyledCardContent,
-  StyledCardHeader
+  StyledCardHeader,
 } from "../../components/manager/styles/OrderDetailStyles";
 import { StaffAvailabilityDto } from "../../types/staff";
 import { formatCurrency, formatDate } from "../../utils/formatters";

@@ -14,17 +14,16 @@ import {
   Tooltip,
   Typography,
   useTheme,
-  Button, // Add Button import
+  Button, // Thêm import Button
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { shiftTypes, StaffSchedule } from "../../types/scheduleInterfaces";
 import useSchedule from "../../hooks/useSchedule";
-import { useNavigate } from "react-router-dom"; // Import useNavigate instead of Link
+import { useNavigate } from "react-router-dom"; // Import useNavigate thay vì Link
 
 const WorkAssignmentSchedule: React.FC = () => {
   const theme = useTheme();
-  const navigate = useNavigate(); // Initialize useNavigate hook
-
+  const navigate = useNavigate(); // Khởi tạo hook useNavigate
   const {
     loading: hookLoading,
     error: hookError,
@@ -32,13 +31,11 @@ const WorkAssignmentSchedule: React.FC = () => {
     fetchMySchedule,
     fetchAllStaffSchedules,
   } = useSchedule();
-
   const [personalSchedule, setPersonalSchedule] =
     useState<StaffSchedule | null>(null);
   const [allSchedules, setAllSchedules] = useState<StaffSchedule[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
   const days = [
     "Monday",
     "Tuesday",
@@ -49,7 +46,7 @@ const WorkAssignmentSchedule: React.FC = () => {
     "Sunday",
   ];
 
-  // Navigation handler function
+  // Hàm xử lý điều hướng
   const goToStaffAssignment = () => {
     navigate("/staff-assignment");
   };
@@ -59,12 +56,12 @@ const WorkAssignmentSchedule: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        // Fetch personal schedule
+        // Lấy lịch cá nhân
         const mySchedule = await fetchMySchedule();
         if (mySchedule) {
           setPersonalSchedule(mySchedule);
         }
-        // If user is a manager, fetch all staff schedules
+        // Nếu người dùng là quản lý, lấy lịch của tất cả nhân viên
         if (isManagerRole) {
           const staffSchedules = await fetchAllStaffSchedules();
           if (mySchedule) {
@@ -73,12 +70,12 @@ const WorkAssignmentSchedule: React.FC = () => {
             setAllSchedules(staffSchedules);
           }
         } else if (mySchedule) {
-          // For staff, only show their own schedule
+          // Đối với nhân viên, chỉ hiển thị lịch của họ
           setAllSchedules([mySchedule]);
         }
       } catch (err) {
-        console.error("Error fetching schedule data:", err);
-        setError("Failed to load schedule data. Please try again later.");
+        console.error("Lỗi khi lấy dữ liệu lịch:", err);
+        setError("Không thể tải dữ liệu lịch. Vui lòng thử lại sau.");
       } finally {
         setLoading(false);
       }
@@ -86,22 +83,22 @@ const WorkAssignmentSchedule: React.FC = () => {
     fetchData();
   }, [isManagerRole]);
 
-  // Update error state when hook error changes
+  // Cập nhật trạng thái lỗi khi hook error thay đổi
   useEffect(() => {
     if (hookError) {
       setError(hookError);
     }
   }, [hookError]);
 
-  // Update loading state when hook loading changes
+  // Cập nhật trạng thái loading khi hook loading thay đổi
   useEffect(() => {
     setLoading(hookLoading);
   }, [hookLoading]);
 
   const ShiftCell: React.FC<{ shift: string }> = ({ shift }) => {
-    // Check if shift exists in shiftTypes
+    // Kiểm tra xem ca làm việc có tồn tại trong shiftTypes không
     if (!shift || !shiftTypes[shift]) {
-      console.log("Unknown shift type:", shift); // For debugging
+      console.log("Loại ca không xác định:", shift); // Để gỡ lỗi
       return (
         <Box
           sx={{
@@ -115,12 +112,11 @@ const WorkAssignmentSchedule: React.FC = () => {
             variant="body2"
             sx={{ fontWeight: 600, fontSize: "1rem" }}
           >
-            {shift || "Unknown"}
+            {shift || "Không xác định"}
           </Typography>
         </Box>
       );
     }
-
     const shiftType = shiftTypes[shift];
     return (
       <Tooltip title={shiftType.description || ""} arrow placement="top">
@@ -190,7 +186,7 @@ const WorkAssignmentSchedule: React.FC = () => {
           >
             Lịch hàng tuần
           </Typography>
-          {/* Replace Link with Button + onClick */}
+          {/* Thay thế Link bằng Button + onClick */}
           {isManagerRole && (
             <Button
               onClick={goToStaffAssignment}
@@ -252,7 +248,21 @@ const WorkAssignmentSchedule: React.FC = () => {
                         }}
                       >
                         <Typography variant="body2" color="textSecondary">
-                          {day.substring(0, 3)}
+                          {day === "Monday"
+                            ? "Thứ 2"
+                            : day === "Tuesday"
+                            ? "Thứ 3"
+                            : day === "Wednesday"
+                            ? "Thứ 4"
+                            : day === "Thursday"
+                            ? "Thứ 5"
+                            : day === "Friday"
+                            ? "Thứ 6"
+                            : day === "Saturday"
+                            ? "Thứ 7"
+                            : day === "Sunday"
+                            ? "CN"
+                            : day.substring(0, 3)}
                         </Typography>
                       </TableCell>
                     ))}
@@ -298,7 +308,7 @@ const WorkAssignmentSchedule: React.FC = () => {
               }}
             >
               <Typography variant="h6">Lịch của tất cả nhân viên</Typography>
-              {/* Replace Link with Button + onClick */}
+              {/* Thay thế Link bằng Button + onClick */}
               <Button
                 onClick={goToStaffAssignment}
                 variant="outlined"
@@ -343,7 +353,21 @@ const WorkAssignmentSchedule: React.FC = () => {
                         }}
                       >
                         <Typography variant="body2" color="textSecondary">
-                          {day.substring(0, 3)}
+                          {day === "Monday"
+                            ? "Thứ 2"
+                            : day === "Tuesday"
+                            ? "Thứ 3"
+                            : day === "Wednesday"
+                            ? "Thứ 4"
+                            : day === "Thursday"
+                            ? "Thứ 5"
+                            : day === "Friday"
+                            ? "Thứ 6"
+                            : day === "Saturday"
+                            ? "Thứ 7"
+                            : day === "Sunday"
+                            ? "CN"
+                            : day.substring(0, 3)}
                         </Typography>
                       </TableCell>
                     ))}
@@ -386,7 +410,7 @@ const WorkAssignmentSchedule: React.FC = () => {
           </>
         )}
 
-        {/* Replace Link with Button + onClick for floating action button */}
+        {/* Thay thế Link bằng Button + onClick cho nút hành động nổi */}
         {isManagerRole && (
           <Box
             sx={{
@@ -417,7 +441,7 @@ const WorkAssignmentSchedule: React.FC = () => {
           </Box>
         )}
 
-        {/* Legend for shift types */}
+        {/* Chú thích cho các loại ca */}
         <Box sx={{ mt: 4, display: "flex", flexWrap: "wrap", gap: 2 }}>
           <Typography
             variant="subtitle1"
@@ -446,7 +470,7 @@ const WorkAssignmentSchedule: React.FC = () => {
               >
                 {type.label}
               </Box>
-              {/* Show the Vietnamese description instead of the English name */}
+              {/* Hiển thị mô tả tiếng Việt thay vì tên tiếng Anh */}
               <Typography variant="body2">{type.description}</Typography>
             </Box>
           ))}

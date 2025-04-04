@@ -114,21 +114,21 @@ export const menuItems: MenuItemLayout[] = [
         icon: <ReceiptIcon />,
         path: "#",
         children: [
-          {
-            label: "View Assigned Orders",
-            icon: <ReceiptIcon />,
-            path: staffRoutes.assignOrder,
-          },
+          // {
+          //   label: "View Assigned Orders",
+          //   icon: <ReceiptIcon />,
+          //   path: staffRoutes.assignOrder,
+          // },
           {
             label: "Manage Orders",
             icon: <InventoryIcon />,
             path: managerRoutes.manageOrder,
           },
-          {
-            label: "Order History",
-            icon: <AssignmentIcon />,
-            path: staffRoutes.orderHistory,
-          },
+          // {
+          //   label: "Order History",
+          //   icon: <AssignmentIcon />,
+          //   path: staffRoutes.orderHistory,
+          // },
         ],
       },
       //maintenance
@@ -169,34 +169,29 @@ export const menuItems: MenuItemLayout[] = [
         ],
       },
       //payments
-      {
-        label: "Payment",
-        icon: <EngineeringIcon />,
-        path: "#",
-        children: [
-          {
-            label: "Confirm Deposits",
-            icon: <PaymentIcon />,
-            path: staffRoutes.depositConfirmation,
-          },
-          {
-            label: "Manage Payment",
-            icon: <PaymentIcon />,
-            path: staffRoutes.paymentManagement,
-          },
-        ],
-      },
+      // {
+      //   label: "Payment",
+      //   icon: <EngineeringIcon />,
+      //   path: "#",
+      //   children: [
+      //     {
+      //       label: "Manage Payment",
+      //       icon: <PaymentIcon />,
+      //       path: staffRoutes.paymentManagement,
+      //     },
+      //   ],
+      // },
       //customer
       {
         label: "Customer Service",
         icon: <SupportAgentIcon />,
         path: "#",
         children: [
-          {
-            label: "Retrieve Rental Equipment",
-            icon: <InventoryIcon />,
-            path: staffRoutes.checkDeviceAfterReturn,
-          },
+          // {
+          //   label: "Retrieve Rental Equipment",
+          //   icon: <InventoryIcon />,
+          //   path: staffRoutes.checkDeviceAfterReturn,
+          // },
           {
             label: "Manage Return Rental",
             icon: <InventoryIcon />,

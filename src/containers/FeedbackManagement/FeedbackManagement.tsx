@@ -151,13 +151,6 @@ const FeedbackManagement: React.FC = () => {
       } else {
         response = await feedbackService.getAllFeedback(pageNumber, pageSize);
       }
-
-      // Check if response is directly a PagedResult
-      // if (response.items !== undefined) {
-      //   setFeedbacks(response.items);
-      //   setTotalCount(response.totalCount);
-      // }
-      // Check if response is an ApiResponse with data property
       if (response?.data?.items) {
         setFeedbacks(response.data.items);
         setTotalCount(response.data.totalCount);

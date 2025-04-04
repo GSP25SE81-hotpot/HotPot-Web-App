@@ -383,7 +383,7 @@ const PendingDeliveriesList: React.FC = () => {
                               color="primary"
                               onClick={() => {
                                 // Navigate to order details
-                                window.location.href = `/manage-order/${delivery.orderId}`;
+                                window.location.href = `/orders/${delivery.orderId}`;
                               }}
                               sx={{
                                 backgroundColor: (theme) =>

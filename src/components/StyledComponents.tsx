@@ -21,6 +21,7 @@ import {
   TablePagination,
   Stack,
 } from "@mui/material";
+import { ReplacementRequestStatus } from "../types/replacement";
 import { alpha, styled } from "@mui/material/styles";
 import { OrderStatus } from "../types/orderManagement";
 
@@ -180,35 +181,33 @@ export const StyledFormControl = styled(FormControl)(() => ({
   },
 }));
 
-export const StyledChip = styled(Chip)<{ status: string }>(
-  ({ theme, status }) => {
-    const getStatusColor = () => {
-      switch (status) {
-        case "Pending":
-          return theme.palette.warning.main;
-        case "Approved":
-          return theme.palette.info.main;
-        case "InProgress":
-        case "In Progress":
-          return theme.palette.primary.main;
-        case "Completed":
-          return theme.palette.success.main;
-        case "Rejected":
-        case "Cancelled":
-          return theme.palette.error.main;
-        default:
-          return theme.palette.grey[500];
-      }
-    };
-
-    return {
-      borderRadius: 12,
-      fontWeight: 500,
-      backgroundColor: alpha(getStatusColor(), 0.1),
-      color: getStatusColor(),
-    };
-  }
-);
+export const StyledChip = styled(Chip)<{
+  status: ReplacementRequestStatus | string;
+}>(({ theme, status }) => {
+  const getStatusColor = () => {
+    switch (status) {
+      case ReplacementRequestStatus.Pending:
+        return theme.palette.warning.main;
+      case ReplacementRequestStatus.Approved:
+        return theme.palette.info.main;
+      case ReplacementRequestStatus.InProgress:
+        return theme.palette.primary.main;
+      case ReplacementRequestStatus.Completed:
+        return theme.palette.success.main;
+      case ReplacementRequestStatus.Rejected:
+      case ReplacementRequestStatus.Cancelled:
+        return theme.palette.error.main;
+      default:
+        return theme.palette.grey[500];
+    }
+  };
+  return {
+    borderRadius: 12,
+    fontWeight: 500,
+    backgroundColor: alpha(getStatusColor(), 0.1),
+    color: getStatusColor(),
+  };
+});
 
 export const FilterButton = styled(IconButton)(({ theme }) => ({
   borderRadius: 10,
