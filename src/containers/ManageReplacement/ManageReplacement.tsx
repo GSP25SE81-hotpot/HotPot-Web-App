@@ -559,12 +559,14 @@ const ManageReplacement: React.FC = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           variant="outlined"
           fullWidth={isMobile}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="primary" />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="primary" />
+                </InputAdornment>
+              ),
+            },
           }}
         />
         <StyledFormControl sx={{ minWidth: 150 }}>
