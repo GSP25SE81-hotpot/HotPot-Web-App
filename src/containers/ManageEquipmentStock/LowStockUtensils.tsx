@@ -104,7 +104,7 @@ const LowStockUtensils: React.FC = () => {
       if (response.success) {
         setUtensils(response.data);
         if (response.data.length === 0) {
-          setError(`No utensils found below ${threshold}% stock level`);
+          setError(`Không tìm thấy đồ dùng nào dưới mức tồn kho ${threshold}%`);
         }
       } else {
         setError(response.message);

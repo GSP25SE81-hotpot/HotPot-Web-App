@@ -97,35 +97,35 @@ export const menuItems: MenuItemLayout[] = [
       },
       //inventory
       {
-        label: "Inventory Management",
+        label: "Quản lý kho",
         icon: <InventoryIcon />,
         path: "#",
         children: [
           {
-            label: "Equipment Stock Status",
+            label: "Tình trạng thiết bị trong kho",
             icon: <InventoryIcon />,
-            path: managerRoutes.rentalDashboard,
+            path: managerRoutes.manageEquipmentStock,
           },
         ],
       },
       //order
       {
-        label: "Order Management",
+        label: "Quản lý đơn hàng",
         icon: <ReceiptIcon />,
         path: "#",
         children: [
           // {
-          //   label: "View Assigned Orders",
+          //   label: "Xem đơn hàng được giao",
           //   icon: <ReceiptIcon />,
           //   path: staffRoutes.assignOrder,
           // },
           {
-            label: "Manage Orders",
+            label: "Quản lý đơn hàng",
             icon: <InventoryIcon />,
             path: managerRoutes.manageOrder,
           },
           // {
-          //   label: "Order History",
+          //   label: "Lịch sử đơn hàng",
           //   icon: <AssignmentIcon />,
           //   path: staffRoutes.orderHistory,
           // },
@@ -133,36 +133,35 @@ export const menuItems: MenuItemLayout[] = [
       },
       //maintenance
       {
-        label: "Maintenance",
+        label: "Bảo trì",
         icon: <EngineeringIcon />,
         path: "#",
         children: [
           {
-            label: "Equipment Condition Log",
+            label: "Nhật ký tình trạng thiết bị",
             icon: <AssignmentIcon />,
             path: managerRoutes.equipmentConditionLog,
           },
           {
-            label: "Replacement Management",
+            label: "Quản lý thay thế thiết bị",
             icon: <SwapHorizIcon />,
             path: managerRoutes.manageReplacement,
           },
         ],
       },
-
       //report items
       {
-        label: "Report",
+        label: "Báo cáo",
         icon: <EngineeringIcon />,
         path: "#",
         children: [
           {
-            label: "View Feedback",
+            label: "Xem phản hồi",
             icon: <FeedbackIcon />,
             path: managerRoutes.feedbackManagement,
           },
           {
-            label: "Work Schedule",
+            label: "Lịch làm việc",
             icon: <ScheduleIcon />,
             path: managerRoutes.workAssignment,
           },
@@ -170,12 +169,12 @@ export const menuItems: MenuItemLayout[] = [
       },
       //payments
       // {
-      //   label: "Payment",
+      //   label: "Thanh toán",
       //   icon: <EngineeringIcon />,
       //   path: "#",
       //   children: [
       //     {
-      //       label: "Manage Payment",
+      //       label: "Quản lý thanh toán",
       //       icon: <PaymentIcon />,
       //       path: staffRoutes.paymentManagement,
       //     },
@@ -183,22 +182,22 @@ export const menuItems: MenuItemLayout[] = [
       // },
       //customer
       {
-        label: "Customer Service",
+        label: "Dịch vụ khách hàng",
         icon: <SupportAgentIcon />,
         path: "#",
         children: [
           // {
-          //   label: "Retrieve Rental Equipment",
+          //   label: "Nhận lại thiết bị cho thuê",
           //   icon: <InventoryIcon />,
           //   path: staffRoutes.checkDeviceAfterReturn,
           // },
           {
-            label: "Manage Return Rental",
+            label: "Quản lý trả thiết bị thuê",
             icon: <InventoryIcon />,
             path: managerRoutes.rentalDashboard,
           },
           {
-            label: "Chat with Customer",
+            label: "Trò chuyện với khách hàng",
             icon: <SupportAgentIcon />,
             path: managerRoutes.customerChat,
           },

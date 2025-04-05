@@ -1,23 +1,26 @@
 import { Paper, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { ReplacementRequestSummaryDto } from "../../../types/replacement";
+import {
+  ReplacementRequestSummaryDto,
+  ReplacementRequestStatus,
+} from "../../../types/replacement";
 import { StyledChip } from "../../../components/StyledComponents";
 import { formatDate } from "../../../utils/replacementUtils";
 
 const RequestCard = styled(Paper, {
   shouldForwardProp: (prop) => prop !== "status",
-})<{ status: string }>(({ theme, status }) => ({
+})<{ status: ReplacementRequestStatus }>(({ theme, status }) => ({
   padding: theme.spacing(2),
   marginBottom: theme.spacing(2),
   borderRadius: theme.shape.borderRadius * 3,
   borderLeft: `4px solid ${
-    status === "Pending"
+    status === ReplacementRequestStatus.Pending
       ? theme.palette.warning.main
-      : status === "InProgress"
+      : status === ReplacementRequestStatus.InProgress
       ? theme.palette.primary.main
-      : status === "Completed"
+      : status === ReplacementRequestStatus.Completed
       ? theme.palette.success.main
-      : status === "Approved"
+      : status === ReplacementRequestStatus.Approved
       ? theme.palette.info.main
       : theme.palette.error.main
   }`,
@@ -70,7 +73,10 @@ const MobileRequestCard: React.FC<MobileRequestCardProps> = ({
           <CustomerName variant="subtitle1">
             {request.customerName}
           </CustomerName>
-          <StyledChip label={request.status} status={request.status} />
+          <StyledChip
+            label={request.status.toString()}
+            status={request.status}
+          />
         </CardHeader>
         <InfoText variant="body2">Thiết bị: {request.equipmentName}</InfoText>
         <InfoText variant="body2">
