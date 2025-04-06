@@ -352,13 +352,13 @@ const EquipmentConditionLog: React.FC = () => {
         {/* Điều khiển bộ lọc */}
         <StyledPaper sx={{ p: 3, mb: 4 }}>
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 12, md: 12 }}>
               <StyledTextField
                 fullWidth
-                label="Loại thiết bị"
-                value={filterParams.equipmentType || ""}
+                label="Tên thiết bị"
+                value={filterParams.equipmentName || ""}
                 onChange={(e) =>
-                  handleFilterChange("equipmentType", e.target.value)
+                  handleFilterChange("equipmentName", e.target.value)
                 }
                 size="small"
               />
