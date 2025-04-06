@@ -138,7 +138,7 @@ export const menuItems: MenuItemLayout[] = [
         path: "#",
         children: [
           {
-            label: "Nhật ký tình trạng thiết bị",
+            label: "Danh sách bảo trì thiết bị",
             icon: <AssignmentIcon />,
             path: managerRoutes.equipmentConditionLog,
           },

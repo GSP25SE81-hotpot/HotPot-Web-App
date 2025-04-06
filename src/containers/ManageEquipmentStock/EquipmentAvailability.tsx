@@ -353,13 +353,13 @@ const EquipmentAvailability: React.FC = () => {
     const statusText =
       typeof equipment.status === "boolean"
         ? equipment.status
-          ? "available"
-          : "unavailable"
+          ? "có sẵn"
+          : "không có sẵn"
         : equipment.status.toLowerCase();
     setReportMessage(
-      `${equipment.name} is currently ${statusText}${
+      `${equipment.name} hiện đang ${statusText}${
         equipment.condition
-          ? ` and in ${equipment.condition.toLowerCase()} condition`
+          ? ` và trong tình trạng ${equipment.condition.toLowerCase()}`
           : ""
       }.`
     );
@@ -481,7 +481,7 @@ const EquipmentAvailability: React.FC = () => {
   const sendOverallStatusReport = async () => {
     try {
       setLoading(true);
-      // Get equipment status summary
+      // Lấy tóm tắt trạng thái thiết bị
       const summaryResponse = await stockService.getEquipmentStatusSummary();
       if (
         summaryResponse &&
@@ -489,7 +489,7 @@ const EquipmentAvailability: React.FC = () => {
         summaryResponse.length > 0
       ) {
         const summary = summaryResponse;
-        // Create a report message
+        // Tạo tin nhắn báo cáo
         const availableHotpots =
           summary.find((s: EquipmentStatusDto) => s.equipmentType === "HotPot")
             ?.availableCount || 0;
@@ -505,33 +505,34 @@ const EquipmentAvailability: React.FC = () => {
         const lowStockCount =
           summary.find((s: EquipmentStatusDto) => s.equipmentType === "Utensil")
             ?.lowStockCount || 0;
-        const reportMessage = `Equipment Status Report:
-- Hotpots: ${availableHotpots}/${totalHotpots} available
-- Utensils: ${availableUtensils}/${totalUtensils} available
-- Low stock items: ${lowStockCount}`;
-        // Send notification to admin
+        const reportMessage = `Báo cáo trạng thái thiết bị:
+- Nồi lẩu: ${availableHotpots}/${totalHotpots} có sẵn
+- Dụng cụ: ${availableUtensils}/${totalUtensils} có sẵn
+- Các mặt hàng sắp hết: ${lowStockCount}`;
+        // Gửi thông báo cho quản trị viên
         const request: NotifyAdminStockRequest = {
           notificationType: "StatusChange",
           equipmentType: "Summary",
           equipmentId: 0,
-          equipmentName: "Equipment Status Summary",
+          equipmentName: "Tóm tắt trạng thái thiết bị",
           reason: reportMessage,
         };
         await stockService.notifyAdminDirectly(request);
-        // Show notification
+        // Hiển thị thông báo
         setNotification({
           open: true,
-          message: "Overall equipment status report sent to admin",
+          message:
+            "Đã gửi báo cáo trạng thái thiết bị tổng thể cho quản trị viên",
           severity: "info",
         });
       } else {
-        throw new Error("Failed to get equipment status summary");
+        throw new Error("Không thể lấy tóm tắt trạng thái thiết bị");
       }
     } catch (error) {
-      console.error("Error sending overall status report:", error);
+      console.error("Lỗi khi gửi báo cáo trạng thái tổng thể:", error);
       setNotification({
         open: true,
-        message: "Failed to send overall status report",
+        message: "Không thể gửi báo cáo trạng thái tổng thể",
         severity: "error",
       });
     } finally {

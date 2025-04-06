@@ -116,7 +116,7 @@ const EquipmentConditionNotification: React.FC = () => {
     );
 
     // Điều hướng đến trang chi tiết điều kiện thiết bị
-    navigate(`/equipment-condition/${notification.id}`);
+    navigate(`/equipment-condition-log/${notification.id}`);
 
     // Đóng menu
     handleClose();

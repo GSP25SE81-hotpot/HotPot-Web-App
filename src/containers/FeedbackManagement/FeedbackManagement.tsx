@@ -105,7 +105,7 @@ const FeedbackManagement: React.FC = () => {
 
         // Register for feedback response notifications
         feedbackHubService.onReceiveFeedbackResponse(
-          (feedbackId, responseMessage, managerName, responseDate) => {
+          (feedbackId, responseMessage, _managerName, responseDate) => {
             // Update the feedback in the list if it exists
             setFeedbacks((prevFeedbacks) =>
               prevFeedbacks.map((fb) =>

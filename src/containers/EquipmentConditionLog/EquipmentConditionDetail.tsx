@@ -673,7 +673,7 @@ const EquipmentConditionDetails: React.FC = () => {
                                 variant="outlined"
                                 onClick={() =>
                                   navigate(
-                                    `/equipment-condition/${log.damageDeviceId}`
+                                    `/equipment-condition-log/${log.damageDeviceId}`
                                   )
                                 }
                               >

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Alert, CircularProgress } from "@mui/material";
 import {
-  OrderStatus,
   orderManagementService,
   OrderCountsDTO,
 } from "../../api/Services/orderManagementService";
@@ -17,7 +16,6 @@ import {
   StyledTabsContainer,
 } from "../../components/manager/styles/OrderManagementStyles";
 import OrdersByStatusList from "./ManageOrderComponents/OrdersByStatusList";
-import OrderStatusCard from "./ManageOrderComponents/OrderStatusCard";
 import PendingDeliveriesList from "./ManageOrderComponents/PendingDeliveriesList";
 import UnallocatedOrdersList from "./ManageOrderComponents/UnallocatedOrdersList";
 
@@ -113,36 +111,7 @@ const ManageOrder: React.FC = () => {
             <Alert severity="error">{error}</Alert>
           </ErrorContainer>
           {/* Still show the UI with default counts even if there's an error */}
-          <StatusCardsGrid>
-            <OrderStatusCard
-              status={OrderStatus.Pending}
-              count={orderCounts.pendingCount}
-            />
-            <OrderStatusCard
-              status={OrderStatus.Processing}
-              count={orderCounts.processingCount}
-            />
-            <OrderStatusCard
-              status={OrderStatus.Shipping}
-              count={orderCounts.shippedCount}
-            />
-            <OrderStatusCard
-              status={OrderStatus.Delivered}
-              count={orderCounts.deliveredCount}
-            />
-            <OrderStatusCard
-              status={OrderStatus.Cancelled}
-              count={orderCounts.cancelledCount}
-            />
-            <OrderStatusCard
-              status={OrderStatus.Returning}
-              count={orderCounts.returningCount}
-            />
-            <OrderStatusCard
-              status={OrderStatus.Completed}
-              count={orderCounts.completedCount}
-            />
-          </StatusCardsGrid>
+          <StatusCardsGrid></StatusCardsGrid>
           <StyledTabsContainer>
             <StyledTabs
               value={activeTab}
@@ -151,8 +120,8 @@ const ManageOrder: React.FC = () => {
               textColor="primary"
               variant="fullWidth"
             >
-              <StyledTab label="Đơn hàng chưa phân công" />
-              <StyledTab label="Giao hàng đang chờ" />
+              <StyledTab label="Đơn hàng đang chờ duyệt" />
+              <StyledTab label="Đơn hàng đã duyệt" />
               <StyledTab label="Tất cả đơn hàng" />
             </StyledTabs>
             <TabPanel value={activeTab} index={0}>
@@ -168,24 +137,7 @@ const ManageOrder: React.FC = () => {
         </>
       ) : (
         <>
-          <StatusCardsGrid>
-            <OrderStatusCard
-              status={OrderStatus.Pending}
-              count={orderCounts.pendingCount}
-            />
-            <OrderStatusCard
-              status={OrderStatus.Processing}
-              count={orderCounts.processingCount}
-            />
-            <OrderStatusCard
-              status={OrderStatus.Shipping}
-              count={orderCounts.shippedCount}
-            />
-            <OrderStatusCard
-              status={OrderStatus.Delivered}
-              count={orderCounts.deliveredCount}
-            />
-          </StatusCardsGrid>
+          <StatusCardsGrid></StatusCardsGrid>
           <StyledTabsContainer>
             <StyledTabs
               value={activeTab}
@@ -194,8 +146,8 @@ const ManageOrder: React.FC = () => {
               textColor="primary"
               variant="fullWidth"
             >
-              <StyledTab label="Đơn hàng chưa phân công" />
-              <StyledTab label="Giao hàng đang chờ" />
+              <StyledTab label="Đơn hàng đang chờ duyệt" />
+              <StyledTab label="Đơn hàng đã duyệt" />
               <StyledTab label="Tất cả đơn hàng" />
             </StyledTabs>
             <TabPanel value={activeTab} index={0}>

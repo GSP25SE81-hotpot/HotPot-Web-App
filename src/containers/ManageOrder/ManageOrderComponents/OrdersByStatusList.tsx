@@ -365,7 +365,7 @@ const OrdersByStatusList: React.FC = () => {
           </Box>
           <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
-              placeholder="Tìm kiếm đơn hàng..."
+              placeholder="Tìm tên khách hàng..."
               size="small"
               value={searchTerm}
               onChange={handleSearch}
@@ -463,7 +463,7 @@ const OrdersByStatusList: React.FC = () => {
                         direction={sortDescending ? "desc" : "asc"}
                         onClick={() => handleSortChange("date")}
                       >
-                        Ngày đặt
+                        Số tiền
                       </TableSortLabel>
                     </StyledHeaderCell>
                     <StyledHeaderCell>
@@ -472,11 +472,10 @@ const OrdersByStatusList: React.FC = () => {
                         direction={sortDescending ? "desc" : "asc"}
                         onClick={() => handleSortChange("totalprice")}
                       >
-                        Tổng tiền
+                        Sản phẩm
                       </TableSortLabel>
                     </StyledHeaderCell>
-                    <StyledHeaderCell>Sản phẩm</StyledHeaderCell>
-                    <StyledHeaderCell>Vận chuyển</StyledHeaderCell>
+                    <StyledHeaderCell>Trạng thái</StyledHeaderCell>
                     <StyledHeaderCell>Thao tác</StyledHeaderCell>
                   </TableRow>
                 </TableHead>

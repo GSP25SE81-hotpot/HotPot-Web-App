@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AddIcon from "@mui/icons-material/Add";
@@ -25,7 +26,7 @@ import {
   useTheme,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Thêm import này
@@ -87,9 +88,9 @@ const EquipmentConditionLog: React.FC = () => {
     equipmentId: false,
   });
   const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
-  const [currentNotificationLog, setCurrentNotificationLog] =
+  const [currentNotificationLog, _setCurrentNotificationLog] =
     useState<any>(null);
-  const [notificationScheduleType, setNotificationScheduleType] =
+  const [notificationScheduleType, _setNotificationScheduleType] =
     useState<MaintenanceScheduleType>(MaintenanceScheduleType.Regular);
 
   // Định nghĩa các cột có thể sắp xếp
@@ -258,19 +259,6 @@ const EquipmentConditionLog: React.FC = () => {
     }
   };
 
-  // Xử lý thông báo cho quản trị viên
-  const handleNotifyAdmin = (conditionLog: any) => {
-    setCurrentNotificationLog(conditionLog);
-    setNotificationScheduleType(MaintenanceScheduleType.Regular);
-    setNotificationDialogOpen(true);
-  };
-
-  const handleEmergencyNotify = (conditionLog: any) => {
-    setCurrentNotificationLog(conditionLog);
-    setNotificationScheduleType(MaintenanceScheduleType.Emergency);
-    setNotificationDialogOpen(true);
-  };
-
   const handleNotificationSubmit = async (description: string) => {
     if (!currentNotificationLog) return;
     try {
@@ -375,99 +363,14 @@ const EquipmentConditionLog: React.FC = () => {
                 size="small"
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Trạng thái</InputLabel>
-                <Select
-                  value={filterParams.status || ""}
-                  label="Trạng thái"
-                  onChange={(e) => handleFilterChange("status", e.target.value)}
-                >
-                  <MenuItem value="">Tất cả</MenuItem>
-                  <MenuItem value={MaintenanceStatus.Pending}>
-                    Đang chờ
-                  </MenuItem>
-                  <MenuItem value={MaintenanceStatus.InProgress}>
-                    Đang tiến hành
-                  </MenuItem>
-                  <MenuItem value={MaintenanceStatus.Completed}>
-                    Hoàn thành
-                  </MenuItem>
-                  <MenuItem value={MaintenanceStatus.Cancelled}>
-                    Đã hủy
-                  </MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <DatePicker
-                label="Ngày bắt đầu"
-                value={
-                  filterParams.startDate
-                    ? new Date(filterParams.startDate)
-                    : null
-                }
-                onChange={(date) =>
-                  handleFilterChange(
-                    "startDate",
-                    date ? date.toISOString().split("T")[0] : null
-                  )
-                }
-                slotProps={{
-                  textField: {
-                    size: "small",
-                    fullWidth: true,
-                  },
-                }}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <DatePicker
-                label="Ngày kết thúc"
-                value={
-                  filterParams.endDate ? new Date(filterParams.endDate) : null
-                }
-                onChange={(date) =>
-                  handleFilterChange(
-                    "endDate",
-                    date ? date.toISOString().split("T")[0] : null
-                  )
-                }
-                slotProps={{
-                  textField: {
-                    size: "small",
-                    fullWidth: true,
-                  },
-                }}
-              />
-            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}></Grid>
+
             <Grid
               size={{ xs: 12, md: 6 }}
               container
               justifyContent="flex-end"
               alignItems="baseline"
-            >
-              <StyledButton
-                variant="outlined"
-                onClick={() =>
-                  setFilterParams({
-                    pageNumber: 1,
-                    pageSize: 10,
-                    sortBy: "damageDeviceId",
-                    sortDescending: false,
-                  })
-                }
-                sx={{ mr: 2 }}
-              >
-                Đặt lại
-              </StyledButton>
-              <StyledButton
-                variant="contained"
-                onClick={() => fetchConditionLogs()}
-              >
-                Áp dụng bộ lọc
-              </StyledButton>
-            </Grid>
+            ></Grid>
           </Grid>
         </StyledPaper>
         <Box
@@ -483,7 +386,7 @@ const EquipmentConditionLog: React.FC = () => {
             startIcon={<AddIcon />}
             onClick={() => setOpenDialog(true)}
           >
-            Thêm nhật ký điều kiện mới
+            Thêm thiết bị bảo trì
           </StyledButton>
           <Typography variant="body2">
             Hiển thị {conditionLogs.length} trong số {totalCount} mục
@@ -588,38 +491,22 @@ const EquipmentConditionLog: React.FC = () => {
                             >
                               Xem chi tiết
                             </StyledButton>
-                            <StyledButton
-                              size="small"
-                              variant="outlined"
-                              onClick={() => handleNotifyAdmin(log)}
-                            >
-                              Thông báo quản trị viên
-                            </StyledButton>
-                            {log.status === MaintenanceStatus.Pending && (
-                              <StyledButton
-                                size="small"
-                                variant="outlined"
-                                color="error"
-                                onClick={() => handleEmergencyNotify(log)}
-                              >
-                                Khẩn cấp
-                              </StyledButton>
-                            )}
-                            {log.status !== MaintenanceStatus.Completed && (
-                              <StyledButton
-                                size="small"
-                                variant="contained"
-                                color="success"
-                                onClick={() =>
-                                  handleStatusUpdate(
-                                    log.damageDeviceId,
-                                    MaintenanceStatus.Completed
-                                  )
-                                }
-                              >
-                                Đánh dấu hoàn thành
-                              </StyledButton>
-                            )}
+                            {log.status !== MaintenanceStatus.Cancelled &&
+                              log.status !== MaintenanceStatus.Completed && (
+                                <StyledButton
+                                  size="small"
+                                  variant="contained"
+                                  color="success"
+                                  onClick={() =>
+                                    handleStatusUpdate(
+                                      log.damageDeviceId,
+                                      MaintenanceStatus.Completed
+                                    )
+                                  }
+                                >
+                                  Đánh dấu hoàn thành
+                                </StyledButton>
+                              )}
                           </Box>
                         </TableCell>
                       </TableRow>
@@ -847,11 +734,7 @@ const EquipmentConditionLog: React.FC = () => {
               onClick={handleSubmit}
               disabled={loading}
             >
-              {loading ? (
-                <CircularProgress size={24} />
-              ) : (
-                "Thêm nhật ký điều kiện"
-              )}
+              {loading ? <CircularProgress size={24} /> : "Thêm thiết bị"}
             </StyledButton>
           </DialogActions>
         </StyledDialog>
