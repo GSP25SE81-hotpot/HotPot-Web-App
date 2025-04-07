@@ -75,6 +75,7 @@ class SignalRService {
     try {
       // Try to get the token from userInfor in localStorage
       const userInfor = localStorage.getItem("userInfor");
+      console.log("userInfor from localStorage:", userInfor);
       if (userInfor) {
         const parsedUserInfo = JSON.parse(userInfor);
         return parsedUserInfo.accessToken || null;

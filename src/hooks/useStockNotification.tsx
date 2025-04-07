@@ -27,27 +27,30 @@ export const useEquipmentNotifications = (
   );
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Connect to the hub
   const connect = useCallback(async () => {
     try {
       setLoading(true);
+
+      // Debug localStorage contents
+      console.log("All localStorage keys:", Object.keys(localStorage));
+
       // Get the user info from localStorage
       const userDataLocal = localStorage.getItem("userInfor");
-      const userData = userDataLocal ? JSON.parse(userDataLocal) : null;
+      console.log("Raw user data from localStorage:", userDataLocal);
 
-      if (userData && userData.userId) {
+      const userData = userDataLocal ? JSON.parse(userDataLocal) : null;
+      console.log("Parsed user data:", userData);
+
+      if (userData && userData.id) {
         // Connect to the hub
-        await equipmentStockHubService.connect(
-          userData.userId,
-          userData.role || "User"
-        );
+        await equipmentStockHubService.connect();
 
         // Register as admin if the user is an admin or manager
         if (userData.role === "Admin" || userData.role === "Manager") {
-          await equipmentStockHubService.registerAdminConnection(
-            userData.userId
-          );
+          await equipmentStockHubService.registerAdminConnection(userData.id);
         }
 
         setConnected(true);
@@ -55,9 +58,19 @@ export const useEquipmentNotifications = (
           toast.success("Connected to equipment notifications");
         }
       } else {
-        console.error(
-          "User information not found. Cannot connect to notifications."
-        );
+        // More detailed error message
+        if (!userDataLocal) {
+          console.error(
+            "User information not found in localStorage. Key 'userInfor' is missing."
+          );
+        } else if (!userData) {
+          console.error("Failed to parse user information from localStorage.");
+        } else if (!userData.id) {
+          console.error(
+            "User ID is missing in the user information:",
+            userData
+          );
+        }
       }
     } catch (error) {
       console.error("Error connecting to equipment stock hub:", error);
@@ -128,6 +141,38 @@ export const useEquipmentNotifications = (
     },
     [showToasts]
   );
+
+  // Add this effect to check authentication status
+  useEffect(() => {
+    const checkAuth = () => {
+      const userDataLocal = localStorage.getItem("userInfor");
+      const userData = userDataLocal ? JSON.parse(userDataLocal) : null;
+      setIsAuthenticated(!!userData && !!userData.id);
+    };
+
+    checkAuth();
+
+    // Listen for storage changes (in case user logs in/out in another tab)
+    const handleStorageChange = () => {
+      checkAuth();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  // Modify your auto-connect effect
+  useEffect(() => {
+    if (autoConnect && isAuthenticated) {
+      connect();
+    }
+
+    return () => {
+      disconnect();
+    };
+  }, [autoConnect, isAuthenticated, connect, disconnect]);
 
   // Set up listeners for notifications
   useEffect(() => {
