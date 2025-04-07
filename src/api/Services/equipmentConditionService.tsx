@@ -54,6 +54,7 @@ export interface CreateEquipmentConditionRequest {
   status: MaintenanceStatus;
   hotPotInventoryId?: number;
   utensilId?: number;
+  updateEquipmentStatus?: boolean;
 }
 
 // Request to update equipment condition status

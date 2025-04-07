@@ -24,6 +24,8 @@ import {
   TableRow,
   Typography,
   useTheme,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -48,6 +50,8 @@ import {
   getStatusText,
 } from "../../components/manager/styles/EquipmentConditionLogStyles";
 import NotificationDescriptionDialog from "./NotificationDescriptionDialog";
+import stockService from "../../api/Services/stockService";
+import { HotPotInventoryDto, UtensilDto } from "../../types/stock";
 
 // Định nghĩa cấu hình cột cho việc sắp xếp
 interface ColumnConfig {
@@ -93,6 +97,14 @@ const EquipmentConditionLog: React.FC = () => {
   const [notificationScheduleType, _setNotificationScheduleType] =
     useState<MaintenanceScheduleType>(MaintenanceScheduleType.Regular);
 
+  const [hotPotInventoryList, setHotPotInventoryList] = useState<
+    HotPotInventoryDto[]
+  >([]);
+  const [utensilList, setUtensilList] = useState<UtensilDto[]>([]);
+  const [loadingEquipment, setLoadingEquipment] = useState(false);
+  const [selectedEquipmentType, setSelectedEquipmentType] =
+    useState<string>("");
+
   // Định nghĩa các cột có thể sắp xếp
   const columns: ColumnConfig[] = [
     { field: "damageDeviceId", label: "ID", sortable: true },
@@ -103,6 +115,68 @@ const EquipmentConditionLog: React.FC = () => {
     { field: "status", label: "Trạng thái", sortable: true },
     { field: "actions", label: "Hành động", sortable: false },
   ];
+
+  const handleEquipmentTypeChange = (type: string) => {
+    setSelectedEquipmentType(type);
+    if (type === "hotpot") {
+      setNewCondition({
+        ...newCondition,
+        hotPotInventoryId: undefined,
+        utensilId: undefined,
+      });
+    } else if (type === "utensil") {
+      setNewCondition({
+        ...newCondition,
+        utensilId: undefined,
+        hotPotInventoryId: undefined,
+      });
+    } else {
+      setNewCondition({
+        ...newCondition,
+        utensilId: undefined,
+        hotPotInventoryId: undefined,
+      });
+    }
+  };
+
+  const fetchHotPotInventory = async () => {
+    try {
+      setLoadingEquipment(true);
+      const response = await stockService.getAllHotPotInventory();
+      if (response.success) {
+        setHotPotInventoryList(response.data);
+      } else {
+        setError(response.message || "Failed to load hot pot inventory");
+      }
+    } catch (err) {
+      setError("Error fetching hot pot inventory");
+      console.error("Error fetching hot pot inventory:", err);
+    } finally {
+      setLoadingEquipment(false);
+    }
+  };
+
+  const fetchUtensils = async () => {
+    try {
+      setLoadingEquipment(true);
+      const response = await stockService.getAllUtensils();
+      if (response.success) {
+        setUtensilList(response.data);
+      } else {
+        setError(response.message || "Failed to load utensils");
+      }
+    } catch (err) {
+      setError("Error fetching utensils");
+      console.error("Error fetching utensils:", err);
+    } finally {
+      setLoadingEquipment(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHotPotInventory();
+    fetchUtensils();
+  }, []);
 
   // Lấy danh sách nhật ký điều kiện
   const fetchConditionLogs = async () => {
@@ -177,7 +251,11 @@ const EquipmentConditionLog: React.FC = () => {
   const validateForm = () => {
     const errors = {
       name: !newCondition.name,
-      equipmentId: !newCondition.hotPotInventoryId && !newCondition.utensilId,
+      equipmentId:
+        (selectedEquipmentType === "hotpot" &&
+          !newCondition.hotPotInventoryId) ||
+        (selectedEquipmentType === "utensil" && !newCondition.utensilId) ||
+        !selectedEquipmentType,
     };
     setFormErrors(errors);
     return !Object.values(errors).some(Boolean);
@@ -200,6 +278,7 @@ const EquipmentConditionLog: React.FC = () => {
           name: "",
           description: "",
           status: MaintenanceStatus.Pending,
+          updateEquipmentStatus: false,
         });
         // Hiển thị thông báo thành công
         setSuccessMessage("Nhật ký điều kiện đã được tạo thành công");
@@ -615,42 +694,14 @@ const EquipmentConditionLog: React.FC = () => {
                   }
                 />
               </Grid>
+
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth error={formErrors.equipmentId}>
                   <InputLabel>Loại thiết bị</InputLabel>
                   <Select
-                    value={
-                      newCondition.hotPotInventoryId !== undefined
-                        ? "hotpot"
-                        : newCondition.utensilId !== undefined
-                        ? "utensil"
-                        : ""
-                    }
+                    value={selectedEquipmentType}
                     label="Loại thiết bị"
-                    onChange={(e) => {
-                      const equipmentType = e.target.value;
-                      // Đặt lại cả hai ID thiết bị và đặt loại đã chọn
-                      if (equipmentType === "hotpot") {
-                        setNewCondition((prev) => ({
-                          ...prev,
-                          hotPotInventoryId: 0, // Khởi tạo với 0
-                          utensilId: undefined, // Xóa loại khác
-                        }));
-                      } else if (equipmentType === "utensil") {
-                        setNewCondition((prev) => ({
-                          ...prev,
-                          utensilId: 0, // Khởi tạo với 0
-                          hotPotInventoryId: undefined, // Xóa loại khác
-                        }));
-                      } else {
-                        // Nếu không có loại nào được chọn, xóa cả hai
-                        setNewCondition((prev) => ({
-                          ...prev,
-                          hotPotInventoryId: undefined,
-                          utensilId: undefined,
-                        }));
-                      }
-                    }}
+                    onChange={(e) => handleEquipmentTypeChange(e.target.value)}
                   >
                     <MenuItem value="">Chọn loại</MenuItem>
                     <MenuItem value="hotpot">Nồi lẩu</MenuItem>
@@ -663,44 +714,63 @@ const EquipmentConditionLog: React.FC = () => {
                   )}
                 </FormControl>
               </Grid>
+
               <Grid size={{ xs: 12, sm: 6 }}>
-                {/* Chỉ hiển thị trường ID nếu loại thiết bị được chọn */}
-                {(newCondition.hotPotInventoryId !== undefined ||
-                  newCondition.utensilId !== undefined) && (
-                  <StyledTextField
-                    fullWidth
-                    type="number"
-                    label={
-                      newCondition.hotPotInventoryId !== undefined
-                        ? "ID nồi lẩu"
-                        : "ID dụng cụ"
-                    }
-                    required
-                    value={
-                      newCondition.hotPotInventoryId !== undefined
-                        ? newCondition.hotPotInventoryId === 0
-                          ? ""
-                          : newCondition.hotPotInventoryId
-                        : newCondition.utensilId === 0
-                        ? ""
-                        : newCondition.utensilId
-                    }
-                    onChange={(e) => {
-                      const value =
-                        e.target.value === "" ? 0 : parseInt(e.target.value);
-                      if (newCondition.hotPotInventoryId !== undefined) {
-                        handleInputChange("hotPotInventoryId", value);
-                      } else if (newCondition.utensilId !== undefined) {
-                        handleInputChange("utensilId", value);
+                {loadingEquipment ? (
+                  <Box display="flex" justifyContent="center">
+                    <CircularProgress size={24} />
+                  </Box>
+                ) : selectedEquipmentType === "hotpot" ? (
+                  <FormControl fullWidth error={formErrors.equipmentId}>
+                    <InputLabel>Nồi lẩu</InputLabel>
+                    <Select
+                      value={newCondition.hotPotInventoryId || ""}
+                      label="Nồi lẩu"
+                      onChange={(e) =>
+                        handleInputChange(
+                          "hotPotInventoryId",
+                          Number(e.target.value)
+                        )
                       }
-                    }}
-                    error={formErrors.equipmentId}
-                    helperText={
-                      formErrors.equipmentId ? "ID thiết bị là bắt buộc" : ""
-                    }
-                  />
-                )}
+                    >
+                      <MenuItem value="">Chọn nồi lẩu</MenuItem>
+                      {hotPotInventoryList.map((item) => (
+                        <MenuItem
+                          key={item.hotPotInventoryId}
+                          value={item.hotPotInventoryId}
+                        >
+                          {item.hotpotName} (Số series: {item.seriesNumber})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {formErrors.equipmentId && (
+                      <FormHelperText>Vui lòng chọn nồi lẩu</FormHelperText>
+                    )}
+                  </FormControl>
+                ) : selectedEquipmentType === "utensil" ? (
+                  <FormControl fullWidth error={formErrors.equipmentId}>
+                    <InputLabel>Dụng cụ</InputLabel>
+                    <Select
+                      value={newCondition.utensilId || ""}
+                      label="Dụng cụ"
+                      onChange={(e) =>
+                        handleInputChange("utensilId", Number(e.target.value))
+                      }
+                    >
+                      <MenuItem value="">Chọn dụng cụ</MenuItem>
+                      {utensilList.map((item) => (
+                        <MenuItem key={item.utensilId} value={item.utensilId}>
+                          {item.name} (Loại: {item.utensilTypeName})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {formErrors.equipmentId && (
+                      <FormHelperText>Vui lòng chọn dụng cụ</FormHelperText>
+                    )}
+                  </FormControl>
+                ) : null}
               </Grid>
+
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth>
                   <InputLabel>Trạng thái</InputLabel>
@@ -725,6 +795,23 @@ const EquipmentConditionLog: React.FC = () => {
               </Grid>
             </Grid>
           </DialogContent>
+          <Box sx={{ px: 3, pb: 1 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={newCondition.updateEquipmentStatus || false}
+                  onChange={(e: any) =>
+                    setNewCondition({
+                      ...newCondition,
+                      updateEquipmentStatus: e.target.checked,
+                    })
+                  }
+                  name="updateEquipmentStatus"
+                />
+              }
+              label="Tự động cập nhật trạng thái thiết bị"
+            />
+          </Box>
           <DialogActions sx={{ p: 3 }}>
             <StyledButton onClick={() => setOpenDialog(false)}>
               Hủy bỏ
