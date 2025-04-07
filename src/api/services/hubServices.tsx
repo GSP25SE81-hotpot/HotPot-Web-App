@@ -4,6 +4,11 @@ import { disconnectHubs, ensureHubConnection } from "./hubConnectionService";
 // Hub URLs
 const CHAT_HUB = "/chatHub";
 const NOTIFICATION_HUB = "/notificationHub";
+const FEEDBACK_HUB = "/feedbackHub";
+const EQUIPMENT_HUB = "/equipmentHub";
+const SCHEDULE_HUB = "/scheduleHub";
+const EQUIPMENT_CONDITION_HUB = "/equipmentConditionHub";
+const EQUIPMENT_STOCK_HUB = "/equipmentStockHub";
 
 // Define specific callback types for each hub
 type ChatMessageCallback = (user: string, message: string) => void;
@@ -100,14 +105,14 @@ export const chatHubService = {
 // Feedback Hub Service
 export const feedbackHubService = {
   connect: async () => {
-    await signalRService.startConnection(NOTIFICATION_HUB);
-    await signalRService.registerUserConnection(NOTIFICATION_HUB);
+    await signalRService.startConnection(FEEDBACK_HUB);
+    await signalRService.registerUserConnection(FEEDBACK_HUB);
   },
 
   // Listen for connection registration confirmation
   onConnectionRegistered: (callback: ConnectionRegisteredCallback) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      FEEDBACK_HUB,
       "ConnectionRegistered",
       callback as HubCallback
     );
@@ -116,7 +121,7 @@ export const feedbackHubService = {
   // Listen for feedback response notifications
   onReceiveFeedbackResponse: (callback: FeedbackResponseCallback) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      FEEDBACK_HUB,
       "ReceiveFeedbackResponse",
       callback as HubCallback
     );
@@ -125,7 +130,7 @@ export const feedbackHubService = {
   // Listen for new feedback notifications (for admins)
   onReceiveNewFeedback: (callback: NewFeedbackCallback) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      FEEDBACK_HUB,
       "ReceiveNewFeedback",
       callback as HubCallback
     );
@@ -134,7 +139,7 @@ export const feedbackHubService = {
   // Listen for approved feedback notifications (for managers)
   onReceiveApprovedFeedback: (callback: ApprovedFeedbackCallback) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      FEEDBACK_HUB,
       "ReceiveApprovedFeedback",
       callback as HubCallback
     );
@@ -148,7 +153,7 @@ export const feedbackHubService = {
     managerName: string
   ) => {
     await signalRService.invoke(
-      NOTIFICATION_HUB,
+      FEEDBACK_HUB,
       "NotifyFeedbackResponse",
       userId,
       feedbackId,
@@ -164,7 +169,7 @@ export const feedbackHubService = {
     feedbackTitle: string
   ) => {
     await signalRService.invoke(
-      NOTIFICATION_HUB,
+      FEEDBACK_HUB,
       "NotifyNewFeedback",
       feedbackId,
       customerName,
@@ -179,7 +184,7 @@ export const feedbackHubService = {
     feedbackTitle: string
   ) => {
     await signalRService.invoke(
-      NOTIFICATION_HUB,
+      FEEDBACK_HUB,
       "NotifyFeedbackApproved",
       feedbackId,
       adminName,
@@ -195,7 +200,7 @@ export const feedbackHubService = {
 // Equipment Hub Service
 export const equipmentHubService = {
   connect: async () => {
-    await ensureHubConnection(NOTIFICATION_HUB);
+    await ensureHubConnection(EQUIPMENT_HUB);
   },
 
   // Register for replacement-related events
@@ -203,7 +208,7 @@ export const equipmentHubService = {
     callback: (id: number, isApproved: boolean, reviewNotes: string) => void
   ) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      EQUIPMENT_HUB,
       "ReceiveReplacementReview",
       callback as HubCallback
     );
@@ -219,7 +224,7 @@ export const equipmentHubService = {
     ) => void
   ) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      EQUIPMENT_HUB,
       "ReceiveAssignmentUpdate",
       callback as HubCallback
     );
@@ -234,7 +239,7 @@ export const equipmentHubService = {
     ) => void
   ) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      EQUIPMENT_HUB,
       "ReceiveNewAssignment",
       callback as HubCallback
     );
@@ -249,7 +254,7 @@ export const equipmentHubService = {
     ) => void
   ) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      EQUIPMENT_HUB,
       "ReceiveReplacementUpdate",
       callback as HubCallback
     );
@@ -263,7 +268,7 @@ export const equipmentHubService = {
     ) => void
   ) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      EQUIPMENT_HUB,
       "ReceiveDirectNotification",
       callback as HubCallback
     );
@@ -278,7 +283,7 @@ export const equipmentHubService = {
     ) => void
   ) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      EQUIPMENT_HUB,
       "ReceiveResolutionUpdate",
       callback as HubCallback
     );
@@ -294,7 +299,7 @@ export const equipmentHubService = {
     ) => void
   ) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      EQUIPMENT_HUB,
       "ReceiveEquipmentUpdate",
       callback as HubCallback
     );
@@ -308,7 +313,7 @@ export const equipmentHubService = {
     message: string
   ) => {
     await signalRService.invoke(
-      NOTIFICATION_HUB,
+      EQUIPMENT_HUB,
       "SendResolutionUpdate",
       conditionLogId,
       status,
@@ -326,7 +331,7 @@ export const equipmentHubService = {
     message: string
   ) => {
     await signalRService.invoke(
-      NOTIFICATION_HUB,
+      EQUIPMENT_HUB,
       "SendCustomerUpdate",
       customerId,
       conditionLogId,
@@ -338,29 +343,29 @@ export const equipmentHubService = {
   },
 
   disconnect: async () => {
-    await signalRService.stopConnection(NOTIFICATION_HUB);
+    await signalRService.stopConnection(EQUIPMENT_HUB);
   },
 };
 
 // Schedule Hub Service
 export const scheduleHubService = {
   connect: async () => {
-    await signalRService.startConnection(NOTIFICATION_HUB);
-    await signalRService.registerUserConnection(NOTIFICATION_HUB);
+    await signalRService.startConnection(SCHEDULE_HUB);
+    await signalRService.registerUserConnection(SCHEDULE_HUB);
   },
 
   // Add schedule-specific methods here
 
   disconnect: async () => {
-    await signalRService.stopConnection(NOTIFICATION_HUB);
+    await signalRService.stopConnection(SCHEDULE_HUB);
   },
 };
 
 // Equipment Condition Hub Service
 export const equipmentConditionHubService = {
   connect: async (userId: number, userType: string) => {
-    await signalRService.startConnection(NOTIFICATION_HUB);
-    await signalRService.registerUserConnection(NOTIFICATION_HUB);
+    await signalRService.startConnection(EQUIPMENT_CONDITION_HUB);
+    await signalRService.registerUserConnection(EQUIPMENT_CONDITION_HUB);
 
     // If user is an admin, register as admin
     if (
@@ -368,7 +373,7 @@ export const equipmentConditionHubService = {
       userType.toLowerCase() === "administrator"
     ) {
       await signalRService.invoke(
-        NOTIFICATION_HUB,
+        EQUIPMENT_CONDITION_HUB,
         "RegisterAdminConnection",
         userId
       );
@@ -378,7 +383,7 @@ export const equipmentConditionHubService = {
   // Listen for connection registration confirmation
   onConnectionRegistered: (callback: (userId: number) => void) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      EQUIPMENT_CONDITION_HUB,
       "ConnectionRegistered",
       callback as HubCallback
     );
@@ -387,7 +392,7 @@ export const equipmentConditionHubService = {
   // Listen for condition alerts
   onReceiveConditionAlert: (callback: ConditionAlertCallback) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      EQUIPMENT_CONDITION_HUB,
       "ReceiveConditionAlert",
       callback as HubCallback
     );
@@ -396,7 +401,7 @@ export const equipmentConditionHubService = {
   // Listen for status updates
   onReceiveStatusUpdate: (callback: StatusUpdateCallback) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      EQUIPMENT_CONDITION_HUB,
       "ReceiveStatusUpdate",
       callback as HubCallback
     );
@@ -405,7 +410,7 @@ export const equipmentConditionHubService = {
   // Listen for direct notifications
   onReceiveDirectNotification: (callback: DirectNotificationCallback) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      EQUIPMENT_CONDITION_HUB,
       "ReceiveDirectNotification",
       callback as HubCallback
     );
@@ -421,7 +426,7 @@ export const equipmentConditionHubService = {
     scheduleType: MaintenanceScheduleType
   ) => {
     await signalRService.invoke(
-      NOTIFICATION_HUB,
+      EQUIPMENT_CONDITION_HUB,
       "NotifyConditionIssue",
       conditionLogId,
       equipmentType,
@@ -435,14 +440,14 @@ export const equipmentConditionHubService = {
   // Join administrator group
   joinAdministratorGroup: async () => {
     await signalRService.invoke(
-      NOTIFICATION_HUB,
+      EQUIPMENT_CONDITION_HUB,
       "JoinGroup",
       "Administrators"
     );
   },
 
   disconnect: async () => {
-    await signalRService.stopConnection(NOTIFICATION_HUB);
+    await signalRService.stopConnection(EQUIPMENT_CONDITION_HUB);
   },
 };
 
@@ -450,7 +455,7 @@ export const equipmentConditionHubService = {
 export const equipmentStockHubService = {
   connect: async () => {
     // Just use the shared connection service
-    await ensureHubConnection(NOTIFICATION_HUB);
+    await ensureHubConnection(EQUIPMENT_STOCK_HUB);
 
     // Get the user info from localStorage
     const userDataLocal = localStorage.getItem("userInfor");
@@ -469,7 +474,7 @@ export const equipmentStockHubService = {
   // Register as admin to receive notifications
   registerAdminConnection: async (adminId: number) => {
     await signalRService.invoke(
-      NOTIFICATION_HUB,
+      EQUIPMENT_STOCK_HUB,
       "RegisterAdminConnection",
       adminId
     );
@@ -478,7 +483,7 @@ export const equipmentStockHubService = {
   // Listen for low stock alerts
   onReceiveLowStockAlert: (callback: LowStockAlertCallback) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      EQUIPMENT_STOCK_HUB,
       "ReceiveLowStockAlert",
       callback as HubCallback
     );
@@ -487,7 +492,7 @@ export const equipmentStockHubService = {
   // Listen for status change alerts
   onReceiveStatusChangeAlert: (callback: StatusChangeAlertCallback) => {
     signalRService.on(
-      NOTIFICATION_HUB,
+      EQUIPMENT_STOCK_HUB,
       "ReceiveStatusChangeAlert",
       callback as HubCallback
     );
@@ -501,7 +506,7 @@ export const equipmentStockHubService = {
     threshold: number
   ) => {
     await signalRService.invoke(
-      NOTIFICATION_HUB,
+      EQUIPMENT_STOCK_HUB,
       "NotifyLowStock",
       equipmentType,
       equipmentName,
@@ -519,7 +524,7 @@ export const equipmentStockHubService = {
     reason: string
   ) => {
     await signalRService.invoke(
-      NOTIFICATION_HUB,
+      EQUIPMENT_STOCK_HUB,
       "NotifyStatusChange",
       equipmentType,
       equipmentId,
