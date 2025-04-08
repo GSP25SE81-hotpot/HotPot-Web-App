@@ -10,12 +10,16 @@ const hubConnections: {
   notificationHub: null,
 };
 
-export const ensureHubConnection = async (hubUrl: string): Promise<void> => {
+export const ensureHubConnection = async (
+  hubUrl: string,
+  userId: number,
+  userType: string
+): Promise<void> => {
   const hubKey = hubUrl.replace("/", "") as keyof typeof hubConnections;
 
   if (!hubConnections[hubKey]) {
     await signalRService.startConnection(hubUrl);
-    await signalRService.registerUserConnection(hubUrl);
+    await signalRService.registerConnection(hubUrl, userId, userType);
     hubConnections[hubKey] = true;
   }
 };

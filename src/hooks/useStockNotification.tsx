@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/useEquipmentNotifications.ts
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { equipmentStockHubService } from "../api/Services/hubServices";
+import { jwtDecode } from "jwt-decode";
 
 export interface EquipmentNotification {
   id: number;
@@ -34,23 +36,39 @@ export const useEquipmentNotifications = (
     try {
       setLoading(true);
 
-      // Debug localStorage contents
-      console.log("All localStorage keys:", Object.keys(localStorage));
-
       // Get the user info from localStorage
       const userDataLocal = localStorage.getItem("userInfor");
-      console.log("Raw user data from localStorage:", userDataLocal);
-
       const userData = userDataLocal ? JSON.parse(userDataLocal) : null;
-      console.log("Parsed user data:", userData);
 
-      if (userData && userData.id) {
-        // Connect to the hub
-        await equipmentStockHubService.connect();
+      let userId: number | null = null;
+      let userRole: string | undefined = undefined;
+
+      if (userData) {
+        // Try to get ID from direct property or access token
+        if (userData.id) {
+          userId = parseInt(userData.id, 10);
+          userRole = userData.role;
+        } else if (userData.accessToken) {
+          try {
+            const decoded: any = jwtDecode(userData.accessToken);
+            userId = parseInt(decoded.id, 10);
+            userRole = decoded.role;
+          } catch (decodeError) {
+            console.error("Error decoding JWT:", decodeError);
+          }
+        } else if (userData.userId) {
+          userId = parseInt(userData.userId, 10);
+          userRole = userData.role;
+        }
+      }
+
+      if (userId && !isNaN(userId)) {
+        // Connect to the hub - userRole is optional now
+        await equipmentStockHubService.connect(userId, userRole);
 
         // Register as admin if the user is an admin or manager
-        if (userData.role === "Admin" || userData.role === "Manager") {
-          await equipmentStockHubService.registerAdminConnection(userData.id);
+        if (userRole === "Admin" || userRole === "Manager") {
+          await equipmentStockHubService.registerAdminConnection(userId);
         }
 
         setConnected(true);
@@ -58,18 +76,12 @@ export const useEquipmentNotifications = (
           toast.success("Connected to equipment notifications");
         }
       } else {
-        // More detailed error message
-        if (!userDataLocal) {
-          console.error(
-            "User information not found in localStorage. Key 'userInfor' is missing."
-          );
-        } else if (!userData) {
-          console.error("Failed to parse user information from localStorage.");
-        } else if (!userData.id) {
-          console.error(
-            "User ID is missing in the user information:",
-            userData
-          );
+        console.error(
+          "Could not determine valid user ID from localStorage data:",
+          userData
+        );
+        if (showToasts) {
+          toast.error("Failed to identify user for notifications");
         }
       }
     } catch (error) {
@@ -81,7 +93,6 @@ export const useEquipmentNotifications = (
       setLoading(false);
     }
   }, [showToasts]);
-
   // Disconnect from the hub
   const disconnect = useCallback(async () => {
     try {

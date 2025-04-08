@@ -30,16 +30,17 @@ export const SignalRProvider: React.FC<{ children: ReactNode }> = ({
   // Initialize hub connections when the user logs in
   useEffect(() => {
     const initializeHubs = async () => {
-      if (auth?.user) {
+      // Only attempt to initialize if auth and auth.user are properly loaded
+      if (auth?.user && Object.keys(auth.user).length > 0) {
         setIsConnecting(true);
         setError(null);
         try {
           // Determine which hubs to connect to based on user role
           const hubsToConnect: string[] = ["notification"]; // Everyone gets notifications
 
-          if (auth?.user?.role === Role.Manager) {
+          if (auth.user.role === Role.Manager) {
             hubsToConnect.push("feedback", "equipment", "equipmentStock");
-          } else if (auth?.user?.role === Role.Admin) {
+          } else if (auth.user.role === Role.Admin) {
             hubsToConnect.push(
               "feedback",
               "equipment",
@@ -48,21 +49,28 @@ export const SignalRProvider: React.FC<{ children: ReactNode }> = ({
             );
           }
 
-          // Extract and validate user ID
+          // Extract and validate user ID - check for both id and userId properties
           let userId: number;
-          const rawUserId = auth.user.userId;
+          const rawUserId = auth.user.id || auth.user.userId;
+
+          if (!rawUserId) {
+            console.error("User ID is missing:", auth.user);
+            throw new Error("User ID is required for SignalR connection");
+          }
 
           if (typeof rawUserId === "string") {
-            // Convert string ID to number
             userId = parseInt(rawUserId, 10);
             if (isNaN(userId)) {
               throw new Error(`Invalid user ID format: ${rawUserId}`);
             }
           } else if (typeof rawUserId === "number") {
-            // Use numeric ID directly
             userId = rawUserId;
           } else {
-            console.error("User ID is missing or invalid:", auth.user);
+            console.error(
+              "User ID has invalid type:",
+              typeof rawUserId,
+              auth.user
+            );
             throw new Error("User ID is required for SignalR connection");
           }
 
@@ -85,7 +93,7 @@ export const SignalRProvider: React.FC<{ children: ReactNode }> = ({
           setIsConnecting(false);
         }
       } else {
-        // Disconnect when user logs out
+        // Disconnect when user logs out or if auth is not ready
         if (isInitialized) {
           try {
             await unifiedHubService.disconnectAll();
@@ -97,6 +105,7 @@ export const SignalRProvider: React.FC<{ children: ReactNode }> = ({
       }
     };
 
+    // Only run initialization if auth has changed
     initializeHubs();
 
     // Clean up connections when component unmounts

@@ -300,7 +300,7 @@ const LowStockUtensils: React.FC = () => {
       >
         <Box>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
-            Quản lý dụng cụ sắp hết hàng
+            Quản lý dụng cụ số lượng thấp
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Theo dõi và quản lý các dụng cụ có số lượng thấp

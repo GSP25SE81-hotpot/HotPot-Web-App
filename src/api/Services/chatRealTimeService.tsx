@@ -42,26 +42,28 @@ export class ChatRealTimeService extends ChatService {
       // Start the connection if not already connected
       if (!this.isConnected) {
         console.log("Starting SignalR connection to chat hub...");
-
         // Get the token from the parameter or try to get it from localStorage
         const authToken = token || this.getAuthToken();
         if (!authToken) {
           console.error("No authentication token found. Please log in again.");
           throw new Error("Authentication token not found");
         }
-
         await signalRService.startConnection(CHAT_HUB, authToken);
-
         try {
           console.log("Connection established, registering user...");
-          // Call RegisterConnection without parameters - server extracts from JWT
-          await signalRService.invoke(CHAT_HUB, "RegisterConnection");
+
+          // CHANGE THIS LINE - Use the correct method name that exists on the server
+          // For example, if the server has "RegisterUserConnection" instead:
+          await signalRService.invoke(CHAT_HUB, "RegisterUserConnection");
+
+          // Or if you need to pass the user ID:
+          // const userId = this.getUserId(); // Implement this method to get the user ID
+          // await signalRService.invoke(CHAT_HUB, "RegisterUserConnection", userId);
+
           this.isConnected = true;
           console.log("User registered successfully with chat hub");
-
           // Register event handlers
           this.registerEventHandlers();
-
           // Log connection state
           console.log(
             "Connection state after registration:",

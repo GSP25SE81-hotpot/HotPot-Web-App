@@ -255,9 +255,31 @@ class SignalRService {
    * @param userId The user ID
    * @param userType The user type (e.g., 'manager', 'admin', 'customer')
    */
-  public async registerUserConnection(hubUrl: string): Promise<void> {
+  public async registerConnection(
+    hubUrl: string,
+    userId: number,
+    userType: string
+  ): Promise<void> {
     await this.ensureConnection(hubUrl);
-    await this.invoke(hubUrl, "RegisterConnection");
+
+    try {
+      if (
+        hubUrl.includes("EquipmentCondition") ||
+        hubUrl.includes("EquipmentStock")
+      ) {
+        if (userType.toLowerCase() === "admin") {
+          await this.invoke(hubUrl, "RegisterAdminConnection", userId);
+        }
+      } else if (hubUrl.includes("Notification")) {
+        await this.invoke(hubUrl, "JoinRoleGroup", userType);
+        await this.invoke(hubUrl, "JoinUserSpecificGroup", userId.toString());
+      } else {
+        // For hubs that don't need registration, don't call anything
+        console.log(`No registration needed for ${hubUrl}`);
+      }
+    } catch (error) {
+      console.warn(`Registration for ${hubUrl} failed:`, error);
+    }
   }
 
   /**

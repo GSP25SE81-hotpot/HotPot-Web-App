@@ -559,7 +559,7 @@ const EquipmentAvailability: React.FC = () => {
       <Stack spacing={4}>
         <HeaderContainer>
           <PageTitle variant="h4" component="h1">
-            Dịch vụ cho thuê lẩu sẵn có
+            Dụng cụ thuê
           </PageTitle>
           <Stack
             direction={{ xs: "column", sm: "row" }}
