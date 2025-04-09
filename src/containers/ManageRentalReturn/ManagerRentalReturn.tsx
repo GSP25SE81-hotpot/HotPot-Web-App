@@ -1,7 +1,7 @@
 // src/components/manager/ManagerRentalDashboard.tsx
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import ListAltIcon from "@mui/icons-material/ListAlt";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
+// import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { Box, CardActions, CardContent, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import React from "react";
@@ -38,18 +38,18 @@ const ManagerRentalDashboard: React.FC = () => {
             <StyledDivider />
 
             <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+              <Grid size={{ xs: 12, md: 12, lg: 6 }}>
                 <StyledCard sx={{ height: "100%" }}>
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
                       <CardIcon>
                         <AssignmentIcon />
                       </CardIcon>
-                      <CardTitle>Unassigned Pickups</CardTitle>
+                      <CardTitle>Phân công thu hồi</CardTitle>
                     </Box>
                     <CardDescription>
-                      View and assign staff to equipment pickups that need to be
-                      retrieved from customers.
+                      Xem và phân công nhân viên đến thu hồi thiết bị từ khách
+                      hàng.
                     </CardDescription>
                   </CardContent>
                   <CardActions sx={{ p: 2, pt: 0 }}>
@@ -59,24 +59,23 @@ const ManagerRentalDashboard: React.FC = () => {
                       fullWidth
                       onClick={() => navigateTo("/unassigned-pickups")}
                     >
-                      Manage Unassigned Pickups
+                      Quản lý thu hồi chưa được chỉ định
                     </AnimatedButton>
                   </CardActions>
                 </StyledCard>
               </Grid>
 
-              <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+              {/* <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                 <StyledCard sx={{ height: "100%" }}>
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
                       <CardIcon>
                         <PersonAddIcon />
                       </CardIcon>
-                      <CardTitle>Assign Staff</CardTitle>
+                      <CardTitle>Phân công nhân viên</CardTitle>
                     </Box>
                     <CardDescription>
-                      Directly assign staff members to pickup tasks and provide
-                      them with instructions.
+                      Chỉ định trực tiếp nhân viên thực hiện việc thu hồi
                     </CardDescription>
                   </CardContent>
                   <CardActions sx={{ p: 2, pt: 0 }}>
@@ -90,20 +89,20 @@ const ManagerRentalDashboard: React.FC = () => {
                     </AnimatedButton>
                   </CardActions>
                 </StyledCard>
-              </Grid>
+              </Grid> */}
 
-              <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+              <Grid size={{ xs: 12, md: 12, lg: 6 }}>
                 <StyledCard sx={{ height: "100%" }}>
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
                       <CardIcon>
                         <ListAltIcon />
                       </CardIcon>
-                      <CardTitle>Current Assignments</CardTitle>
+                      <CardTitle>Theo dõi nhiệm vụ</CardTitle>
                     </Box>
                     <CardDescription>
-                      View all current staff assignments and track their
-                      progress.
+                      Xem tất cả các nhiệm vụ hiện tại của nhân viên và theo dõi
+                      tiến độ của họ.
                     </CardDescription>
                   </CardContent>
                   <CardActions sx={{ p: 2, pt: 0 }}>

@@ -96,7 +96,7 @@ const UnassignedPickups: React.FC = () => {
   return (
     <StyledContainer maxWidth="xl">
       <Box sx={{ p: 3 }}>
-        <PageTitle variant="h4">Unassigned Pickups</PageTitle>
+        <PageTitle variant="h4">Phân công thu hồi</PageTitle>
 
         {error && (
           <Alert
@@ -125,12 +125,12 @@ const UnassignedPickups: React.FC = () => {
                   <TableHead>
                     <TableRow>
                       <HeaderTableCell>ID</HeaderTableCell>
-                      <HeaderTableCell>Customer</HeaderTableCell>
-                      <HeaderTableCell>Equipment</HeaderTableCell>
-                      <HeaderTableCell>Type</HeaderTableCell>
-                      <HeaderTableCell>Return Date</HeaderTableCell>
-                      <HeaderTableCell>Status</HeaderTableCell>
-                      <HeaderTableCell>Actions</HeaderTableCell>
+                      <HeaderTableCell>Tên Khách hàng</HeaderTableCell>
+                      <HeaderTableCell>Thiết bị</HeaderTableCell>
+                      <HeaderTableCell>Loại</HeaderTableCell>
+                      <HeaderTableCell>Ngày trả</HeaderTableCell>
+                      <HeaderTableCell>Trạng thái</HeaderTableCell>
+                      <HeaderTableCell>Hành động</HeaderTableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -138,7 +138,7 @@ const UnassignedPickups: React.FC = () => {
                       <StyledTableRow>
                         <BodyTableCell colSpan={7}>
                           <EmptyMessage>
-                            No unassigned pickups found
+                            Không tìm thấy đơn hàng chưa được phân công
                           </EmptyMessage>
                         </BodyTableCell>
                       </StyledTableRow>

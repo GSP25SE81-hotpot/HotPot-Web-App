@@ -84,7 +84,7 @@ const CurrentAssignments: React.FC = () => {
   return (
     <StyledContainer maxWidth="xl">
       <StyledPaper elevation={0} sx={{ p: 4 }}>
-        <PageTitle variant="h4">Current Staff Assignments</PageTitle>
+        <PageTitle variant="h4">Theo dõi nhiệm vụ</PageTitle>
 
         {error && (
           <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
@@ -111,8 +111,8 @@ const CurrentAssignments: React.FC = () => {
                   />
                   <PageTitle variant="h5">No Current Assignments</PageTitle>
                   <InfoText>
-                    There are currently no active staff assignments for
-                    equipment pickups.
+                    Hiện tại không có nhân viên nào được phân công phụ trách thu
+                    hồi thiết bị.
                   </InfoText>
                 </Box>
               </EmptyStateContainer>
