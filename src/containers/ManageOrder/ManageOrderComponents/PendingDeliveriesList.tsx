@@ -35,7 +35,6 @@ import {
 } from "../../../api/Services/orderManagementService";
 import {
   ActionsContainer,
-  CountBadge,
   CustomerName,
   CustomerPhone,
   DialogActionButton,
@@ -233,7 +232,8 @@ const PendingDeliveriesList: React.FC = () => {
         }}
       >
         <ListTitle variant="h6">
-          Giao hàng đang chờ <CountBadge>{totalCount}</CountBadge>
+          Giao hàng đang chờ
+          {/* <CountBadge>{totalCount}</CountBadge> */}
         </ListTitle>
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField

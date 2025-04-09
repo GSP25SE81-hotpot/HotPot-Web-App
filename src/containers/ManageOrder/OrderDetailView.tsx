@@ -102,7 +102,7 @@ const OrderDetailView: React.FC = () => {
         setLoading(true);
         // Get order details
         const orderData = await orderManagementService.getOrderWithDetails(
-          parseInt(orderId)
+          orderId
         );
         setOrder(orderData);
         // Get available staff and handle both array and single object responses
@@ -548,8 +548,8 @@ const OrderDetailView: React.FC = () => {
         {/* Order Items */}
         <Grid size={{ xs: 12 }}>
           <DetailCard>
-            <StyledCardHeader title="Các mặt hàng trong đơn" />
-            <Divider />
+            {/* <StyledCardHeader title="Các mặt hàng trong đơn" /> */}
+            {/* <Divider /> */}
             <StyledCardContent>
               <OrderItemsContainer>
                 {/* Order Summary */}

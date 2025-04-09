@@ -27,8 +27,9 @@ class SignalRService {
     token?: string
   ): signalR.HubConnection {
     if (!this.hubConnections.has(hubUrl)) {
-      const apiBaseUrl = "https://localhost:7163"; // Update with your API base URL
-
+      const apiBaseUrl = "https://hpty.vinhuser.one"; // Update with your API base URL
+      // https://hpty.vinhuser.one
+      // https://localhost:7163
       // Get the JWT token from the parameter or try to get it from localStorage
       const authToken = token || this.getAuthToken();
 

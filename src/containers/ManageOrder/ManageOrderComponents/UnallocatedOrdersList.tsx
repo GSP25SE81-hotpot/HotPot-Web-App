@@ -547,6 +547,21 @@ const UnallocatedOrdersList: React.FC = () => {
                     }}
                   >
                     {staffMember.name}
+                    <Box
+                      component="span"
+                      sx={{
+                        ml: 2,
+                        bgcolor: "action.hover",
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1,
+                        fontSize: "0.75rem",
+                        fontWeight: "medium",
+                        color: "text.secondary",
+                      }}
+                    >
+                      {staffMember.assignmentCount} lần
+                    </Box>
                   </MenuItem>
                 ))}
               </Select>

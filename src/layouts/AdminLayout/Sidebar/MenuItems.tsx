@@ -88,13 +88,6 @@ export const menuItems: MenuItemLayout[] = [
   {
     role: "Manager",
     menu: [
-      //dashboard
-      {
-        icon: <DashboardIcon />,
-        label: config.Vntext.SideBar.Dashboard,
-        path: managerRoutes.home,
-        // role: AccessType.ADMIN_ACCESS,
-      },
       //inventory
       {
         label: "Quản lý kho",

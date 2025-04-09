@@ -264,7 +264,7 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
           <Box sx={{ flexGrow: 1 }} />
 
           {/* Connection status indicator */}
-          <Box sx={{ mr: 2, display: "flex", alignItems: "center" }}>
+          {/* <Box sx={{ mr: 2, display: "flex", alignItems: "center" }}>
             <Chip
               icon={getConnectionStatusIcon(connectionState)}
               label={
@@ -281,10 +281,10 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
               }
               variant="outlined"
             />
-          </Box>
+          </Box> */}
 
           {/* Notification section */}
-          <Box sx={{ mr: 2 }}>
+          {/* <Box sx={{ mr: 2 }}>
             <IconButton
               color="inherit"
               onClick={handleNotificationOpen}
@@ -457,7 +457,7 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
                 </Box>
               )}
             </Menu>
-          </Box>
+          </Box> */}
 
           {/* User profile section */}
           <Box sx={{ display: "flex", alignItems: "center" }}>

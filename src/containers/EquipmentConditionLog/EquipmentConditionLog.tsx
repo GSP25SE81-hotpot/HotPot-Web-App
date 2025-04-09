@@ -72,7 +72,7 @@ const EquipmentConditionLog: React.FC = () => {
   const [pageSize, setPageSize] = useState(10);
   const [openDialog, setOpenDialog] = useState(false);
   const [sortBy, setSortBy] = useState<string>("damageDeviceId");
-  const [sortDescending, setSortDescending] = useState<boolean>(false);
+  const [sortDescending, setSortDescending] = useState<boolean>(true);
   const [filterParams, setFilterParams] = useState<EquipmentConditionFilterDto>(
     {
       pageNumber: 1,

@@ -54,7 +54,7 @@ export interface ShippingDetailDTO {
 }
 
 export interface OrderWithDetailsDTO {
-  orderId: number;
+  orderId: string;
   address: string;
   notes?: string;
   totalPrice: number;
@@ -67,7 +67,7 @@ export interface OrderWithDetailsDTO {
 }
 
 export interface OrderDetailDTO {
-  orderId: number;
+  orderId: string;
   address: string;
   notes?: string;
   totalPrice: number;
@@ -81,7 +81,7 @@ export interface OrderDetailDTO {
 
 export interface PendingDeliveryDTO {
   shippingOrderId: number;
-  orderId: number;
+  orderId: string;
   deliveryTime?: string;
   deliveryNotes?: string;
   address: string;
@@ -94,7 +94,7 @@ export interface PendingDeliveryDTO {
 
 export interface StaffShippingOrderDTO {
   shippingOrderId: number;
-  orderId: number;
+  orderId: string;
   deliveryTime?: string;
   deliveryNotes?: string;
   isDelivered: boolean;
@@ -110,7 +110,7 @@ export interface StaffShippingOrderDTO {
 
 export interface ShippingOrderAllocationDTO {
   shippingOrderId: number;
-  orderId: number;
+  orderId: string;
   staffId: number;
   staffName: string;
   isDelivered: boolean;
@@ -118,14 +118,14 @@ export interface ShippingOrderAllocationDTO {
 }
 
 export interface OrderStatusUpdateDTO {
-  orderId: number;
+  orderId: string;
   status: OrderStatus;
   updatedAt: string;
 }
 
 export interface DeliveryStatusUpdateDTO {
   shippingOrderId: number;
-  orderId: number;
+  orderId: string;
   isDelivered: boolean;
   deliveryTime?: string;
   deliveryNotes?: string;
@@ -134,14 +134,14 @@ export interface DeliveryStatusUpdateDTO {
 
 export interface DeliveryTimeUpdateDTO {
   shippingOrderId: number;
-  orderId: number;
+  orderId: string;
   deliveryTime: string;
   updatedAt: string;
 }
 
 // Request interfaces
 export interface AllocateOrderRequest {
-  orderId: number;
+  orderId: string;
   staffId: number;
 }
 
@@ -211,7 +211,7 @@ export interface OrderCountsDTO {
   totalCount: number;
 }
 export interface UnallocatedOrderDTO {
-  orderId: number;
+  orderId: string;
   address: string;
   notes: string | null;
   totalPrice: number;
@@ -245,7 +245,7 @@ export const orderManagementService = {
 
   // Order status tracking
   updateOrderStatus: async (
-    orderId: number,
+    orderId: string,
     status: OrderStatus
   ): Promise<OrderStatusUpdateDTO> => {
     const response = await axiosClient.put<ApiResponse<OrderStatusUpdateDTO>>(
@@ -255,7 +255,7 @@ export const orderManagementService = {
     return response.data.data;
   },
 
-  getOrderWithDetails: async (orderId: number): Promise<OrderDetailDTO> => {
+  getOrderWithDetails: async (orderId: string): Promise<OrderDetailDTO> => {
     const response = await axiosClient.get<any, ApiResponse<OrderDetailDTO>>(
       `${API_URL}/details/${orderId}`
     );
@@ -270,10 +270,10 @@ export const orderManagementService = {
     }
   ): Promise<PagedResult<OrderWithDetailsDTO>> {
     try {
-      console.log(
-        `Making API call for status ${status} with params:`,
-        queryParams
-      );
+      // console.log(
+      //   `Making API call for status ${status} with params:`,
+      //   queryParams
+      // );
       // Convert query params to URL search params
       const params = new URLSearchParams();
       // Add pagination params
@@ -296,18 +296,18 @@ export const orderManagementService = {
         params.append("customerId", queryParams.customerId.toString());
 
       const url = `${API_URL}/status/${status}?${params.toString()}`;
-      console.log(`API URL: ${url}`);
+      // console.log(`API URL: ${url}`);
 
       const response = await axiosClient.get<
         any,
         ApiResponse<PagedResult<OrderWithDetailsDTO>>
       >(url);
 
-      console.log(`Raw API response for status ${status}:`, response);
+      // console.log(`Raw API response for status ${status}:`, response);
 
       // Directly return the data from the response without any additional processing
       if (response && response.data && response.data) {
-        console.log(`Response data for status ${status}:`, response.data);
+        // console.log(`Response data for status ${status}:`, response.data);
         return response.data;
       } else {
         console.warn(`No data property in response for status ${status}`);
@@ -320,7 +320,7 @@ export const orderManagementService = {
         };
       }
     } catch (error) {
-      console.error(`Error fetching orders by status ${status}:`, error);
+      // console.error(`Error fetching orders by status ${status}:`, error);
       return {
         items: [],
         totalCount: 0,

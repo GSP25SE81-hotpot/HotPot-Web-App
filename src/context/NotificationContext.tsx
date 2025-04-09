@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/contexts/NotificationContext.tsx
@@ -58,7 +59,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     }
 
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:7163/notificationHub", {
+      .withUrl("https://hpty.vinhuser.one/notificationHub", {
+        // https://localhost:7163
+        // https://hpty.vinhuser.one
         accessTokenFactory: () => {
           const token = auth.accessToken || "";
           // console.log(
@@ -82,7 +85,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         connection.stop();
       }
     };
-  }, [auth?.accessToken]);
+  }, [auth?.accessToken, auth?.user?.id]);
 
   const startConnection = useCallback(
     async (connection: signalR.HubConnection) => {

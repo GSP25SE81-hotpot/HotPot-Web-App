@@ -8,7 +8,6 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import InfoIcon from "@mui/icons-material/Info";
 import LocalDiningIcon from "@mui/icons-material/LocalDining";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import SendIcon from "@mui/icons-material/Send";
 import SortIcon from "@mui/icons-material/Sort";
 import {
@@ -22,7 +21,6 @@ import {
   DialogTitle,
   FormControl,
   FormControlLabel,
-  IconButton,
   MenuItem,
   Radio,
   RadioGroup,
@@ -60,7 +58,6 @@ import {
   StyledCardContent,
 } from "../../components/manager/styles/EquipmentAvailabilityStyles";
 import {
-  EquipmentStatusDto,
   HotPotInventoryDto,
   HotpotStatus,
   NotifyAdminStockRequest,
@@ -97,7 +94,7 @@ const EquipmentAvailability: React.FC = () => {
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
   const [conditionDialogOpen, setConditionDialogOpen] = useState(false);
   const [selectedCondition, setSelectedCondition] = useState("");
-  const [notificationsDrawerOpen, setNotificationsDrawerOpen] = useState(false);
+  // const [notificationsDrawerOpen, setNotificationsDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
@@ -327,23 +324,23 @@ const EquipmentAvailability: React.FC = () => {
   };
 
   // Function to open report dialog
-  const openReportDialog = (equipment: Equipment) => {
-    setSelectedEquipment(equipment);
-    const statusText =
-      typeof equipment.status === "boolean"
-        ? equipment.status
-          ? "có sẵn"
-          : "không có sẵn"
-        : equipment.status.toLowerCase();
-    setReportMessage(
-      `${equipment.name} hiện đang ${statusText}${
-        equipment.condition
-          ? ` và trong tình trạng ${equipment.condition.toLowerCase()}`
-          : ""
-      }.`
-    );
-    setReportDialogOpen(true);
-  };
+  // const openReportDialog = (equipment: Equipment) => {
+  //   setSelectedEquipment(equipment);
+  //   const statusText =
+  //     typeof equipment.status === "boolean"
+  //       ? equipment.status
+  //         ? "có sẵn"
+  //         : "không có sẵn"
+  //       : equipment.status.toLowerCase();
+  //   setReportMessage(
+  //     `${equipment.name} hiện đang ${statusText}${
+  //       equipment.condition
+  //         ? ` và trong tình trạng ${equipment.condition.toLowerCase()}`
+  //         : ""
+  //     }.`
+  //   );
+  //   setReportDialogOpen(true);
+  // };
 
   // Function to open condition update dialog
   const openConditionDialog = (equipment: Equipment) => {
@@ -449,72 +446,72 @@ const EquipmentAvailability: React.FC = () => {
   };
 
   // Function to send overall status report to admin
-  const sendOverallStatusReport = async () => {
-    try {
-      setLoading(true);
-      // Lấy tóm tắt trạng thái thiết bị
-      const summaryResponse = await stockService.getEquipmentStatusSummary();
-      if (
-        summaryResponse &&
-        Array.isArray(summaryResponse) &&
-        summaryResponse.length > 0
-      ) {
-        const summary = summaryResponse;
-        // Tạo tin nhắn báo cáo
-        const availableHotpots =
-          summary.find((s: EquipmentStatusDto) => s.equipmentType === "HotPot")
-            ?.availableCount || 0;
-        const totalHotpots =
-          summary.find((s: EquipmentStatusDto) => s.equipmentType === "HotPot")
-            ?.totalCount || 0;
-        const availableUtensils =
-          summary.find((s: EquipmentStatusDto) => s.equipmentType === "Utensil")
-            ?.availableCount || 0;
-        const totalUtensils =
-          summary.find((s: EquipmentStatusDto) => s.equipmentType === "Utensil")
-            ?.totalCount || 0;
-        const lowStockCount =
-          summary.find((s: EquipmentStatusDto) => s.equipmentType === "Utensil")
-            ?.lowStockCount || 0;
-        const reportMessage = `Báo cáo trạng thái thiết bị:
-- Nồi lẩu: ${availableHotpots}/${totalHotpots} có sẵn
-- Dụng cụ: ${availableUtensils}/${totalUtensils} có sẵn
-- Các mặt hàng sắp hết: ${lowStockCount}`;
-        // Gửi thông báo cho quản trị viên
-        const request: NotifyAdminStockRequest = {
-          notificationType: "StatusChange",
-          equipmentType: "Summary",
-          equipmentId: 0,
-          equipmentName: "Tóm tắt trạng thái thiết bị",
-          reason: reportMessage,
-        };
-        await stockService.notifyAdminDirectly(request);
-        // Hiển thị thông báo
-        setNotification({
-          open: true,
-          message:
-            "Đã gửi báo cáo trạng thái thiết bị tổng thể cho quản trị viên",
-          severity: "info",
-        });
-      } else {
-        throw new Error("Không thể lấy tóm tắt trạng thái thiết bị");
-      }
-    } catch (error) {
-      console.error("Lỗi khi gửi báo cáo trạng thái tổng thể:", error);
-      setNotification({
-        open: true,
-        message: "Không thể gửi báo cáo trạng thái tổng thể",
-        severity: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   const sendOverallStatusReport = async () => {
+  //     try {
+  //       setLoading(true);
+  //       // Lấy tóm tắt trạng thái thiết bị
+  //       const summaryResponse = await stockService.getEquipmentStatusSummary();
+  //       if (
+  //         summaryResponse &&
+  //         Array.isArray(summaryResponse) &&
+  //         summaryResponse.length > 0
+  //       ) {
+  //         const summary = summaryResponse;
+  //         // Tạo tin nhắn báo cáo
+  //         const availableHotpots =
+  //           summary.find((s: EquipmentStatusDto) => s.equipmentType === "HotPot")
+  //             ?.availableCount || 0;
+  //         const totalHotpots =
+  //           summary.find((s: EquipmentStatusDto) => s.equipmentType === "HotPot")
+  //             ?.totalCount || 0;
+  //         const availableUtensils =
+  //           summary.find((s: EquipmentStatusDto) => s.equipmentType === "Utensil")
+  //             ?.availableCount || 0;
+  //         const totalUtensils =
+  //           summary.find((s: EquipmentStatusDto) => s.equipmentType === "Utensil")
+  //             ?.totalCount || 0;
+  //         const lowStockCount =
+  //           summary.find((s: EquipmentStatusDto) => s.equipmentType === "Utensil")
+  //             ?.lowStockCount || 0;
+  //         const reportMessage = `Báo cáo trạng thái thiết bị:
+  // - Nồi lẩu: ${availableHotpots}/${totalHotpots} có sẵn
+  // - Dụng cụ: ${availableUtensils}/${totalUtensils} có sẵn
+  // - Các mặt hàng sắp hết: ${lowStockCount}`;
+  //         // Gửi thông báo cho quản trị viên
+  //         const request: NotifyAdminStockRequest = {
+  //           notificationType: "StatusChange",
+  //           equipmentType: "Summary",
+  //           equipmentId: 0,
+  //           equipmentName: "Tóm tắt trạng thái thiết bị",
+  //           reason: reportMessage,
+  //         };
+  //         await stockService.notifyAdminDirectly(request);
+  //         // Hiển thị thông báo
+  //         setNotification({
+  //           open: true,
+  //           message:
+  //             "Đã gửi báo cáo trạng thái thiết bị tổng thể cho quản trị viên",
+  //           severity: "info",
+  //         });
+  //       } else {
+  //         throw new Error("Không thể lấy tóm tắt trạng thái thiết bị");
+  //       }
+  //     } catch (error) {
+  //       console.error("Lỗi khi gửi báo cáo trạng thái tổng thể:", error);
+  //       setNotification({
+  //         open: true,
+  //         message: "Không thể gửi báo cáo trạng thái tổng thể",
+  //         severity: "error",
+  //       });
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-  // Toggle notifications drawer
-  const toggleNotificationsDrawer = () => {
-    setNotificationsDrawerOpen(!notificationsDrawerOpen);
-  };
+  //   // Toggle notifications drawer
+  //   const toggleNotificationsDrawer = () => {
+  //     setNotificationsDrawerOpen(!notificationsDrawerOpen);
+  //   };
 
   // Check if equipment is available
   const isEquipmentAvailable = (status: string | boolean): boolean => {
@@ -560,7 +557,7 @@ const EquipmentAvailability: React.FC = () => {
               >
                 Lọc
               </Button>
-              <Button
+              {/* <Button
                 variant="contained"
                 startIcon={<NotificationsIcon />}
                 onClick={sendOverallStatusReport}
@@ -571,15 +568,15 @@ const EquipmentAvailability: React.FC = () => {
                 }}
               >
                 Báo cáo trạng thái thiết bị
-              </Button>
-              <IconButton
+              </Button> */}
+              {/* <IconButton
                 color="primary"
                 onClick={toggleNotificationsDrawer}
                 sx={{
                   bgcolor: (theme) => theme.palette.action.hover,
                   borderRadius: "50%",
                 }}
-              ></IconButton>
+              ></IconButton> */}
             </Stack>
           </Stack>
           {/* Sorting controls */}
@@ -847,7 +844,7 @@ const EquipmentAvailability: React.FC = () => {
                               )}
                           </EquipmentDetailsStack>
                         </Stack>
-                        <Button
+                        {/* <Button
                           variant="outlined"
                           size="small"
                           onClick={() => openReportDialog(equipment)}
@@ -859,7 +856,7 @@ const EquipmentAvailability: React.FC = () => {
                           }}
                         >
                           Báo cáo
-                        </Button>
+                        </Button> */}
                       </Stack>
                       {hoveredId === equipment.id && (
                         <HoverInfoContainer>

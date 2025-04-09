@@ -60,16 +60,16 @@ const ManageOrder: React.FC = () => {
 
   // Add this effect to log state changes
   useEffect(() => {
-    console.log("orderCounts state updated:", orderCounts);
+    // console.log("orderCounts state updated:", orderCounts);
   }, [orderCounts]);
 
   useEffect(() => {
     const fetchOrderCounts = async () => {
       try {
         setLoading(true);
-        console.log("Đang tải số lượng đơn hàng...");
+        // console.log("Đang tải số lượng đơn hàng...");
         const counts = await orderManagementService.getOrderCounts();
-        console.log("API trả về số lượng:", counts);
+        // console.log("API trả về số lượng:", counts);
         // Create a new object to ensure React detects the state change
         const newCounts: OrderCountsDTO = {
           pendingCount: counts.pendingCount || 0,
@@ -81,7 +81,7 @@ const ManageOrder: React.FC = () => {
           completedCount: counts.completedCount || 0,
           totalCount: counts.totalCount || 0,
         };
-        console.log("Cập nhật số lượng đơn hàng thành:", newCounts);
+        // console.log("Cập nhật số lượng đơn hàng thành:", newCounts);
         setOrderCounts(newCounts);
         setError(null);
       } catch (err) {
