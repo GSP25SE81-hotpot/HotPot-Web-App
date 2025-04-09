@@ -1,4 +1,3 @@
-import { HubConnectionState } from "@microsoft/signalr";
 import {
   Alert,
   Button,
@@ -18,7 +17,6 @@ import feedbackService, {
   ManagerFeedbackListDto,
 } from "../../api/Services/feedbackService";
 import { toast } from "react-toastify";
-import { feedbackHubService } from "../../api/Services/hubServices";
 import {
   DateText,
   EmptyStateMessage,
@@ -69,71 +67,8 @@ const FeedbackManagement: React.FC = () => {
     responseRate: 0,
   });
 
-  // State for SignalR connection
-  const [hubConnectionState, setHubConnectionState] =
-    useState<HubConnectionState>(HubConnectionState.Disconnected);
-
   // Get manager ID from localStorage
   const managerId = parseInt(localStorage.getItem("uid") || "1");
-  const managerName = localStorage.getItem("userName") || "Manager";
-
-  // Initialize SignalR connection
-  useEffect(() => {
-    const initializeSignalR = async () => {
-      try {
-        // Connect to the feedback hub
-        await feedbackHubService.connect(managerId, "Manager");
-        setHubConnectionState(HubConnectionState.Connected);
-
-        // Register for connection confirmation
-        feedbackHubService.onConnectionRegistered((userId) => {
-          console.log(`Connection registered for user ${userId}`);
-        });
-
-        // Register for approved feedback notifications
-        feedbackHubService.onReceiveApprovedFeedback(
-          (feedbackTitle, adminName) => {
-            setSuccess(
-              `New feedback "${feedbackTitle}" approved by ${adminName}`
-            );
-            // Refresh the feedback list and stats
-            fetchFeedback();
-            fetchStats();
-          }
-        );
-
-        // Register for feedback response notifications
-        feedbackHubService.onReceiveFeedbackResponse(
-          (feedbackId, responseMessage, managerName, responseDate) => {
-            // Update the feedback in the list if it exists
-            setFeedbacks((prevFeedbacks) =>
-              prevFeedbacks.map((fb) =>
-                fb.feedbackId === feedbackId
-                  ? {
-                      ...fb,
-                      response: responseMessage,
-                      responseDate: responseDate,
-                      hasResponse: true,
-                    }
-                  : fb
-              )
-            );
-          }
-        );
-      } catch (err) {
-        console.error("Failed to initialize SignalR:", err);
-        setHubConnectionState(HubConnectionState.Disconnected);
-        setError("Failed to connect to real-time notifications");
-      }
-    };
-
-    initializeSignalR();
-
-    // Cleanup function to disconnect from SignalR
-    return () => {
-      feedbackHubService.disconnect();
-    };
-  }, [managerId]);
 
   // Fetch feedback based on current filter
   const fetchFeedback = useCallback(async () => {
@@ -150,13 +85,6 @@ const FeedbackManagement: React.FC = () => {
       } else {
         response = await feedbackService.getAllFeedback(pageNumber, pageSize);
       }
-
-      // Check if response is directly a PagedResult
-      // if (response.items !== undefined) {
-      //   setFeedbacks(response.items);
-      //   setTotalCount(response.totalCount);
-      // }
-      // Check if response is an ApiResponse with data property
       if (response?.data?.items) {
         setFeedbacks(response.data.items);
         setTotalCount(response.data.totalCount);
@@ -218,17 +146,10 @@ const FeedbackManagement: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await feedbackService.respondToFeedback(
-        feedbackId,
-        {
-          managerId,
-          response: responseText,
-        },
-        {
-          userId: managerId,
-          name: managerName,
-        }
-      );
+      const response = await feedbackService.respondToFeedback(feedbackId, {
+        managerId,
+        response: responseText,
+      });
 
       if (response && response.data) {
         // Update the feedback in the list
@@ -280,13 +201,6 @@ const FeedbackManagement: React.FC = () => {
   return (
     <FeedbackContainer>
       <FeedbackTitle variant="h4">Quản lý Phản hồi Khách hàng</FeedbackTitle>
-
-      {/* Connection status */}
-      {hubConnectionState !== HubConnectionState.Connected && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          Trạng thái kết nối: {hubConnectionState}
-        </Alert>
-      )}
 
       {/* Stats Section */}
       <StatsContainer>

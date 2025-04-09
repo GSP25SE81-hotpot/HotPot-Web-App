@@ -1,7 +1,5 @@
 import {
   Box,
-  Divider,
-  List,
   Paper,
   Stack,
   Table,

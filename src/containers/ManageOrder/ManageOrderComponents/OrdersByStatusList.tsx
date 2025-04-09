@@ -10,12 +10,8 @@ import {
   Button,
   CircularProgress,
   Collapse,
-  FormControl,
   IconButton,
   InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
   Snackbar,
   Table,
   TableBody,
@@ -252,7 +248,7 @@ const OrdersByStatusList: React.FC = () => {
               />
             </LocalizationProvider>
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <FormControl fullWidth size="small">
               <InputLabel>Khách hàng</InputLabel>
               <Select
@@ -271,9 +267,9 @@ const OrdersByStatusList: React.FC = () => {
               >
                 <MenuItem value="">Tất cả khách hàng</MenuItem>
                 {/* Add customer options here */}
-              </Select>
+          {/* </Select>
             </FormControl>
-          </Grid>
+          </Grid>  */}
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Box sx={{ display: "flex", gap: 1 }}>
               <Button
@@ -365,32 +361,34 @@ const OrdersByStatusList: React.FC = () => {
           </Box>
           <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
-              placeholder="Tìm kiếm đơn hàng..."
+              placeholder="Tìm tên khách hàng..."
               size="small"
               value={searchTerm}
               onChange={handleSearch}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-                endAdornment: searchTerm && (
-                  <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setSearchTerm("");
-                        applyFilters();
-                      }}
-                    >
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                sx: { borderRadius: 2 },
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchTerm && (
+                    <InputAdornment position="end">
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setSearchTerm("");
+                          applyFilters();
+                        }}
+                      >
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                  sx: { borderRadius: 2 },
+                },
               }}
-              onKeyPress={(e) => {
+              onKeyUp={(e) => {
                 if (e.key === "Enter") {
                   applyFilters();
                 }
@@ -461,7 +459,7 @@ const OrdersByStatusList: React.FC = () => {
                         direction={sortDescending ? "desc" : "asc"}
                         onClick={() => handleSortChange("date")}
                       >
-                        Ngày đặt
+                        Số tiền
                       </TableSortLabel>
                     </StyledHeaderCell>
                     <StyledHeaderCell>
@@ -470,11 +468,10 @@ const OrdersByStatusList: React.FC = () => {
                         direction={sortDescending ? "desc" : "asc"}
                         onClick={() => handleSortChange("totalprice")}
                       >
-                        Tổng tiền
+                        Sản phẩm
                       </TableSortLabel>
                     </StyledHeaderCell>
-                    <StyledHeaderCell>Sản phẩm</StyledHeaderCell>
-                    <StyledHeaderCell>Vận chuyển</StyledHeaderCell>
+                    <StyledHeaderCell>Trạng thái</StyledHeaderCell>
                     <StyledHeaderCell>Thao tác</StyledHeaderCell>
                   </TableRow>
                 </TableHead>

@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import VisibilityIcon from "@mui/icons-material/Visibility"; // Add this import
+import VisibilityIcon from "@mui/icons-material/Visibility"; // Thêm import này
 import {
   Alert,
   Box,
@@ -23,12 +24,14 @@ import {
   TableRow,
   Typography,
   useTheme,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Add this import
+import { useNavigate } from "react-router-dom"; // Thêm import này
 import equipmentConditionService, {
   CreateEquipmentConditionRequest,
   EquipmentConditionFilterDto,
@@ -47,8 +50,10 @@ import {
   getStatusText,
 } from "../../components/manager/styles/EquipmentConditionLogStyles";
 import NotificationDescriptionDialog from "./NotificationDescriptionDialog";
+import stockService from "../../api/Services/stockService";
+import { HotPotInventoryDto, UtensilDto } from "../../types/stock";
 
-// Define column configuration for sorting
+// Định nghĩa cấu hình cột cho việc sắp xếp
 interface ColumnConfig {
   field: string;
   label: string;
@@ -57,17 +62,17 @@ interface ColumnConfig {
 
 const EquipmentConditionLog: React.FC = () => {
   const theme = useTheme();
-  const navigate = useNavigate(); // Add this hook
+  const navigate = useNavigate(); // Thêm hook này
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null); // Add success message state
+  const [successMessage, setSuccessMessage] = useState<string | null>(null); // Thêm trạng thái thông báo thành công
   const [conditionLogs, setConditionLogs] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [openDialog, setOpenDialog] = useState(false);
   const [sortBy, setSortBy] = useState<string>("damageDeviceId");
-  const [sortDescending, setSortDescending] = useState<boolean>(false);
+  const [sortDescending, setSortDescending] = useState<boolean>(true);
   const [filterParams, setFilterParams] = useState<EquipmentConditionFilterDto>(
     {
       pageNumber: 1,
@@ -87,23 +92,93 @@ const EquipmentConditionLog: React.FC = () => {
     equipmentId: false,
   });
   const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
-  const [currentNotificationLog, setCurrentNotificationLog] =
+  const [currentNotificationLog, _setCurrentNotificationLog] =
     useState<any>(null);
-  const [notificationScheduleType, setNotificationScheduleType] =
+  const [notificationScheduleType, _setNotificationScheduleType] =
     useState<MaintenanceScheduleType>(MaintenanceScheduleType.Regular);
 
-  // Define sortable columns
+  const [hotPotInventoryList, setHotPotInventoryList] = useState<
+    HotPotInventoryDto[]
+  >([]);
+  const [utensilList, setUtensilList] = useState<UtensilDto[]>([]);
+  const [loadingEquipment, setLoadingEquipment] = useState(false);
+  const [selectedEquipmentType, setSelectedEquipmentType] =
+    useState<string>("");
+
+  // Định nghĩa các cột có thể sắp xếp
   const columns: ColumnConfig[] = [
     { field: "damageDeviceId", label: "ID", sortable: true },
-    { field: "name", label: "Name", sortable: false },
-    { field: "equipmentType", label: "Equipment Type", sortable: false },
-    { field: "equipmentName", label: "Equipment Name", sortable: false },
-    { field: "loggedDate", label: "Logged Date", sortable: true },
-    { field: "status", label: "Status", sortable: true },
-    { field: "actions", label: "Actions", sortable: false },
+    { field: "name", label: "Tên", sortable: false },
+    { field: "equipmentType", label: "Loại thiết bị", sortable: false },
+    { field: "equipmentName", label: "Tên thiết bị", sortable: false },
+    { field: "loggedDate", label: "Ngày ghi nhận", sortable: true },
+    { field: "status", label: "Trạng thái", sortable: true },
+    { field: "actions", label: "Hành động", sortable: false },
   ];
 
-  // Fetch condition logs
+  const handleEquipmentTypeChange = (type: string) => {
+    setSelectedEquipmentType(type);
+    if (type === "hotpot") {
+      setNewCondition({
+        ...newCondition,
+        hotPotInventoryId: undefined,
+        utensilId: undefined,
+      });
+    } else if (type === "utensil") {
+      setNewCondition({
+        ...newCondition,
+        utensilId: undefined,
+        hotPotInventoryId: undefined,
+      });
+    } else {
+      setNewCondition({
+        ...newCondition,
+        utensilId: undefined,
+        hotPotInventoryId: undefined,
+      });
+    }
+  };
+
+  const fetchHotPotInventory = async () => {
+    try {
+      setLoadingEquipment(true);
+      const response = await stockService.getAllHotPotInventory();
+      if (response.success) {
+        setHotPotInventoryList(response.data);
+      } else {
+        setError(response.message || "Failed to load hot pot inventory");
+      }
+    } catch (err) {
+      setError("Error fetching hot pot inventory");
+      console.error("Error fetching hot pot inventory:", err);
+    } finally {
+      setLoadingEquipment(false);
+    }
+  };
+
+  const fetchUtensils = async () => {
+    try {
+      setLoadingEquipment(true);
+      const response = await stockService.getAllUtensils();
+      if (response.success) {
+        setUtensilList(response.data);
+      } else {
+        setError(response.message || "Failed to load utensils");
+      }
+    } catch (err) {
+      setError("Error fetching utensils");
+      console.error("Error fetching utensils:", err);
+    } finally {
+      setLoadingEquipment(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHotPotInventory();
+    fetchUtensils();
+  }, []);
+
+  // Lấy danh sách nhật ký điều kiện
   const fetchConditionLogs = async () => {
     try {
       setLoading(true);
@@ -118,35 +193,35 @@ const EquipmentConditionLog: React.FC = () => {
         setPageSize(response.data.pageSize);
       } else {
         setError(
-          response.message || "Failed to fetch equipment condition logs"
+          response.message || "Không thể lấy nhật ký điều kiện thiết bị"
         );
       }
     } catch (err) {
-      setError("An error occurred while fetching equipment condition logs");
-      console.error("Error fetching condition logs:", err);
+      setError("Đã xảy ra lỗi khi lấy nhật ký điều kiện thiết bị");
+      console.error("Lỗi khi lấy nhật ký điều kiện:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial data load
+  // Tải dữ liệu ban đầu
   useEffect(() => {
     fetchConditionLogs();
   }, [filterParams]);
 
-  // Handle filter changes
+  // Xử lý thay đổi bộ lọc
   const handleFilterChange = (name: string, value: any) => {
     setFilterParams((prev) => ({
       ...prev,
       [name]: value,
-      pageNumber: 1, // Reset to first page on filter change
+      pageNumber: 1, // Đặt lại về trang đầu tiên khi thay đổi bộ lọc
     }));
   };
 
-  // Handle sort change
+  // Xử lý thay đổi sắp xếp
   const handleSortChange = (field: string) => {
-    // If clicking the same field, toggle direction
-    // If clicking a new field, sort ascending by that field
+    // Nếu nhấp vào cùng một trường, chuyển đổi hướng
+    // Nếu nhấp vào trường mới, sắp xếp tăng dần theo trường đó
     const newSortDescending = field === sortBy ? !sortDescending : false;
     setSortBy(field);
     setSortDescending(newSortDescending);
@@ -157,13 +232,13 @@ const EquipmentConditionLog: React.FC = () => {
     }));
   };
 
-  // Handle form input changes
+  // Xử lý thay đổi đầu vào biểu mẫu
   const handleInputChange = (name: string, value: any) => {
     setNewCondition((prev) => ({
       ...prev,
       [name]: value,
     }));
-    // Clear validation error when field is filled
+    // Xóa lỗi xác thực khi trường được điền
     if (formErrors[name as keyof typeof formErrors] && value) {
       setFormErrors((prev) => ({
         ...prev,
@@ -172,17 +247,21 @@ const EquipmentConditionLog: React.FC = () => {
     }
   };
 
-  // Validate form
+  // Xác thực biểu mẫu
   const validateForm = () => {
     const errors = {
       name: !newCondition.name,
-      equipmentId: !newCondition.hotPotInventoryId && !newCondition.utensilId,
+      equipmentId:
+        (selectedEquipmentType === "hotpot" &&
+          !newCondition.hotPotInventoryId) ||
+        (selectedEquipmentType === "utensil" && !newCondition.utensilId) ||
+        !selectedEquipmentType,
     };
     setFormErrors(errors);
     return !Object.values(errors).some(Boolean);
   };
 
-  // Handle form submission
+  // Xử lý gửi biểu mẫu
   const handleSubmit = async () => {
     if (!validateForm()) {
       return;
@@ -194,32 +273,33 @@ const EquipmentConditionLog: React.FC = () => {
       );
       if (response.success) {
         setOpenDialog(false);
-        // Reset form
+        // Đặt lại biểu mẫu
         setNewCondition({
           name: "",
           description: "",
           status: MaintenanceStatus.Pending,
+          updateEquipmentStatus: false,
         });
-        // Show success message
-        setSuccessMessage("Condition log created successfully");
-        // Clear success message after 5 seconds
+        // Hiển thị thông báo thành công
+        setSuccessMessage("Nhật ký điều kiện đã được tạo thành công");
+        // Xóa thông báo thành công sau 5 giây
         setTimeout(() => {
           setSuccessMessage(null);
         }, 5000);
-        // Refresh data
+        // Làm mới dữ liệu
         fetchConditionLogs();
       } else {
-        setError(response.message || "Failed to create condition log");
+        setError(response.message || "Không thể tạo nhật ký điều kiện");
       }
     } catch (err) {
-      setError("An error occurred while creating the condition log");
-      console.error("Error creating condition log:", err);
+      setError("Đã xảy ra lỗi khi tạo nhật ký điều kiện");
+      console.error("Lỗi khi tạo nhật ký điều kiện:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle status update
+  // Xử lý cập nhật trạng thái
   const handleStatusUpdate = async (
     id: number,
     newStatus: MaintenanceStatus
@@ -231,107 +311,92 @@ const EquipmentConditionLog: React.FC = () => {
         newStatus
       );
       if (response.success) {
-        // Update the local state to reflect the change
+        // Cập nhật trạng thái cục bộ để phản ánh sự thay đổi
         setConditionLogs((prev) =>
           prev.map((log) =>
             log.damageDeviceId === id ? { ...log, status: newStatus } : log
           )
         );
-        // Show success message
+        // Hiển thị thông báo thành công
         setSuccessMessage(
-          `Status successfully updated to ${getStatusText(newStatus)}`
+          `Trạng thái đã được cập nhật thành công thành ${getStatusText(
+            newStatus
+          )}`
         );
-        // Clear success message after 5 seconds
+        // Xóa thông báo thành công sau 5 giây
         setTimeout(() => {
           setSuccessMessage(null);
         }, 5000);
       } else {
-        setError(response.message || "Failed to update status");
+        setError(response.message || "Không thể cập nhật trạng thái");
       }
     } catch (err) {
-      setError("An error occurred while updating the status");
-      console.error("Error updating status:", err);
+      setError("Đã xảy ra lỗi khi cập nhật trạng thái");
+      console.error("Lỗi khi cập nhật trạng thái:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle notify admin
-  const handleNotifyAdmin = (conditionLog: any) => {
-    setCurrentNotificationLog(conditionLog);
-    setNotificationScheduleType(MaintenanceScheduleType.Regular);
-    setNotificationDialogOpen(true);
-  };
-
-  const handleEmergencyNotify = (conditionLog: any) => {
-    setCurrentNotificationLog(conditionLog);
-    setNotificationScheduleType(MaintenanceScheduleType.Emergency);
-    setNotificationDialogOpen(true);
-  };
-
   const handleNotificationSubmit = async (description: string) => {
     if (!currentNotificationLog) return;
-
     try {
       setLoading(true);
-
-      // Create the notification request with the provided description
+      // Tạo yêu cầu thông báo với mô tả được cung cấp
       const notifyRequest: NotifyAdminRequest = {
         conditionLogId: currentNotificationLog.damageDeviceId,
         equipmentType: currentNotificationLog.equipmentType,
         equipmentName: currentNotificationLog.equipmentName,
         issueName: currentNotificationLog.name,
-        description: description, // Use the description from the dialog
+        description: description, // Sử dụng mô tả từ hộp thoại
         scheduleType: notificationScheduleType,
       };
-
-      // Send the notification through the API
+      // Gửi thông báo qua API
       const response = await equipmentConditionService.notifyAdministrators(
         notifyRequest
       );
-
       if (response.success) {
-        // Show success message
+        // Hiển thị thông báo thành công
         setSuccessMessage(
           notificationScheduleType === MaintenanceScheduleType.Emergency
-            ? "Emergency notification sent to administrators"
-            : "Administrators have been notified"
+            ? "Thông báo khẩn cấp đã được gửi đến quản trị viên"
+            : "Quản trị viên đã được thông báo"
         );
-
-        // Clear success message after 5 seconds
+        // Xóa thông báo thành công sau 5 giây
         setTimeout(() => {
           setSuccessMessage(null);
         }, 5000);
-
-        // Close the dialog
+        // Đóng hộp thoại
         setNotificationDialogOpen(false);
       } else {
-        setError(response.message || "Failed to notify administrators");
+        setError(response.message || "Không thể thông báo cho quản trị viên");
       }
     } catch (err: any) {
-      // Handle validation errors specifically
+      // Xử lý lỗi xác thực cụ thể
       if (err.response && err.response.status === 400) {
         const errorData = err.response.data;
         if (errorData.errors && errorData.errors.Description) {
-          setError(`Validation error: ${errorData.errors.Description[0]}`);
+          setError(`Lỗi xác thực: ${errorData.errors.Description[0]}`);
         } else {
-          setError("Invalid request: Please check all required fields");
+          setError(
+            "Yêu cầu không hợp lệ: Vui lòng kiểm tra tất cả các trường bắt buộc"
+          );
         }
       } else {
-        setError("An error occurred while notifying administrators");
+        setError("Đã xảy ra lỗi khi thông báo cho quản trị viên");
       }
-      console.error("Error notifying administrators:", err);
+      console.error("Lỗi khi thông báo cho quản trị viên:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Navigate to details page
+  // Điều hướng đến trang chi tiết
   const navigateToDetails = (id: number) => {
     navigate(`/equipment-condition-log/${id}`);
   };
 
-  // Render sort icon for column headers
+  // Hiển thị biểu tượng sắp xếp cho tiêu đề cột
   const renderSortIcon = (field: string) => {
     if (sortBy !== field) return null;
     return sortDescending ? (
@@ -361,113 +426,30 @@ const EquipmentConditionLog: React.FC = () => {
             WebkitTextFillColor: "transparent",
           }}
         >
-          Equipment Condition Management
+          Quản lý điều kiện thiết bị
         </Typography>
-        {/* Filter Controls */}
+        {/* Điều khiển bộ lọc */}
         <StyledPaper sx={{ p: 3, mb: 4 }}>
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 12, md: 12 }}>
               <StyledTextField
                 fullWidth
-                label="Equipment Type"
-                value={filterParams.equipmentType || ""}
+                label="Tên thiết bị"
+                value={filterParams.equipmentName || ""}
                 onChange={(e) =>
-                  handleFilterChange("equipmentType", e.target.value)
+                  handleFilterChange("equipmentName", e.target.value)
                 }
                 size="small"
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={filterParams.status || ""}
-                  label="Status"
-                  onChange={(e) => handleFilterChange("status", e.target.value)}
-                >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value={MaintenanceStatus.Pending}>Pending</MenuItem>
-                  <MenuItem value={MaintenanceStatus.InProgress}>
-                    In Progress
-                  </MenuItem>
-                  <MenuItem value={MaintenanceStatus.Completed}>
-                    Completed
-                  </MenuItem>
-                  <MenuItem value={MaintenanceStatus.Cancelled}>
-                    Cancelled
-                  </MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <DatePicker
-                label="Start Date"
-                value={
-                  filterParams.startDate
-                    ? new Date(filterParams.startDate)
-                    : null
-                }
-                onChange={(date) =>
-                  handleFilterChange(
-                    "startDate",
-                    date ? date.toISOString().split("T")[0] : null
-                  )
-                }
-                slotProps={{
-                  textField: {
-                    size: "small",
-                    fullWidth: true,
-                  },
-                }}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <DatePicker
-                label="End Date"
-                value={
-                  filterParams.endDate ? new Date(filterParams.endDate) : null
-                }
-                onChange={(date) =>
-                  handleFilterChange(
-                    "endDate",
-                    date ? date.toISOString().split("T")[0] : null
-                  )
-                }
-                slotProps={{
-                  textField: {
-                    size: "small",
-                    fullWidth: true,
-                  },
-                }}
-              />
-            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}></Grid>
+
             <Grid
               size={{ xs: 12, md: 6 }}
               container
               justifyContent="flex-end"
               alignItems="baseline"
-            >
-              <StyledButton
-                variant="outlined"
-                onClick={() =>
-                  setFilterParams({
-                    pageNumber: 1,
-                    pageSize: 10,
-                    sortBy: "damageDeviceId",
-                    sortDescending: false,
-                  })
-                }
-                sx={{ mr: 2 }}
-              >
-                Reset
-              </StyledButton>
-              <StyledButton
-                variant="contained"
-                onClick={() => fetchConditionLogs()}
-              >
-                Apply Filters
-              </StyledButton>
-            </Grid>
+            ></Grid>
           </Grid>
         </StyledPaper>
         <Box
@@ -483,10 +465,10 @@ const EquipmentConditionLog: React.FC = () => {
             startIcon={<AddIcon />}
             onClick={() => setOpenDialog(true)}
           >
-            Add New Condition Log
+            Thêm thiết bị bảo trì
           </StyledButton>
           <Typography variant="body2">
-            Showing {conditionLogs.length} of {totalCount} entries
+            Hiển thị {conditionLogs.length} trong số {totalCount} mục
           </Typography>
         </Box>
         {error && (
@@ -518,7 +500,7 @@ const EquipmentConditionLog: React.FC = () => {
           </Alert>
         )}
         <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-          Equipment Condition Logs
+          Nhật ký điều kiện thiết bị
         </Typography>
         <StyledPaper sx={{ mb: 4 }}>
           {loading && conditionLogs.length === 0 ? (
@@ -586,40 +568,24 @@ const EquipmentConditionLog: React.FC = () => {
                                 navigateToDetails(log.damageDeviceId)
                               }
                             >
-                              View Details
+                              Xem chi tiết
                             </StyledButton>
-                            <StyledButton
-                              size="small"
-                              variant="outlined"
-                              onClick={() => handleNotifyAdmin(log)}
-                            >
-                              Notify Admin
-                            </StyledButton>
-                            {log.status === MaintenanceStatus.Pending && (
-                              <StyledButton
-                                size="small"
-                                variant="outlined"
-                                color="error"
-                                onClick={() => handleEmergencyNotify(log)}
-                              >
-                                Emergency
-                              </StyledButton>
-                            )}
-                            {log.status !== MaintenanceStatus.Completed && (
-                              <StyledButton
-                                size="small"
-                                variant="contained"
-                                color="success"
-                                onClick={() =>
-                                  handleStatusUpdate(
-                                    log.damageDeviceId,
-                                    MaintenanceStatus.Completed
-                                  )
-                                }
-                              >
-                                Mark Complete
-                              </StyledButton>
-                            )}
+                            {log.status !== MaintenanceStatus.Cancelled &&
+                              log.status !== MaintenanceStatus.Completed && (
+                                <StyledButton
+                                  size="small"
+                                  variant="contained"
+                                  color="success"
+                                  onClick={() =>
+                                    handleStatusUpdate(
+                                      log.damageDeviceId,
+                                      MaintenanceStatus.Completed
+                                    )
+                                  }
+                                >
+                                  Đánh dấu hoàn thành
+                                </StyledButton>
+                              )}
                           </Box>
                         </TableCell>
                       </TableRow>
@@ -627,7 +593,7 @@ const EquipmentConditionLog: React.FC = () => {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={7} align="center">
-                        No condition logs found
+                        Không tìm thấy nhật ký điều kiện nào
                       </TableCell>
                     </TableRow>
                   )}
@@ -635,10 +601,10 @@ const EquipmentConditionLog: React.FC = () => {
               </StyledTable>
             </TableContainer>
           )}
-          {/* Pagination Controls */}
+          {/* Điều khiển phân trang */}
           <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Typography variant="body2">Rows per page:</Typography>
+              <Typography variant="body2">Số hàng mỗi trang:</Typography>
               <Select
                 value={pageSize}
                 size="small"
@@ -670,10 +636,10 @@ const EquipmentConditionLog: React.FC = () => {
                     }));
                   }}
                 >
-                  Previous
+                  Trước
                 </StyledButton>
                 <Typography variant="body2" sx={{ alignSelf: "center" }}>
-                  Page {pageNumber} of {Math.ceil(totalCount / pageSize)}
+                  Trang {pageNumber} / {Math.ceil(totalCount / pageSize)}
                 </Typography>
                 <StyledButton
                   size="small"
@@ -687,13 +653,13 @@ const EquipmentConditionLog: React.FC = () => {
                     }));
                   }}
                 >
-                  Next
+                  Tiếp
                 </StyledButton>
               </Box>
             </Box>
           </Box>
         </StyledPaper>
-        {/* Add Condition Log Dialog */}
+        {/* Hộp thoại thêm nhật ký điều kiện */}
         <StyledDialog
           open={openDialog}
           onClose={() => setOpenDialog(false)}
@@ -701,25 +667,25 @@ const EquipmentConditionLog: React.FC = () => {
           fullWidth
         >
           <DialogTitle sx={{ fontWeight: 600 }}>
-            New Equipment Condition Log
+            Nhật ký điều kiện thiết bị mới
           </DialogTitle>
           <DialogContent>
             <Grid container spacing={3} sx={{ mt: 1 }}>
               <Grid size={{ xs: 12 }}>
                 <StyledTextField
                   fullWidth
-                  label="Issue Name"
+                  label="Tên vấn đề"
                   required
                   value={newCondition.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   error={formErrors.name}
-                  helperText={formErrors.name ? "Issue name is required" : ""}
+                  helperText={formErrors.name ? "Tên vấn đề là bắt buộc" : ""}
                 />
               </Grid>
               <Grid size={{ xs: 12 }}>
                 <StyledTextField
                   fullWidth
-                  label="Description"
+                  label="Mô tả"
                   multiline
                   rows={3}
                   value={newCondition.description || ""}
@@ -728,126 +694,134 @@ const EquipmentConditionLog: React.FC = () => {
                   }
                 />
               </Grid>
+
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth error={formErrors.equipmentId}>
-                  <InputLabel>Equipment Type</InputLabel>
+                  <InputLabel>Loại thiết bị</InputLabel>
                   <Select
-                    value={
-                      newCondition.hotPotInventoryId !== undefined
-                        ? "hotpot"
-                        : newCondition.utensilId !== undefined
-                        ? "utensil"
-                        : ""
-                    }
-                    label="Equipment Type"
-                    onChange={(e) => {
-                      const equipmentType = e.target.value;
-                      // Reset both equipment IDs and set the selected type
-                      if (equipmentType === "hotpot") {
-                        setNewCondition((prev) => ({
-                          ...prev,
-                          hotPotInventoryId: 0, // Initialize with 0
-                          utensilId: undefined, // Clear the other type
-                        }));
-                      } else if (equipmentType === "utensil") {
-                        setNewCondition((prev) => ({
-                          ...prev,
-                          utensilId: 0, // Initialize with 0
-                          hotPotInventoryId: undefined, // Clear the other type
-                        }));
-                      } else {
-                        // If no type is selected, clear both
-                        setNewCondition((prev) => ({
-                          ...prev,
-                          hotPotInventoryId: undefined,
-                          utensilId: undefined,
-                        }));
-                      }
-                    }}
+                    value={selectedEquipmentType}
+                    label="Loại thiết bị"
+                    onChange={(e) => handleEquipmentTypeChange(e.target.value)}
                   >
-                    <MenuItem value="">Select Type</MenuItem>
-                    <MenuItem value="hotpot">Hot Pot</MenuItem>
-                    <MenuItem value="utensil">Utensil</MenuItem>
+                    <MenuItem value="">Chọn loại</MenuItem>
+                    <MenuItem value="hotpot">Nồi lẩu</MenuItem>
+                    <MenuItem value="utensil">Dụng cụ</MenuItem>
                   </Select>
                   {formErrors.equipmentId && (
                     <FormHelperText>
-                      Equipment selection is required
+                      Lựa chọn thiết bị là bắt buộc
                     </FormHelperText>
                   )}
                 </FormControl>
               </Grid>
+
               <Grid size={{ xs: 12, sm: 6 }}>
-                {/* Only show ID field if an equipment type is selected */}
-                {(newCondition.hotPotInventoryId !== undefined ||
-                  newCondition.utensilId !== undefined) && (
-                  <StyledTextField
-                    fullWidth
-                    type="number"
-                    label={
-                      newCondition.hotPotInventoryId !== undefined
-                        ? "Hot Pot ID"
-                        : "Utensil ID"
-                    }
-                    required
-                    value={
-                      newCondition.hotPotInventoryId !== undefined
-                        ? newCondition.hotPotInventoryId === 0
-                          ? ""
-                          : newCondition.hotPotInventoryId
-                        : newCondition.utensilId === 0
-                        ? ""
-                        : newCondition.utensilId
-                    }
-                    onChange={(e) => {
-                      const value =
-                        e.target.value === "" ? 0 : parseInt(e.target.value);
-                      if (newCondition.hotPotInventoryId !== undefined) {
-                        handleInputChange("hotPotInventoryId", value);
-                      } else if (newCondition.utensilId !== undefined) {
-                        handleInputChange("utensilId", value);
+                {loadingEquipment ? (
+                  <Box display="flex" justifyContent="center">
+                    <CircularProgress size={24} />
+                  </Box>
+                ) : selectedEquipmentType === "hotpot" ? (
+                  <FormControl fullWidth error={formErrors.equipmentId}>
+                    <InputLabel>Nồi lẩu</InputLabel>
+                    <Select
+                      value={newCondition.hotPotInventoryId || ""}
+                      label="Nồi lẩu"
+                      onChange={(e) =>
+                        handleInputChange(
+                          "hotPotInventoryId",
+                          Number(e.target.value)
+                        )
                       }
-                    }}
-                    error={formErrors.equipmentId}
-                    helperText={
-                      formErrors.equipmentId ? "Equipment ID is required" : ""
-                    }
-                  />
-                )}
+                    >
+                      <MenuItem value="">Chọn nồi lẩu</MenuItem>
+                      {hotPotInventoryList.map((item) => (
+                        <MenuItem
+                          key={item.hotPotInventoryId}
+                          value={item.hotPotInventoryId}
+                        >
+                          {item.hotpotName} (Số series: {item.seriesNumber})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {formErrors.equipmentId && (
+                      <FormHelperText>Vui lòng chọn nồi lẩu</FormHelperText>
+                    )}
+                  </FormControl>
+                ) : selectedEquipmentType === "utensil" ? (
+                  <FormControl fullWidth error={formErrors.equipmentId}>
+                    <InputLabel>Dụng cụ</InputLabel>
+                    <Select
+                      value={newCondition.utensilId || ""}
+                      label="Dụng cụ"
+                      onChange={(e) =>
+                        handleInputChange("utensilId", Number(e.target.value))
+                      }
+                    >
+                      <MenuItem value="">Chọn dụng cụ</MenuItem>
+                      {utensilList.map((item) => (
+                        <MenuItem key={item.utensilId} value={item.utensilId}>
+                          {item.name} (Loại: {item.utensilTypeName})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {formErrors.equipmentId && (
+                      <FormHelperText>Vui lòng chọn dụng cụ</FormHelperText>
+                    )}
+                  </FormControl>
+                ) : null}
               </Grid>
+
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth>
-                  <InputLabel>Status</InputLabel>
+                  <InputLabel>Trạng thái</InputLabel>
                   <Select
                     value={newCondition.status}
-                    label="Status"
+                    label="Trạng thái"
                     onChange={(e) =>
                       handleInputChange("status", e.target.value)
                     }
                   >
                     <MenuItem value={MaintenanceStatus.Pending}>
-                      Pending
+                      Đang chờ
                     </MenuItem>
                     <MenuItem value={MaintenanceStatus.InProgress}>
-                      In Progress
+                      Đang tiến hành
                     </MenuItem>
                     <MenuItem value={MaintenanceStatus.Completed}>
-                      Completed
+                      Hoàn thành
                     </MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
             </Grid>
           </DialogContent>
+          <Box sx={{ px: 3, pb: 1 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={newCondition.updateEquipmentStatus || false}
+                  onChange={(e: any) =>
+                    setNewCondition({
+                      ...newCondition,
+                      updateEquipmentStatus: e.target.checked,
+                    })
+                  }
+                  name="updateEquipmentStatus"
+                />
+              }
+              label="Tự động cập nhật trạng thái thiết bị"
+            />
+          </Box>
           <DialogActions sx={{ p: 3 }}>
             <StyledButton onClick={() => setOpenDialog(false)}>
-              Cancel
+              Hủy bỏ
             </StyledButton>
             <StyledButton
               variant="contained"
               onClick={handleSubmit}
               disabled={loading}
             >
-              {loading ? <CircularProgress size={24} /> : "Add Condition Log"}
+              {loading ? <CircularProgress size={24} /> : "Thêm thiết bị"}
             </StyledButton>
           </DialogActions>
         </StyledDialog>

@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/useEquipmentNotifications.ts
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { equipmentStockHubService } from "../api/Services/hubServices";
+import { jwtDecode } from "jwt-decode";
 
 export interface EquipmentNotification {
   id: number;
@@ -27,27 +29,46 @@ export const useEquipmentNotifications = (
   );
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Connect to the hub
   const connect = useCallback(async () => {
     try {
       setLoading(true);
+
       // Get the user info from localStorage
       const userDataLocal = localStorage.getItem("userInfor");
       const userData = userDataLocal ? JSON.parse(userDataLocal) : null;
 
-      if (userData && userData.userId) {
-        // Connect to the hub
-        await equipmentStockHubService.connect(
-          userData.userId,
-          userData.role || "User"
-        );
+      let userId: number | null = null;
+      let userRole: string | undefined = undefined;
+
+      if (userData) {
+        // Try to get ID from direct property or access token
+        if (userData.id) {
+          userId = parseInt(userData.id, 10);
+          userRole = userData.role;
+        } else if (userData.accessToken) {
+          try {
+            const decoded: any = jwtDecode(userData.accessToken);
+            userId = parseInt(decoded.id, 10);
+            userRole = decoded.role;
+          } catch (decodeError) {
+            console.error("Error decoding JWT:", decodeError);
+          }
+        } else if (userData.userId) {
+          userId = parseInt(userData.userId, 10);
+          userRole = userData.role;
+        }
+      }
+
+      if (userId && !isNaN(userId)) {
+        // Connect to the hub - userRole is optional now
+        await equipmentStockHubService.connect(userId, userRole);
 
         // Register as admin if the user is an admin or manager
-        if (userData.role === "Admin" || userData.role === "Manager") {
-          await equipmentStockHubService.registerAdminConnection(
-            userData.userId
-          );
+        if (userRole === "Admin" || userRole === "Manager") {
+          await equipmentStockHubService.registerAdminConnection(userId);
         }
 
         setConnected(true);
@@ -56,8 +77,12 @@ export const useEquipmentNotifications = (
         }
       } else {
         console.error(
-          "User information not found. Cannot connect to notifications."
+          "Could not determine valid user ID from localStorage data:",
+          userData
         );
+        if (showToasts) {
+          toast.error("Failed to identify user for notifications");
+        }
       }
     } catch (error) {
       console.error("Error connecting to equipment stock hub:", error);
@@ -68,7 +93,6 @@ export const useEquipmentNotifications = (
       setLoading(false);
     }
   }, [showToasts]);
-
   // Disconnect from the hub
   const disconnect = useCallback(async () => {
     try {
@@ -128,6 +152,38 @@ export const useEquipmentNotifications = (
     },
     [showToasts]
   );
+
+  // Add this effect to check authentication status
+  useEffect(() => {
+    const checkAuth = () => {
+      const userDataLocal = localStorage.getItem("userInfor");
+      const userData = userDataLocal ? JSON.parse(userDataLocal) : null;
+      setIsAuthenticated(!!userData && !!userData.id);
+    };
+
+    checkAuth();
+
+    // Listen for storage changes (in case user logs in/out in another tab)
+    const handleStorageChange = () => {
+      checkAuth();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  // Modify your auto-connect effect
+  useEffect(() => {
+    if (autoConnect && isAuthenticated) {
+      connect();
+    }
+
+    return () => {
+      disconnect();
+    };
+  }, [autoConnect, isAuthenticated, connect, disconnect]);
 
   // Set up listeners for notifications
   useEffect(() => {

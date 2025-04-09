@@ -266,7 +266,7 @@ const UnallocatedOrdersList: React.FC = () => {
       fetchData();
       setSnackbar({
         open: true,
-        message: `Đơn hàng #${selectedOrder.orderId} đã được phân công thành công`,
+        message: `Đơn hàng #${selectedOrder.orderCode} đã được phân công thành công`,
         severity: "success",
       });
       handleCloseDialog();
@@ -325,26 +325,28 @@ const UnallocatedOrdersList: React.FC = () => {
             size="small"
             value={searchTerm}
             onChange={handleSearch}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-              endAdornment: searchTerm && (
-                <InputAdornment position="end">
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setSearchTerm("");
-                      applySearch();
-                    }}
-                  >
-                    <ClearIcon fontSize="small" />
-                  </IconButton>
-                </InputAdornment>
-              ),
-              sx: { borderRadius: 2 },
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+                endAdornment: searchTerm && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setSearchTerm("");
+                        applySearch();
+                      }}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: { borderRadius: 2 },
+              },
             }}
             onKeyUp={(e) => {
               if (e.key === "Enter") {
@@ -405,8 +407,8 @@ const UnallocatedOrdersList: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {orders.map((order) => (
-                    <StyledTableRow key={order.orderId}>
-                      <IdCell>#{order.orderId}</IdCell>
+                    <StyledTableRow key={order.orderCode}>
+                      <IdCell>#{order.orderCode}</IdCell>
                       <StyledTableCell>
                         <CustomerName>
                           {order.userName || "Không xác định"}
@@ -501,7 +503,7 @@ const UnallocatedOrdersList: React.FC = () => {
             pb: 1,
           }}
         >
-          Phân công đơn hàng #{selectedOrder?.orderId}
+          Phân công đơn hàng #{selectedOrder?.orderCode}
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3, pb: 2 }}>
           <Box sx={{ mt: 1, minWidth: 300 }}>
@@ -545,6 +547,21 @@ const UnallocatedOrdersList: React.FC = () => {
                     }}
                   >
                     {staffMember.name}
+                    <Box
+                      component="span"
+                      sx={{
+                        ml: 2,
+                        bgcolor: "action.hover",
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1,
+                        fontSize: "0.75rem",
+                        fontWeight: "medium",
+                        color: "text.secondary",
+                      }}
+                    >
+                      {staffMember.assignmentCount} lần
+                    </Box>
                   </MenuItem>
                 ))}
               </Select>

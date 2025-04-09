@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosClient from "../axiosInstance";
-import { feedbackHubService } from "./hubServices";
+// import { feedbackHubService } from "./hubServices";
 const API_URL = "manager/feedback";
 
 // Updated to match backend UserInfoDto
@@ -191,8 +191,8 @@ const feedbackService = {
   // Respond to feedback
   respondToFeedback: async (
     feedbackId: number,
-    request: RespondToFeedbackRequest,
-    userInfo: { userId: number; name: string }
+    request: RespondToFeedbackRequest
+    // userInfo: { userId: number; name: string }
   ): Promise<ApiResponse<ManagerFeedbackDetailDto>> => {
     try {
       const response = await axiosClient.post(
@@ -201,15 +201,15 @@ const feedbackService = {
       );
 
       // If the response is successful and we have the customer's user ID
-      if (response.data.success && response.data.data?.user?.userId) {
-        // Send a real-time notification to the customer using the imported feedbackHubService
-        await feedbackHubService.notifyFeedbackResponse(
-          response.data.data.user.userId,
-          feedbackId,
-          request.response,
-          userInfo.name
-        );
-      }
+      // if (response.data.success && response.data.data?.user?.userId) {
+      //   // Send a real-time notification to the customer using the imported feedbackHubService
+      //   await feedbackHubService.notifyFeedbackResponse(
+      //     response.data.data.user.userId,
+      //     feedbackId,
+      //     request.response,
+      //     userInfo.name
+      //   );
+      // }
       return response.data;
     } catch (error) {
       console.error(`Error responding to feedback ${feedbackId}:`, error);

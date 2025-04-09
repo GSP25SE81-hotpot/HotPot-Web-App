@@ -10,8 +10,8 @@ import {
 
 // Chat Hub URL
 const CHAT_HUB = "/chatHub";
-
 export type HubCallback = (...args: unknown[]) => void;
+
 export interface ChatMessageReceived {
   messageId: number;
   senderId: number;
@@ -31,60 +31,75 @@ export class ChatRealTimeService extends ChatService {
       managerName?: string
     ) => void
   > = new Set();
-  private typingCallbacks: Set<(sessionId: number, isTyping: boolean) => void> =
-    new Set();
   private readCallbacks: Set<(messageId: number) => void> = new Set();
 
   /**
    * Initialize the SignalR connection for chat
-   * @param userId The user ID
-   * @param userType The user type (manager, customer, etc.)
    */
-  public async initializeConnection(
-    userId: number,
-    userType: string
-  ): Promise<void> {
+  // In your chatRealTimeService.ts
+  public async initializeConnection(token?: string): Promise<void> {
     try {
-      // Validate parameters
-      if (!userId || isNaN(userId)) {
-        throw new Error(`Invalid userId: ${userId}. Must be a valid number.`);
-      }
-
-      if (!userType) {
-        throw new Error("userType cannot be null or empty");
-      }
-
-      console.log(
-        `Attempting to connect to chat hub as ${userType} with ID ${userId}`
-      );
-
       // Start the connection if not already connected
       if (!this.isConnected) {
-        await signalRService.startConnection(CHAT_HUB);
-
+        console.log("Starting SignalR connection to chat hub...");
+        // Get the token from the parameter or try to get it from localStorage
+        const authToken = token || this.getAuthToken();
+        if (!authToken) {
+          console.error("No authentication token found. Please log in again.");
+          throw new Error("Authentication token not found");
+        }
+        await signalRService.startConnection(CHAT_HUB, authToken);
         try {
           console.log("Connection established, registering user...");
-          await signalRService.registerUserConnection(
-            CHAT_HUB,
-            userId,
-            userType
-          );
+
+          // CHANGE THIS LINE - Use the correct method name that exists on the server
+          // For example, if the server has "RegisterUserConnection" instead:
+          await signalRService.invoke(CHAT_HUB, "RegisterUserConnection");
+
+          // Or if you need to pass the user ID:
+          // const userId = this.getUserId(); // Implement this method to get the user ID
+          // await signalRService.invoke(CHAT_HUB, "RegisterUserConnection", userId);
+
           this.isConnected = true;
-          console.log(
-            `Successfully connected and registered to chat hub as ${userType} with ID ${userId}`
-          );
+          console.log("User registered successfully with chat hub");
           // Register event handlers
           this.registerEventHandlers();
+          // Log connection state
+          console.log(
+            "Connection state after registration:",
+            this.isConnected ? "Connected" : "Disconnected"
+          );
         } catch (registerError) {
           console.error("Error registering user connection:", registerError);
           // Optionally disconnect since registration failed
           await signalRService.stopConnection(CHAT_HUB);
+          this.isConnected = false;
           throw registerError;
         }
       }
     } catch (error) {
       console.error("Error initializing chat connection:", error);
+      this.isConnected = false;
       throw error;
+    }
+  }
+
+  /**
+   * Get the authentication token from localStorage
+   * @returns The authentication token or null if not found
+   */
+  private getAuthToken(): string | null {
+    try {
+      // Try to get the token from userInfor in localStorage
+      const userInfor = localStorage.getItem("userInfor");
+      if (userInfor) {
+        const parsedUserInfo = JSON.parse(userInfor);
+        return parsedUserInfo.accessToken || null;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error getting auth token:", error);
+      return null;
     }
   }
 
@@ -106,13 +121,8 @@ export class ChatRealTimeService extends ChatService {
     // Handle incoming messages
     signalRService.on(CHAT_HUB, "ReceiveMessage", ((...args: unknown[]) => {
       // Cast the arguments to the expected types
-      const [messageId, senderId, receiverId, message, createdAt] = args as [
-        number,
-        number,
-        number,
-        string,
-        string
-      ];
+      const [messageId, senderId, senderName, receiverId, message, createdAt] =
+        args as [number, number, string, number, string, string];
 
       const chatMessage: ChatMessageDto = {
         chatMessageId: messageId,
@@ -121,8 +131,8 @@ export class ChatRealTimeService extends ChatService {
         message: message,
         isRead: false,
         createdAt: new Date(createdAt),
-        senderName: "", // This will be filled by the backend
-        receiverName: "", // This will be filled by the backend
+        senderName: senderName,
+        receiverName: "", // This will be filled by the UI if needed
       };
 
       // Notify all registered callbacks
@@ -133,12 +143,6 @@ export class ChatRealTimeService extends ChatService {
     signalRService.on(CHAT_HUB, "MessageRead", ((...args: unknown[]) => {
       const [messageId] = args as [number];
       this.readCallbacks.forEach((callback) => callback(messageId));
-    }) as HubCallback);
-
-    // Handle typing indicators
-    signalRService.on(CHAT_HUB, "UserTyping", ((...args: unknown[]) => {
-      const [sessionId, isTyping] = args as [number, boolean];
-      this.typingCallbacks.forEach((callback) => callback(sessionId, isTyping));
     }) as HubCallback);
 
     // Handle chat status changes (accepted, ended, etc.)
@@ -159,9 +163,17 @@ export class ChatRealTimeService extends ChatService {
     }) as HubCallback);
 
     // Handle connection errors
-    signalRService.on(CHAT_HUB, "ChatError", ((...args: unknown[]) => {
+    signalRService.on(CHAT_HUB, "chaterror", ((...args: unknown[]) => {
       const [errorMessage] = args as [string];
       console.error("Chat hub error:", errorMessage);
+    }) as HubCallback);
+
+    // Handle connection registration confirmation
+    signalRService.on(CHAT_HUB, "ConnectionRegistered", ((
+      ...args: unknown[]
+    ) => {
+      const [userId] = args as [number];
+      console.log(`Connection registered for user ${userId}`);
     }) as HubCallback);
   }
 
@@ -199,9 +211,11 @@ export class ChatRealTimeService extends ChatService {
   /**
    * Mark a message as read via SignalR
    * @param messageId The ID of the message to mark as read
+   * @param userId The ID of the user marking the message as read
    */
   public async markMessageAsReadRealTime(
-    messageId: number
+    messageId: number,
+    userId: number
   ): Promise<ApiResponse<boolean>> {
     try {
       // Ensure connection is established
@@ -209,8 +223,8 @@ export class ChatRealTimeService extends ChatService {
         throw new Error("Not connected to chat hub");
       }
 
-      // Send via SignalR
-      await signalRService.invoke(CHAT_HUB, "MarkAsRead", messageId);
+      // Send via SignalR - match the server method signature
+      await signalRService.invoke(CHAT_HUB, "MarkAsRead", messageId, userId);
 
       // Also send via HTTP API to ensure persistence
       return await this.markMessageAsRead(messageId);
@@ -221,37 +235,13 @@ export class ChatRealTimeService extends ChatService {
   }
 
   /**
-   * Send a typing indicator
-   * @param sessionId The chat session ID
-   * @param isTyping Whether the user is typing
-   */
-  public async sendTypingIndicator(
-    sessionId: number,
-    isTyping: boolean
-  ): Promise<void> {
-    try {
-      // Ensure connection is established
-      if (!this.isConnected) {
-        throw new Error("Not connected to chat hub");
-      }
-
-      await signalRService.invoke(
-        CHAT_HUB,
-        "SendTypingIndicator",
-        sessionId,
-        isTyping
-      );
-    } catch (error) {
-      console.error("Error sending typing indicator:", error);
-    }
-  }
-
-  /**
    * End a chat session via SignalR
    * @param sessionId The ID of the session to end
+   * @param userId The ID of the user ending the session
    */
   public async endChatSessionRealTime(
-    sessionId: number
+    sessionId: number,
+    userId: number
   ): Promise<ApiResponse<ChatSessionDto>> {
     try {
       // Ensure connection is established
@@ -259,8 +249,8 @@ export class ChatRealTimeService extends ChatService {
         throw new Error("Not connected to chat hub");
       }
 
-      // Send via SignalR
-      await signalRService.invoke(CHAT_HUB, "EndChat", sessionId);
+      // Send via SignalR - match the server method signature
+      await signalRService.invoke(CHAT_HUB, "EndChat", sessionId, userId);
 
       // Also send via HTTP API to ensure persistence
       return await this.endChatSession(sessionId);
@@ -291,7 +281,12 @@ export class ChatRealTimeService extends ChatService {
    * @param callback The callback function
    */
   public onStatusChange(
-    callback: (status: string, sessionId: number) => void
+    callback: (
+      status: string,
+      sessionId: number,
+      managerId?: number,
+      managerName?: string
+    ) => void
   ): void {
     this.statusCallbacks.add(callback);
   }
@@ -301,29 +296,14 @@ export class ChatRealTimeService extends ChatService {
    * @param callback The callback function to remove
    */
   public offStatusChange(
-    callback: (status: string, sessionId: number) => void
+    callback: (
+      status: string,
+      sessionId: number,
+      managerId?: number,
+      managerName?: string
+    ) => void
   ): void {
     this.statusCallbacks.delete(callback);
-  }
-
-  /**
-   * Register a callback for typing indicators
-   * @param callback The callback function
-   */
-  public onTypingIndicator(
-    callback: (sessionId: number, isTyping: boolean) => void
-  ): void {
-    this.typingCallbacks.add(callback);
-  }
-
-  /**
-   * Remove a typing indicator callback
-   * @param callback The callback function to remove
-   */
-  public offTypingIndicator(
-    callback: (sessionId: number, isTyping: boolean) => void
-  ): void {
-    this.typingCallbacks.delete(callback);
   }
 
   /**
@@ -340,6 +320,64 @@ export class ChatRealTimeService extends ChatService {
    */
   public offMessageRead(callback: (messageId: number) => void): void {
     this.readCallbacks.delete(callback);
+  }
+
+  /**
+   * Initiate a new chat session
+   * @param customerId The customer's user ID
+   * @param topic The chat topic
+   */
+  public async initiateChatRealTime(
+    customerId: number,
+    topic: string
+  ): Promise<ApiResponse<ChatSessionDto>> {
+    try {
+      // Ensure connection is established
+      if (!this.isConnected) {
+        throw new Error("Not connected to chat hub");
+      }
+
+      // Create the request object
+      const request = { customerId, topic };
+
+      // Send via SignalR
+      await signalRService.invoke(CHAT_HUB, "InitiateChat", request);
+
+      // Also send via HTTP API to ensure persistence
+      return await this.createChatSession(customerId, topic);
+    } catch (error) {
+      console.error("Error initiating chat:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Accept a chat as a manager
+   * @param sessionId The chat session ID
+   * @param managerId The manager's user ID
+   */
+  public async acceptChatRealTime(
+    sessionId: number,
+    managerId: number
+  ): Promise<ApiResponse<ChatSessionDto>> {
+    try {
+      // Ensure connection is established
+      if (!this.isConnected) {
+        throw new Error("Not connected to chat hub");
+      }
+
+      // Create the request object
+      const request = { managerId };
+
+      // Send via SignalR
+      await signalRService.invoke(CHAT_HUB, "AcceptChat", request, sessionId);
+
+      // Also send via HTTP API to ensure persistence
+      return await this.assignManagerToSession(sessionId, managerId);
+    } catch (error) {
+      console.error("Error accepting chat:", error);
+      throw error;
+    }
   }
 }
 

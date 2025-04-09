@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/hooks/useReplacementNotifications.ts
 import { useEffect, useState } from "react";
 import { equipmentHubService } from "../api/Services/hubServices";
@@ -22,7 +23,7 @@ export const useReplacementNotifications = (
   useEffect(() => {
     const connectToHub = async () => {
       try {
-        await equipmentHubService.connect(userId, userType);
+        await equipmentHubService.connect();
         setIsConnected(true);
         setError(null);
       } catch (err) {

@@ -3,55 +3,57 @@ import { Route, Routes } from "react-router-dom";
 import config from "../configs";
 // import Home from "../pages/Home/HomePage";
 
-import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/ManageEquipmentStockPage";
-import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock/EquipmentAvailabilityPage";
-import { CheckDeviceAfterReturnPage } from "../pages/Staff/CheckDeviceAfterReturn/CheckDeviceAfterReturnPage";
-import { ChatWithCustomerPage } from "../pages/Manager/ChatWithCustomer/ChatWithCustomerPage";
-import { DepositConfirmationPage } from "../pages/Staff/DepositConfirmation/DepositConfirmationPage";
-import { PaymentManagementPage } from "../pages/Staff/PaymentManagement/PaymentManagementPage";
-import { EquipmentConditionLogPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionLogPage";
-import { EquipmentStatusReportPage } from "../pages/Manager/EquipmentStatusReport/EquipmentStatusReportPage";
-import { OrderHistoryPage } from "../pages/Staff/OrderHistory/OrderHistoryPage";
-import { FeedbackManagementPage } from "../pages/Manager/FeedbackManagement/FeedbackManagementPage";
+import HotpotComboDetailPage from "../pages/Admin/ComboDetail/HotpotComboDetailPage";
+import CreateComboPage from "../pages/Admin/Combohotpot/CreateComboPage";
+import CreateHotpotPage from "../pages/Admin/CreateHotpot/CreateHotpotPage";
+import CreateIngredientsPage from "../pages/Admin/CreateIngredients/CreateIngredientsPage";
+import DashboardPage from "../pages/Admin/Dashboard/DashboardPage";
 import FeedbackDetailPage from "../pages/Admin/Feedback/FeedbackDetailPage";
 import FeedbackPage from "../pages/Admin/Feedback/FeedbackPage";
-import CreateComboPage from "../pages/Admin/Combohotpot/CreateComboPage";
-import CreateIngredientsPage from "../pages/Admin/CreateIngredients/CreateIngredientsPage";
-import { ManageReplacementPage } from "../pages/Manager/ManageReplacement/ManageReplacementPage";
+import OrderPage from "../pages/Admin/ManageOrder/OrderPage";
 import ManageUserPage from "../pages/Admin/ManageUser/ManageUserPage";
-import { AuthenticatePage } from "../pages/Global/Authenticate/SignIn";
+import TableHotpotComboPage from "../pages/Admin/TableCombo/TableHotpoComboPage";
+import TableIngredientTypePage from "../pages/Admin/TableIngredientType/TableIngredientTypePage";
 import TableIngredientsPage from "../pages/Admin/TableIngredients/TableIngredientsPage";
 import TableHotpotPage from "../pages/Admin/Tablehotpot/TableHotpotPage";
-import TableHotpotComboPage from "../pages/Admin/TableCombo/TableHotpoComboPage";
-import CreateHotpotPage from "../pages/Admin/CreateHotpot/CreateHotpotPage";
-import DashboardPage from "../pages/Admin/Dashboard/DashboardPage";
-import OrderPage from "../pages/Admin/ManageOrder/OrderPage";
-import HotpotComboDetailPage from "../pages/Admin/ComboDetail/HotpotComboDetailPage";
-import TableIngredientTypePage from "../pages/Admin/TableIngredientType/TableIngredientTypePage";
+import { AuthenticatePage } from "../pages/Global/Authenticate/SignIn";
+import { ChatWithCustomerPage } from "../pages/Manager/ChatWithCustomer/ChatWithCustomerPage";
+import { EquipmentConditionLogPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionLogPage";
+import { FeedbackManagementPage } from "../pages/Manager/FeedbackManagement/FeedbackManagementPage";
+import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock/EquipmentAvailabilityPage";
+import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/ManageEquipmentStockPage";
+import { ManageReplacementPage } from "../pages/Manager/ManageReplacement/ManageReplacementPage";
+import { CheckDeviceAfterReturnPage } from "../pages/Staff/CheckDeviceAfterReturn/CheckDeviceAfterReturnPage";
+import { OrderHistoryPage } from "../pages/Staff/OrderHistory/OrderHistoryPage";
+import { PaymentManagementPage } from "../pages/Staff/PaymentManagement/PaymentManagementPage";
 
 // import CheckRoute from "./CheckRoute";
 // import RequireAuth from "./RequireAuth";
 // import { Role } from "./Roles";
-import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
-import WorkAssignmentSchedulePage from "../pages/Manager/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
-import { AssignOrderPage } from "../pages/Staff/AssignOrder/AssignOrderPage";
-import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliveryPage";
-import { ManagerRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManagerRentalReturnPage";
-import { UnassignedPickupsPage } from "../pages/Manager/ManagerRentalReturnPage/UnassignedPickupsPage";
-import { CurrentAssignmentsPage } from "../pages/Manager/ManagerRentalReturnPage/CurrentAssignmentsPage";
-import { RentalHistoryPage } from "../pages/Manager/ManagerRentalReturnPage/RentalHistoryPage";
-import { LateFeeCalculatorPage } from "../pages/Manager/ManagerRentalReturnPage/LateFeeCalculatorPage";
-import { ReturnDateAdjustmentPage } from "../pages/Manager/ManagerRentalReturnPage/ReturnDateAdjustmentPage";
-import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
-import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
-import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
-import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
 import OrderDetail from "../containers/ManageOrder/SubPage/OrderDetail";
+import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
 import TableHotpotDetailPage from "../pages/Admin/TableHotpotDetail/TableHotpotDetailPage";
 import TableMaintenanceHotpotDetailPage from "../pages/Admin/TableMaintenanceHotpot/TableMaintenanceHopotPage";
-import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
-import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
 import { EquipmentConditionDetailPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionDetailPage";
+import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
+import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
+import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
+import { CurrentAssignmentsPage } from "../pages/Manager/ManagerRentalReturnPage/CurrentAssignmentsPage";
+import { LateFeeCalculatorPage } from "../pages/Manager/ManagerRentalReturnPage/LateFeeCalculatorPage";
+import { ManagerRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManagerRentalReturnPage";
+import { RentalHistoryPage } from "../pages/Manager/ManagerRentalReturnPage/RentalHistoryPage";
+import { ReturnDateAdjustmentPage } from "../pages/Manager/ManagerRentalReturnPage/ReturnDateAdjustmentPage";
+import { UnassignedPickupsPage } from "../pages/Manager/ManagerRentalReturnPage/UnassignedPickupsPage";
+import StaffAssignmentPage from "../pages/Manager/WorkAssignmentSchedule/StaffAssignmentPage";
+import WorkAssignmentSchedulePage from "../pages/Manager/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
+import { AssignOrderPage } from "../pages/Staff/AssignOrder/AssignOrderPage";
+import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
+import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
+import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
+import { PickupReplacementPage } from "../pages/Staff/PickupReplacement/PickupReplacementPage";
+import { ReplacementDetailPage } from "../pages/Staff/PickupReplacement/ReplacementDetailPage";
+import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliveryPage";
+import NotificationsPage from "../pages/Global/Notification/NotificationsPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -61,7 +63,11 @@ const AppRoute: React.FC = () => {
         path={config.managerRoutes.home}
         element={<AuthenticatePage />}
       />
-
+      <Route
+        key={"Notification"}
+        path={config.authRoutes.notification}
+        element={<NotificationsPage />}
+      />
       <Route key="layoutManager" element={<ManagerLayout />}>
         <Route
           path={config.managerRoutes.manageEquipmentStock}
@@ -80,6 +86,10 @@ const AppRoute: React.FC = () => {
           element={<WorkAssignmentSchedulePage />}
         />
         <Route
+          path={config.managerRoutes.staffAssignment}
+          element={<StaffAssignmentPage />}
+        />
+        <Route
           path={config.managerRoutes.customerChat}
           element={<ChatWithCustomerPage />}
         />
@@ -90,10 +100,6 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.equipmentConditionDetail}
           element={<EquipmentConditionDetailPage />}
-        />
-        <Route
-          path={config.managerRoutes.equipmentStatusReport}
-          element={<EquipmentStatusReportPage />}
         />
         <Route
           path={config.managerRoutes.feedbackManagement}
@@ -242,10 +248,6 @@ const AppRoute: React.FC = () => {
         element={<ManagerLayout />}
       >
         <Route
-          path={config.staffRoutes.depositConfirmation}
-          element={<DepositConfirmationPage />}
-        />
-        <Route
           path={config.staffRoutes.paymentManagement}
           element={<PaymentManagementPage />}
         />
@@ -277,10 +279,14 @@ const AppRoute: React.FC = () => {
           path={config.staffRoutes.pickupRental}
           element={<PickupRentalPage />}
         />
-        {/* <Route
-          path={config.staffRoutes.retrieveRentalEquipment}
-          element={<RetrieveRentalEquipmentPage />}
-        /> */}
+        <Route
+          path={config.staffRoutes.pickupReplacement}
+          element={<PickupReplacementPage />}
+        />
+        <Route
+          path={config.staffRoutes.replacementDetail}
+          element={<ReplacementDetailPage />}
+        />
       </Route>
     </Routes>
   );

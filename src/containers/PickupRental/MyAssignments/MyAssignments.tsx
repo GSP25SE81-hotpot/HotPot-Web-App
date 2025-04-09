@@ -34,7 +34,6 @@ import { formatDate } from "../../../utils/formatters";
 const MyAssignments: React.FC = () => {
   const navigate = useNavigate();
   const [pendingOnly, setPendingOnly] = useState(false);
-
   const { data, loading, error, execute } = useApi(
     rentalService.getMyAssignments
   );
@@ -63,7 +62,7 @@ const MyAssignments: React.FC = () => {
     });
   };
 
-  // Check if data and data.data exist before accessing length
+  // Kiểm tra xem data và data.data có tồn tại trước khi truy cập length
   const assignments = data?.data || [];
   const hasAssignments = assignments.length > 0;
 
@@ -78,7 +77,7 @@ const MyAssignments: React.FC = () => {
               color="primary"
             />
           }
-          label="Show pending pickups only"
+          label="Chỉ hiển thị lấy hàng đang chờ xử lý"
         />
       </FilterContainer>
 
@@ -90,19 +89,19 @@ const MyAssignments: React.FC = () => {
           {!hasAssignments ? (
             <EmptyStateContainer>
               <Typography variant="h6" fontWeight={600}>
-                No assignments found
+                Không tìm thấy nhiệm vụ nào
               </Typography>
               <CardDescription>
                 {pendingOnly
-                  ? "You don't have any pending pickups assigned to you."
-                  : "You don't have any assignments yet."}
+                  ? "Bạn không có nhiệm vụ lấy hàng đang chờ xử lý nào được giao."
+                  : "Bạn chưa có nhiệm vụ nào."}
               </CardDescription>
               <AnimatedButton
                 variant="outlined"
                 color="primary"
                 onClick={() => setPendingOnly(!pendingOnly)}
               >
-                {pendingOnly ? "View All Assignments" : "Check Pending Only"}
+                {pendingOnly ? "Xem tất cả nhiệm vụ" : "Chỉ xem đang chờ xử lý"}
               </AnimatedButton>
             </EmptyStateContainer>
           ) : (
@@ -110,12 +109,12 @@ const MyAssignments: React.FC = () => {
               <StyledTable>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Assignment ID</TableCell>
-                    <TableCell>Customer</TableCell>
-                    <TableCell>Equipment</TableCell>
-                    <TableCell>Expected Return</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Actions</TableCell>
+                    <TableCell>Mã nhiệm vụ</TableCell>
+                    <TableCell>Khách hàng</TableCell>
+                    <TableCell>Thiết bị</TableCell>
+                    <TableCell>Ngày trả dự kiến</TableCell>
+                    <TableCell>Trạng thái</TableCell>
+                    <TableCell>Hành động</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -135,7 +134,7 @@ const MyAssignments: React.FC = () => {
                           {assignment.equipmentName}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          Quantity: {assignment.quantity}
+                          Số lượng: {assignment.quantity}
                         </Typography>
                       </TableCell>
                       <TableCell>
@@ -147,7 +146,9 @@ const MyAssignments: React.FC = () => {
                         <StatusContainer>
                           <AssignmentChip
                             label={
-                              assignment.completedDate ? "Completed" : "Pending"
+                              assignment.completedDate
+                                ? "Hoàn thành"
+                                : "Đang chờ"
                             }
                             status={
                               assignment.completedDate ? "completed" : "pending"
@@ -166,7 +167,7 @@ const MyAssignments: React.FC = () => {
                             }
                             sx={{ minWidth: "80px" }}
                           >
-                            View
+                            Xem
                           </AnimatedButton>
                           {!assignment.completedDate && (
                             <AnimatedButton
@@ -176,7 +177,7 @@ const MyAssignments: React.FC = () => {
                               onClick={() => handleRecordReturn(assignment)}
                               sx={{ minWidth: "120px" }}
                             >
-                              Record Return
+                              Ghi nhận trả
                             </AnimatedButton>
                           )}
                         </ActionButtonsContainer>

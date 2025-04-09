@@ -35,7 +35,6 @@ import {
 } from "../../../api/Services/orderManagementService";
 import {
   ActionsContainer,
-  CountBadge,
   CustomerName,
   CustomerPhone,
   DialogActionButton,
@@ -52,7 +51,7 @@ import {
   StyledTableCell,
   StyledTableContainer,
   StyledTableRow,
-} from "../../../components/manager/styles/PendingDeliveriesListStyles"; // You'll need to create this
+} from "../../../components/manager/styles/PendingDeliveriesListStyles";
 import { formatDate } from "../../../utils/formatters";
 
 const PendingDeliveriesList: React.FC = () => {
@@ -233,11 +232,12 @@ const PendingDeliveriesList: React.FC = () => {
         }}
       >
         <ListTitle variant="h6">
-          Giao hàng đang chờ <CountBadge>{totalCount}</CountBadge>
+          Giao hàng đang chờ
+          {/* <CountBadge>{totalCount}</CountBadge> */}
         </ListTitle>
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
-            placeholder="Tìm kiếm giao hàng..."
+            placeholder="Tìm tên khách hàng..."
             size="small"
             value={searchTerm}
             onChange={handleSearch}
@@ -383,7 +383,7 @@ const PendingDeliveriesList: React.FC = () => {
                               color="primary"
                               onClick={() => {
                                 // Navigate to order details
-                                window.location.href = `/manage-order/${delivery.orderId}`;
+                                window.location.href = `/orders/${delivery.orderId}`;
                               }}
                               sx={{
                                 backgroundColor: (theme) =>
@@ -534,6 +534,14 @@ const getStatusTranslation = (status: string): string => {
     Completed: "Hoàn thành",
     Cancelled: "Đã hủy",
     Returning: "Đang trả",
+
+    "1": "Đang chờ",
+    "2": "Đang xử lý",
+    "3": "Đang giao",
+    "4": "Đã giao",
+    "5": "Hoàn thành",
+    "6": "Đã hủy",
+    "7": "Đang trả",
   };
 
   return statusMap[status] || status;

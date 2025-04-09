@@ -4,9 +4,9 @@ import WorkAssignmentSchedule from "../../../containers/WorkAssignmentSchedule/W
 
 const WorkAssignmentSchedulePage: React.FC = () => {
   return (
-      <Box>
-        <WorkAssignmentSchedule />
-      </Box>
+    <Box>
+      <WorkAssignmentSchedule />
+    </Box>
   );
 };
 

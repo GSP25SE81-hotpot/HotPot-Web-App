@@ -7,7 +7,6 @@ import {
   alpha,
   Box,
   Button,
-  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -16,9 +15,6 @@ import {
   Divider,
   FormControl,
   InputLabel,
-  List,
-  ListItem,
-  ListItemText,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -33,7 +29,6 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-
   AllocateOrderRequest,
   DeliveryStatusUpdateRequest,
   DeliveryTimeUpdateRequest,
@@ -46,7 +41,6 @@ import {
   ActionButton,
   ActionButtonsContainer,
   BackButton,
-  CustomerEmail,
   CustomerName,
   DeliveryChip,
   DetailCard,
@@ -58,7 +52,6 @@ import {
   HeaderPaper,
   InfoLabel,
   InfoValue,
-  ItemSectionTitle,
   LoadingContainer,
   OrderInfoGrid,
   OrderInfoItem,
@@ -109,7 +102,7 @@ const OrderDetailView: React.FC = () => {
         setLoading(true);
         // Get order details
         const orderData = await orderManagementService.getOrderWithDetails(
-          parseInt(orderId)
+          orderId
         );
         setOrder(orderData);
         // Get available staff and handle both array and single object responses
@@ -196,7 +189,7 @@ const OrderDetailView: React.FC = () => {
     try {
       setUpdating(true);
       const updatedOrder = await orderManagementService.updateOrderStatus(
-        order.orderId,
+        order.orderCode,
         newStatus
       );
       setOrder({ ...order, ...updatedOrder });
@@ -232,7 +225,7 @@ const OrderDetailView: React.FC = () => {
     try {
       setUpdating(true);
       const request: AllocateOrderRequest = {
-        orderId: order.orderId,
+        orderId: Number(order.orderId),
         staffId: selectedStaffId,
       };
       const shippingOrder = await orderManagementService.allocateOrderToStaff(
@@ -388,7 +381,7 @@ const OrderDetailView: React.FC = () => {
         <Grid size={{ xs: 12 }}>
           <HeaderPaper>
             <HeaderContainer>
-              <OrderTitle variant="h5">Đơn hàng #{order.orderId}</OrderTitle>
+              <OrderTitle variant="h5">Đơn hàng #{order.orderCode}</OrderTitle>
               <StatusChip
                 label={getVietnameseOrderStatusLabel(order.status)}
                 status={order.status}
@@ -452,8 +445,8 @@ const OrderDetailView: React.FC = () => {
               <CustomerName>
                 {order.userName || "Khách hàng không xác định"}
               </CustomerName>
-              <SectionTitle>ID người dùng</SectionTitle>
-              <SectionValue>{order.userId || "Không có ID"}</SectionValue>
+              {/* <SectionTitle>ID người dùng</SectionTitle>
+              <SectionValue>{order.userId || "Không có ID"}</SectionValue> */}
               <SectionTitle>Địa chỉ giao hàng</SectionTitle>
               <SectionValue>{order.address || "Không có địa chỉ"}</SectionValue>
               {order.notes && (
@@ -555,8 +548,8 @@ const OrderDetailView: React.FC = () => {
         {/* Order Items */}
         <Grid size={{ xs: 12 }}>
           <DetailCard>
-            <StyledCardHeader title="Các mặt hàng trong đơn" />
-            <Divider />
+            {/* <StyledCardHeader title="Các mặt hàng trong đơn" /> */}
+            {/* <Divider /> */}
             <StyledCardContent>
               <OrderItemsContainer>
                 {/* Order Summary */}

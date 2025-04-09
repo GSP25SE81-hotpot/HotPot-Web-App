@@ -25,6 +25,7 @@ export interface StaffAvailabilityDto {
   email: string;
   phone: string;
   isAvailable: boolean;
+  assignmentCount: number;
 }
 
 export interface StaffAvailabilityStatus {

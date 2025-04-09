@@ -247,10 +247,11 @@ const stockService = {
 
   getEquipmentStatusSummary: async (): Promise<EquipmentStatusDto[]> => {
     try {
-      const response = await axiosClient.get<ApiResponse<EquipmentStatusDto[]>>(
-        `${BASE_URL}/status-summary`
-      );
-      return response.data.data;
+      const response = await axiosClient.get<
+        any,
+        ApiResponse<EquipmentStatusDto[]>
+      >(`${BASE_URL}/status-summary`);
+      return response.data;
     } catch (error) {
       console.error("Error fetching equipment status summary:", error);
       throw error;
@@ -261,14 +262,14 @@ const stockService = {
     request: NotifyAdminStockRequest
   ): Promise<ApiResponse<boolean>> => {
     try {
-      const response = await axiosClient.post<ApiResponse<boolean>>(
+      const response = await axiosClient.post<any, ApiResponse<boolean>>(
         `${BASE_URL}/notify-admin`,
         request
       );
 
       // If the response is already properly formatted
-      if (response.data && typeof response.data.success === "boolean") {
-        return response.data;
+      if (response.data && typeof response.success === "boolean") {
+        return response;
       }
 
       // Fallback for unwrapped responses

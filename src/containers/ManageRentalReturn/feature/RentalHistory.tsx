@@ -12,7 +12,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import { format } from "date-fns";
 import {
   getRentalHistoryByUser,
-  getRentalHistoryByUtensil,
   getRentalHistoryByHotpot,
   getAllRentalHistory,
 } from "../../../api/Services/rentalService";
@@ -63,7 +62,7 @@ const TabPanel = (props: TabPanelProps) => {
 const RentalHistory: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [userId, setUserId] = useState("");
-  const [utensilId, setUtensilId] = useState("");
+  // const [utensilId, setUtensilId] = useState("");
   const [hotpotId, setHotpotId] = useState("");
   // Initialize with an empty array to avoid undefined
   const [rentalHistory, setRentalHistory] = useState<RentalHistoryItem[]>([]);
@@ -102,8 +101,6 @@ const RentalHistory: React.FC = () => {
     if (newValue === 0) {
       setUserId("");
     } else if (newValue === 1) {
-      setUtensilId("");
-    } else if (newValue === 2) {
       setHotpotId("");
     }
     // Load all rental history again
@@ -119,28 +116,6 @@ const RentalHistory: React.FC = () => {
     setError(null);
     try {
       const history = await getRentalHistoryByUser(parseInt(userId, 10));
-      // Ensure history is an array
-      setRentalHistory(Array.isArray(history) ? history : []);
-      setSearchPerformed(true);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Không thể tải lịch sử thuê"
-      );
-      setRentalHistory([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUtensilSearch = async () => {
-    if (!utensilId) {
-      setError("Vui lòng nhập ID dụng cụ");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const history = await getRentalHistoryByUtensil(parseInt(utensilId, 10));
       // Ensure history is an array
       setRentalHistory(Array.isArray(history) ? history : []);
       setSearchPerformed(true);
@@ -183,8 +158,6 @@ const RentalHistory: React.FC = () => {
     if (tabValue === 0) {
       setUserId("");
     } else if (tabValue === 1) {
-      setUtensilId("");
-    } else if (tabValue === 2) {
       setHotpotId("");
     }
   };
@@ -203,7 +176,6 @@ const RentalHistory: React.FC = () => {
           centered
         >
           <StyledTab label="Theo người dùng" />
-          <StyledTab label="Theo dụng cụ" />
           <StyledTab label="Theo lẩu" />
         </StyledTabs>
         <TabPanel value={tabValue} index={0}>
@@ -244,45 +216,8 @@ const RentalHistory: React.FC = () => {
             )}
           </SearchContainer>
         </TabPanel>
+
         <TabPanel value={tabValue} index={1}>
-          <SearchContainer>
-            <SearchField
-              label="ID dụng cụ"
-              variant="outlined"
-              size="small"
-              value={utensilId}
-              onChange={(e) => setUtensilId(e.target.value)}
-              placeholder="Nhập ID dụng cụ"
-              fullWidth
-            />
-            <SearchButton
-              variant="contained"
-              color="primary"
-              startIcon={
-                loading ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : (
-                  <SearchIcon />
-                )
-              }
-              onClick={handleUtensilSearch}
-              disabled={loading}
-            >
-              {loading ? "Đang tìm..." : "Tìm kiếm"}
-            </SearchButton>
-            {searchPerformed && (
-              <SearchButton
-                variant="outlined"
-                color="secondary"
-                onClick={handleClearSearch}
-                disabled={loading}
-              >
-                Xóa tìm kiếm
-              </SearchButton>
-            )}
-          </SearchContainer>
-        </TabPanel>
-        <TabPanel value={tabValue} index={2}>
           <SearchContainer>
             <SearchField
               label="ID lẩu"

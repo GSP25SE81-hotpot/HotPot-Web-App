@@ -2,26 +2,23 @@
 import { useState, useEffect, useCallback } from "react";
 import chatRealTimeService from "../api/Services/chatRealTimeService";
 import { ChatMessageDto, ChatSessionDto } from "../types/chat";
+import useAuth from "./useAuth";
 
-export const useChatRealTime = (userId: number, userType: string) => {
+export const useChatRealTime = (userId: number) => {
+  const { auth } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [messages, setMessages] = useState<Map<number, ChatMessageDto[]>>(
-    new Map()
-  );
-  const [typingStatus, setTypingStatus] = useState<Map<number, boolean>>(
     new Map()
   );
   const [chatSessions, setChatSessions] = useState<ChatSessionDto[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Initialize connection
-  // In useChatRealTime.tsx
   useEffect(() => {
     const connect = async () => {
       try {
         setLoading(true);
-
         // Add validation for userId
         if (!userId || isNaN(userId)) {
           setError(
@@ -31,20 +28,48 @@ export const useChatRealTime = (userId: number, userType: string) => {
           return;
         }
 
-        console.log(
-          `Attempting to connect to chat hub as ${userType} with ID ${userId}`
-        );
-        await chatRealTimeService.initializeConnection(userId, userType);
+        console.log(`Attempting to connect to chat hub with ID ${userId}`);
+
+        // Get the token from auth
+        const token = auth?.accessToken;
+        if (!token) {
+          setError(
+            new Error("Authentication token not found. Please log in again.")
+          );
+          setLoading(false);
+          return;
+        }
+
+        await chatRealTimeService.initializeConnection(token);
         setIsConnected(true);
         setError(null);
 
+        console.log("Connection established, loading active sessions...");
+
         // Load active sessions
-        const response = await chatRealTimeService.getActiveSessions();
-        if (response.success && response.data) {
-          setChatSessions(response.data);
+        try {
+          const response = await chatRealTimeService.getActiveSessions();
+          if (response.success && response.data) {
+            console.log(`Loaded ${response.data.length} active sessions`);
+            setChatSessions(response.data);
+
+            // Log if there are no active sessions
+            if (response.data.length === 0) {
+              console.log(
+                "Connected successfully, but there are no active chat sessions"
+              );
+            }
+          } else {
+            console.warn("No active sessions found or failed to load sessions");
+          }
+        } catch (sessionError) {
+          console.error("Error loading active sessions:", sessionError);
         }
+        setIsConnected(true);
         setLoading(false);
       } catch (err) {
+        console.error("Failed to connect to chat service:", err);
+        setIsConnected(false);
         setError(
           err instanceof Error
             ? err
@@ -54,19 +79,25 @@ export const useChatRealTime = (userId: number, userType: string) => {
       }
     };
 
-    // Only connect if userId is valid
-    if (userId && !isNaN(userId)) {
+    // Only connect if userId is valid and we have an auth token
+    if (userId && !isNaN(userId) && auth?.accessToken) {
       connect();
-    } else {
+    } else if (!auth?.accessToken) {
+      setError(
+        new Error("Authentication token not found. Please log in again.")
+      );
+      setLoading(false);
+    } else if (!userId || isNaN(userId)) {
       setError(new Error("Invalid user ID. Please provide a valid user ID."));
       setLoading(false);
     }
 
     // Cleanup on unmount
     return () => {
+      console.log("Disconnecting from chat hub...");
       chatRealTimeService.disconnect();
     };
-  }, [userId, userType]);
+  }, [userId, auth?.accessToken]);
 
   // Register message handler
   useEffect(() => {
@@ -75,8 +106,10 @@ export const useChatRealTime = (userId: number, userType: string) => {
         // Find the session ID for this message
         const sessionId = chatSessions.find(
           (session) =>
-            session.customerId === message.senderUserId ||
-            session.customerId === message.receiverUserId
+            (session.customerId === message.senderUserId &&
+              session.managerId === message.receiverUserId) ||
+            (session.customerId === message.receiverUserId &&
+              session.managerId === message.senderUserId)
         )?.chatSessionId;
 
         if (!sessionId) return prevMessages;
@@ -107,26 +140,16 @@ export const useChatRealTime = (userId: number, userType: string) => {
     };
   }, [chatSessions]);
 
-  // Register typing indicator handler
-  useEffect(() => {
-    const handleTypingIndicator = (sessionId: number, isTyping: boolean) => {
-      setTypingStatus((prev) => {
-        const newStatus = new Map(prev);
-        newStatus.set(sessionId, isTyping);
-        return newStatus;
-      });
-    };
-
-    chatRealTimeService.onTypingIndicator(handleTypingIndicator);
-
-    return () => {
-      chatRealTimeService.offTypingIndicator(handleTypingIndicator);
-    };
-  }, []);
+  // src/hooks/useChatRealTime.ts (continued)
 
   // Register status change handler
   useEffect(() => {
-    const handleStatusChange = (status: string, sessionId: number) => {
+    const handleStatusChange = (
+      status: string,
+      sessionId: number,
+      managerId?: number,
+      managerName?: string
+    ) => {
       if (status === "ended") {
         // Remove ended session
         setChatSessions((prev) =>
@@ -137,7 +160,12 @@ export const useChatRealTime = (userId: number, userType: string) => {
         setChatSessions((prev) =>
           prev.map((session) =>
             session.chatSessionId === sessionId
-              ? { ...session, isActive: true }
+              ? {
+                  ...session,
+                  isActive: true,
+                  managerId: managerId || session.managerId,
+                  managerName: managerName || session.managerName,
+                }
               : session
           )
         );
@@ -156,16 +184,13 @@ export const useChatRealTime = (userId: number, userType: string) => {
     const handleMessageRead = (messageId: number) => {
       setMessages((prev) => {
         const newMessages = new Map(prev);
-
         // Update all sessions
         for (const [sessionId, sessionMessages] of newMessages.entries()) {
           const updatedMessages = sessionMessages.map((msg) =>
             msg.chatMessageId === messageId ? { ...msg, isRead: true } : msg
           );
-
           newMessages.set(sessionId, updatedMessages);
         }
-
         return newMessages;
       });
     };
@@ -182,20 +207,20 @@ export const useChatRealTime = (userId: number, userType: string) => {
     try {
       setLoading(true);
       const response = await chatRealTimeService.getSessionMessages(sessionId);
-
       if (response.success && response.data) {
-        const messageData = response.data; // Create a local variable that TypeScript knows won't change
+        const messageData = response.data;
         setMessages((prev) => {
           const newMessages = new Map(prev);
           newMessages.set(sessionId, messageData);
           return newMessages;
         });
       }
-
       setLoading(false);
+      return true;
     } catch (err) {
       console.error("Error loading session messages:", err);
       setLoading(false);
+      return false;
     }
   }, []);
 
@@ -248,85 +273,120 @@ export const useChatRealTime = (userId: number, userType: string) => {
   );
 
   // Mark message as read
-  const markMessageAsRead = useCallback(async (messageId: number) => {
-    try {
-      await chatRealTimeService.markMessageAsReadRealTime(messageId);
-
-      // Update local state immediately for better UX
-      setMessages((prev) => {
-        const newMessages = new Map(prev);
-
-        // Update all sessions
-        for (const [sessionId, sessionMessages] of newMessages.entries()) {
-          const updatedMessages = sessionMessages.map((msg) =>
-            msg.chatMessageId === messageId ? { ...msg, isRead: true } : msg
-          );
-
-          newMessages.set(sessionId, updatedMessages);
+  const markMessageAsRead = useCallback(
+    async (messageId: number) => {
+      try {
+        if (!userId) {
+          throw new Error("User ID is required to mark a message as read");
         }
 
-        return newMessages;
-      });
+        await chatRealTimeService.markMessageAsReadRealTime(messageId, userId);
 
-      return true;
-    } catch (err) {
-      console.error("Error marking message as read:", err);
-      return false;
-    }
-  }, []);
+        // Update local state immediately for better UX
+        setMessages((prev) => {
+          const newMessages = new Map(prev);
+          // Update all sessions
+          for (const [sessionId, sessionMessages] of newMessages.entries()) {
+            const updatedMessages = sessionMessages.map((msg) =>
+              msg.chatMessageId === messageId ? { ...msg, isRead: true } : msg
+            );
+            newMessages.set(sessionId, updatedMessages);
+          }
+          return newMessages;
+        });
 
-  // Send typing indicator
-  const sendTypingIndicator = useCallback(
-    async (sessionId: number, isTyping: boolean) => {
-      try {
-        await chatRealTimeService.sendTypingIndicator(sessionId, isTyping);
         return true;
       } catch (err) {
-        console.error("Error sending typing indicator:", err);
+        console.error("Error marking message as read:", err);
         return false;
       }
     },
-    []
+    [userId]
   );
 
   // End chat session
-  const endChatSession = useCallback(async (sessionId: number) => {
-    try {
-      const response = await chatRealTimeService.endChatSessionRealTime(
-        sessionId
-      );
-
-      if (response.success) {
-        // Remove session from local state
-        setChatSessions((prev) =>
-          prev.filter((session) => session.chatSessionId !== sessionId)
-        );
-        return true;
-      }
-      return false;
-    } catch (err) {
-      console.error("Error ending chat session:", err);
-      return false;
-    }
-  }, []);
-
-  // Assign manager to session
-  const assignManagerToSession = useCallback(
-    async (sessionId: number, managerId: number) => {
+  const endChatSession = useCallback(
+    async (sessionId: number) => {
       try {
-        const response = await chatRealTimeService.assignManagerToSession(
+        if (!userId) {
+          throw new Error("User ID is required to end a chat session");
+        }
+
+        const response = await chatRealTimeService.endChatSessionRealTime(
           sessionId,
-          managerId
+          userId
+        );
+
+        if (response.success) {
+          // Remove session from local state
+          setChatSessions((prev) =>
+            prev.filter((session) => session.chatSessionId !== sessionId)
+          );
+
+          return true;
+        }
+
+        return false;
+      } catch (err) {
+        console.error("Error ending chat session:", err);
+        return false;
+      }
+    },
+    [userId]
+  );
+
+  // Initiate a new chat session
+  const initiateChat = useCallback(
+    async (topic: string) => {
+      try {
+        if (!userId) {
+          throw new Error("User ID is required to initiate a chat");
+        }
+
+        const response = await chatRealTimeService.initiateChatRealTime(
+          userId,
+          topic
         );
 
         if (response.success && response.data) {
-          // Create a local variable to help TypeScript understand the flow
-          const sessionData = response.data;
+          // Create a local variable with the correct type
+          const newSession: ChatSessionDto = response.data;
 
-          // Update session in local state
+          setChatSessions((prev) => [...prev, newSession]);
+          return newSession.chatSessionId;
+        }
+
+        return null;
+      } catch (err) {
+        console.error("Error initiating chat:", err);
+        return null;
+      }
+    },
+    [userId]
+  );
+
+  // Accept a chat as a manager
+  // Accept a chat as a manager
+  const acceptChat = useCallback(
+    async (sessionId: number) => {
+      try {
+        if (!userId) {
+          throw new Error("User ID is required to accept a chat");
+        }
+
+        const response = await chatRealTimeService.acceptChatRealTime(
+          sessionId,
+          userId
+        );
+
+        if (response.success && response.data) {
+          // Create a local variable with the correct type
+          const updatedSession: ChatSessionDto = response.data;
+
+          // Now TypeScript knows updatedSession is definitely a ChatSessionDto
           setChatSessions((prev) =>
             prev.map((session) =>
-              session.chatSessionId === sessionId ? sessionData : session
+              session.chatSessionId === sessionId ? updatedSession : session
             )
           );
 
@@ -335,11 +395,11 @@ export const useChatRealTime = (userId: number, userType: string) => {
 
         return false;
       } catch (err) {
-        console.error("Error assigning manager to session:", err);
+        console.error("Error accepting chat:", err);
         return false;
       }
     },
-    []
+    [userId]
   );
 
   // Get messages for a session
@@ -350,24 +410,14 @@ export const useChatRealTime = (userId: number, userType: string) => {
     [messages]
   );
 
-  // Check if user is typing in a session
-  const isUserTyping = useCallback(
-    (sessionId: number) => {
-      return typingStatus.get(sessionId) || false;
-    },
-    [typingStatus]
-  );
-
   // Refresh sessions
   const refreshSessions = useCallback(async () => {
     try {
       setLoading(true);
       const response = await chatRealTimeService.getActiveSessions();
-
       if (response.success && response.data) {
         setChatSessions(response.data);
       }
-
       setLoading(false);
       return true;
     } catch (err) {
@@ -383,13 +433,12 @@ export const useChatRealTime = (userId: number, userType: string) => {
     loading,
     chatSessions,
     getSessionMessages,
-    isUserTyping,
     sendMessage,
     markMessageAsRead,
-    sendTypingIndicator,
     endChatSession,
-    assignManagerToSession,
     loadSessionMessages,
     refreshSessions,
+    initiateChat,
+    acceptChat,
   };
 };

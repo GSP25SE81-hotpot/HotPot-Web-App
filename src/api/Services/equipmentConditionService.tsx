@@ -11,9 +11,8 @@ export interface PaginationParams {
 export interface EquipmentConditionFilterDto extends PaginationParams {
   equipmentType?: string;
   equipmentId?: number;
+  equipmentName?: string;
   status?: MaintenanceStatus;
-  startDate?: string;
-  endDate?: string;
   sortBy?: string;
   sortDescending?: boolean;
 }
@@ -55,6 +54,7 @@ export interface CreateEquipmentConditionRequest {
   status: MaintenanceStatus;
   hotPotInventoryId?: number;
   utensilId?: number;
+  updateEquipmentStatus?: boolean;
 }
 
 // Request to update equipment condition status

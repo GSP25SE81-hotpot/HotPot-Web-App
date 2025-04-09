@@ -1,12 +1,12 @@
 // src/types/replacement.ts
 
 export enum ReplacementRequestStatus {
-  Pending = "Pending",
-  Approved = "Approved",
-  Rejected = "Rejected",
-  InProgress = "InProgress",
-  Completed = "Completed",
-  Cancelled = "Cancelled",
+  Pending = 1,
+  Approved = 2,
+  Rejected = 3,
+  InProgress = 4,
+  Completed = 5,
+  Cancelled = 6,
 }
 
 export enum EquipmentType {

@@ -13,14 +13,11 @@ import {
   Alert,
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   FormControl,
   IconButton,
   InputAdornment,
@@ -38,10 +35,7 @@ import {
   TextField,
   Tooltip,
   Typography,
-  useTheme,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
-import { alpha } from "@mui/material/styles";
 import React, { useEffect, useMemo, useState } from "react";
 import stockService from "../../api/Services/stockService";
 import {
@@ -49,7 +43,7 @@ import {
   StyledTableContainer,
   StyledTableHead,
   StyledTableRow,
-} from "../../components/manager/styles/lowStockUtensilStyles";
+} from "../../components/manager/styles/LowStockUtensilStyles";
 import { NotifyAdminStockRequest, UtensilDto } from "../../types/stock";
 
 // Types
@@ -73,14 +67,13 @@ const headCells: HeadCell[] = [
 
 // Component
 const LowStockUtensils: React.FC = () => {
-  const theme = useTheme();
   const [utensils, setUtensils] = useState<UtensilDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [order, setOrder] = useState<Order>("asc");
   const [orderBy, setOrderBy] = useState<SortableColumn>("name");
-  const [threshold, setThreshold] = useState(5);
+  const [threshold, setThreshold] = useState(100);
 
   // Dialog states
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -104,7 +97,7 @@ const LowStockUtensils: React.FC = () => {
       if (response.success) {
         setUtensils(response.data);
         if (response.data.length === 0) {
-          setError(`No utensils found below ${threshold}% stock level`);
+          setError(`Không tìm thấy đồ dùng nào dưới mức tồn kho ${threshold}%`);
         }
       } else {
         setError(response.message);
@@ -165,26 +158,26 @@ const LowStockUtensils: React.FC = () => {
   }, [utensils, searchQuery, order, orderBy]);
 
   // Calculate statistics
-  const stats = useMemo(() => {
-    // Add a null check before calculating stats
-    if (!utensils || !Array.isArray(utensils)) {
-      return {
-        totalItems: 0,
-        criticalItems: 0,
-        lowItems: 0,
-        unavailableItems: 0,
-      };
-    }
+  // const stats = useMemo(() => {
+  //   // Add a null check before calculating stats
+  //   if (!utensils || !Array.isArray(utensils)) {
+  //     return {
+  //       totalItems: 0,
+  //       criticalItems: 0,
+  //       lowItems: 0,
+  //       unavailableItems: 0,
+  //     };
+  //   }
 
-    const totalItems = utensils.length;
-    const criticalItems = utensils.filter((u) => u.quantity <= 2).length;
-    const lowItems = utensils.filter(
-      (u) => u.quantity > 2 && u.quantity <= 5
-    ).length;
-    const unavailableItems = utensils.filter((u) => !u.status).length;
+  //   const totalItems = utensils.length;
+  //   const criticalItems = utensils.filter((u) => u.quantity <= 2).length;
+  //   const lowItems = utensils.filter(
+  //     (u) => u.quantity > 2 && u.quantity <= 5
+  //   ).length;
+  //   const unavailableItems = utensils.filter((u) => !u.status).length;
 
-    return { totalItems, criticalItems, lowItems, unavailableItems };
-  }, [utensils]);
+  //   return { totalItems, criticalItems, lowItems, unavailableItems };
+  // }, [utensils]);
 
   // Handle update quantity
   const handleUpdateQuantity = async () => {
@@ -307,7 +300,7 @@ const LowStockUtensils: React.FC = () => {
       >
         <Box>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
-            Quản lý dụng cụ sắp hết hàng
+            Quản lý dụng cụ số lượng thấp
           </Typography>
           <Typography variant="body1" color="text.secondary">
             Theo dõi và quản lý các dụng cụ có số lượng thấp
@@ -323,7 +316,7 @@ const LowStockUtensils: React.FC = () => {
       </Stack>
 
       {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
+      {/* <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ borderRadius: 2, boxShadow: theme.shadows[2] }}>
             <CardContent>
@@ -402,7 +395,7 @@ const LowStockUtensils: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-      </Grid>
+      </Grid> */}
 
       {/* Filters and Search */}
       <Stack
@@ -413,7 +406,7 @@ const LowStockUtensils: React.FC = () => {
         mb={3}
       >
         <TextField
-          placeholder="Tìm kiếm dụng cụ..."
+          placeholder="Tìm kiếm tên dụng cụ..."
           variant="outlined"
           size="small"
           fullWidth
@@ -591,7 +584,7 @@ const LowStockUtensils: React.FC = () => {
       </StyledTableContainer>
 
       {/* Summary Section */}
-      <Paper
+      {/* <Paper
         sx={{
           p: 3,
           borderRadius: 2,
@@ -645,7 +638,7 @@ const LowStockUtensils: React.FC = () => {
             sx={{ display: { xs: "none", md: "block" } }}
           />
         </Stack>
-      </Paper>
+      </Paper> */}
 
       {/* Update Quantity Dialog */}
       <Dialog

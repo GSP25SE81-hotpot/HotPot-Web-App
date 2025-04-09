@@ -37,7 +37,6 @@ const PendingPickups: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-
   const { data, loading, error, execute } = useApi(
     rentalService.getPendingPickups
   );
@@ -46,7 +45,7 @@ const PendingPickups: React.FC = () => {
     execute(page + 1, rowsPerPage);
   }, [execute, page, rowsPerPage]);
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
@@ -76,15 +75,14 @@ const PendingPickups: React.FC = () => {
     <Box>
       {loading && <LoadingSpinner />}
       {error && <ErrorAlert message={error} />}
-
       {data && data.items.length === 0 ? (
         <EmptyStateContainer>
           <Typography variant="h6" fontWeight={600}>
-            No pending pickups found
+            Không tìm thấy lấy hàng đang chờ xử lý
           </Typography>
           <CardDescription>
-            There are no rentals due for pickup today. Check back later for
-            upcoming returns.
+            Không có đơn thuê nào cần lấy hàng hôm nay. Kiểm tra lại sau để xem
+            các lần trả sắp tới.
           </CardDescription>
         </EmptyStateContainer>
       ) : (
@@ -93,12 +91,12 @@ const PendingPickups: React.FC = () => {
             <StyledTable>
               <TableHead>
                 <TableRow>
-                  <TableCell>Order ID</TableCell>
-                  <TableCell>Customer</TableCell>
-                  <TableCell>Equipment</TableCell>
-                  <TableCell>Expected Return</TableCell>
-                  <TableCell>Rental Price</TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell>Mã đơn hàng</TableCell>
+                  <TableCell>Khách hàng</TableCell>
+                  <TableCell>Thiết bị</TableCell>
+                  <TableCell>Ngày trả dự kiến</TableCell>
+                  <TableCell>Giá thuê</TableCell>
+                  <TableCell>Hành động</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -115,7 +113,7 @@ const PendingPickups: React.FC = () => {
                       <EquipmentCell>
                         <EquipmentName>{rental.equipmentName}</EquipmentName>
                         <EquipmentType>
-                          {rental.equipmentType} • Qty: {rental.quantity}
+                          {rental.equipmentType} • SL: {rental.quantity}
                         </EquipmentType>
                       </EquipmentCell>
                     </TableCell>
@@ -139,7 +137,7 @@ const PendingPickups: React.FC = () => {
                           }
                           sx={{ minWidth: "80px" }}
                         >
-                          View
+                          Xem
                         </AnimatedButton>
                         <AnimatedButton
                           variant="contained"
@@ -148,7 +146,7 @@ const PendingPickups: React.FC = () => {
                           onClick={() => handleRecordReturn(rental)}
                           sx={{ minWidth: "120px" }}
                         >
-                          Record Return
+                          Ghi nhận trả
                         </AnimatedButton>
                       </ActionButtonsContainer>
                     </TableCell>
@@ -157,7 +155,6 @@ const PendingPickups: React.FC = () => {
               </TableBody>
             </StyledTable>
           </StyledTableContainer>
-
           <StyledTablePagination
             rowsPerPageOptions={[5, 10, 25]}
             count={data?.totalCount || 0}
@@ -165,6 +162,10 @@ const PendingPickups: React.FC = () => {
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Số hàng mỗi trang:"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}-${to} của ${count}`
+            }
           />
         </>
       )}
