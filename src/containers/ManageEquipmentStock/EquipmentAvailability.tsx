@@ -40,7 +40,6 @@ import React, { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import stockService from "../../api/Services/stockService";
-// import { useEquipmentNotifications } from "../../hooks/useStockNotification";
 import {
   ConditionChip,
   EmptyStateContainer,
@@ -224,16 +223,6 @@ const EquipmentAvailability: React.FC = () => {
       page * rowsPerPage + rowsPerPage
     );
   };
-
-  // Use our custom hook for equipment notifications
-  // const {
-  //   notifications,
-  //   unreadCount,
-  //   markAsRead,
-  //   markAllAsRead,
-  //   clearNotifications,
-  //   addNotification,
-  // } = useEquipmentNotifications();
 
   // Fetch equipment data
   useEffect(() => {
@@ -440,14 +429,6 @@ const EquipmentAvailability: React.FC = () => {
           message: "Equipment status report sent to admin successfully",
           severity: "success",
         });
-        // Add to local notifications
-        // addNotification({
-        //   type: "StatusChange",
-        //   equipmentType: selectedEquipment.type,
-        //   equipmentName: selectedEquipment.name,
-        //   message: `Report sent: ${reportMessage}`,
-        //   timestamp: new Date(),
-        // });
         setReportDialogOpen(false);
       } catch (error) {
         console.error("Error sending report:", error);
@@ -598,11 +579,7 @@ const EquipmentAvailability: React.FC = () => {
                   bgcolor: (theme) => theme.palette.action.hover,
                   borderRadius: "50%",
                 }}
-              >
-                {/* <Badge badgeContent={unreadCount} color="error">
-                  <NotificationsIcon />
-                </Badge> */}
-              </IconButton>
+              ></IconButton>
             </Stack>
           </Stack>
           {/* Sorting controls */}

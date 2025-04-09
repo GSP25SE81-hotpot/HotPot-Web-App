@@ -35,7 +35,6 @@ import replacementService from "../../api/Services/replacementService";
 import staffService from "../../api/Services/staffService";
 import { formatDate } from "../../utils/replacementUtils";
 // Remove the direct import of equipmentHubService
-// import { equipmentHubService } from "../../api/Services/hubServices";
 import {
   FilterButton,
   StyledChip,

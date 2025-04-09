@@ -1,20 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 // src/components/admin/EquipmentConditionNotification.tsx
-import React, { useEffect, useState } from "react";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import {
-  Alert,
-  Snackbar,
   Badge,
+  Box,
+  Divider,
   IconButton,
   Menu,
   MenuItem,
+  Snackbar,
   Typography,
-  Box,
-  Divider,
 } from "@mui/material";
-import useAuth from "../../hooks/useAuth";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import unifiedHubService from "../../api/Services/unifiedHubService";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MaintenanceScheduleType } from "../../api/Services/equipmentConditionService";
 
@@ -31,72 +28,15 @@ interface ConditionNotification {
 
 const EquipmentConditionNotification: React.FC = () => {
   const navigate = useNavigate();
-  const { auth } = useAuth();
-  const user = auth.user;
   const [notifications, setNotifications] = useState<ConditionNotification[]>(
     []
   );
-  const [newNotification, setNewNotification] =
-    useState<ConditionNotification | null>(null);
+
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
   // Kết nối với SignalR hub khi component được tạo
-  useEffect(() => {
-    const connectToHub = async () => {
-      try {
-        // Lấy thông tin người dùng từ hệ thống xác thực của bạn
-        const userId = user?.id; // Thay thế bằng ID người dùng thực tế từ hệ thống xác thực của bạn
-        const userType = "admin"; // Thay thế bằng loại người dùng thực tế từ hệ thống xác thực của bạn
-
-        // Khởi tạo kết nối hub
-        await unifiedHubService.initializeHubs(userId, userType, [
-          "equipmentCondition",
-        ]);
-
-        // Thiết lập trình nghe cho thông báo trực tiếp
-        unifiedHubService.equipmentCondition.onReceiveDirectNotification(
-          (
-            conditionLogId,
-            equipmentType,
-            equipmentName,
-            issueName,
-            description,
-            scheduleType,
-            timestamp
-          ) => {
-            const notification: ConditionNotification = {
-              id: conditionLogId,
-              equipmentType,
-              equipmentName,
-              issueName,
-              description: description || "",
-              scheduleType,
-              timestamp: new Date(timestamp),
-              read: false,
-            };
-
-            // Thêm vào danh sách thông báo
-            setNotifications((prev) => [notification, ...prev]);
-
-            // Hiển thị snackbar với thông báo mới
-            setNewNotification(notification);
-            setShowSnackbar(true);
-          }
-        );
-      } catch (error) {
-        console.error("Lỗi kết nối đến SignalR hub:", error);
-      }
-    };
-
-    connectToHub();
-
-    // Ngắt kết nối khi component bị hủy
-    return () => {
-      unifiedHubService.disconnectAll();
-    };
-  }, []);
 
   // Xử lý khi nhấp vào biểu tượng thông báo
   const handleNotificationClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -236,25 +176,7 @@ const EquipmentConditionNotification: React.FC = () => {
         autoHideDuration={6000}
         onClose={() => setShowSnackbar(false)}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => setShowSnackbar(false)}
-          severity={
-            newNotification?.scheduleType ===
-            MaintenanceScheduleType.Emergency.toString()
-              ? "error"
-              : "info"
-          }
-          sx={{ width: "100%" }}
-        >
-          <Typography variant="subtitle2">
-            Vấn đề thiết bị mới: {newNotification?.issueName}
-          </Typography>
-          <Typography variant="body2">
-            {newNotification?.equipmentType}: {newNotification?.equipmentName}
-          </Typography>
-        </Alert>
-      </Snackbar>
+      ></Snackbar>
     </>
   );
 };

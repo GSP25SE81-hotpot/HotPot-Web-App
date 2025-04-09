@@ -29,7 +29,7 @@ import {
   ButtonsContainer,
   SearchButton,
   ResetButton,
-} from "../../../components/staff/styles/PaymentFilterStyles";
+} from "../../../components/staff/styles/paymentFilterStyles";
 
 interface PaymentFilterProps {
   onFilterChange: (filter: PaymentFilterRequest) => void;

@@ -19,7 +19,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { shiftTypes, StaffSchedule } from "../../types/scheduleInterfaces";
 import useSchedule from "../../hooks/useSchedule";
-import { useNavigate } from "react-router-dom"; // Import useNavigate thay vì Link
+import { useNavigate } from "react-router-dom";
 
 const WorkAssignmentSchedule: React.FC = () => {
   const theme = useTheme();

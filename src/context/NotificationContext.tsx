@@ -20,6 +20,7 @@ import {
   FeedbackResponseDto,
   ScheduleUpdateDto,
 } from "../types/notifications";
+import useAuth from "../hooks/useAuth";
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
   undefined
@@ -47,12 +48,25 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     useState<signalR.HubConnection | null>(null);
   const [connectionState, setConnectionState] =
     useState<ConnectionState>("disconnected");
+  const { auth } = useAuth();
 
   // Initialize SignalR connection
   useEffect(() => {
+    if (!auth?.accessToken) {
+      console.log("User not authenticated, not connecting to SignalR");
+      return;
+    }
+
     const connection = new signalR.HubConnectionBuilder()
       .withUrl("https://localhost:7163/notificationHub", {
-        accessTokenFactory: () => localStorage.getItem("jwt_token") || "",
+        accessTokenFactory: () => {
+          const token = auth.accessToken || "";
+          // console.log(
+          //   "Passing token to SignalR:",
+          //   token.substring(0, 10) + "..."
+          // );
+          return token;
+        },
       })
       .withAutomaticReconnect()
       .build();
@@ -68,7 +82,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         connection.stop();
       }
     };
-  }, []);
+  }, [auth?.accessToken]);
 
   const startConnection = useCallback(
     async (connection: signalR.HubConnection) => {
@@ -78,15 +92,45 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         setConnectionState("connected");
 
         // Register connection with the hub
-        await connection.invoke("RegisterConnection");
+        // Pass user ID explicitly to help with connection issues
+        if (auth?.user?.id) {
+          await connection.invoke("RegisterConnection");
+        } else {
+          console.error("User ID not available for SignalR connection");
+          setConnectionState("error");
+          // Add an error notification
+          handleNotification("Error", {
+            type: "Error",
+            title: "Connection Error",
+            message: "User ID not available. Please try logging in again.",
+            timestamp: new Date(),
+          });
+        }
       } catch (err) {
         console.error("SignalR Connection Error: ", err);
         setConnectionState("error");
+
+        // Add an error notification
+        handleNotification("Error", {
+          type: "Error",
+          title: "Connection Error",
+          message:
+            err instanceof Error
+              ? err.message
+              : "Failed to connect to notification service",
+          timestamp: new Date(),
+        });
+
         // Retry after 5 seconds
-        setTimeout(() => startConnection(connection), 5000);
+        setTimeout(() => {
+          if (auth?.accessToken) {
+            // Only retry if still authenticated
+            startConnection(connection);
+          }
+        }, 5000);
       }
     },
-    []
+    [auth]
   );
 
   // Register all notification handlers

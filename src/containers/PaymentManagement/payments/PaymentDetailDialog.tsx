@@ -14,7 +14,7 @@ import {
   InfoValue,
   ActionButton,
   StyledDivider,
-} from "../../../components/staff/styles/PaymentDetailDialogStyles";
+} from "../../../components/staff/styles/paymentDetailDialogStyles";
 
 interface PaymentDetailDialogProps {
   open: boolean;
