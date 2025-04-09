@@ -381,7 +381,7 @@ const OrderDetailView: React.FC = () => {
         <Grid size={{ xs: 12 }}>
           <HeaderPaper>
             <HeaderContainer>
-              <OrderTitle variant="h5">Đơn hàng #{order.orderId}</OrderTitle>
+              <OrderTitle variant="h5">Đơn hàng #{order.orderCode}</OrderTitle>
               <StatusChip
                 label={getVietnameseOrderStatusLabel(order.status)}
                 status={order.status}

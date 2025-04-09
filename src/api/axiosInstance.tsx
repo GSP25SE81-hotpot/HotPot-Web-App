@@ -3,8 +3,8 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  // baseURL: `https://hpty.vinhuser.one/api`,
-  baseURL: `https://localhost:7163/api`,
+  baseURL: `https://hpty.vinhuser.one/api`,
+  // baseURL: `https://localhost:7163/api`,
 
   headers: {
     "Content-Type": "application/json",

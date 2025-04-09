@@ -10,12 +10,8 @@ import {
   Button,
   CircularProgress,
   Collapse,
-  FormControl,
   IconButton,
   InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
   Snackbar,
   Table,
   TableBody,
@@ -252,7 +248,7 @@ const OrdersByStatusList: React.FC = () => {
               />
             </LocalizationProvider>
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <FormControl fullWidth size="small">
               <InputLabel>Khách hàng</InputLabel>
               <Select
@@ -271,9 +267,9 @@ const OrdersByStatusList: React.FC = () => {
               >
                 <MenuItem value="">Tất cả khách hàng</MenuItem>
                 {/* Add customer options here */}
-              </Select>
+          {/* </Select>
             </FormControl>
-          </Grid>
+          </Grid>  */}
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Box sx={{ display: "flex", gap: 1 }}>
               <Button
