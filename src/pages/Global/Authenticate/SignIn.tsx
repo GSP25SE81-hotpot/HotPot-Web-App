@@ -1,17 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // import React from "react";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
 // import { toast } from "react-toastify";
+import { FaLock, FaUser } from "react-icons/fa";
 import * as Yup from "yup";
-import { FaUser, FaLock } from "react-icons/fa";
 // import authApi from "../../services/api/AuthAPI";
 // import "./SignIn.scss";
 import classNames from "classnames/bind";
-import styles from "./authenticate.module.scss";
-import authApi from "../../../api/authAPI";
+import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
+import authApi from "../../../api/authAPI";
 import useAuth from "../../../hooks/useAuth";
-// import useAuth from "../../hooks/useAuth";
+import styles from "./authenticate.module.scss";
 
 export const AuthenticatePage = () => {
   const navigate = useNavigate();
@@ -42,16 +43,18 @@ export const AuthenticatePage = () => {
         });
         localStorage.setItem("userInfor", JSON.stringify(response?.data));
         console.log("first", response?.data);
-        navigate("/dashboard");
+        const decoded: any = jwtDecode(response?.data?.accessToken);
         setAuth({
           user: response?.data,
           accessToken: response?.data?.accessToken,
         });
-        // if (response?.role == "Admin") {
-        //   navigate("/warranty");
-        // } else {
-        //   navigate("/forbidden");
-        // }
+        if (decoded?.role == "Admin") {
+          navigate("/dashboard");
+        } else if (decoded?.role == "Manager") {
+          navigate("/manage-order");
+        } else {
+          navigate("/assign-order");
+        }
         toast.success("Đăng nhập thành công!");
       } catch (error: any) {
         console.error("Login failed:", error);
