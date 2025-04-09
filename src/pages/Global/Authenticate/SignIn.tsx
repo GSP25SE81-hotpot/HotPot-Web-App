@@ -52,7 +52,7 @@ export const AuthenticatePage = () => {
         if (decoded?.role == "Admin") {
           navigate("/dashboard");
         } else if (decoded?.role == "Manager") {
-          navigate("/dashboard");
+          navigate("/manage-order");
         } else {
           navigate("/assign-order");
         }

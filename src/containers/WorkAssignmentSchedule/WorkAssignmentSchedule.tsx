@@ -1,5 +1,4 @@
-// src/components/WorkScheduleTable.tsx (updated with custom hook)
-
+/* eslint-disable react-hooks/exhaustive-deps */
 import {
   Box,
   Card,
@@ -15,18 +14,28 @@ import {
   Tooltip,
   Typography,
   useTheme,
+  Button, // Thêm import Button
 } from "@mui/material";
-import React from "react";
-import { shiftTypes } from "../../types/scheduleInterfaces";
-import { useSchedule } from "../../hooks/useSchedule";
-import useAuth from "../../hooks/useAuth";
+import React, { useEffect, useState } from "react";
+import { shiftTypes, StaffSchedule } from "../../types/scheduleInterfaces";
+import useSchedule from "../../hooks/useSchedule";
+import { useNavigate } from "react-router-dom";
 
 const WorkAssignmentSchedule: React.FC = () => {
   const theme = useTheme();
-  const { auth } = useAuth();
-
-  const { loading, error, schedules, personalSchedule } = useSchedule();
-
+  const navigate = useNavigate(); // Khởi tạo hook useNavigate
+  const {
+    loading: hookLoading,
+    error: hookError,
+    isManagerRole,
+    fetchMySchedule,
+    fetchAllStaffSchedules,
+  } = useSchedule();
+  const [personalSchedule, setPersonalSchedule] =
+    useState<StaffSchedule | null>(null);
+  const [allSchedules, setAllSchedules] = useState<StaffSchedule[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const days = [
     "Monday",
     "Tuesday",
@@ -37,16 +46,86 @@ const WorkAssignmentSchedule: React.FC = () => {
     "Sunday",
   ];
 
+  // Hàm xử lý điều hướng
+  const goToStaffAssignment = () => {
+    navigate("/staff-assignment");
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Lấy lịch cá nhân
+        const mySchedule = await fetchMySchedule();
+        if (mySchedule) {
+          setPersonalSchedule(mySchedule);
+        }
+        // Nếu người dùng là quản lý, lấy lịch của tất cả nhân viên
+        if (isManagerRole) {
+          const staffSchedules = await fetchAllStaffSchedules();
+          if (mySchedule) {
+            setAllSchedules([mySchedule, ...staffSchedules]);
+          } else {
+            setAllSchedules(staffSchedules);
+          }
+        } else if (mySchedule) {
+          // Đối với nhân viên, chỉ hiển thị lịch của họ
+          setAllSchedules([mySchedule]);
+        }
+      } catch (err) {
+        console.error("Lỗi khi lấy dữ liệu lịch:", err);
+        setError("Không thể tải dữ liệu lịch. Vui lòng thử lại sau.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [isManagerRole]);
+
+  // Cập nhật trạng thái lỗi khi hook error thay đổi
+  useEffect(() => {
+    if (hookError) {
+      setError(hookError);
+    }
+  }, [hookError]);
+
+  // Cập nhật trạng thái loading khi hook loading thay đổi
+  useEffect(() => {
+    setLoading(hookLoading);
+  }, [hookLoading]);
+
   const ShiftCell: React.FC<{ shift: string }> = ({ shift }) => {
-    const shiftType = shiftTypes[shift];
-    return (
-      <Tooltip title={shiftType.description} arrow placement="top">
+    // Kiểm tra xem ca làm việc có tồn tại trong shiftTypes không
+    if (!shift || !shiftTypes[shift]) {
+      console.log("Loại ca không xác định:", shift); // Để gỡ lỗi
+      return (
         <Box
           sx={{
             p: 1,
             borderRadius: 1,
-            backgroundColor: shiftType.backgroundColor,
-            color: shiftType.color,
+            backgroundColor: "gray",
+            color: "white",
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 600, fontSize: "1rem" }}
+          >
+            {shift || "Không xác định"}
+          </Typography>
+        </Box>
+      );
+    }
+    const shiftType = shiftTypes[shift];
+    return (
+      <Tooltip title={shiftType.description || ""} arrow placement="top">
+        <Box
+          sx={{
+            p: 1,
+            borderRadius: 1,
+            backgroundColor: shiftType.backgroundColor || "#f5f5f5",
+            color: shiftType.color || "#000",
             "&:hover": {
               transform: "scale(1.05)",
               boxShadow: theme.shadows[2],
@@ -57,7 +136,7 @@ const WorkAssignmentSchedule: React.FC = () => {
             variant="body2"
             sx={{ fontWeight: 600, fontSize: "1rem" }}
           >
-            {shiftType.label}
+            {shiftType.label || shift}
           </Typography>
         </Box>
       </Tooltip>
@@ -107,6 +186,26 @@ const WorkAssignmentSchedule: React.FC = () => {
           >
             Lịch hàng tuần
           </Typography>
+          {/* Thay thế Link bằng Button + onClick */}
+          {isManagerRole && (
+            <Button
+              onClick={goToStaffAssignment}
+              variant="contained"
+              color="primary"
+              sx={{
+                fontWeight: "bold",
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                boxShadow: theme.shadows[3],
+                "&:hover": {
+                  boxShadow: theme.shadows[5],
+                },
+              }}
+            >
+              Quản lý nhân viên
+            </Button>
+          )}
         </Box>
 
         {personalSchedule && (
@@ -149,7 +248,21 @@ const WorkAssignmentSchedule: React.FC = () => {
                         }}
                       >
                         <Typography variant="body2" color="textSecondary">
-                          {day.substring(0, 3)}
+                          {day === "Monday"
+                            ? "Thứ 2"
+                            : day === "Tuesday"
+                            ? "Thứ 3"
+                            : day === "Wednesday"
+                            ? "Thứ 4"
+                            : day === "Thursday"
+                            ? "Thứ 5"
+                            : day === "Friday"
+                            ? "Thứ 6"
+                            : day === "Saturday"
+                            ? "Thứ 7"
+                            : day === "Sunday"
+                            ? "CN"
+                            : day.substring(0, 3)}
                         </Typography>
                       </TableCell>
                     ))}
@@ -184,11 +297,28 @@ const WorkAssignmentSchedule: React.FC = () => {
           </Box>
         )}
 
-        {(auth?.user?.role === "Manager" || auth?.user?.role === "Admin") && schedules.length > 1 && (
+        {isManagerRole && allSchedules.length > 1 && (
           <>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Lịch của tất cả nhân viên
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography variant="h6">Lịch của tất cả nhân viên</Typography>
+              {/* Thay thế Link bằng Button + onClick */}
+              <Button
+                onClick={goToStaffAssignment}
+                variant="outlined"
+                color="primary"
+                size="medium"
+                sx={{ ml: 2 }}
+              >
+                Phân công lịch làm việc
+              </Button>
+            </Box>
             <TableContainer
               component={Paper}
               elevation={0}
@@ -223,19 +353,33 @@ const WorkAssignmentSchedule: React.FC = () => {
                         }}
                       >
                         <Typography variant="body2" color="textSecondary">
-                          {day.substring(0, 3)}
+                          {day === "Monday"
+                            ? "Thứ 2"
+                            : day === "Tuesday"
+                            ? "Thứ 3"
+                            : day === "Wednesday"
+                            ? "Thứ 4"
+                            : day === "Thursday"
+                            ? "Thứ 5"
+                            : day === "Friday"
+                            ? "Thứ 6"
+                            : day === "Saturday"
+                            ? "Thứ 7"
+                            : day === "Sunday"
+                            ? "CN"
+                            : day.substring(0, 3)}
                         </Typography>
                       </TableCell>
                     ))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {schedules
+                  {allSchedules
                     .filter(
                       (staff) =>
                         staff.employeeName !== personalSchedule?.employeeName
                     )
-                    .map((staff) => (
+                    .map((staff: any) => (
                       <TableRow
                         key={staff.employeeName}
                         sx={{
@@ -253,7 +397,7 @@ const WorkAssignmentSchedule: React.FC = () => {
                         <TableCell sx={{ fontSize: "1rem", p: 2 }}>
                           {staff.week}
                         </TableCell>
-                        {staff.schedule.map((shift, index) => (
+                        {staff.schedule.map((shift: any, index: any) => (
                           <TableCell key={index} align="center" sx={{ p: 2 }}>
                             <ShiftCell shift={shift} />
                           </TableCell>
@@ -266,7 +410,38 @@ const WorkAssignmentSchedule: React.FC = () => {
           </>
         )}
 
-        {/* Legend for shift types */}
+        {/* Thay thế Link bằng Button + onClick cho nút hành động nổi */}
+        {isManagerRole && (
+          <Box
+            sx={{
+              position: "fixed",
+              bottom: 30,
+              right: 30,
+              zIndex: 1000,
+            }}
+          >
+            <Button
+              onClick={goToStaffAssignment}
+              variant="contained"
+              color="secondary"
+              sx={{
+                borderRadius: "50%",
+                width: 64,
+                height: 64,
+                boxShadow: theme.shadows[8],
+                "&:hover": {
+                  boxShadow: theme.shadows[12],
+                },
+              }}
+            >
+              <Typography variant="body1" fontWeight="bold">
+                +
+              </Typography>
+            </Button>
+          </Box>
+        )}
+
+        {/* Chú thích cho các loại ca */}
         <Box sx={{ mt: 4, display: "flex", flexWrap: "wrap", gap: 2 }}>
           <Typography
             variant="subtitle1"
@@ -295,7 +470,8 @@ const WorkAssignmentSchedule: React.FC = () => {
               >
                 {type.label}
               </Box>
-              <Typography variant="body2">{name}</Typography>
+              {/* Hiển thị mô tả tiếng Việt thay vì tên tiếng Anh */}
+              <Typography variant="body2">{type.description}</Typography>
             </Box>
           ))}
         </Box>

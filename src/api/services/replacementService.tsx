@@ -7,6 +7,7 @@ import {
   ReplacementRequestDetailDto,
   ReplacementRequestSummaryDto,
   ReviewReplacementRequestDto,
+  ReplacementRequestStatus,
 } from "../../types/replacement";
 import axiosClient from "../axiosInstance";
 
@@ -19,7 +20,7 @@ const replacementService = {
   },
 
   getReplacementsByStatus: async (
-    status: string
+    status: ReplacementRequestStatus
   ): Promise<ReplacementRequestSummaryDto[]> => {
     const response = await axiosClient.get<
       ApiResponse<ReplacementRequestSummaryDto[]>
@@ -29,11 +30,12 @@ const replacementService = {
 
   getReplacementById: async (
     id: number
-  ): Promise<ReplacementRequestDetailDto> => {
+  ): Promise<ApiResponse<ReplacementRequestDetailDto>> => {
     const response = await axiosClient.get<
+      any,
       ApiResponse<ReplacementRequestDetailDto>
     >(`/manager/replacement/id/${id}`);
-    return response.data.data;
+    return response;
   },
 
   reviewReplacement: async (
@@ -41,19 +43,20 @@ const replacementService = {
     data: ReviewReplacementRequestDto
   ): Promise<ReplacementRequestDetailDto> => {
     const response = await axiosClient.put<
+      any,
       ApiResponse<ReplacementRequestDetailDto>
     >(`/manager/replacement/${id}/review`, data);
-    return response.data.data;
+    return response.data;
   },
-
   assignStaff: async (
     id: number,
     data: AssignStaffDto
-  ): Promise<ReplacementRequestDetailDto> => {
+  ): Promise<ReplacementRequestDetailDto[]> => {
     const response = await axiosClient.put<
-      ApiResponse<ReplacementRequestDetailDto>
+      any,
+      ApiResponse<ReplacementRequestDetailDto[]>
     >(`/manager/replacement/${id}/assign-staff`, data);
-    return response.data.data;
+    return response.data;
   },
 
   completeReplacement: async (

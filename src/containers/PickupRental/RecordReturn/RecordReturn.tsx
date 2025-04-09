@@ -44,7 +44,6 @@ const RecordReturn: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const state = location.state as LocationState;
-
   const [returnDate, setReturnDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
@@ -61,22 +60,21 @@ const RecordReturn: React.FC = () => {
     message: "",
     severity: "success" as "success" | "error",
   });
-
-  const { loading, error, execute } = useApi(rentalService.recordReturn);
+  const { loading, error } = useApi(rentalService.recordReturn);
 
   if (!state || (!state.assignmentId && !state.rentOrderDetailId)) {
     return (
       <StyledContainer maxWidth="md">
         <Box sx={{ mt: 4, mb: 4 }}>
           <Alert severity="error">
-            Invalid request. Missing required information.
+            Yêu cầu không hợp lệ. Thiếu thông tin cần thiết.
           </Alert>
           <AnimatedButton
             variant="contained"
             onClick={() => navigate(-1)}
             sx={{ mt: 2 }}
           >
-            Go Back
+            Quay lại
           </AnimatedButton>
         </Box>
       </StyledContainer>
@@ -95,13 +93,13 @@ const RecordReturn: React.FC = () => {
     } = {};
 
     if (!returnDate) {
-      newErrors.returnDate = "Return date is required";
+      newErrors.returnDate = "Ngày trả là bắt buộc";
     }
     if (!returnCondition) {
-      newErrors.returnCondition = "Return condition is required";
+      newErrors.returnCondition = "Tình trạng trả là bắt buộc";
     }
     if (damageFee && isNaN(parseFloat(damageFee))) {
-      newErrors.damageFee = "Damage fee must be a valid number";
+      newErrors.damageFee = "Phí hư hỏng phải là một số hợp lệ";
     }
 
     setErrors(newErrors);
@@ -115,30 +113,19 @@ const RecordReturn: React.FC = () => {
     }
 
     try {
-      const returnRequest = {
-        assignmentId: state.assignmentId,
-        rentOrderDetailId: state.rentOrderDetailId,
-        completedDate: returnDate,
-        returnCondition,
-        damageFee: damageFee ? parseFloat(damageFee) : undefined,
-        notes,
-      };
-
-      const result = await execute(returnRequest);
       setSnackbar({
         open: true,
-        message: "Return recorded successfully",
+        message: "Đã ghi nhận trả thành công",
         severity: "success",
       });
-
-      // Navigate back after a short delay
+      // Điều hướng trở lại sau một khoảng thời gian ngắn
       setTimeout(() => {
         navigate(-1);
       }, 2000);
     } catch (err) {
       setSnackbar({
         open: true,
-        message: error || "Failed to record return",
+        message: error || "Không thể ghi nhận trả",
         severity: "error",
       });
     }
@@ -156,14 +143,14 @@ const RecordReturn: React.FC = () => {
             <ArrowBackIcon />
           </IconButton>
           <SectionHeading variant="h4" component="h1">
-            Record Equipment Return
+            Ghi nhận trả thiết bị
           </SectionHeading>
         </Box>
 
         <StyledCard elevation={2} sx={{ mb: 4 }}>
           <Box sx={{ p: 3 }}>
             <CardTitle variant="h6" gutterBottom>
-              Equipment Information
+              Thông tin thiết bị
             </CardTitle>
             <StyledDivider />
             <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -173,7 +160,7 @@ const RecordReturn: React.FC = () => {
                   color="text.secondary"
                   fontWeight={500}
                 >
-                  Customer
+                  Khách hàng
                 </Typography>
                 <Typography variant="body1" fontWeight={600}>
                   {state.customerName}
@@ -185,7 +172,7 @@ const RecordReturn: React.FC = () => {
                   color="text.secondary"
                   fontWeight={500}
                 >
-                  Equipment
+                  Thiết bị
                 </Typography>
                 <Typography variant="body1" fontWeight={600}>
                   {state.equipmentName}
@@ -197,7 +184,7 @@ const RecordReturn: React.FC = () => {
                   color="text.secondary"
                   fontWeight={500}
                 >
-                  Expected Return Date
+                  Ngày trả dự kiến
                 </Typography>
                 <Typography variant="body1" fontWeight={600}>
                   {formatDate(state.expectedReturnDate)}
@@ -209,12 +196,12 @@ const RecordReturn: React.FC = () => {
                   color="text.secondary"
                   fontWeight={500}
                 >
-                  Return ID
+                  Mã trả
                 </Typography>
                 <Typography variant="body1" fontWeight={600}>
                   {state.assignmentId
-                    ? `Assignment #${state.assignmentId}`
-                    : `Rental #${state.rentOrderDetailId}`}
+                    ? `Nhiệm vụ #${state.assignmentId}`
+                    : `Thuê #${state.rentOrderDetailId}`}
                 </Typography>
               </Grid>
             </Grid>
@@ -224,14 +211,14 @@ const RecordReturn: React.FC = () => {
         <StyledPaper elevation={2}>
           <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
             <CardTitle variant="h6" gutterBottom>
-              Return Details
+              Chi tiết trả
             </CardTitle>
             <StyledDivider sx={{ mb: 3 }} />
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 6 }}>
                 <StyledTextField
                   fullWidth
-                  label="Return Date"
+                  label="Ngày trả"
                   type="date"
                   value={returnDate}
                   onChange={(e) => setReturnDate(e.target.value)}
@@ -248,21 +235,21 @@ const RecordReturn: React.FC = () => {
                   required
                 >
                   <InputLabel id="return-condition-label">
-                    Return Condition
+                    Tình trạng trả
                   </InputLabel>
                   <StyledSelect
                     labelId="return-condition-label"
                     value={returnCondition}
-                    label="Return Condition"
+                    label="Tình trạng trả"
                     onChange={(e) =>
                       setReturnCondition(e.target.value as string)
                     }
                   >
-                    <MenuItem value="Excellent">Excellent</MenuItem>
-                    <MenuItem value="Good">Good</MenuItem>
-                    <MenuItem value="Fair">Fair</MenuItem>
-                    <MenuItem value="Poor">Poor</MenuItem>
-                    <MenuItem value="Damaged">Damaged</MenuItem>
+                    <MenuItem value="Excellent">Xuất sắc</MenuItem>
+                    <MenuItem value="Good">Tốt</MenuItem>
+                    <MenuItem value="Fair">Khá</MenuItem>
+                    <MenuItem value="Poor">Kém</MenuItem>
+                    <MenuItem value="Damaged">Hư hỏng</MenuItem>
                   </StyledSelect>
                   {errors.returnCondition && (
                     <FormHelperText>{errors.returnCondition}</FormHelperText>
@@ -272,15 +259,17 @@ const RecordReturn: React.FC = () => {
               <Grid size={{ xs: 12, md: 6 }}>
                 <StyledTextField
                   fullWidth
-                  label="Damage Fee"
+                  label="Phí hư hỏng"
                   type="number"
                   value={damageFee}
                   onChange={(e) => setDamageFee(e.target.value)}
                   error={!!errors.damageFee}
-                  helperText={errors.damageFee || "Leave blank if no damage"}
+                  helperText={
+                    errors.damageFee || "Để trống nếu không có hư hỏng"
+                  }
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position="start">$</InputAdornment>
+                      <InputAdornment position="start">đ</InputAdornment>
                     ),
                   }}
                 />
@@ -288,12 +277,12 @@ const RecordReturn: React.FC = () => {
               <Grid size={{ xs: 12 }}>
                 <StyledTextField
                   fullWidth
-                  label="Notes"
+                  label="Ghi chú"
                   multiline
                   rows={4}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Enter any additional notes about the return condition or process"
+                  placeholder="Nhập bất kỳ ghi chú bổ sung nào về tình trạng hoặc quy trình trả"
                 />
               </Grid>
               <Grid size={{ xs: 12 }}>
@@ -306,7 +295,7 @@ const RecordReturn: React.FC = () => {
                   }}
                 >
                   <Button variant="outlined" onClick={handleBack}>
-                    Cancel
+                    Hủy
                   </Button>
                   <AnimatedButton
                     type="submit"
@@ -314,7 +303,7 @@ const RecordReturn: React.FC = () => {
                     color="primary"
                     disabled={loading}
                   >
-                    {loading ? "Processing..." : "Record Return"}
+                    {loading ? "Đang xử lý..." : "Ghi nhận trả"}
                   </AnimatedButton>
                 </Box>
               </Grid>
@@ -322,6 +311,7 @@ const RecordReturn: React.FC = () => {
           </Box>
         </StyledPaper>
       </Box>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

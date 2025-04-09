@@ -1,11 +1,27 @@
+// src/types/replacement.ts
+
+export enum ReplacementRequestStatus {
+  Pending = 1,
+  Approved = 2,
+  Rejected = 3,
+  InProgress = 4,
+  Completed = 5,
+  Cancelled = 6,
+}
+
+export enum EquipmentType {
+  HotPot = "HotPot",
+  Utensil = "Utensil",
+}
+
 export interface ReplacementRequestSummaryDto {
   replacementRequestId: number;
   requestReason: string;
-  status: string;
+  status: ReplacementRequestStatus;
   requestDate: string;
   reviewDate?: string;
   completionDate?: string;
-  equipmentType: string;
+  equipmentType: EquipmentType;
   equipmentName: string;
   customerName: string;
   assignedStaffName?: string;

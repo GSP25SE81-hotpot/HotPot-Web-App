@@ -1,15 +1,14 @@
 export const managerRoutes = {
   home: "/",
-  manageRentals: "/manage-rentals",
-  manageRentalStatus: "/manage-rental-status",
+  manageEquipmentStock: "/manage-equipment-stock",
   equipmentAvailability: "/equipment-availability",
+  lowStockUtensil: "/low-stock-utensil",
   workAssignment: "/work-assignment",
   manageOrder: "/manage-order",
   customerChat: "/chat",
   feedback: "/feedback",
-  resolveEquipmentFailure: "/resolve-equipment-failure",
   equipmentConditionLog: "/equipment-condition-log",
-  equipmentStatusReport: "/equipment-status-report",
+  equipmentConditionDetail: "/equipment-condition-log/:id",
   feedbackManagement: "/feedback-management",
   manageReplacement: "/manage-replacement",
   rentalDashboard: "/rental-dashboard",
@@ -18,10 +17,13 @@ export const managerRoutes = {
   rentalHistory: "/rental-history",
   calculateLateFee: "/calculate-late-fee",
   adjustReturnDate: "/adjust-return-date",
+  orderDetail: "/orders/:orderId",
+  staffAssignment: "staff-assignment",
 };
 
 export const authRoutes = {
   authenticate: "/auth",
+  notification: "/notifications",
 };
 
 export const adminRoutes = {
@@ -46,7 +48,6 @@ export const adminRoutes = {
 
 export const staffRoutes = {
   paymentManagement: "/payment-management",
-  depositConfirmation: "/deposit-confirmation",
   retrieveRentalEquipment: "/retrieve-rental-equipment",
   checkDeviceAfterReturn: "/check-device-after-return",
   orderHistory: "/order-history",
@@ -58,4 +59,6 @@ export const staffRoutes = {
   pickupRental: "/pickup-rental",
   staffMyAssignment: "/staff-assignment",
   staffMyAssignmentDetail: "/staff-assignment/:orderId/:assignmentId",
+  pickupReplacement: "/pickup-replacement",
+  replacementDetail: "/replacements/:id",
 };

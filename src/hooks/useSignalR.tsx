@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/hooks/useSignalR.ts
 import { useState, useEffect, useCallback } from "react";
 import signalRService from "../api/Services/signalrService";
@@ -24,7 +25,7 @@ export const useSignalR = (
   const connect = useCallback(async () => {
     try {
       await signalRService.startConnection(hubUrl);
-      await signalRService.registerUserConnection(hubUrl, userId, userType);
+      await signalRService.registerConnection(hubUrl, userId, userType);
       setConnectionState(signalRService.getConnectionState(hubUrl));
       setError(null);
     } catch (err) {
@@ -33,7 +34,7 @@ export const useSignalR = (
       );
       console.error(`Error connecting to hub ${hubUrl}:`, err);
     }
-  }, [hubUrl, userId, userType]);
+  }, [hubUrl]);
 
   // Disconnect from the hub
   const disconnect = useCallback(async () => {

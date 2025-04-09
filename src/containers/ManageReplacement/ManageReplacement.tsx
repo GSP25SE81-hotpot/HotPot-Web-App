@@ -1,3 +1,4 @@
+// src/components/replacement/ManageReplacement.tsx
 import FilterListIcon from "@mui/icons-material/FilterList";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SearchIcon from "@mui/icons-material/Search";
@@ -10,6 +11,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   InputAdornment,
   MenuItem,
   Paper,
@@ -23,37 +25,16 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
-  TextField,
   Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { IconButton } from "@mui/material";
-import { formatDate } from "../../utils/replacementUtils";
-import { alpha } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 import replacementService from "../../api/Services/replacementService";
 import staffService from "../../api/Services/staffService";
-import {
-  AssignStaffDto,
-  CompleteReplacementDto,
-  NotificationState,
-  Order,
-  OrderBy,
-  ReplacementRequestDetailDto,
-  ReplacementRequestSummaryDto,
-  ReviewReplacementRequestDto,
-} from "../../types/replacement";
-import { StaffDto } from "../../types/staff";
-import { getAvailableActions } from "../../utils/replacementUtils";
-import AssignStaff from "./replacement/AssignStaff";
-import CompleteRequest from "./replacement/CompleteRequest";
-import CustomerInfo from "./replacement/CustomerInfo";
-import EquipmentInfo from "./replacement/EquipmentInfo";
-import MobileRequestCard from "./replacement/MobileRequestCard";
-import NotesInfo from "./replacement/NotesInfo";
-import ReviewRequest from "./replacement/ReviewRequest";
+import { formatDate } from "../../utils/replacementUtils";
+// Remove the direct import of equipmentHubService
 import {
   FilterButton,
   StyledChip,
@@ -62,18 +43,82 @@ import {
   StyledPaper,
   StyledTable,
 } from "../../components/StyledComponents";
+import {
+  DialogHeader,
+  LoadingOverlay,
+  NoActionsMessage,
+  NoResultsMessage,
+  PageTitle,
+  SearchField,
+} from "../../components/manager/styles/manageReplacementStyles";
+import {
+  AssignStaffDto,
+  NotificationState,
+  Order,
+  OrderBy,
+  ReplacementRequestDetailDto,
+  ReplacementRequestStatus,
+  ReplacementRequestSummaryDto,
+  ReviewReplacementRequestDto,
+} from "../../types/replacement";
+import { StaffAvailabilityDto } from "../../types/staff";
+import { getAvailableActions } from "../../utils/replacementUtils";
+import AssignStaff from "./replacement/AssignStaff";
+import CustomerInfo from "./replacement/CustomerInfo";
+import EquipmentInfo from "./replacement/EquipmentInfo";
+import MobileRequestCard from "./replacement/MobileRequestCard";
+import NotesInfo from "./replacement/NotesInfo";
+import ReviewRequest from "./replacement/ReviewRequest";
+// Import the notification context
+// import { useNotificationContext } from "../../context/NotificationContext";
+
+// Improved getStatusText function with better type handling
+const getStatusText = (
+  status: string | ReplacementRequestStatus | null | undefined
+): string => {
+  // Handle null, undefined, or empty string
+  if (status === null || status === undefined || status === "") {
+    return "Tất cả trạng thái";
+  }
+  // Convert string to number if needed
+  const statusValue =
+    typeof status === "string" ? parseInt(status, 10) : status;
+  // Use a switch statement instead of statusTextMap
+  switch (statusValue) {
+    case ReplacementRequestStatus.Pending:
+      return "Đang chờ";
+    case ReplacementRequestStatus.Approved:
+      return "Đã phê duyệt";
+    case ReplacementRequestStatus.Rejected:
+      return "Đã từ chối";
+    case ReplacementRequestStatus.InProgress:
+      return "Đang xử lý";
+    case ReplacementRequestStatus.Completed:
+      return "Đã hoàn thành";
+    case ReplacementRequestStatus.Cancelled:
+      return "Đã hủy";
+    default:
+      return "Tất cả trạng thái";
+  }
+};
 
 const ManageReplacement: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // State
+  // Use the notification context instead of direct hub connection
+  // const { isConnected, equipmentAlerts, statusAlerts, equipmentUpdates } =
+  //   useNotificationContext();
+
+  // Trạng thái
   const [requests, setRequests] = useState<ReplacementRequestSummaryDto[]>([]);
-  const [staff, setStaff] = useState<StaffDto[]>([]);
+  const [staff, setStaff] = useState<StaffAvailabilityDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [staffLoading, setStaffLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<
+    ReplacementRequestStatus | ""
+  >("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [order, setOrder] = useState<Order>("desc");
@@ -90,33 +135,51 @@ const ManageReplacement: React.FC = () => {
   const [detailLoading, setDetailLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Form states
+  // Trạng thái biểu mẫu
   const [reviewNotes, setReviewNotes] = useState("");
   const [isApproved, setIsApproved] = useState(true);
   const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null);
-  const [completionNotes, setCompletionNotes] = useState("");
 
-  // Status options
-  const statusOptions = [
-    "Pending",
-    "Approved",
-    "In Progress",
-    "Completed",
-    "Rejected",
-    "Cancelled",
-  ];
+  // Tùy chọn trạng thái
+  const statusOptions = Object.values(ReplacementRequestStatus).filter(
+    (value) => typeof value === "number"
+  ) as ReplacementRequestStatus[];
 
-  // Fetch data
+  // Listen for equipment updates from the notification context
+  // useEffect(() => {
+  //   // When we receive equipment updates, refresh the data
+  //   if (equipmentUpdates.length > 0) {
+  //     fetchData();
+  //   }
+  // }, [equipmentUpdates]);
+
+  // // Listen for status alerts from the notification context
+  // useEffect(() => {
+  //   // When we receive status alerts, refresh the data
+  //   if (statusAlerts.length > 0) {
+  //     fetchData();
+  //   }
+  // }, [statusAlerts]);
+
+  // // Listen for equipment alerts from the notification context
+  // useEffect(() => {
+  //   // When we receive equipment alerts, refresh the data
+  //   if (equipmentAlerts.length > 0) {
+  //     fetchData();
+  //   }
+  // }, [equipmentAlerts]);
+
+  // Lấy dữ liệu
   const fetchData = async () => {
     try {
       setLoading(true);
       const replacementData = await replacementService.getAllReplacements();
       setRequests(replacementData);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Lỗi khi lấy dữ liệu:", error);
       setNotification({
         open: true,
-        message: "Failed to load replacement requests",
+        message: "Không thể tải yêu cầu thay thế",
         severity: "error",
       });
     } finally {
@@ -124,17 +187,17 @@ const ManageReplacement: React.FC = () => {
     }
   };
 
-  // Fetch staff data
+  // Lấy dữ liệu nhân viên
   const fetchStaffData = async () => {
     try {
       setStaffLoading(true);
-      const staffData = await staffService.getAllStaff();
+      const staffData = await staffService.getAvailableStaff();
       setStaff(staffData);
     } catch (error) {
-      console.error("Error fetching staff data:", error);
+      console.error("Lỗi khi lấy dữ liệu nhân viên:", error);
       setNotification({
         open: true,
-        message: "Failed to load staff data",
+        message: "Không thể tải dữ liệu nhân viên",
         severity: "error",
       });
     } finally {
@@ -145,33 +208,39 @@ const ManageReplacement: React.FC = () => {
   useEffect(() => {
     fetchData();
     fetchStaffData();
+    // Thiết lập làm mới định kỳ
+    const refreshInterval = setInterval(() => {
+      fetchData();
+    }, 60000); // Làm mới mỗi phút
+    return () => clearInterval(refreshInterval);
   }, []);
 
-  // Handle view details
+  // Xử lý xem chi tiết
   const handleViewDetails = async (request: ReplacementRequestSummaryDto) => {
     try {
       setDetailLoading(true);
-      const detailedRequest = await replacementService.getReplacementById(
+      const response = await replacementService.getReplacementById(
         request.replacementRequestId
       );
+      // Check if we got a valid response
+      if (!response || !response.success || !response.data) {
+        throw new Error("Invalid response from server");
+      }
+      // The data is now a single object, not an array
+      const detailedRequest = response.data;
       setSelectedRequest(detailedRequest);
-
-      // Reset form states
       setReviewNotes(detailedRequest.reviewNotes || "");
       setIsApproved(
-        detailedRequest.status === "Approved" ||
-          detailedRequest.status === "InProgress" ||
-          detailedRequest.status === "In Progress"
+        detailedRequest.status === ReplacementRequestStatus.Approved ||
+          detailedRequest.status === ReplacementRequestStatus.InProgress
       );
       setSelectedStaffId(detailedRequest.assignedStaffId || null);
-      setCompletionNotes("");
-
       setDetailDialogOpen(true);
     } catch (error) {
       console.error("Error fetching request details:", error);
       setNotification({
         open: true,
-        message: "Failed to load request details",
+        message: "Could not load request details",
         severity: "error",
       });
     } finally {
@@ -179,24 +248,26 @@ const ManageReplacement: React.FC = () => {
     }
   };
 
-  // Handle review request
+  // Xử lý xem xét yêu cầu
   const handleReviewRequest = async () => {
     if (!selectedRequest) return;
-
     try {
       setActionLoading(true);
       setValidationError(null);
-
       const reviewData: ReviewReplacementRequestDto = {
         isApproved,
         reviewNotes,
       };
-
-      const updatedRequest = await replacementService.reviewReplacement(
+      const updatedRequestArray = await replacementService.reviewReplacement(
         selectedRequest.replacementRequestId,
         reviewData
       );
-
+      // Extract the first item from the array
+      const updatedRequest = updatedRequestArray;
+      // Check if we have a valid updated request
+      if (!updatedRequest) {
+        throw new Error("No updated replacement request details found");
+      }
       // Update the requests list
       setRequests(
         requests.map((req) =>
@@ -209,20 +280,20 @@ const ManageReplacement: React.FC = () => {
             : req
         )
       );
-
       setSelectedRequest(updatedRequest);
-
       setNotification({
         open: true,
-        message: `Request ${isApproved ? "approved" : "rejected"} successfully`,
+        message: `Yêu cầu đã được ${
+          isApproved ? "phê duyệt" : "từ chối"
+        } thành công`,
         severity: "success",
       });
     } catch (error) {
-      console.error("Error reviewing request:", error);
-      setValidationError("Failed to review request. Please try again.");
+      console.error("Lỗi khi xem xét yêu cầu:", error);
+      setValidationError("Không thể xem xét yêu cầu. Vui lòng thử lại.");
       setNotification({
         open: true,
-        message: "Failed to review request",
+        message: "Không thể xem xét yêu cầu",
         severity: "error",
       });
     } finally {
@@ -230,23 +301,25 @@ const ManageReplacement: React.FC = () => {
     }
   };
 
-  // Handle assign staff
+  // Xử lý phân công nhân viên
   const handleAssignStaff = async () => {
     if (!selectedRequest || selectedStaffId === null) return;
-
     try {
       setActionLoading(true);
       setValidationError(null);
-
       const assignData: AssignStaffDto = {
         staffId: selectedStaffId,
       };
-
-      const updatedRequest = await replacementService.assignStaff(
+      const updatedRequestArray = await replacementService.assignStaff(
         selectedRequest.replacementRequestId,
         assignData
       );
-
+      // Extract the first item from the array
+      const updatedRequest = updatedRequestArray[0];
+      // Check if we have a valid updated request
+      if (!updatedRequest) {
+        throw new Error("No updated replacement request details found");
+      }
       // Update the requests list
       setRequests(
         requests.map((req) =>
@@ -259,20 +332,18 @@ const ManageReplacement: React.FC = () => {
             : req
         )
       );
-
       setSelectedRequest(updatedRequest);
-
       setNotification({
         open: true,
-        message: "Staff assigned successfully",
+        message: "Đã phân công nhân viên thành công",
         severity: "success",
       });
     } catch (error) {
-      console.error("Error assigning staff:", error);
-      setValidationError("Failed to assign staff. Please try again.");
+      console.error("Lỗi khi phân công nhân viên:", error);
+      setValidationError("Không thể phân công nhân viên. Vui lòng thử lại.");
       setNotification({
         open: true,
-        message: "Failed to assign staff",
+        message: "Không thể phân công nhân viên",
         severity: "error",
       });
     } finally {
@@ -280,62 +351,13 @@ const ManageReplacement: React.FC = () => {
     }
   };
 
-  // Handle complete request
-  const handleCompleteRequest = async () => {
-    if (!selectedRequest) return;
-
-    try {
-      setActionLoading(true);
-      setValidationError(null);
-
-      const completeData: CompleteReplacementDto = {
-        completionNotes,
-      };
-
-      const updatedRequest = await replacementService.completeReplacement(
-        selectedRequest.replacementRequestId,
-        completeData
-      );
-
-      // Update the requests list
-      setRequests(
-        requests.map((req) =>
-          req.replacementRequestId === updatedRequest.replacementRequestId
-            ? {
-                ...req,
-                status: updatedRequest.status,
-                completionDate: updatedRequest.completionDate,
-              }
-            : req
-        )
-      );
-
-      setSelectedRequest(updatedRequest);
-
-      setNotification({
-        open: true,
-        message: "Request marked as completed successfully",
-        severity: "success",
-      });
-    } catch (error) {
-      console.error("Error completing request:", error);
-      setValidationError("Failed to complete request. Please try again.");
-      setNotification({
-        open: true,
-        message: "Failed to complete request",
-        severity: "error",
-      });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // Handle filter by status
-  const handleStatusFilterChange = async (status: string) => {
+  // Xử lý lọc theo trạng thái
+  const handleStatusFilterChange = async (
+    status: ReplacementRequestStatus | ""
+  ) => {
     try {
       setLoading(true);
       setStatusFilter(status);
-
       let filteredRequests;
       if (status === "") {
         filteredRequests = await replacementService.getAllReplacements();
@@ -344,13 +366,13 @@ const ManageReplacement: React.FC = () => {
           status
         );
       }
-
-      setRequests(filteredRequests);
+      setRequests(filteredRequests || []);
     } catch (error) {
-      console.error("Error filtering requests:", error);
+      console.error("Lỗi khi lọc yêu cầu:", error);
+      setRequests([]);
       setNotification({
         open: true,
-        message: "Failed to filter requests",
+        message: "Không thể lọc yêu cầu",
         severity: "error",
       });
     } finally {
@@ -358,15 +380,15 @@ const ManageReplacement: React.FC = () => {
     }
   };
 
-  // Sort function
+  // Hàm sắp xếp
   const createSortHandler = (property: OrderBy) => () => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
 
-  // Filter and sort requests
-  const filteredRequests = requests
+  // Lọc và sắp xếp yêu cầu
+  const filteredRequests = (requests || [])
     .filter((request) => {
       const matchesSearch =
         request.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -379,11 +401,9 @@ const ManageReplacement: React.FC = () => {
     .sort((a, b) => {
       const aValue = a[orderBy];
       const bValue = b[orderBy];
-
       if (!aValue && !bValue) return 0;
       if (!aValue) return order === "asc" ? -1 : 1;
       if (!bValue) return order === "asc" ? 1 : -1;
-
       if (order === "asc") {
         return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
       } else {
@@ -396,7 +416,7 @@ const ManageReplacement: React.FC = () => {
     page * rowsPerPage + rowsPerPage
   );
 
-  // Pagination handlers
+  // Xử lý phân trang
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
@@ -412,7 +432,7 @@ const ManageReplacement: React.FC = () => {
     setNotification({ ...notification, open: false });
   };
 
-  // Reset filters
+  // Đặt lại bộ lọc
   const handleResetFilters = () => {
     setSearchTerm("");
     handleStatusFilterChange("");
@@ -420,7 +440,7 @@ const ManageReplacement: React.FC = () => {
 
   return (
     <StyledContainer maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Header */}
+      {/* Tiêu đề */}
       <Box
         sx={{
           display: "flex",
@@ -431,9 +451,17 @@ const ManageReplacement: React.FC = () => {
           mb: 3,
         }}
       >
-        <Typography variant="h4">Equipment Replacement Requests</Typography>
+        <PageTitle>Yêu cầu thay thế thiết bị</PageTitle>
         <Stack direction="row" spacing={2}>
-          <Tooltip title="Refresh">
+          {/* {isConnected && (
+            <Tooltip title="Cập nhật thời gian thực đang hoạt động">
+              <LiveIndicator>
+                <LiveDot />
+                <Typography variant="body2">Trực tiếp</Typography>
+              </LiveIndicator>
+            </Tooltip>
+          )} */}
+          <Tooltip title="Làm mới">
             <FilterButton onClick={fetchData}>
               <RefreshIcon />
             </FilterButton>
@@ -441,69 +469,71 @@ const ManageReplacement: React.FC = () => {
         </Stack>
       </Box>
 
-      {/* Filters and Search */}
+      {/* Bộ lọc và Tìm kiếm */}
       <Stack
         direction={isMobile ? "column" : "row"}
         spacing={2}
         sx={{ mb: 3 }}
         alignItems={isMobile ? "stretch" : "center"}
       >
-        <TextField
-          placeholder="Search requests..."
+        <SearchField
+          placeholder="Tìm kiếm yêu cầu..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           variant="outlined"
           fullWidth={isMobile}
-          sx={{
-            flexGrow: 1,
-            "& .MuiOutlinedInput-root": { borderRadius: 3 },
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="primary" />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="primary" />
+                </InputAdornment>
+              ),
+            },
           }}
         />
         <StyledFormControl sx={{ minWidth: 150 }}>
           <Select
             value={statusFilter}
-            onChange={(e) => handleStatusFilterChange(e.target.value)}
+            onChange={(e) =>
+              handleStatusFilterChange(
+                e.target.value === "" ? "" : Number(e.target.value)
+              )
+            }
             displayEmpty
-            renderValue={(value) => value || "All Statuses"}
+            renderValue={(value) => getStatusText(value)}
             startAdornment={<FilterListIcon color="primary" sx={{ mr: 1 }} />}
           >
-            <MenuItem value="">All Statuses</MenuItem>
+            <MenuItem value="">Tất cả trạng thái</MenuItem>
             {statusOptions.map((status) => (
               <MenuItem key={status} value={status}>
-                {status}
+                {getStatusText(status)}
               </MenuItem>
             ))}
           </Select>
         </StyledFormControl>
-        <Tooltip title="Reset Filters">
+        <Tooltip title="Đặt lại bộ lọc">
           <FilterButton onClick={handleResetFilters}>
             <RefreshIcon />
           </FilterButton>
         </Tooltip>
       </Stack>
 
-      {/* Error alert */}
+      {/* Thông báo lỗi */}
       {validationError && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {validationError}
         </Alert>
       )}
 
-      {/* Loading indicator */}
+      {/* Chỉ báo đang tải */}
       {loading && (
         <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
           <CircularProgress />
         </Box>
       )}
 
-      {/* Main content */}
+      {/* Nội dung chính */}
       {!loading &&
         (isMobile ? (
           <Box>
@@ -511,15 +541,18 @@ const ManageReplacement: React.FC = () => {
               paginatedRequests.map((request) => (
                 <MobileRequestCard
                   key={request.replacementRequestId}
-                  request={request}
-                  onViewDetails={handleViewDetails}
+                  request={{
+                    ...request,
+                    // Don't modify the status type, just pass it as is
+                  }}
+                  onViewDetails={() => handleViewDetails(request)}
                 />
               ))
             ) : (
               <Paper sx={{ p: 3, textAlign: "center", borderRadius: 3 }}>
-                <Typography color="text.secondary">
-                  No replacement requests found
-                </Typography>
+                <NoResultsMessage>
+                  Không tìm thấy yêu cầu thay thế nào
+                </NoResultsMessage>
               </Paper>
             )}
             <TablePagination
@@ -529,6 +562,10 @@ const ManageReplacement: React.FC = () => {
               onPageChange={handleChangePage}
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
+              labelRowsPerPage="Số hàng mỗi trang:"
+              labelDisplayedRows={({ from, to, count }) =>
+                `${from}-${to} của ${count}`
+              }
             />
           </Box>
         ) : (
@@ -548,16 +585,16 @@ const ManageReplacement: React.FC = () => {
                         ID
                       </TableSortLabel>
                     </TableCell>
-                    <TableCell>Customer</TableCell>
-                    <TableCell>Equipment</TableCell>
-                    <TableCell>Issue</TableCell>
+                    <TableCell>Khách hàng</TableCell>
+                    <TableCell>Thiết bị</TableCell>
+                    <TableCell>Vấn đề</TableCell>
                     <TableCell>
                       <TableSortLabel
                         active={orderBy === "requestDate"}
                         direction={orderBy === "requestDate" ? order : "asc"}
                         onClick={createSortHandler("requestDate")}
                       >
-                        Request Date
+                        Ngày yêu cầu
                       </TableSortLabel>
                     </TableCell>
                     <TableCell>
@@ -566,11 +603,11 @@ const ManageReplacement: React.FC = () => {
                         direction={orderBy === "status" ? order : "asc"}
                         onClick={createSortHandler("status")}
                       >
-                        Status
+                        Trạng thái
                       </TableSortLabel>
                     </TableCell>
-                    <TableCell>Assigned Staff</TableCell>
-                    <TableCell>Actions</TableCell>
+                    <TableCell>Nhân viên được phân công</TableCell>
+                    <TableCell>Hành động</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -579,20 +616,16 @@ const ManageReplacement: React.FC = () => {
                       <TableRow key={request.replacementRequestId}>
                         <TableCell>#{request.replacementRequestId}</TableCell>
                         <TableCell>{request.customerName}</TableCell>
-                        // src/components/replacement/ManageReplacement.tsx
-                        (continued)
                         <TableCell>{request.equipmentName}</TableCell>
                         <TableCell>
-                          <Tooltip title={request.requestReason}>
-                            <Typography noWrap sx={{ maxWidth: 200 }}>
-                              {request.requestReason}
-                            </Typography>
-                          </Tooltip>
+                          <Typography noWrap sx={{ maxWidth: 200 }}>
+                            {request.requestReason}
+                          </Typography>
                         </TableCell>
                         <TableCell>{formatDate(request.requestDate)}</TableCell>
                         <TableCell>
                           <StyledChip
-                            label={request.status}
+                            label={getStatusText(request.status)}
                             status={request.status}
                           />
                         </TableCell>
@@ -602,12 +635,12 @@ const ManageReplacement: React.FC = () => {
                               color="text.secondary"
                               fontStyle="italic"
                             >
-                              Not assigned
+                              Chưa phân công
                             </Typography>
                           )}
                         </TableCell>
                         <TableCell>
-                          <Tooltip title="View Details">
+                          <Tooltip title="Xem chi tiết">
                             <IconButton
                               color="primary"
                               onClick={() => handleViewDetails(request)}
@@ -621,9 +654,9 @@ const ManageReplacement: React.FC = () => {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={8} align="center">
-                        <Typography color="text.secondary" py={2}>
-                          No replacement requests found
-                        </Typography>
+                        <NoResultsMessage>
+                          Không tìm thấy yêu cầu thay thế nào
+                        </NoResultsMessage>
                       </TableCell>
                     </TableRow>
                   )}
@@ -638,11 +671,15 @@ const ManageReplacement: React.FC = () => {
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
               rowsPerPageOptions={[5, 10, 25]}
+              labelRowsPerPage="Số hàng mỗi trang:"
+              labelDisplayedRows={({ from, to, count }) =>
+                `${from}-${to} của ${count}`
+              }
             />
           </StyledPaper>
         ))}
 
-      {/* Detail Dialog */}
+      {/* Hộp thoại chi tiết */}
       <Dialog
         open={detailDialogOpen}
         onClose={() => setDetailDialogOpen(false)}
@@ -656,50 +693,30 @@ const ManageReplacement: React.FC = () => {
         ) : selectedRequest ? (
           <>
             <DialogTitle>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
+              <DialogHeader>
                 <Typography variant="h6">
-                  Replacement Request #{selectedRequest.replacementRequestId}
+                  Yêu cầu thay thế #{selectedRequest.replacementRequestId}
                 </Typography>
                 <StyledChip
-                  label={selectedRequest.status}
+                  label={getStatusText(selectedRequest.status)}
                   status={selectedRequest.status}
                 />
-              </Stack>
+              </DialogHeader>
             </DialogTitle>
             <DialogContent dividers>
               {actionLoading && (
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: alpha("#fff", 0.7),
-                    zIndex: 1,
-                  }}
-                >
+                <LoadingOverlay>
                   <CircularProgress />
-                </Box>
+                </LoadingOverlay>
               )}
               <Stack spacing={3} sx={{ pt: 1 }}>
-                {/* Customer Information */}
+                {/* Thông tin khách hàng */}
                 <CustomerInfo request={selectedRequest} />
-
-                {/* Equipment Information */}
+                {/* Thông tin thiết bị */}
                 <EquipmentInfo request={selectedRequest} />
-
-                {/* Notes */}
+                {/* Ghi chú */}
                 <NotesInfo request={selectedRequest} />
-
-                {/* Actions based on status */}
+                {/* Hành động dựa trên trạng thái */}
                 {getAvailableActions(selectedRequest.status).canReview && (
                   <ReviewRequest
                     isApproved={isApproved}
@@ -709,7 +726,6 @@ const ManageReplacement: React.FC = () => {
                     onReview={handleReviewRequest}
                   />
                 )}
-
                 {getAvailableActions(selectedRequest.status).canAssign && (
                   <AssignStaff
                     selectedStaffId={selectedStaffId}
@@ -719,36 +735,20 @@ const ManageReplacement: React.FC = () => {
                     onAssign={handleAssignStaff}
                   />
                 )}
-
-                {getAvailableActions(selectedRequest.status).canComplete && (
-                  <CompleteRequest
-                    completionNotes={completionNotes}
-                    setCompletionNotes={setCompletionNotes}
-                    onComplete={handleCompleteRequest}
-                  />
-                )}
-
-                {/* If no actions are available */}
+                {/* Nếu không có hành động nào khả dụng */}
                 {!getAvailableActions(selectedRequest.status).canReview &&
                   !getAvailableActions(selectedRequest.status).canAssign &&
                   !getAvailableActions(selectedRequest.status).canComplete && (
-                    <Paper
-                      variant="outlined"
-                      sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        bgcolor: alpha(theme.palette.info.light, 0.1),
-                      }}
-                    >
+                    <NoActionsMessage variant="outlined">
                       <Typography
                         variant="body1"
                         textAlign="center"
                         color="text.secondary"
                       >
-                        No actions available for requests with status "
-                        {selectedRequest.status}"
+                        Không có hành động nào khả dụng cho yêu cầu có trạng
+                        thái "{getStatusText(selectedRequest.status)}"
                       </Typography>
-                    </Paper>
+                    </NoActionsMessage>
                   )}
               </Stack>
             </DialogContent>
@@ -757,20 +757,20 @@ const ManageReplacement: React.FC = () => {
                 onClick={() => setDetailDialogOpen(false)}
                 sx={{ borderRadius: 2 }}
               >
-                Close
+                Đóng
               </Button>
             </DialogActions>
           </>
         ) : (
           <Box sx={{ p: 4, textAlign: "center" }}>
             <Typography color="error">
-              Failed to load request details
+              Không thể tải chi tiết yêu cầu
             </Typography>
           </Box>
         )}
       </Dialog>
 
-      {/* Notification Snackbar */}
+      {/* Thanh thông báo */}
       <Snackbar
         open={notification.open}
         autoHideDuration={4000}

@@ -226,18 +226,18 @@ export const SectionValue = styled(Typography)(({ theme }) => ({
 }));
 
 // Delivery chip
-export const DeliveryChip = styled(Chip)<{ delivered: boolean }>(
-  ({ theme, delivered }) => ({
-    backgroundColor: delivered
-      ? theme.palette.success.main
-      : theme.palette.warning.main,
-    color: "white",
-    fontWeight: 600,
-    fontSize: "0.8rem",
-    marginBottom: theme.spacing(2),
-    marginTop: theme.spacing(0.5),
-  })
-);
+export const DeliveryChip = styled(Chip, {
+  shouldForwardProp: (prop) => prop !== "delivered",
+})<{ delivered: boolean }>(({ theme, delivered }) => ({
+  backgroundColor: delivered
+    ? theme.palette.success.main
+    : theme.palette.warning.main,
+  color: "white",
+  fontWeight: 600,
+  fontSize: "0.8rem",
+  marginBottom: theme.spacing(2),
+  marginTop: theme.spacing(0.5),
+}));
 
 // Empty state container
 export const EmptyStateContainer = styled(Box)(({ theme }) => ({

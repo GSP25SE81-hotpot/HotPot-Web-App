@@ -1,4 +1,3 @@
-// src/components/replacement/StaffSelection.tsx
 import {
   Avatar,
   Box,
@@ -11,18 +10,59 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { StaffDto } from "../../../types/staff";
+import { styled } from "@mui/material/styles";
 import { StyledFormControl } from "../../../components/StyledComponents";
+import { StaffAvailabilityDto } from "../../../types/staff";
 import {
   getStaffAvailabilityStatus,
   getStaffDisplayName,
-  getStaffWorkload,
 } from "../../../utils/replacementUtils";
+
+const StaffAvatar = styled(Avatar, {
+  shouldForwardProp: (prop) => prop !== "available",
+})<{ available?: boolean }>(({ theme, available }) => ({
+  width: 28,
+  height: 28,
+  backgroundColor: available
+    ? theme.palette.success.light
+    : theme.palette.error.light,
+}));
+
+const StaffMenuItem = styled(MenuItem)({
+  width: "100%",
+});
+
+// Fix: Use flexDirection instead of direction and apply spacing as a prop
+const StaffInfo = styled(Stack)({
+  flexDirection: "row", // Changed from direction to flexDirection
+  alignItems: "center",
+  width: "100%",
+});
+
+const StaffName = styled(Typography)({
+  flexGrow: 1,
+});
+
+const AvailabilityChip = styled(Chip, {
+  shouldForwardProp: (prop) => prop !== "available",
+})<{ available?: boolean }>(({ theme }) => ({
+  marginLeft: theme.spacing(1),
+}));
+
+const LoadingMenuItem = styled(MenuItem)(() => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}));
+
+const LoadingIndicator = styled(CircularProgress)(({ theme }) => ({
+  marginRight: theme.spacing(1),
+}));
 
 interface StaffSelectionProps {
   selectedStaffId: number | null;
   setSelectedStaffId: (id: number | null) => void;
-  staff: StaffDto[];
+  staff: StaffAvailabilityDto[];
   loading: boolean;
 }
 
@@ -47,73 +87,56 @@ const StaffSelection: React.FC<StaffSelectionProps> = ({
           if (value === null) {
             return (
               <Typography color="text.secondary" fontStyle="italic">
-                Select Staff Member
+                Chọn nhân viên
               </Typography>
             );
           }
-
           return getStaffDisplayName(Number(value), staff);
         }}
       >
         <MenuItem value="">
-          <em>None</em>
+          <em>Không chọn</em>
         </MenuItem>
         {loading ? (
-          <MenuItem disabled>
-            <CircularProgress size={20} sx={{ mr: 1 }} /> Loading staff...
-          </MenuItem>
+          <LoadingMenuItem disabled>
+            <LoadingIndicator size={20} /> Đang tải danh sách nhân viên...
+          </LoadingMenuItem>
         ) : (
           staff.map((s) => {
             const availabilityStatus = getStaffAvailabilityStatus(s);
-
             return (
-              <MenuItem
-                key={s.staffId}
-                value={s.staffId}
+              <StaffMenuItem
+                key={s.id}
+                value={s.id}
                 disabled={!availabilityStatus.available}
               >
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  alignItems="center"
-                  width="100%"
-                >
-                  <Avatar
-                    sx={{
-                      width: 28,
-                      height: 28,
-                      bgcolor: availabilityStatus.available
-                        ? "success.light"
-                        : "error.light",
-                    }}
-                  >
-                    {s.user.name.charAt(0)}
-                  </Avatar>
+                <StaffInfo spacing={1}>
+                  {" "}
+                  {/* Apply spacing as a prop */}
+                  <StaffAvatar available={availabilityStatus.available}>
+                    {s.name.charAt(0)}
+                  </StaffAvatar>
                   <Box sx={{ flexGrow: 1 }}>
-                    <Typography>{s.user.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {getStaffWorkload(s.staffId, staff)}
-                    </Typography>
+                    <StaffName>{s.name}</StaffName>
                   </Box>
-                  <Chip
+                  <AvailabilityChip
                     size="small"
                     label={
-                      availabilityStatus.available ? "Available" : "Unavailable"
+                      availabilityStatus.available ? "Có sẵn" : "Không có sẵn"
                     }
                     color={availabilityStatus.available ? "success" : "error"}
-                    sx={{ ml: 1 }}
                     title={availabilityStatus.reason}
                   />
-                </Stack>
-              </MenuItem>
+                </StaffInfo>
+              </StaffMenuItem>
             );
           })
         )}
       </Select>
       <FormHelperText>
         {selectedStaffId !== null
-          ? `Selected: ${getStaffDisplayName(selectedStaffId, staff)}`
-          : "Please select a staff member to assign"}
+          ? `Đã chọn: ${getStaffDisplayName(selectedStaffId, staff)}`
+          : "Vui lòng chọn một nhân viên để phân công"}
       </FormHelperText>
     </StyledFormControl>
   );

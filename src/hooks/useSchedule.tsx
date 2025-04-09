@@ -1,82 +1,138 @@
 // src/hooks/useSchedule.ts
 import { useState, useEffect, useCallback } from "react";
-import { StaffSchedule } from "../types/scheduleInterfaces";
-import scheduleService from "../api/Services/scheduleService";
 import useAuth from "./useAuth";
+import scheduleService, { isManager } from "../api/Services/scheduleService";
+import {
+  StaffSchedule,
+  WorkDays,
+  StaffSDto,
+} from "../types/scheduleInterfaces";
 
-
-interface UseScheduleReturn {
-  loading: boolean;
-  error: string | null;
-  schedules: StaffSchedule[];
-  personalSchedule: StaffSchedule | null;
-  refreshSchedules: () => Promise<void>;
-}
-
-export const useSchedule = (): UseScheduleReturn => {
+export const useSchedule = () => {
   const { auth } = useAuth();
-  const [loading, setLoading] = useState<boolean>(true);
+  const [mySchedule, setMySchedule] = useState<StaffSchedule | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [schedules, setSchedules] = useState<StaffSchedule[]>([]);
-  const [personalSchedule, setPersonalSchedule] =
-    useState<StaffSchedule | null>(null);
+  const [isManagerRole, setIsManagerRole] = useState<boolean>(false);
 
-  // Use useCallback to memoize the fetchSchedules function
-  const fetchSchedules = useCallback(async () => {
+  useEffect(() => {
+    if (auth?.user) {
+      setIsManagerRole(isManager(auth.user));
+    }
+  }, [auth]);
+
+  const fetchMySchedule = useCallback(async () => {
+    if (!auth) return null;
+
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-
-      // If user is not authenticated, don't fetch anything
-      if (!auth) {
-        setSchedules([]);
-        setPersonalSchedule(null);
-        setLoading(false);
-        return;
-      }
-
-      // If user is a manager, get their schedule and all staff schedules
-      if (auth?.user?.role === "Manager") {
-        const managerSchedule = await scheduleService.getManagerSchedule();
-        const staffSchedules = await scheduleService.getAllStaffSchedules();
-
-        setPersonalSchedule(managerSchedule);
-        setSchedules([managerSchedule, ...staffSchedules]);
-      }
-      // If user is a staff, get only their schedule
-      else if (auth?.user?.role === "Staff") {
-        // For staff, we'll use the auth?.user?.userId as staffId
-        // You might need to adjust this if your staffId is different from auth?.user?.userId
-        const staffId = parseInt(auth?.user?.userId);
-        const staffSchedule = await scheduleService.getStaffSchedule(staffId);
-        setPersonalSchedule(staffSchedule);
-        setSchedules([staffSchedule]);
-      }
-      // Otherwise, try to get all staff schedules (for admin)
-      else if (auth?.user?.role === "Admin") {
-        const allSchedules = await scheduleService.getAllStaffSchedules();
-        setSchedules(allSchedules);
-      }
+      const schedule = await scheduleService.getMySchedule(auth);
+      setMySchedule(schedule);
+      return schedule;
     } catch (err) {
-      console.error("Error fetching schedules:", err);
-      setError("Failed to load schedules. Please try again later.");
+      setError("Failed to fetch schedule");
+      console.error(err);
+      return null;
     } finally {
       setLoading(false);
     }
-  }, [auth?.user?.userId, auth?.user?.role]); // Include dependencies that fetchSchedules uses from the component scope
+  }, [auth]);
 
-  useEffect(() => {
-    // Only fetch schedules when auth loading is complete and user is authenticated
-    if ( auth?.user?.userId) {
-      fetchSchedules();
-    } 
-  }, [auth?.user?.userId, auth?.user?.role, fetchSchedules]); // Now we can safely include fetchSchedules
+  const fetchAllStaffSchedules = async (): Promise<StaffSchedule[]> => {
+    if (!isManagerRole) {
+      setError("Only managers can access staff schedules");
+      return [];
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const schedules = await scheduleService.getAllStaffSchedules();
+      return schedules;
+    } catch (err) {
+      setError("Failed to fetch staff schedules");
+      console.error(err);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStaffSchedule = async (
+    staffId: number
+  ): Promise<StaffSchedule | null> => {
+    if (!isManagerRole) {
+      setError("Only managers can access staff schedules");
+      return null;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const schedule = await scheduleService.getStaffSchedule(staffId);
+      return schedule;
+    } catch (err) {
+      setError(`Failed to fetch schedule for staff ${staffId}`);
+      console.error(err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStaffByDay = async (day: WorkDays): Promise<StaffSDto[]> => {
+    if (!isManagerRole) {
+      setError("Only managers can access staff by day");
+      return [];
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const staff = await scheduleService.getStaffByDay(day);
+      return staff;
+    } catch (err) {
+      setError(`Failed to fetch staff for day ${day}`);
+      console.error(err);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const assignStaffWorkDays = async (
+    staffId: number,
+    workDays: WorkDays
+  ): Promise<boolean> => {
+    if (!isManagerRole) {
+      setError("Only managers can assign work days");
+      return false;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      await scheduleService.assignStaffWorkDays(staffId, workDays);
+
+      await fetchMySchedule();
+      return true;
+    } catch (err) {
+      setError("Failed to assign work days");
+      console.error(err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return {
-    loading: loading ,
+    mySchedule,
+    loading,
     error,
-    schedules,
-    personalSchedule,
-    refreshSchedules: fetchSchedules,
+    isManagerRole,
+    fetchMySchedule,
+    fetchAllStaffSchedules,
+    fetchStaffSchedule,
+    fetchStaffByDay,
+    assignStaffWorkDays,
   };
 };
+
+export default useSchedule;

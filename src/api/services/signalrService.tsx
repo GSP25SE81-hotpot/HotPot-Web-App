@@ -17,18 +17,28 @@ class SignalRService {
       return delay;
     },
   };
-
   /**
    * Get or create a hub connection
    * @param hubUrl The URL of the hub to connect to
    * @returns The hub connection
    */
-  private getOrCreateHubConnection(hubUrl: string): signalR.HubConnection {
+  private getOrCreateHubConnection(
+    hubUrl: string,
+    token?: string
+  ): signalR.HubConnection {
     if (!this.hubConnections.has(hubUrl)) {
+      const apiBaseUrl = "https://hpty.vinhuser.one"; // Update with your API base URL
+      // https://hpty.vinhuser.one
+      // https://localhost:7163
+      // Get the JWT token from the parameter or try to get it from localStorage
+      const authToken = token || this.getAuthToken();
+
       const connection = new signalR.HubConnectionBuilder()
-        .withUrl(hubUrl)
+        .withUrl(`${apiBaseUrl}${hubUrl}`, {
+          accessTokenFactory: () => authToken || "",
+        })
         .withAutomaticReconnect(this.reconnectPolicy)
-        .configureLogging(signalR.LogLevel.Information)
+        .configureLogging(signalR.LogLevel.Debug) // Keep Debug for troubleshooting
         .build();
 
       // Set up connection state change handlers
@@ -44,6 +54,10 @@ class SignalRService {
 
       connection.onclose((error) => {
         console.log(`Connection to ${hubUrl} closed.`, error);
+        // Log more details about the error
+        if (error) {
+          console.error("Connection closed due to error:", error);
+        }
         // Remove from our maps when closed
         this.hubConnections.delete(hubUrl);
         this.connectionPromises.delete(hubUrl);
@@ -56,31 +70,62 @@ class SignalRService {
   }
 
   /**
+   * Get the authentication token from localStorage
+   * @returns The authentication token or null if not found
+   */
+  private getAuthToken(): string | null {
+    try {
+      // Try to get the token from userInfor in localStorage
+      const userInfor = localStorage.getItem("userInfor");
+      console.log("userInfor from localStorage:", userInfor);
+      if (userInfor) {
+        const parsedUserInfo = JSON.parse(userInfor);
+        return parsedUserInfo.accessToken || null;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error getting auth token:", error);
+      return null;
+    }
+  }
+
+  /**
    * Start a connection to a hub
    * @param hubUrl The URL of the hub to connect to
    * @returns A promise that resolves when the connection is established
    */
-  public async startConnection(hubUrl: string): Promise<void> {
-    // If we already have a connection promise for this hub, return it
+  public async startConnection(hubUrl: string, token?: string): Promise<void> {
+    // If we already have a promise for this connection, return it
     if (this.connectionPromises.has(hubUrl)) {
       return this.connectionPromises.get(hubUrl)!;
     }
 
-    const connection = this.getOrCreateHubConnection(hubUrl);
+    // Create a new promise for this connection
+    const connectionPromise = new Promise<void>((resolve, reject) => {
+      const connection = this.getOrCreateHubConnection(hubUrl, token);
 
-    // Create a new connection promise
-    const connectionPromise = connection
-      .start()
-      .then(() => {
-        console.log(`Connected to hub: ${hubUrl}`);
-      })
-      .catch((err) => {
-        console.error(`Error connecting to hub ${hubUrl}:`, err);
-        this.connectionPromises.delete(hubUrl);
-        throw err;
-      });
+      // If the connection is already connected, resolve immediately
+      if (connection.state === signalR.HubConnectionState.Connected) {
+        resolve();
+        return;
+      }
 
+      // Start the connection
+      connection
+        .start()
+        .then(() => {
+          console.log(`Connected to ${hubUrl}`);
+          resolve();
+        })
+        .catch((error) => {
+          console.error(`Error connecting to ${hubUrl}:`, error);
+          reject(error);
+        });
+    });
+
+    // Store the promise so we can reuse it
     this.connectionPromises.set(hubUrl, connectionPromise);
+
     return connectionPromise;
   }
 
@@ -212,13 +257,31 @@ class SignalRService {
    * @param userId The user ID
    * @param userType The user type (e.g., 'manager', 'admin', 'customer')
    */
-  public async registerUserConnection(
+  public async registerConnection(
     hubUrl: string,
     userId: number,
     userType: string
   ): Promise<void> {
     await this.ensureConnection(hubUrl);
-    await this.invoke(hubUrl, "RegisterConnection", userId, userType);
+
+    try {
+      if (
+        hubUrl.includes("EquipmentCondition") ||
+        hubUrl.includes("EquipmentStock")
+      ) {
+        if (userType.toLowerCase() === "admin") {
+          await this.invoke(hubUrl, "RegisterAdminConnection", userId);
+        }
+      } else if (hubUrl.includes("Notification")) {
+        await this.invoke(hubUrl, "JoinRoleGroup", userType);
+        await this.invoke(hubUrl, "JoinUserSpecificGroup", userId.toString());
+      } else {
+        // For hubs that don't need registration, don't call anything
+        console.log(`No registration needed for ${hubUrl}`);
+      }
+    } catch (error) {
+      console.warn(`Registration for ${hubUrl} failed:`, error);
+    }
   }
 
   /**
