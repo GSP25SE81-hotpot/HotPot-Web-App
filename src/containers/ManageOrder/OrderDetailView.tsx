@@ -225,7 +225,7 @@ const OrderDetailView: React.FC = () => {
     try {
       setUpdating(true);
       const request: AllocateOrderRequest = {
-        orderId: order.orderId,
+        orderId: Number(order.orderId),
         staffId: selectedStaffId,
       };
       const shippingOrder = await orderManagementService.allocateOrderToStaff(
@@ -445,8 +445,8 @@ const OrderDetailView: React.FC = () => {
               <CustomerName>
                 {order.userName || "Khách hàng không xác định"}
               </CustomerName>
-              <SectionTitle>ID người dùng</SectionTitle>
-              <SectionValue>{order.userId || "Không có ID"}</SectionValue>
+              {/* <SectionTitle>ID người dùng</SectionTitle>
+              <SectionValue>{order.userId || "Không có ID"}</SectionValue> */}
               <SectionTitle>Địa chỉ giao hàng</SectionTitle>
               <SectionValue>{order.address || "Không có địa chỉ"}</SectionValue>
               {order.notes && (

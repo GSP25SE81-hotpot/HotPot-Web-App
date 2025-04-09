@@ -110,7 +110,8 @@ export interface StaffShippingOrderDTO {
 
 export interface ShippingOrderAllocationDTO {
   shippingOrderId: number;
-  orderId: string;
+  orderId: number;
+  orderCode: string;
   staffId: number;
   staffName: string;
   isDelivered: boolean;
@@ -125,7 +126,7 @@ export interface OrderStatusUpdateDTO {
 
 export interface DeliveryStatusUpdateDTO {
   shippingOrderId: number;
-  orderId: string;
+  orderId: number;
   isDelivered: boolean;
   deliveryTime?: string;
   deliveryNotes?: string;
@@ -134,14 +135,15 @@ export interface DeliveryStatusUpdateDTO {
 
 export interface DeliveryTimeUpdateDTO {
   shippingOrderId: number;
-  orderId: string;
+  orderId: number;
+  orderCode: string;
   deliveryTime: string;
   updatedAt: string;
 }
 
 // Request interfaces
 export interface AllocateOrderRequest {
-  orderId: string;
+  orderId: number;
   staffId: number;
 }
 
@@ -211,7 +213,8 @@ export interface OrderCountsDTO {
   totalCount: number;
 }
 export interface UnallocatedOrderDTO {
-  orderId: string;
+  orderId: number;
+  orderCode: string;
   address: string;
   notes: string | null;
   totalPrice: number;
