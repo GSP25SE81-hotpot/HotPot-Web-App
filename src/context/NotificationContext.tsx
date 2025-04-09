@@ -50,6 +50,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   const [connectionState, setConnectionState] =
     useState<ConnectionState>("disconnected");
   const { auth } = useAuth();
+  const [registrationStatus, setRegistrationStatus] = useState<
+    "pending" | "registered" | "failed"
+  >("pending");
 
   // Initialize SignalR connection
   useEffect(() => {
@@ -60,32 +63,41 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
     const connection = new signalR.HubConnectionBuilder()
       .withUrl("https://hpty.vinhuser.one/notificationHub", {
-        // https://localhost:7163
-        // https://hpty.vinhuser.one
-        accessTokenFactory: () => {
-          const token = auth.accessToken || "";
-          // console.log(
-          //   "Passing token to SignalR:",
-          //   token.substring(0, 10) + "..."
-          // );
-          return token;
-        },
+        accessTokenFactory: () => auth.accessToken || "",
       })
       .withAutomaticReconnect()
       .build();
 
     setHubConnection(connection);
-
-    // Start the connection
     startConnection(connection);
 
-    // Clean up on unmount
     return () => {
       if (connection) {
         connection.stop();
       }
     };
-  }, [auth?.accessToken, auth?.user?.id]);
+  }, [auth?.accessToken]);
+
+  // Register connection when user ID becomes available
+  useEffect(() => {
+    if (
+      hubConnection &&
+      connectionState === "connected" &&
+      auth?.user?.id &&
+      registrationStatus === "pending"
+    ) {
+      hubConnection
+        .invoke("RegisterConnection")
+        .then(() => {
+          // console.log("Connection registered for user:", auth?.user?.id);
+          setRegistrationStatus("registered");
+        })
+        .catch((err) => {
+          console.error("Error registering connection:", err);
+          setRegistrationStatus("failed");
+        });
+    }
+  }, [hubConnection, connectionState, auth?.user?.id, registrationStatus]);
 
   const startConnection = useCallback(
     async (connection: signalR.HubConnection) => {
