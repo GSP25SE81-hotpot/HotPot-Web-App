@@ -189,7 +189,7 @@ const OrderDetailView: React.FC = () => {
     try {
       setUpdating(true);
       const updatedOrder = await orderManagementService.updateOrderStatus(
-        order.orderId,
+        order.orderCode,
         newStatus
       );
       setOrder({ ...order, ...updatedOrder });

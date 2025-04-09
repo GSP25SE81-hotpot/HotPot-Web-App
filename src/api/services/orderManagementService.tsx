@@ -67,7 +67,8 @@ export interface OrderWithDetailsDTO {
 }
 
 export interface OrderDetailDTO {
-  orderId: string;
+  orderCode: string;
+  orderId: number;
   address: string;
   notes?: string;
   totalPrice: number;
@@ -119,13 +120,15 @@ export interface ShippingOrderAllocationDTO {
 }
 
 export interface OrderStatusUpdateDTO {
-  orderId: string;
+  orderCode: string;
+  orderId: number;
   status: OrderStatus;
   updatedAt: string;
 }
 
 export interface DeliveryStatusUpdateDTO {
   shippingOrderId: number;
+  orderCode: string;
   orderId: number;
   isDelivered: boolean;
   deliveryTime?: string;

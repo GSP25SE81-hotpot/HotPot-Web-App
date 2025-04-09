@@ -266,7 +266,7 @@ const UnallocatedOrdersList: React.FC = () => {
       fetchData();
       setSnackbar({
         open: true,
-        message: `Đơn hàng #${selectedOrder.orderId} đã được phân công thành công`,
+        message: `Đơn hàng #${selectedOrder.orderCode} đã được phân công thành công`,
         severity: "success",
       });
       handleCloseDialog();
@@ -407,8 +407,8 @@ const UnallocatedOrdersList: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {orders.map((order) => (
-                    <StyledTableRow key={order.orderId}>
-                      <IdCell>#{order.orderId}</IdCell>
+                    <StyledTableRow key={order.orderCode}>
+                      <IdCell>#{order.orderCode}</IdCell>
                       <StyledTableCell>
                         <CustomerName>
                           {order.userName || "Không xác định"}
@@ -503,7 +503,7 @@ const UnallocatedOrdersList: React.FC = () => {
             pb: 1,
           }}
         >
-          Phân công đơn hàng #{selectedOrder?.orderId}
+          Phân công đơn hàng #{selectedOrder?.orderCode}
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3, pb: 2 }}>
           <Box sx={{ mt: 1, minWidth: 300 }}>
