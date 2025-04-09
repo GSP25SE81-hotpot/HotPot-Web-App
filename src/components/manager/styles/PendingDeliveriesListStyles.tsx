@@ -1,20 +1,46 @@
+// src/styles/PendingDeliveriesListStyles.tsx
 import {
   Box,
   Button,
   Chip,
+  IconButton,
   Paper,
   TableCell,
   TableContainer,
   TableRow,
   Typography,
-  alpha,
   styled,
+  alpha,
 } from "@mui/material";
 
 // Main container for the deliveries list
-export const OrdersListContainer = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(1),
+export const DeliveriesListContainer = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
   width: "100%",
+}));
+
+// Title with count
+export const ListTitle = styled(Typography)(({ theme }) => ({
+  fontSize: "1.25rem",
+  fontWeight: 600,
+  marginBottom: theme.spacing(2),
+  color: theme.palette.text.primary,
+  display: "flex",
+  alignItems: "center",
+}));
+
+// Count badge
+export const CountBadge = styled(Box)(({ theme }) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: alpha(theme.palette.primary.main, 0.1),
+  color: theme.palette.primary.main,
+  borderRadius: 12,
+  padding: theme.spacing(0.5, 1.5),
+  fontSize: "0.9rem",
+  fontWeight: 600,
+  marginLeft: theme.spacing(1),
 }));
 
 // Styled paper for the table
@@ -29,24 +55,6 @@ export const StyledPaper = styled(Paper)(({ theme }) => ({
     0.8
   )}, ${alpha(theme.palette.background.default, 0.9)})`,
   backdropFilter: "blur(8px)",
-}));
-
-// List title
-export const ListTitle = styled(Typography)(() => ({
-  fontWeight: 600,
-  display: "flex",
-  alignItems: "center",
-}));
-
-// Count badge
-export const CountBadge = styled(Box)(({ theme }) => ({
-  marginLeft: theme.spacing(1),
-  padding: theme.spacing(0.5, 1.5),
-  borderRadius: 12,
-  fontSize: "0.875rem",
-  fontWeight: 600,
-  backgroundColor: alpha(theme.palette.primary.main, 0.1),
-  color: theme.palette.primary.main,
 }));
 
 // Table container with proper spacing
@@ -93,13 +101,7 @@ export const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-// Table cell with proper styling
-export const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  fontSize: "0.9rem",
-  padding: theme.spacing(1.5, 2),
-}));
-
-// Order ID cell
+// ID cell with primary color
 export const IdCell = styled(TableCell)(({ theme }) => ({
   fontWeight: 600,
   color: theme.palette.primary.main,
@@ -119,22 +121,31 @@ export const CustomerPhone = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-// Order type chip with proper styling
-export const OrderTypeChip = styled(Chip)(({ theme }) => ({
-  height: 24,
-  fontSize: "0.75rem",
+// Staff name with proper styling
+export const StaffName = styled(Typography)(() => ({
   fontWeight: 600,
-  marginRight: theme.spacing(0.5),
+  fontSize: "0.9rem",
+}));
+
+// Delivery time with proper styling
+export const DeliveryTime = styled(Typography)(({ theme }) => ({
+  fontSize: "0.9rem",
+  color: theme.palette.text.primary,
 }));
 
 // Status chip with dynamic color
-export const StatusChip = styled(Chip)<{ statuscolor: string }>(
-  ({ statuscolor }) => ({
+export const StatusChip = styled(Chip)<{ delivered?: boolean }>(
+  ({ theme, delivered }) => ({
     height: 24,
     fontSize: "0.75rem",
     fontWeight: 600,
-    backgroundColor: statuscolor,
+    backgroundColor: delivered
+      ? theme.palette.success.main
+      : theme.palette.warning.main,
     color: "white",
+    boxShadow: delivered
+      ? `0 2px 8px ${alpha(theme.palette.success.main, 0.4)}`
+      : `0 2px 8px ${alpha(theme.palette.warning.main, 0.4)}`,
   })
 );
 
@@ -143,31 +154,54 @@ export const ActionsContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   gap: theme.spacing(1),
   alignItems: "center",
+  flexWrap: "wrap",
 }));
 
-// Dialog action button
-export const DialogActionButton = styled(Button)(({ theme }) => ({
-  borderRadius: 8,
-  padding: theme.spacing(0.75, 2),
+// Action button
+export const ActionButton = styled(Button)(({ theme }) => ({
   textTransform: "none",
   fontWeight: 600,
+  fontSize: "0.8rem",
+  padding: theme.spacing(0.5, 1.5),
+  borderRadius: 8,
+  minWidth: "auto",
+  transition: "all 0.2s",
+  "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: `0 4px 8px ${alpha(theme.palette.primary.main, 0.2)}`,
+  },
+}));
+
+// View details button
+export const ViewDetailsButton = styled(IconButton)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  backgroundColor: alpha(theme.palette.primary.main, 0.1),
+  transition: "all 0.2s",
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.2),
+    transform: "translateY(-2px)",
+  },
 }));
 
 // Empty state container
 export const EmptyStateContainer = styled(Box)(({ theme }) => ({
   textAlign: "center",
   padding: theme.spacing(6, 2),
+  backgroundColor: alpha(theme.palette.background.paper, 0.5),
+  borderRadius: 16,
 }));
 
 // Empty state title
 export const EmptyStateTitle = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.secondary,
   fontWeight: 600,
   marginBottom: theme.spacing(1),
 }));
 
 // Empty state subtitle
 export const EmptyStateSubtitle = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
+  color: alpha(theme.palette.text.secondary, 0.7),
+  fontWeight: 500,
 }));
 
 // Loading container

@@ -9,7 +9,7 @@ import getFileData from "../../utils/getFileData";
 // ----------------------------------------------------------------------
 
 type Props = {
-  fileRejections: FileRejection[];
+  fileRejections: readonly FileRejection[];
 };
 
 function RejectionFiles({ fileRejections }: Props) {

@@ -1,5 +1,4 @@
-// src/components/Chat/ChatWithCustomer.tsx
-import { MoreVert, Send } from "@mui/icons-material";
+import { MoreVert, Send, Warning } from "@mui/icons-material";
 import {
   alpha,
   Avatar,
@@ -8,13 +7,16 @@ import {
   Button,
   IconButton,
   List,
+  ListItemAvatar,
+  ListItemButton,
+  ListItemText,
   Menu,
   MenuItem,
+  Paper,
+  styled,
   TextField,
   Typography,
   useTheme,
-  ListItemAvatar,
-  ListItemText,
 } from "@mui/material";
 import React, {
   useCallback,
@@ -24,17 +26,168 @@ import React, {
   useState,
 } from "react";
 import { FixedSizeList as VirtualList } from "react-window";
-import {
-  AnimatedListItem,
-  MessageBubble,
-  StyledBadge,
-  StyledInput,
-  StyledPaper,
-  TypingIndicator,
-} from "../../components/manager/styles/ChatStyles"; // Extract styled components to a separate file
-import useAuth from "../../hooks/useAuth";
-import { useChatRealTime } from "../../hooks/useChatRealTime";
-import { ChatMessageDto, ChatSessionDto } from "../../types/chat";
+
+// Types
+interface Message {
+  id: string;
+  sender: "customer" | "staff";
+  text: string;
+  timestamp: Date;
+  status?: "sent" | "delivered" | "read";
+}
+
+interface CustomerChat {
+  id: string;
+  name: string;
+  avatar: string;
+  lastMessage: string;
+  unread: number;
+  lastActivity: Date;
+  messages: Message[];
+  isTyping?: boolean;
+}
+
+// Styled Components
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  "& .MuiBadge-badge": {
+    backgroundColor: "#44b700",
+    color: "#44b700",
+    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    "&::after": {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      borderRadius: "50%",
+      animation: "ripple 1.2s infinite ease-in-out",
+      border: "1px solid currentColor",
+      content: '""',
+    },
+  },
+  "@keyframes ripple": {
+    "0%": {
+      transform: "scale(.8)",
+      opacity: 1,
+    },
+    "100%": {
+      transform: "scale(2.4)",
+      opacity: 0,
+    },
+  },
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  background: `linear-gradient(135deg, ${alpha(
+    theme.palette.background.paper,
+    0.9
+  )}, ${alpha(theme.palette.background.default, 0.95)})`,
+  backdropFilter: "blur(10px)",
+  borderRadius: 24,
+  boxShadow: `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.08)}`,
+  transition: "all 0.3s ease",
+  "&:hover": {
+    boxShadow: `0 12px 48px 0 ${alpha(theme.palette.common.black, 0.12)}`,
+  },
+}));
+
+const MessageBubble = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "isStaff",
+})<{ isStaff?: boolean }>(({ theme, isStaff }) => ({
+  maxWidth: "70%",
+  padding: "12px 16px",
+  borderRadius: isStaff ? "20px 20px 4px 20px" : "20px 20px 20px 4px",
+  background: isStaff
+    ? `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`
+    : theme.palette.grey[100],
+  boxShadow: `0 4px 12px ${alpha(
+    isStaff ? theme.palette.primary.main : theme.palette.common.black,
+    0.08
+  )}`,
+  color: isStaff ? "white" : "inherit",
+  transition: "all 0.2s ease-in-out",
+  "&:hover": {
+    transform: "translateY(-1px)",
+    boxShadow: `0 6px 16px ${alpha(
+      isStaff ? theme.palette.primary.main : theme.palette.common.black,
+      0.12
+    )}`,
+  },
+}));
+
+const AnimatedListItem = styled(ListItemButton)(({ theme }) => ({
+  transition: "all 0.2s ease-in-out",
+  borderRadius: 12,
+  margin: "4px 8px",
+  "&:hover": {
+    transform: "translateX(4px)",
+    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+  },
+  "&.Mui-selected": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.12),
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.primary.main, 0.16),
+    },
+  },
+}));
+
+const StyledInput = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 30,
+    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+    backdropFilter: "blur(8px)",
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.background.paper, 0.95),
+    },
+    "&.Mui-focused": {
+      backgroundColor: theme.palette.background.paper,
+      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.12)}`,
+    },
+  },
+}));
+
+const TypingIndicator = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: "8px 16px",
+  borderRadius: 20,
+  backgroundColor: alpha(theme.palette.background.paper, 0.7),
+  width: "fit-content",
+  marginTop: 8,
+  "& .dot": {
+    width: 8,
+    height: 8,
+    margin: "0 2px",
+    borderRadius: "50%",
+    backgroundColor: theme.palette.text.secondary,
+    display: "inline-block",
+    animation: "typing 1.4s infinite ease-in-out both",
+  },
+  "& .dot:nth-of-type(1)": {
+    animationDelay: "0s",
+  },
+  "& .dot:nth-of-type(2)": {
+    animationDelay: "0.2s",
+  },
+  "& .dot:nth-of-type(3)": {
+    animationDelay: "0.4s",
+  },
+  "@keyframes typing": {
+    "0%": {
+      transform: "scale(1)",
+      opacity: 0.7,
+    },
+    "50%": {
+      transform: "scale(1.4)",
+      opacity: 1,
+    },
+    "100%": {
+      transform: "scale(1)",
+      opacity: 0.7,
+    },
+  },
+}));
 
 // Memoized Components
 const ChatListItem = React.memo(
@@ -42,12 +195,10 @@ const ChatListItem = React.memo(
     chat,
     isSelected,
     onClick,
-    unreadCount = 0,
   }: {
-    chat: ChatSessionDto;
+    chat: CustomerChat;
     isSelected: boolean;
     onClick: () => void;
-    unreadCount?: number;
   }) => (
     <AnimatedListItem selected={isSelected} onClick={onClick}>
       <ListItemAvatar>
@@ -56,14 +207,12 @@ const ChatListItem = React.memo(
           anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           variant="dot"
         >
-          <Avatar sx={{ bgcolor: "primary.main" }}>
-            {chat.customerName?.charAt(0) || "C"}
-          </Avatar>
+          <Avatar sx={{ bgcolor: "primary.main" }}>{chat.avatar}</Avatar>
         </StyledBadge>
       </ListItemAvatar>
       <ListItemText
-        primary={chat.customerName || "Customer"}
-        secondary={chat.topic || "No topic"}
+        primary={chat.name}
+        secondary={chat.lastMessage}
         slotProps={{
           secondary: {
             noWrap: true,
@@ -72,29 +221,22 @@ const ChatListItem = React.memo(
         }}
       />
       <Box sx={{ textAlign: "right", minWidth: 60 }}>
-        {unreadCount > 0 && (
-          <Badge badgeContent={unreadCount} color="primary" sx={{ mb: 1 }} />
-        )}
         <Typography variant="caption" color="text.secondary">
-          {chat.updatedAt
-            ? new Date(chat.updatedAt).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : new Date(chat.createdAt).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+          {new Date(chat.lastActivity).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
         </Typography>
+        {chat.unread > 0 && (
+          <Badge badgeContent={chat.unread} color="primary" sx={{ ml: 1 }} />
+        )}
       </Box>
     </AnimatedListItem>
   )
 );
 
-const MessageItem = React.memo(({ message }: { message: ChatMessageDto }) => {
-  const { auth } = useAuth();
-  const user = auth.user;
-  const isStaff = message.senderUserId === user?.uid;
+const MessageItem = React.memo(({ message }: { message: Message }) => {
+  const isStaff = message.sender === "staff";
 
   return (
     <Box
@@ -105,7 +247,7 @@ const MessageItem = React.memo(({ message }: { message: ChatMessageDto }) => {
       }}
     >
       <MessageBubble isStaff={isStaff}>
-        <Typography variant="body2">{message.message}</Typography>
+        <Typography variant="body2">{message.text}</Typography>
         <Box
           sx={{
             display: "flex",
@@ -121,20 +263,20 @@ const MessageItem = React.memo(({ message }: { message: ChatMessageDto }) => {
               color: isStaff ? "common.white" : "text.primary",
             }}
           >
-            {new Date(message.createdAt).toLocaleTimeString([], {
+            {message.timestamp.toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
             })}
           </Typography>
-          {isStaff && (
+          {isStaff && message.status && (
             <Box
               component="span"
               sx={{ ml: 0.5, display: "flex", alignItems: "center" }}
             >
-              {message.isRead ? (
+              {message.status === "sent" && "✓"}
+              {message.status === "delivered" && "✓✓"}
+              {message.status === "read" && (
                 <span style={{ color: "#44b700" }}>✓✓</span>
-              ) : (
-                "✓"
               )}
             </Box>
           )}
@@ -147,115 +289,193 @@ const MessageItem = React.memo(({ message }: { message: ChatMessageDto }) => {
 // Main Component
 const ChatWithCustomer: React.FC = () => {
   const theme = useTheme();
-  const { auth } = useAuth();
-  const user = auth.user;
-  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
+  const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [customerChats, setCustomerChats] = useState<CustomerChat[]>([
+    {
+      id: "1",
+      name: "John Doe",
+      avatar: "J",
+      lastMessage: "Hey, I have an issue with my order!",
+      unread: 2,
+      lastActivity: new Date(),
+      isTyping: true,
+      messages: [
+        {
+          id: "1-1",
+          sender: "customer",
+          text: "Hey, I have an issue with my order!",
+          timestamp: new Date(Date.now() - 3600000),
+        },
+        {
+          id: "1-2",
+          sender: "staff",
+          text: "Sure, let me check that for you.",
+          timestamp: new Date(Date.now() - 1800000),
+          status: "read",
+        },
+      ],
+    },
+    {
+      id: "2",
+      name: "Jane Smith",
+      avatar: "J",
+      lastMessage: "When will my package arrive?",
+      unread: 0,
+      lastActivity: new Date(Date.now() - 7200000),
+      messages: [
+        {
+          id: "2-1",
+          sender: "customer",
+          text: "When will my package arrive?",
+          timestamp: new Date(Date.now() - 7200000),
+        },
+      ],
+    },
+    {
+      id: "3",
+      name: "Alex Johnson",
+      avatar: "A",
+      lastMessage: "Thanks for your help!",
+      unread: 1,
+      lastActivity: new Date(Date.now() - 10800000),
+      messages: [
+        {
+          id: "3-1",
+          sender: "customer",
+          text: "Do you have this product in blue?",
+          timestamp: new Date(Date.now() - 14400000),
+        },
+        {
+          id: "3-2",
+          sender: "staff",
+          text: "Yes, we do have it in blue. Would you like me to place an order for you?",
+          timestamp: new Date(Date.now() - 12600000),
+          status: "delivered",
+        },
+        {
+          id: "3-3",
+          sender: "customer",
+          text: "That would be great!",
+          timestamp: new Date(Date.now() - 10800000),
+        },
+      ],
+    },
+  ]);
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize chat real-time service
-  const {
-    isConnected,
-    loading,
-    chatSessions,
-    getSessionMessages,
-    isUserTyping,
-    sendMessage,
-    markMessageAsRead,
-    sendTypingIndicator,
-    endChatSession,
-    assignManagerToSession,
-    loadSessionMessages,
-  } = useChatRealTime(user?.uid, "manager");
-
-  // Memoized values
-  const selectedChat = useMemo(
-    () => chatSessions.find((c) => c.chatSessionId === selectedChatId),
-    [chatSessions, selectedChatId]
+  // Memoized values and callbacks
+  const selectedCustomer = useMemo(
+    () => customerChats.find((c) => c.id === selectedChat),
+    [customerChats, selectedChat]
   );
 
-  const chatMessages = useMemo(
-    () => (selectedChatId ? getSessionMessages(selectedChatId) : []),
-    [selectedChatId, getSessionMessages]
-  );
+  const handleChatSelect = useCallback((chatId: string) => {
+    setSelectedChat(chatId);
 
-  const isTyping = useMemo(
-    () => (selectedChatId ? isUserTyping(selectedChatId) : false),
-    [selectedChatId, isUserTyping]
-  );
+    // Mark messages as read when selecting a chat
+    setCustomerChats((prevChats) =>
+      prevChats.map((chat) =>
+        chat.id === chatId ? { ...chat, unread: 0 } : chat
+      )
+    );
+  }, []);
 
-  // Sort chats by last activity
-  const sortedChats = useMemo(
-    () =>
-      [...chatSessions].sort((a, b) => {
-        const dateA = a.updatedAt
-          ? new Date(a.updatedAt)
-          : new Date(a.createdAt);
-        const dateB = b.updatedAt
-          ? new Date(b.updatedAt)
-          : new Date(b.createdAt);
-        return dateB.getTime() - dateA.getTime();
-      }),
-    [chatSessions]
-  );
-
-  // Calculate unread counts for each chat
-  const unreadCounts = useMemo(() => {
-    const counts = new Map<number, number>();
-
-    chatSessions.forEach((session) => {
-      const sessionMessages = getSessionMessages(session.chatSessionId);
-      const unreadCount = sessionMessages.filter(
-        (msg) => !msg.isRead && msg.receiverUserId === user?.uid
-      ).length;
-
-      counts.set(session.chatSessionId, unreadCount);
-    });
-
-    return counts;
-  }, [chatSessions, getSessionMessages, user?.uid]);
-
-  // Callbacks
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  const handleChatSelect = useCallback(
-    (chatId: number) => {
-      setSelectedChatId(chatId);
-      loadSessionMessages(chatId);
-
-      // Mark unread messages as read
-      const messages = getSessionMessages(chatId);
-      messages.forEach((message) => {
-        if (!message.isRead && message.receiverUserId === user?.uid) {
-          markMessageAsRead(message.chatMessageId);
-        }
-      });
-    },
-    [loadSessionMessages, getSessionMessages, markMessageAsRead, user?.uid]
-  );
-
   const handleSend = useCallback(() => {
-    if (input.trim() && selectedChatId && selectedChat) {
-      sendMessage(user?.uid, selectedChat.customerId, input, selectedChatId)
-        .then((success) => {
-          if (success) {
-            setInput("");
-          } else {
-            setError("Failed to send message");
-          }
-        })
-        .catch((err) => {
-          setError("Failed to send message");
-          console.error(err);
-        });
+    if (input.trim() && selectedChat) {
+      const newMessage: Message = {
+        id: `${selectedChat}-${Date.now()}`,
+        sender: "staff",
+        text: input,
+        timestamp: new Date(),
+        status: "sent",
+      };
+
+      setCustomerChats((chats) =>
+        chats.map((chat) =>
+          chat.id === selectedChat
+            ? {
+                ...chat,
+                messages: [...chat.messages, newMessage],
+                lastMessage: input,
+                lastActivity: new Date(),
+              }
+            : chat
+        )
+      );
+      setInput("");
+
+      // Simulate message delivery after 1 second
+      setTimeout(() => {
+        setCustomerChats((chats) =>
+          chats.map((chat) =>
+            chat.id === selectedChat
+              ? {
+                  ...chat,
+                  messages: chat.messages.map((msg) =>
+                    msg.id === newMessage.id
+                      ? { ...msg, status: "delivered" }
+                      : msg
+                  ),
+                }
+              : chat
+          )
+        );
+
+        // Simulate message read after 2 seconds
+        setTimeout(() => {
+          setCustomerChats((chats) =>
+            chats.map((chat) =>
+              chat.id === selectedChat
+                ? {
+                    ...chat,
+                    messages: chat.messages.map((msg) =>
+                      msg.id === newMessage.id
+                        ? { ...msg, status: "read" }
+                        : msg
+                    ),
+                    // Simulate customer typing after staff message
+                    isTyping: true,
+                  }
+                : chat
+            )
+          );
+
+          // Simulate customer response after typing
+          setTimeout(() => {
+            setCustomerChats((chats) =>
+              chats.map((chat) =>
+                chat.id === selectedChat
+                  ? {
+                      ...chat,
+                      isTyping: false,
+                      messages: [
+                        ...chat.messages,
+                        {
+                          id: `${selectedChat}-${Date.now()}`,
+                          sender: "customer",
+                          text: "Thanks for the information!",
+                          timestamp: new Date(),
+                        },
+                      ],
+                      lastMessage: "Thanks for the information!",
+                      lastActivity: new Date(),
+                    }
+                  : chat
+              )
+            );
+          }, 3000);
+        }, 2000);
+      }, 1000);
     }
-  }, [input, selectedChatId, selectedChat, sendMessage, user?.uid]);
+  }, [input, selectedChat]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement | HTMLTextAreaElement>) => {
@@ -267,28 +487,9 @@ const ChatWithCustomer: React.FC = () => {
     [handleSend]
   );
 
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setInput(e.target.value);
-
-      // Send typing indicator
-      if (selectedChatId) {
-        // Clear existing timeout
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
-
-        // Send typing indicator
-        sendTypingIndicator(selectedChatId, true);
-
-        // Set timeout to stop typing indicator after 3 seconds
-        typingTimeoutRef.current = setTimeout(() => {
-          sendTypingIndicator(selectedChatId, false);
-        }, 3000);
-      }
-    },
-    [selectedChatId, sendTypingIndicator]
-  );
+  const handleEscalate = useCallback(() => {
+    alert("The issue has been escalated to higher support.");
+  }, []);
 
   const handleMenuOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -298,114 +499,45 @@ const ChatWithCustomer: React.FC = () => {
     setAnchorEl(null);
   }, []);
 
-  const handleEndChat = useCallback(() => {
-    if (selectedChatId) {
-      endChatSession(selectedChatId)
-        .then((success) => {
-          if (success) {
-            setSelectedChatId(null);
-            handleMenuClose();
-          } else {
-            setError("Failed to end chat session");
-          }
-        })
-        .catch((err) => {
-          setError("Failed to end chat session");
-          console.error(err);
-        });
+  const handleClearChat = useCallback(() => {
+    if (selectedChat) {
+      setCustomerChats((prevChats) =>
+        prevChats.map((chat) =>
+          chat.id === selectedChat ? { ...chat, messages: [] } : chat
+        )
+      );
+      handleMenuClose();
     }
-  }, [selectedChatId, endChatSession, handleMenuClose]);
+  }, [selectedChat, handleMenuClose]);
 
-  // src/components/Chat/ChatWithCustomer.tsx (continued)
-  const handleAssignManager = useCallback(
-    (managerId: number) => {
-      if (selectedChatId) {
-        assignManagerToSession(selectedChatId, managerId)
-          .then((success) => {
-            if (success) {
-              handleMenuClose();
-            } else {
-              setError("Failed to assign manager");
-            }
-          })
-          .catch((err) => {
-            setError("Failed to assign manager");
-            console.error(err);
-          });
-      }
-    },
-    [selectedChatId, assignManagerToSession, handleMenuClose]
+  // Effects
+  useEffect(() => {
+    scrollToBottom();
+  }, [selectedChat, scrollToBottom, customerChats]);
+
+  // Sort chats by last activity
+  const sortedChats = useMemo(
+    () =>
+      [...customerChats].sort(
+        (a, b) => b.lastActivity.getTime() - a.lastActivity.getTime()
+      ),
+    [customerChats]
   );
 
   // Virtual list renderer for messages
   const renderMessage = useCallback(
     ({ index, style }: { index: number; style: React.CSSProperties }) => {
-      const message = chatMessages[index];
+      if (!selectedCustomer) return null;
+      const message = selectedCustomer.messages[index];
+
       return (
         <div style={style}>
           <MessageItem message={message} />
         </div>
       );
     },
-    [chatMessages]
+    [selectedCustomer]
   );
-
-  // Effects
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [selectedChatId, scrollToBottom, chatMessages]);
-
-  // Mark messages as read when they are viewed
-  useEffect(() => {
-    if (selectedChatId) {
-      chatMessages.forEach((message) => {
-        if (!message.isRead && message.receiverUserId === user?.uid) {
-          markMessageAsRead(message.chatMessageId);
-        }
-      });
-    }
-  }, [selectedChatId, chatMessages, markMessageAsRead, user?.uid]);
-
-  // Clean up typing indicator timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Loading and error states
-  if (loading && chatSessions.length === 0) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <Typography>Loading chats...</Typography>
-      </Box>
-    );
-  }
-
-  if (error && chatSessions.length === 0) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <Typography color="error">{error}</Typography>
-      </Box>
-    );
-  }
 
   return (
     <StyledPaper
@@ -458,36 +590,18 @@ const ChatWithCustomer: React.FC = () => {
         <List sx={{ flex: 1, py: 0 }}>
           {sortedChats.map((chat) => (
             <ChatListItem
-              key={chat.chatSessionId}
+              key={chat.id}
               chat={chat}
-              isSelected={selectedChatId === chat.chatSessionId}
-              onClick={() => handleChatSelect(chat.chatSessionId)}
-              unreadCount={unreadCounts.get(chat.chatSessionId) || 0}
+              isSelected={selectedChat === chat.id}
+              onClick={() => handleChatSelect(chat.id)}
             />
           ))}
         </List>
-        <Box
-          sx={{
-            p: 2,
-            borderTop: "1px solid",
-            borderColor: "divider",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Typography variant="caption" color="text.secondary">
-            {isConnected ? "Connected" : "Disconnected"}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {chatSessions.length} active chats
-          </Typography>
-        </Box>
       </Box>
 
       {/* Chat Area */}
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        {selectedChat ? (
+        {selectedCustomer ? (
           <>
             {/* Header */}
             <Box
@@ -509,15 +623,15 @@ const ChatWithCustomer: React.FC = () => {
                   variant="dot"
                 >
                   <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}>
-                    {selectedChat.customerName?.charAt(0) || "C"}
+                    {selectedCustomer.avatar}
                   </Avatar>
                 </StyledBadge>
                 <Box>
                   <Typography variant="subtitle1" fontWeight="500">
-                    {selectedChat.customerName || "Customer"}
+                    {selectedCustomer.name}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {isTyping ? "Typing..." : "Online"}
+                    {selectedCustomer.isTyping ? "Typing..." : "Online"}
                   </Typography>
                 </Box>
               </Box>
@@ -529,20 +643,11 @@ const ChatWithCustomer: React.FC = () => {
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
               >
-                <MenuItem onClick={handleEndChat}>End chat</MenuItem>
+                <MenuItem onClick={handleClearChat}>Clear chat</MenuItem>
+                <MenuItem onClick={handleEscalate}>Escalate issue</MenuItem>
                 <MenuItem onClick={handleMenuClose}>
                   View customer profile
                 </MenuItem>
-                {!selectedChat.managerId && (
-                  <MenuItem onClick={() => handleAssignManager(user?.uid)}>
-                    Assign to me
-                  </MenuItem>
-                )}
-                {selectedChat.managerId === user?.uid && (
-                  <MenuItem onClick={() => handleAssignManager(0)}>
-                    Unassign from me
-                  </MenuItem>
-                )}
               </Menu>
             </Box>
 
@@ -558,32 +663,21 @@ const ChatWithCustomer: React.FC = () => {
                 flexDirection: "column",
               }}
             >
-              {loading ? (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "100%",
-                  }}
-                >
-                  <Typography>Loading messages...</Typography>
-                </Box>
-              ) : chatMessages.length > 10 ? (
+              {selectedCustomer.messages.length > 10 ? (
                 <VirtualList
                   height={chatContainerRef.current?.clientHeight || 400}
                   width="100%"
-                  itemCount={chatMessages.length}
+                  itemCount={selectedCustomer.messages.length}
                   itemSize={80} // Approximate height of a message
                 >
                   {renderMessage}
                 </VirtualList>
               ) : (
                 <>
-                  {chatMessages.map((msg) => (
-                    <MessageItem key={msg.chatMessageId} message={msg} />
+                  {selectedCustomer.messages.map((msg) => (
+                    <MessageItem key={msg.id} message={msg} />
                   ))}
-                  {isTyping && (
+                  {selectedCustomer.isTyping && (
                     <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
                       <TypingIndicator>
                         <span className="dot"></span>
@@ -615,7 +709,7 @@ const ChatWithCustomer: React.FC = () => {
                   size="small"
                   placeholder="Type a message..."
                   value={input}
-                  onChange={handleInputChange}
+                  onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   aria-label="Message input"
                 />
@@ -638,6 +732,16 @@ const ChatWithCustomer: React.FC = () => {
                 </IconButton>
               </Box>
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<Warning />}
+                  onClick={handleEscalate}
+                  size="small"
+                  sx={{ borderRadius: "20px", textTransform: "none" }}
+                >
+                  Escalate Issue
+                </Button>
                 <Box>
                   <Button
                     variant="text"

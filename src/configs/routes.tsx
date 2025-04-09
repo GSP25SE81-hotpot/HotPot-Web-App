@@ -1,14 +1,14 @@
 export const managerRoutes = {
   home: "/",
-  manageEquipmentStock: "/manage-equipment-stock",
+  manageRentals: "/manage-rentals",
+  manageRentalStatus: "/manage-rental-status",
   equipmentAvailability: "/equipment-availability",
-  lowStockUtensil: "/low-stock-utensil",
   workAssignment: "/work-assignment",
   manageOrder: "/manage-order",
   customerChat: "/chat",
   feedback: "/feedback",
+  resolveEquipmentFailure: "/resolve-equipment-failure",
   equipmentConditionLog: "/equipment-condition-log",
-  equipmentConditionDetail: "/equipment-condition-log/:id",
   equipmentStatusReport: "/equipment-status-report",
   feedbackManagement: "/feedback-management",
   manageReplacement: "/manage-replacement",
@@ -18,7 +18,6 @@ export const managerRoutes = {
   rentalHistory: "/rental-history",
   calculateLateFee: "/calculate-late-fee",
   adjustReturnDate: "/adjust-return-date",
-  orderDetail: "/orders/:orderId",
 };
 
 export const authRoutes = {
@@ -52,8 +51,11 @@ export const staffRoutes = {
   checkDeviceAfterReturn: "/check-device-after-return",
   orderHistory: "/order-history",
   assignOrder: "/assign-order",
+  shippingOrder: "/shipping",
   proofOfDelivery: "/proof-of-delivery",
   rentalDetail: "/staff/rentals/:id",
   recordReturn: "/staff/rentals/record-return",
   pickupRental: "/pickup-rental",
+  staffMyAssignment: "/staff-assignment",
+  staffMyAssignmentDetail: "/staff-assignment/:orderId/:assignmentId",
 };

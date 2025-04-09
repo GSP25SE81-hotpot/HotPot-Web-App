@@ -22,8 +22,10 @@ import {
   Staff,
   PickupAssignmentRequestDto,
 } from "../../../types/rentalTypes";
-import { allocateStaffForPickup } from "../../../api/Services/rentalService";
-import staffService from "../../../api/Services/staffService";
+import {
+  getAvailableStaff,
+  allocateStaffForPickup,
+} from "../../../api/Services/rentalService";
 import { format } from "date-fns";
 
 interface AssignStaffDialogProps {
@@ -50,7 +52,7 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
     const fetchStaff = async () => {
       setStaffLoading(true);
       try {
-        const availableStaff = await staffService.getAvailableStaff();
+        const availableStaff = await getAvailableStaff();
         setStaff(availableStaff);
       } catch (error) {
         setError("Failed to load available staff");
@@ -81,12 +83,14 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
 
     setLoading(true);
     setError(null);
+
     try {
       const request: PickupAssignmentRequestDto = {
         staffId: selectedStaffId as number,
         rentOrderDetailId: pickup.id,
         notes: notes || undefined,
       };
+
       await allocateStaffForPickup(request);
       onSuccess();
     } catch (err) {
@@ -98,7 +102,7 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Phân công nhân viên cho việc lấy hàng</DialogTitle>
+      <DialogTitle>Assign Staff for Pickup</DialogTitle>
       <DialogContent>
         <Box sx={{ mt: 2 }}>
           {error && (
@@ -106,77 +110,80 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
               {error}
             </Alert>
           )}
+
           <Typography variant="subtitle1" gutterBottom>
-            Chi tiết lấy hàng
+            Pickup Details
           </Typography>
+
           <Box
             sx={{ mb: 3, p: 2, bgcolor: "background.default", borderRadius: 1 }}
           >
             <Typography variant="body2">
-              <strong>Khách hàng:</strong> {pickup.customerName}
+              <strong>Customer:</strong> {pickup.customerName}
             </Typography>
             <Typography variant="body2">
-              <strong>Thiết bị:</strong> {pickup.equipmentName}
+              <strong>Equipment:</strong> {pickup.equipmentName}
             </Typography>
             <Typography variant="body2">
-              <strong>Ngày trả:</strong>{" "}
+              <strong>Return Date:</strong>{" "}
               {format(new Date(pickup.expectedReturnDate), "MMM dd, yyyy")}
             </Typography>
             <Typography variant="body2">
-              <strong>Địa chỉ:</strong>{" "}
-              {pickup.customerAddress || "Không cung cấp"}
+              <strong>Address:</strong>{" "}
+              {pickup.customerAddress || "Not provided"}
             </Typography>
             <Typography variant="body2">
-              <strong>Điện thoại:</strong>{" "}
-              {pickup.customerPhone || "Không cung cấp"}
+              <strong>Phone:</strong> {pickup.customerPhone || "Not provided"}
             </Typography>
           </Box>
+
           <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel id="staff-select-label">Phân công nhân viên</InputLabel>
+            <InputLabel id="staff-select-label">Assign Staff</InputLabel>
             <Select
               labelId="staff-select-label"
               value={selectedStaffId}
               onChange={handleStaffChange}
-              label="Phân công nhân viên"
+              label="Assign Staff"
               disabled={staffLoading}
             >
               {staffLoading ? (
                 <MenuItem value="">
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <CircularProgress size={20} sx={{ mr: 1 }} />
-                    Đang tải danh sách nhân viên...
+                    Loading staff...
                   </Box>
                 </MenuItem>
               ) : (
                 staff.map((staffMember) => (
                   <MenuItem key={staffMember.id} value={staffMember.id}>
                     {staffMember.name}{" "}
-                    {staffMember.isAvailable ? "(Sẵn sàng)" : "(Bận)"}
+                    {staffMember.isAvailable ? "(Available)" : "(Busy)"}
                   </MenuItem>
                 ))
               )}
             </Select>
           </FormControl>
+
           <TextField
-            label="Ghi chú cho nhân viên"
+            label="Notes for Staff"
             multiline
             rows={3}
             fullWidth
             value={notes}
             onChange={handleNotesChange}
-            placeholder="Thêm bất kỳ hướng dẫn đặc biệt hoặc ghi chú nào cho nhân viên"
+            placeholder="Add any special instructions or notes for the staff member"
           />
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Hủy</Button>
+        <Button onClick={onClose}>Cancel</Button>
         <Button
           onClick={handleSubmit}
           variant="contained"
           color="primary"
           disabled={loading || selectedStaffId === ""}
         >
-          {loading ? <CircularProgress size={24} /> : "Phân công nhân viên"}
+          {loading ? <CircularProgress size={24} /> : "Assign Staff"}
         </Button>
       </DialogActions>
     </Dialog>

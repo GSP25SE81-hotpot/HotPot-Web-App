@@ -8,22 +8,28 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import * as React from "react";
 import DetailPopupIngredient from "../../../containers/ManageIngredients/Modal/ModalIngredientDetail";
+import UpdateIngredientModal from "../../../containers/ManageIngredients/Modal/ModalUpdateIngredients";
+import DeleteIngredientModal from "../../../containers/ManageIngredients/Modal/ModalRemoveIngredient";
 
 interface MenuActionTableIngredientProps {
-  hotpotData: any;
+  IngredientData: any;
   onOpenUpdate?: any;
   onOpenDetail?: any;
   onOpenDelete?: any;
+  onFetch?: () => void;
 }
 
 const MenuActionTableIngredient: React.FC<MenuActionTableIngredientProps> = ({
-  hotpotData,
+  IngredientData,
   onOpenUpdate,
   onOpenDetail,
   onOpenDelete,
+  onFetch,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<any>(null);
   const [openDetail, setOpenDetail] = React.useState<boolean>(false);
+  const [openUpdate, setOpenUpdate] = React.useState<boolean>(false);
+  const [openDelete, setOpenDelete] = React.useState<boolean>(false);
   const open = Boolean(anchorEl);
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
@@ -32,23 +38,33 @@ const MenuActionTableIngredient: React.FC<MenuActionTableIngredientProps> = ({
     setAnchorEl(null);
   };
   const handleUpdate = () => {
-    onOpenUpdate(hotpotData);
+    onOpenUpdate(IngredientData);
+    setOpenUpdate(true);
     setAnchorEl(null);
   };
   const handleDetail = () => {
-    onOpenDetail(hotpotData);
+    onOpenDetail(IngredientData);
     setOpenDetail(true);
     setAnchorEl(null);
   };
 
   const handleDelete = () => {
-    onOpenDelete(hotpotData);
+    onOpenDelete(IngredientData);
+    setOpenDelete(true);
     setAnchorEl(null);
   };
 
   const handleCloseDetail = () => {
     setOpenDetail(false);
     onOpenDetail(null);
+  };
+
+  const handleCloseUpdate = () => {
+    setOpenUpdate(false);
+  };
+
+  const handleCloseDelete = () => {
+    setOpenDelete(false);
   };
   return (
     <div>
@@ -83,7 +99,7 @@ const MenuActionTableIngredient: React.FC<MenuActionTableIngredientProps> = ({
       >
         <MenuItem onClick={() => handleDetail()}>
           <InfoIcon sx={{ mr: "4px" }} color="info" />
-          <span>Chi Tiết Bảo Trì</span>
+          <span>Chi Tiết nguyên liệu</span>
         </MenuItem>
         <MenuItem onClick={() => handleUpdate()}>
           <EditIcon sx={{ mr: "4px", color: "#9ADE7B" }} />
@@ -98,9 +114,27 @@ const MenuActionTableIngredient: React.FC<MenuActionTableIngredientProps> = ({
 
       {openDetail && (
         <DetailPopupIngredient
-          dataIngredient={hotpotData}
+          dataIngredient={IngredientData}
           handleOpen={openDetail}
           handleClose={handleCloseDetail}
+        />
+      )}
+
+      {openUpdate && (
+        <UpdateIngredientModal
+          ingredientId={IngredientData.ingredientId}
+          open={openUpdate}
+          handleClose={handleCloseUpdate}
+          onUpdateSuccess={onFetch}
+        />
+      )}
+      {openDelete && (
+        <DeleteIngredientModal
+          ingredientId={IngredientData.ingredientId}
+          open={openDelete}
+          handleClose={handleCloseDelete}
+          ingredientName={IngredientData.name}
+          onDeleteSuccess={onFetch}
         />
       )}
     </div>

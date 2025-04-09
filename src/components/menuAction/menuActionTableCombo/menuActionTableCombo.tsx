@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import BlockIcon from "@mui/icons-material/Block";
-import EditIcon from "@mui/icons-material/Edit";
 import InfoIcon from "@mui/icons-material/Info";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Button from "@mui/material/Button";
@@ -19,9 +17,7 @@ interface MenuActionTableComboProps {
 
 const MenuActionTableCombo: React.FC<MenuActionTableComboProps> = ({
   hotpotData,
-  onOpenUpdate,
   onOpenDetail,
-  onOpenDelete,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<any>(null);
   const navigate = useNavigate();
@@ -32,24 +28,12 @@ const MenuActionTableCombo: React.FC<MenuActionTableComboProps> = ({
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleUpdate = () => {
-    onOpenUpdate(hotpotData);
-    setAnchorEl(null);
-  };
   const handleDetail = () => {
     onOpenDetail(hotpotData);
-    console.log(hotpotData, "detail");
-
     navigate(
       config.adminRoutes.HotpotDetail.replace(":comboId", hotpotData.comboId)
     );
   };
-
-  const handleDelete = () => {
-    onOpenDelete(hotpotData);
-    setAnchorEl(null);
-  };
-
   return (
     <div>
       <Button
@@ -84,15 +68,6 @@ const MenuActionTableCombo: React.FC<MenuActionTableComboProps> = ({
         <MenuItem onClick={() => handleDetail()}>
           <InfoIcon sx={{ mr: "4px" }} color="info" />
           <span>Chi Tiết</span>
-        </MenuItem>
-        <MenuItem onClick={() => handleUpdate()}>
-          <EditIcon sx={{ mr: "4px", color: "#9ADE7B" }} />
-          <span>Cập nhật</span>
-        </MenuItem>
-
-        <MenuItem onClick={() => handleDelete()}>
-          <BlockIcon sx={{ mr: "4px" }} color="error" />
-          <span>Xóa</span>
         </MenuItem>
       </Menu>
     </div>

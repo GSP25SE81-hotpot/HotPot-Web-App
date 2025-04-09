@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// src/components/manager/RentalHistory.tsx
+import React, { useState } from "react";
 import {
   Box,
   Table,
@@ -14,14 +15,15 @@ import {
   getRentalHistoryByUser,
   getRentalHistoryByUtensil,
   getRentalHistoryByHotpot,
-  getAllRentalHistory,
 } from "../../../api/Services/rentalService";
 import { RentalHistoryItem } from "../../../types/rentalTypes";
+
 // Import styled components
 import {
   StyledContainer,
   StyledPaper,
 } from "../../../components/StyledComponents";
+
 // Import rental history specific styled components
 import {
   HistoryTitle,
@@ -65,66 +67,32 @@ const RentalHistory: React.FC = () => {
   const [userId, setUserId] = useState("");
   const [utensilId, setUtensilId] = useState("");
   const [hotpotId, setHotpotId] = useState("");
-  // Initialize with an empty array to avoid undefined
   const [rentalHistory, setRentalHistory] = useState<RentalHistoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchPerformed, setSearchPerformed] = useState(false);
 
-  // Load all rental history when component mounts
-  useEffect(() => {
-    loadAllRentalHistory();
-  }, []);
-
-  const loadAllRentalHistory = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const history = await getAllRentalHistory();
-      // Ensure history is an array
-      setRentalHistory(Array.isArray(history) ? history : []);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Không thể tải lịch sử thuê"
-      );
-      setRentalHistory([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
-    // Reset search state when changing tabs
-    setSearchPerformed(false);
+    setRentalHistory([]);
     setError(null);
-    // Reset the appropriate search field based on the tab
-    if (newValue === 0) {
-      setUserId("");
-    } else if (newValue === 1) {
-      setUtensilId("");
-    } else if (newValue === 2) {
-      setHotpotId("");
-    }
-    // Load all rental history again
-    loadAllRentalHistory();
+    setSearchPerformed(false);
   };
 
   const handleUserSearch = async () => {
     if (!userId) {
-      setError("Vui lòng nhập ID người dùng");
+      setError("Please enter a user ID");
       return;
     }
     setLoading(true);
     setError(null);
     try {
       const history = await getRentalHistoryByUser(parseInt(userId, 10));
-      // Ensure history is an array
-      setRentalHistory(Array.isArray(history) ? history : []);
+      setRentalHistory(history);
       setSearchPerformed(true);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Không thể tải lịch sử thuê"
+        err instanceof Error ? err.message : "Failed to fetch rental history"
       );
       setRentalHistory([]);
     } finally {
@@ -134,19 +102,18 @@ const RentalHistory: React.FC = () => {
 
   const handleUtensilSearch = async () => {
     if (!utensilId) {
-      setError("Vui lòng nhập ID dụng cụ");
+      setError("Please enter a utensil ID");
       return;
     }
     setLoading(true);
     setError(null);
     try {
       const history = await getRentalHistoryByUtensil(parseInt(utensilId, 10));
-      // Ensure history is an array
-      setRentalHistory(Array.isArray(history) ? history : []);
+      setRentalHistory(history);
       setSearchPerformed(true);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Không thể tải lịch sử thuê"
+        err instanceof Error ? err.message : "Failed to fetch rental history"
       );
       setRentalHistory([]);
     } finally {
@@ -156,19 +123,18 @@ const RentalHistory: React.FC = () => {
 
   const handleHotpotSearch = async () => {
     if (!hotpotId) {
-      setError("Vui lòng nhập ID lẩu");
+      setError("Please enter a hotpot inventory ID");
       return;
     }
     setLoading(true);
     setError(null);
     try {
       const history = await getRentalHistoryByHotpot(parseInt(hotpotId, 10));
-      // Ensure history is an array
-      setRentalHistory(Array.isArray(history) ? history : []);
+      setRentalHistory(history);
       setSearchPerformed(true);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Không thể tải lịch sử thuê"
+        err instanceof Error ? err.message : "Failed to fetch rental history"
       );
       setRentalHistory([]);
     } finally {
@@ -176,25 +142,13 @@ const RentalHistory: React.FC = () => {
     }
   };
 
-  const handleClearSearch = () => {
-    setSearchPerformed(false);
-    loadAllRentalHistory();
-    // Clear the search field based on the current tab
-    if (tabValue === 0) {
-      setUserId("");
-    } else if (tabValue === 1) {
-      setUtensilId("");
-    } else if (tabValue === 2) {
-      setHotpotId("");
-    }
-  };
-
   return (
     <StyledContainer maxWidth="xl">
       <StyledPaper elevation={0} sx={{ p: 0 }}>
         <Box sx={{ p: 4 }}>
-          <HistoryTitle variant="h4">Lịch sử thuê</HistoryTitle>
+          <HistoryTitle variant="h4">Rental History</HistoryTitle>
         </Box>
+
         <StyledTabs
           value={tabValue}
           onChange={handleTabChange}
@@ -202,19 +156,20 @@ const RentalHistory: React.FC = () => {
           textColor="primary"
           centered
         >
-          <StyledTab label="Theo người dùng" />
-          <StyledTab label="Theo dụng cụ" />
-          <StyledTab label="Theo lẩu" />
+          <StyledTab label="By User" />
+          <StyledTab label="By Utensil" />
+          <StyledTab label="By Hotpot" />
         </StyledTabs>
+
         <TabPanel value={tabValue} index={0}>
           <SearchContainer>
             <SearchField
-              label="ID người dùng"
+              label="User ID"
               variant="outlined"
               size="small"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              placeholder="Nhập ID người dùng"
+              placeholder="Enter user ID"
               fullWidth
             />
             <SearchButton
@@ -230,29 +185,20 @@ const RentalHistory: React.FC = () => {
               onClick={handleUserSearch}
               disabled={loading}
             >
-              {loading ? "Đang tìm..." : "Tìm kiếm"}
+              {loading ? "Searching..." : "Search"}
             </SearchButton>
-            {searchPerformed && (
-              <SearchButton
-                variant="outlined"
-                color="secondary"
-                onClick={handleClearSearch}
-                disabled={loading}
-              >
-                Xóa tìm kiếm
-              </SearchButton>
-            )}
           </SearchContainer>
         </TabPanel>
+
         <TabPanel value={tabValue} index={1}>
           <SearchContainer>
             <SearchField
-              label="ID dụng cụ"
+              label="Utensil ID"
               variant="outlined"
               size="small"
               value={utensilId}
               onChange={(e) => setUtensilId(e.target.value)}
-              placeholder="Nhập ID dụng cụ"
+              placeholder="Enter utensil ID"
               fullWidth
             />
             <SearchButton
@@ -268,29 +214,20 @@ const RentalHistory: React.FC = () => {
               onClick={handleUtensilSearch}
               disabled={loading}
             >
-              {loading ? "Đang tìm..." : "Tìm kiếm"}
+              {loading ? "Searching..." : "Search"}
             </SearchButton>
-            {searchPerformed && (
-              <SearchButton
-                variant="outlined"
-                color="secondary"
-                onClick={handleClearSearch}
-                disabled={loading}
-              >
-                Xóa tìm kiếm
-              </SearchButton>
-            )}
           </SearchContainer>
         </TabPanel>
+
         <TabPanel value={tabValue} index={2}>
           <SearchContainer>
             <SearchField
-              label="ID lẩu"
+              label="Hotpot Inventory ID"
               variant="outlined"
               size="small"
               value={hotpotId}
               onChange={(e) => setHotpotId(e.target.value)}
-              placeholder="Nhập ID lẩu"
+              placeholder="Enter hotpot inventory ID"
               fullWidth
             />
             <SearchButton
@@ -306,20 +243,11 @@ const RentalHistory: React.FC = () => {
               onClick={handleHotpotSearch}
               disabled={loading}
             >
-              {loading ? "Đang tìm..." : "Tìm kiếm"}
+              {loading ? "Searching..." : "Search"}
             </SearchButton>
-            {searchPerformed && (
-              <SearchButton
-                variant="outlined"
-                color="secondary"
-                onClick={handleClearSearch}
-                disabled={loading}
-              >
-                Xóa tìm kiếm
-              </SearchButton>
-            )}
           </SearchContainer>
         </TabPanel>
+
         <ResultsContainer>
           {error && (
             <Alert
@@ -335,14 +263,9 @@ const RentalHistory: React.FC = () => {
               {error}
             </Alert>
           )}
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-              <CircularProgress />
-            </Box>
-          ) : (
+          {searchPerformed && (
             <>
-              {/* Use optional chaining and nullish coalescing to safely check length */}
-              {!rentalHistory?.length ? (
+              {rentalHistory.length === 0 ? (
                 <Alert
                   severity="info"
                   sx={{
@@ -352,7 +275,7 @@ const RentalHistory: React.FC = () => {
                     },
                   }}
                 >
-                  Không tìm thấy lịch sử thuê
+                  No rental history found
                 </Alert>
               ) : (
                 <StyledTableContainer>
@@ -360,63 +283,51 @@ const RentalHistory: React.FC = () => {
                     <TableHead>
                       <TableRow>
                         <HeaderTableCell>ID</HeaderTableCell>
-                        <HeaderTableCell>ID đơn hàng</HeaderTableCell>
-                        <HeaderTableCell>Khách hàng</HeaderTableCell>
-                        <HeaderTableCell>Thiết bị</HeaderTableCell>
-                        <HeaderTableCell>Ngày bắt đầu thuê</HeaderTableCell>
-                        <HeaderTableCell>Ngày trả dự kiến</HeaderTableCell>
-                        <HeaderTableCell>Ngày trả thực tế</HeaderTableCell>
-                        <HeaderTableCell>Trạng thái</HeaderTableCell>
+                        <HeaderTableCell>Order ID</HeaderTableCell>
+                        <HeaderTableCell>Customer</HeaderTableCell>
+                        <HeaderTableCell>Equipment</HeaderTableCell>
+                        <HeaderTableCell>Rental Start</HeaderTableCell>
+                        <HeaderTableCell>Expected Return</HeaderTableCell>
+                        <HeaderTableCell>Actual Return</HeaderTableCell>
+                        <HeaderTableCell>Status</HeaderTableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {/* Only map if rentalHistory is an array */}
-                      {Array.isArray(rentalHistory) &&
-                        rentalHistory.map((rental) => (
-                          <StyledTableRow key={rental?.id || "unknown"}>
-                            <BodyTableCell>{rental?.id}</BodyTableCell>
-                            <BodyTableCell>{rental?.orderId}</BodyTableCell>
-                            <BodyTableCell>
-                              {rental?.customerName}
-                            </BodyTableCell>
-                            <BodyTableCell>
-                              {rental?.equipmentName}
-                            </BodyTableCell>
-                            <BodyTableCell>
-                              {rental?.rentalStartDate
-                                ? format(
-                                    new Date(rental.rentalStartDate),
-                                    "dd/MM/yyyy"
-                                  )
-                                : "N/A"}
-                            </BodyTableCell>
-                            <BodyTableCell>
-                              {rental?.expectedReturnDate
-                                ? format(
-                                    new Date(rental.expectedReturnDate),
-                                    "dd/MM/yyyy"
-                                  )
-                                : "N/A"}
-                            </BodyTableCell>
-                            <BodyTableCell>
-                              {rental?.actualReturnDate
-                                ? format(
-                                    new Date(rental.actualReturnDate),
-                                    "dd/MM/yyyy"
-                                  )
-                                : "Chưa trả"}
-                            </BodyTableCell>
-                            <BodyTableCell>
-                              {rental?.status && (
-                                <StatusChip
-                                  label={getStatusTranslation(rental.status)}
-                                  status={rental.status.toLowerCase()}
-                                  size="small"
-                                />
-                              )}
-                            </BodyTableCell>
-                          </StyledTableRow>
-                        ))}
+                      {rentalHistory.map((rental) => (
+                        <StyledTableRow key={rental.id}>
+                          <BodyTableCell>{rental.id}</BodyTableCell>
+                          <BodyTableCell>{rental.orderId}</BodyTableCell>
+                          <BodyTableCell>{rental.customerName}</BodyTableCell>
+                          <BodyTableCell>{rental.equipmentName}</BodyTableCell>
+                          <BodyTableCell>
+                            {format(
+                              new Date(rental.rentalStartDate),
+                              "MMM dd, yyyy"
+                            )}
+                          </BodyTableCell>
+                          <BodyTableCell>
+                            {format(
+                              new Date(rental.expectedReturnDate),
+                              "MMM dd, yyyy"
+                            )}
+                          </BodyTableCell>
+                          <BodyTableCell>
+                            {rental.actualReturnDate
+                              ? format(
+                                  new Date(rental.actualReturnDate),
+                                  "MMM dd, yyyy"
+                                )
+                              : "Not returned yet"}
+                          </BodyTableCell>
+                          <BodyTableCell>
+                            <StatusChip
+                              label={rental.status}
+                              status={rental.status.toLowerCase()}
+                              size="small"
+                            />
+                          </BodyTableCell>
+                        </StyledTableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </StyledTableContainer>
@@ -427,20 +338,6 @@ const RentalHistory: React.FC = () => {
       </StyledPaper>
     </StyledContainer>
   );
-};
-
-// Hàm trợ giúp để dịch trạng thái
-const getStatusTranslation = (status: string): string => {
-  const statusMap: Record<string, string> = {
-    Active: "Đang hoạt động",
-    Completed: "Hoàn thành",
-    Overdue: "Quá hạn",
-    Cancelled: "Đã hủy",
-    Pending: "Đang chờ",
-    // Thêm các trạng thái khác nếu cần
-  };
-
-  return statusMap[status] || status;
 };
 
 export default RentalHistory;

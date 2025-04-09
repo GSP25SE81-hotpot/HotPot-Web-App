@@ -1,108 +1,82 @@
 // src/hooks/useSchedule.ts
-import { useEffect, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { StaffSchedule } from "../types/scheduleInterfaces";
 import scheduleService from "../api/Services/scheduleService";
-import { StaffDto, StaffSchedule, WorkDays } from "../types/scheduleInterfaces";
+import useAuth from "./useAuth";
 
-export function useManagerSchedule() {
-  const [schedule, setSchedule] = useState<StaffSchedule | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchSchedule = async () => {
-      try {
-        setLoading(true);
-        const data = await scheduleService.getManagerSchedule();
-        setSchedule(data);
-        setError(null);
-      } catch (err) {
-        setError("Failed to load manager schedule");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSchedule();
-  }, []);
-
-  return { schedule, loading, error };
+interface UseScheduleReturn {
+  loading: boolean;
+  error: string | null;
+  schedules: StaffSchedule[];
+  personalSchedule: StaffSchedule | null;
+  refreshSchedules: () => Promise<void>;
 }
 
-export function useAllStaffSchedules() {
+export const useSchedule = (): UseScheduleReturn => {
+  const { auth } = useAuth();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [schedules, setSchedules] = useState<StaffSchedule[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [personalSchedule, setPersonalSchedule] =
+    useState<StaffSchedule | null>(null);
+
+  // Use useCallback to memoize the fetchSchedules function
+  const fetchSchedules = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // If user is not authenticated, don't fetch anything
+      if (!auth) {
+        setSchedules([]);
+        setPersonalSchedule(null);
+        setLoading(false);
+        return;
+      }
+
+      // If user is a manager, get their schedule and all staff schedules
+      if (auth?.user?.role === "Manager") {
+        const managerSchedule = await scheduleService.getManagerSchedule();
+        const staffSchedules = await scheduleService.getAllStaffSchedules();
+
+        setPersonalSchedule(managerSchedule);
+        setSchedules([managerSchedule, ...staffSchedules]);
+      }
+      // If user is a staff, get only their schedule
+      else if (auth?.user?.role === "Staff") {
+        // For staff, we'll use the auth?.user?.userId as staffId
+        // You might need to adjust this if your staffId is different from auth?.user?.userId
+        const staffId = parseInt(auth?.user?.userId);
+        const staffSchedule = await scheduleService.getStaffSchedule(staffId);
+        setPersonalSchedule(staffSchedule);
+        setSchedules([staffSchedule]);
+      }
+      // Otherwise, try to get all staff schedules (for admin)
+      else if (auth?.user?.role === "Admin") {
+        const allSchedules = await scheduleService.getAllStaffSchedules();
+        setSchedules(allSchedules);
+      }
+    } catch (err) {
+      console.error("Error fetching schedules:", err);
+      setError("Failed to load schedules. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  }, [auth?.user?.userId, auth?.user?.role]); // Include dependencies that fetchSchedules uses from the component scope
 
   useEffect(() => {
-    const fetchSchedules = async () => {
-      try {
-        setLoading(true);
-        const data = await scheduleService.getAllStaffSchedules();
-        setSchedules(data);
-        setError(null);
-      } catch (err) {
-        setError("Failed to load staff schedules");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    // Only fetch schedules when auth loading is complete and user is authenticated
+    if ( auth?.user?.userId) {
+      fetchSchedules();
+    } 
+  }, [auth?.user?.userId, auth?.user?.role, fetchSchedules]); // Now we can safely include fetchSchedules
 
-    fetchSchedules();
-  }, []);
-
-  return { schedules, loading, error };
-}
-
-export function useStaffSchedule(staffId: number) {
-  const [schedule, setSchedule] = useState<StaffSchedule | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchSchedule = async () => {
-      try {
-        setLoading(true);
-        const data = await scheduleService.getStaffSchedule(staffId);
-        setSchedule(data);
-        setError(null);
-      } catch (err) {
-        setError(`Failed to load schedule for staff ${staffId}`);
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSchedule();
-  }, [staffId]);
-
-  return { schedule, loading, error };
-}
-
-export function useStaffByDay(day: WorkDays) {
-  const [staff, setStaff] = useState<StaffDto[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchStaff = async () => {
-      try {
-        setLoading(true);
-        const data = await scheduleService.getStaffByDay(day);
-        setStaff(data);
-        setError(null);
-      } catch (err) {
-        setError(`Failed to load staff for day ${day}`);
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStaff();
-  }, [day]);
-
-  return { staff, loading, error };
-}
+  return {
+    loading: loading ,
+    error,
+    schedules,
+    personalSchedule,
+    refreshSchedules: fetchSchedules,
+  };
+};

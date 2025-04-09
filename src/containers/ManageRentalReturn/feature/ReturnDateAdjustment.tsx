@@ -7,8 +7,10 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useState } from "react";
 import { adjustReturnDateForException } from "../../../api/Services/rentalService";
 import { UpdateRentOrderDetailRequest } from "../../../types/rentalTypes";
+
 // Import styled components
 import { StyledContainer } from "../../../components/StyledComponents";
+
 // Import return date adjustment specific styled components
 import { alpha } from "@mui/material/styles";
 import {
@@ -30,16 +32,18 @@ const ReturnDateAdjustment: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!rentalId) {
-      setError("Vui lòng nhập mã thuê");
+      setError("Please enter a rental ID");
       return;
     }
     if (!newReturnDate) {
-      setError("Vui lòng chọn ngày trả mới");
+      setError("Please select a new return date");
       return;
     }
+
     setLoading(true);
     setError(null);
     setSuccess(false);
+
     try {
       const request: UpdateRentOrderDetailRequest = {
         expectedReturnDate: newReturnDate.toISOString(),
@@ -53,7 +57,7 @@ const ReturnDateAdjustment: React.FC = () => {
       // setNotes('');
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Không thể điều chỉnh ngày trả"
+        err instanceof Error ? err.message : "Failed to adjust return date"
       );
     } finally {
       setLoading(false);
@@ -64,8 +68,9 @@ const ReturnDateAdjustment: React.FC = () => {
     <StyledContainer maxWidth="md">
       <Box sx={{ p: 3 }}>
         <AdjustmentTitle variant="h4">
-          Điều chỉnh ngày trả (Chỉ trường hợp đặc biệt)
+          Adjust Return Date (Exception Only)
         </AdjustmentTitle>
+
         <FormContainer elevation={0}>
           {error && (
             <Alert
@@ -81,6 +86,7 @@ const ReturnDateAdjustment: React.FC = () => {
               {error}
             </Alert>
           )}
+
           {success && (
             <Alert
               severity="success"
@@ -92,33 +98,35 @@ const ReturnDateAdjustment: React.FC = () => {
                 },
               }}
             >
-              Đã điều chỉnh ngày trả thành công!
+              Return date adjusted successfully!
             </Alert>
           )}
+
           <WarningText variant="body2">
-            Biểu mẫu này chỉ nên được sử dụng cho các trường hợp đặc biệt. Việc
-            gia hạn thông thường nên được xử lý thông qua tài khoản của khách
-            hàng.
+            This form should only be used for exceptional circumstances. Regular
+            extensions should be handled through the customer's account.
           </WarningText>
+
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 6 }}>
               <StyledTextField
-                label="Mã thuê"
+                label="Rental ID"
                 variant="outlined"
                 fullWidth
                 value={rentalId}
                 onChange={(e) => setRentalId(e.target.value)}
                 disabled={loading}
-                placeholder="Nhập mã thuê"
+                placeholder="Enter the rental ID"
                 slotProps={{
                   input: { sx: { borderRadius: 3 } },
                 }}
               />
             </Grid>
+
             <Grid size={{ xs: 12, md: 6 }}>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
-                  label="Ngày trả mới"
+                  label="New Return Date"
                   value={newReturnDate}
                   onChange={(newValue) => setNewReturnDate(newValue)}
                   disabled={loading}
@@ -138,9 +146,10 @@ const ReturnDateAdjustment: React.FC = () => {
                 />
               </LocalizationProvider>
             </Grid>
+
             <Grid size={{ xs: 12 }}>
               <NotesTextField
-                label="Lý do ngoại lệ"
+                label="Reason for Exception"
                 variant="outlined"
                 fullWidth
                 multiline
@@ -148,12 +157,13 @@ const ReturnDateAdjustment: React.FC = () => {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 disabled={loading}
-                placeholder="Giải thích lý do tại sao việc điều chỉnh ngày trả này được thực hiện như một trường hợp đặc biệt"
+                placeholder="Explain why this return date adjustment is being made as an exception"
                 InputProps={{
                   sx: { borderRadius: 3 },
                 }}
               />
             </Grid>
+
             <Grid size={{ xs: 12 }}>
               <SubmitButton
                 variant="contained"
@@ -167,7 +177,7 @@ const ReturnDateAdjustment: React.FC = () => {
                   ) : null
                 }
               >
-                {loading ? "Đang xử lý..." : "Điều chỉnh ngày trả"}
+                {loading ? "Processing..." : "Adjust Return Date"}
               </SubmitButton>
             </Grid>
           </Grid>

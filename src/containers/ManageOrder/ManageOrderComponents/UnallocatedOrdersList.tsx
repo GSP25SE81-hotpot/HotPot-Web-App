@@ -1,8 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/exhaustive-deps */
 // src/pages/OrderManagement/components/UnallocatedOrdersList.tsx
-import ClearIcon from "@mui/icons-material/Clear";
-import SearchIcon from "@mui/icons-material/Search";
+import React, { useState, useEffect } from "react";
 import {
   Alert,
   Box,
@@ -12,8 +9,6 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
-  IconButton,
-  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
@@ -22,21 +17,19 @@ import {
   Table,
   TableBody,
   TableHead,
-  TablePagination,
   TableRow,
-  TableSortLabel,
-  TextField,
   alpha,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import {
-  AllocateOrderRequest,
-  OrderQueryParams,
-  UnallocatedOrderDTO,
-  orderManagementService,
-  OrderStatus,
-} from "../../../api/Services/orderManagementService";
+import { Order } from "../../../api/Services/orderManagementService";
+import { orderManagementService } from "../../../api/Services/orderManagementService";
 import staffService from "../../../api/Services/staffService";
+import { StaffAvailabilityDto } from "../../../types/staff";
+import {
+  formatDate,
+  formatCurrency,
+  getOrderStatusLabel,
+  getOrderStatusColor,
+} from "../../../utils/formatters";
 import {
   AllocateButton,
   CountBadge,
@@ -54,64 +47,17 @@ import {
   StatusChip,
   StyledHeaderCell,
   StyledPaper,
-  StyledTableCell,
   StyledTableContainer,
   StyledTableRow,
 } from "../../../components/manager/styles/UnallocatedOrdersListStyles";
-import { StaffAvailabilityDto } from "../../../types/staff";
-import {
-  formatCurrency,
-  formatDate,
-  getOrderStatusColor,
-} from "../../../utils/formatters";
-
-// Helper function to translate order status into Vietnamese
-const getVietnameseOrderStatusLabel = (status: any): string => {
-  // If status is a number, convert to enum OrderStatus
-  if (typeof status === "number") {
-    // Map from number to enum name
-    const statusEnum = OrderStatus[status];
-    if (statusEnum) {
-      // If enum name is found, use it to look up in translation table
-      const statusMap: Record<string, string> = {
-        Pending: "Chờ xử lý",
-        Processing: "Đang xử lý",
-        Shipping: "Đang giao",
-        Delivered: "Đã giao",
-        Completed: "Hoàn thành",
-        Cancelled: "Đã hủy",
-        Returning: "Đang trả",
-      };
-      return statusMap[statusEnum] || statusEnum;
-    }
-  }
-
-  // If status is a string, use it directly
-  if (typeof status === "string") {
-    const statusMap: Record<string, string> = {
-      Pending: "Chờ xử lý",
-      Processing: "Đang xử lý",
-      Shipping: "Đang giao",
-      Delivered: "Đã giao",
-      Completed: "Hoàn thành",
-      Cancelled: "Đã hủy",
-      Returning: "Đang trả",
-    };
-    return statusMap[status] || status;
-  }
-
-  // Otherwise, convert to string and return
-  return String(status);
-};
 
 const UnallocatedOrdersList: React.FC = () => {
-  const [orders, setOrders] = useState<UnallocatedOrderDTO[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [staff, setStaff] = useState<StaffAvailabilityDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [allocating, setAllocating] = useState(false);
-  const [selectedOrder, setSelectedOrder] =
-    useState<UnallocatedOrderDTO | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [selectedStaffId, setSelectedStaffId] = useState<number>(0);
   const [openDialog, setOpenDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -119,119 +65,42 @@ const UnallocatedOrdersList: React.FC = () => {
     message: "",
     severity: "success" as "success" | "error",
   });
-  // Pagination state
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [totalCount, setTotalCount] = useState(0);
-  // Sorting state
-  const [sortBy, setSortBy] = useState<string>("date");
-  const [sortDescending, setSortDescending] = useState(true);
-  // Search state
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Fetch data function
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      // Prepare query parameters
-      const queryParams: OrderQueryParams = {
-        pageNumber,
-        pageSize,
-        sortBy,
-        sortDescending,
-        searchTerm: searchTerm.trim() || undefined,
-      };
-      // Call the API
-      const result = await orderManagementService.getUnallocatedOrders(
-        queryParams
-      );
-      // Update state with the response data
-      setOrders(result.items);
-      setTotalCount(result.totalCount);
-      // Also fetch staff members for allocation
-      fetchStaffMembers();
-    } catch (err) {
-      console.error("Error fetching unallocated orders:", err);
-      setError(
-        err instanceof Error
-          ? `Không thể tải đơn hàng chưa phân công: ${err.message}`
-          : "Không thể tải đơn hàng chưa phân công"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch staff members
-  const fetchStaffMembers = async () => {
-    try {
-      const staffData = await staffService.getAvailableStaff();
-      // Filter staff to only include those with isAvailable = true
-      const availableStaff = Array.isArray(staffData)
-        ? staffData.filter((staff) => staff.isAvailable === true)
-        : [];
-      setStaff(availableStaff);
-      // Log how many staff members are available
-      console.log(
-        `Tìm thấy ${availableStaff.length} nhân viên khả dụng trong tổng số ${staffData.length} nhân viên`
-      );
-    } catch (err) {
-      console.error("Error fetching staff members:", err);
-      setStaff([]);
-      // Only show error message if we're opening the dialog
-      if (openDialog) {
-        setSnackbar({
-          open: true,
-          message:
-            "Không thể tải dữ liệu khả dụng của nhân viên. Vui lòng thử lại sau.",
-          severity: "error",
-        });
-      }
-    }
-  };
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Get unallocated orders
+        const ordersData = await orderManagementService.getUnallocatedOrders();
+        // Ensure ordersData is an array
+        setOrders(Array.isArray(ordersData) ? ordersData : []);
+        // Get available staff - handle both array and single object responses
+        const staffData = await staffService.getAvailableStaff();
+        // Check if staffData is an array, if not, convert it to an array
+        if (Array.isArray(staffData)) {
+          setStaff(staffData);
+        } else if (staffData) {
+          // If it's a single object, wrap it in an array
+          setStaff([staffData]);
+        } else {
+          // If it's null or undefined, set an empty array
+          setStaff([]);
+        }
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to load unallocated orders. Please try again later.");
+        // Ensure orders is an empty array in case of error
+        setOrders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
-  }, [pageNumber, pageSize, sortBy, sortDescending]);
+  }, []);
 
-  // Handle search
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
-
-  // Apply search
-  const applySearch = () => {
-    setPageNumber(1); // Reset to first page when searching
-    fetchData();
-  };
-
-  // Handle page change
-  const handlePageChange = (_event: unknown, newPage: number) => {
-    setPageNumber(newPage + 1); // MUI pagination is 0-based, our API is 1-based
-  };
-
-  // Handle rows per page change
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setPageSize(parseInt(event.target.value, 10));
-    setPageNumber(1);
-  };
-
-  // Handle sort change
-  const handleSortChange = (column: string) => {
-    if (sortBy === column) {
-      // Toggle sort direction if clicking the same column
-      setSortDescending(!sortDescending);
-    } else {
-      // Set new sort column and default to descending
-      setSortBy(column);
-      setSortDescending(true);
-    }
-  };
-
-  const handleAllocateClick = (order: UnallocatedOrderDTO) => {
+  const handleAllocateClick = (order: Order) => {
     setSelectedOrder(order);
     setSelectedStaffId(0);
     setOpenDialog(true);
@@ -250,23 +119,24 @@ const UnallocatedOrdersList: React.FC = () => {
     if (!selectedOrder || !selectedStaffId) {
       setSnackbar({
         open: true,
-        message: "Vui lòng chọn một nhân viên",
+        message: "Please select a staff member",
         severity: "error",
       });
       return;
     }
     try {
       setAllocating(true);
-      const request: AllocateOrderRequest = {
+      await orderManagementService.allocateOrderToStaff({
         orderId: selectedOrder.orderId,
         staffId: selectedStaffId,
-      };
-      await orderManagementService.allocateOrderToStaff(request);
-      // Refresh the data after allocation
-      fetchData();
+      });
+      // Remove the allocated order from the list
+      setOrders(
+        orders.filter((order) => order.orderId !== selectedOrder.orderId)
+      );
       setSnackbar({
         open: true,
-        message: `Đơn hàng #${selectedOrder.orderId} đã được phân công thành công`,
+        message: `Order #${selectedOrder.orderId} successfully allocated`,
         severity: "success",
       });
       handleCloseDialog();
@@ -274,8 +144,8 @@ const UnallocatedOrdersList: React.FC = () => {
       console.error("Error allocating order:", err);
       setSnackbar({
         open: true,
-        message: `Không thể phân công đơn hàng: ${
-          err instanceof Error ? err.message : "Lỗi không xác định"
+        message: `Failed to allocate order: ${
+          err instanceof Error ? err.message : "Unknown error"
         }`,
         severity: "error",
       });
@@ -288,7 +158,7 @@ const UnallocatedOrdersList: React.FC = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  if (loading && orders.length === 0) {
+  if (loading) {
     return (
       <LoadingContainer>
         <CircularProgress />
@@ -306,191 +176,105 @@ const UnallocatedOrdersList: React.FC = () => {
     );
   }
 
+  // Safe check for orders array
+  const ordersList = orders || [];
+
+  if (ordersList.length === 0) {
+    return (
+      <EmptyStateContainer>
+        <EmptyStateTitle variant="h6">
+          No unallocated orders found
+        </EmptyStateTitle>
+        <EmptyStateSubtitle variant="body2">
+          All orders have been allocated to staff members
+        </EmptyStateSubtitle>
+      </EmptyStateContainer>
+    );
+  }
+
   return (
     <OrdersListContainer>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
-        <ListTitle variant="h6">
-          Đơn hàng chưa phân công <CountBadge>{totalCount}</CountBadge>
-        </ListTitle>
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <TextField
-            placeholder="Tìm kiếm đơn hàng..."
-            size="small"
-            value={searchTerm}
-            onChange={handleSearch}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-              endAdornment: searchTerm && (
-                <InputAdornment position="end">
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setSearchTerm("");
-                      applySearch();
-                    }}
-                  >
-                    <ClearIcon fontSize="small" />
-                  </IconButton>
-                </InputAdornment>
-              ),
-              sx: { borderRadius: 2 },
-            }}
-            onKeyUp={(e) => {
-              if (e.key === "Enter") {
-                applySearch();
-              }
-            }}
-          />
-        </Box>
-      </Box>
+      <ListTitle variant="h6">
+        Unallocated Orders <CountBadge>{ordersList.length}</CountBadge>
+      </ListTitle>
+
       <StyledPaper>
-        {orders.length === 0 ? (
-          <EmptyStateContainer>
-            <EmptyStateTitle variant="h6">
-              Không tìm thấy đơn hàng chưa phân công
-            </EmptyStateTitle>
-            <EmptyStateSubtitle variant="body2">
-              Tất cả đơn hàng đã được phân công cho nhân viên
-            </EmptyStateSubtitle>
-          </EmptyStateContainer>
-        ) : (
-          <>
-            <StyledTableContainer>
-              <Table stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    <StyledHeaderCell>Mã đơn hàng</StyledHeaderCell>
-                    <StyledHeaderCell>
-                      <TableSortLabel
-                        active={sortBy === "customer"}
-                        direction={sortDescending ? "desc" : "asc"}
-                        onClick={() => handleSortChange("customer")}
-                      >
-                        Khách hàng
-                      </TableSortLabel>
-                    </StyledHeaderCell>
-                    <StyledHeaderCell>
-                      <TableSortLabel
-                        active={sortBy === "date"}
-                        direction={sortDescending ? "desc" : "asc"}
-                        onClick={() => handleSortChange("date")}
-                      >
-                        Ngày đặt
-                      </TableSortLabel>
-                    </StyledHeaderCell>
-                    <StyledHeaderCell>
-                      <TableSortLabel
-                        active={sortBy === "totalprice"}
-                        direction={sortDescending ? "desc" : "asc"}
-                        onClick={() => handleSortChange("totalprice")}
-                      >
-                        Tổng tiền
-                      </TableSortLabel>
-                    </StyledHeaderCell>
-                    <StyledHeaderCell>Trạng thái</StyledHeaderCell>
-                    <StyledHeaderCell>Sản phẩm</StyledHeaderCell>
-                    <StyledHeaderCell>Thao tác</StyledHeaderCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {orders.map((order) => (
-                    <StyledTableRow key={order.orderId}>
-                      <IdCell>#{order.orderId}</IdCell>
-                      <StyledTableCell>
-                        <CustomerName>
-                          {order.userName || "Không xác định"}
-                        </CustomerName>
-                        <CustomerPhone>ID: {order.userId}</CustomerPhone>
-                      </StyledTableCell>
-                      <StyledTableCell>
-                        {formatDate(new Date().toISOString())}{" "}
-                        {/* Use current date as fallback */}
-                      </StyledTableCell>
-                      <StyledTableCell>
-                        {formatCurrency(order.totalPrice)}
-                      </StyledTableCell>
-                      <StyledTableCell>
-                        <StatusChip
-                          label={getVietnameseOrderStatusLabel(order.status)}
-                          size="small"
-                          statuscolor={getOrderStatusColor(order.status)}
-                        />
-                      </StyledTableCell>
-                      <StyledTableCell>
-                        {order.hasSellItems && (
-                          <OrderTypeChip label="Bán" size="small" />
-                        )}
-                        {order.hasRentItems && (
-                          <OrderTypeChip
-                            label="Thuê"
-                            size="small"
-                            color="secondary"
-                          />
-                        )}
-                      </StyledTableCell>
-                      <StyledTableCell>
-                        <AllocateButton
-                          variant="contained"
-                          size="small"
-                          onClick={() => handleAllocateClick(order)}
-                        >
-                          Phân công
-                        </AllocateButton>
-                      </StyledTableCell>
-                    </StyledTableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </StyledTableContainer>
-            {/* Pagination */}
-            <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
-              <TablePagination
-                component="div"
-                count={totalCount}
-                page={pageNumber - 1} // Convert 1-based to 0-based for MUI
-                onPageChange={handlePageChange}
-                rowsPerPage={pageSize}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                rowsPerPageOptions={[5, 10, 25, 50]}
-                labelRowsPerPage="Số hàng:"
-                labelDisplayedRows={({ from, to, count }) =>
-                  `${from}-${to} của ${count !== -1 ? count : `hơn ${to}`}`
-                }
-                sx={{
-                  ".MuiTablePagination-select": {
-                    borderRadius: 1,
-                  },
-                  ".MuiTablePagination-selectIcon": {
-                    color: "primary.main",
-                  },
-                }}
-              />
-            </Box>
-          </>
-        )}
+        <StyledTableContainer>
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <StyledHeaderCell>Order ID</StyledHeaderCell>
+                <StyledHeaderCell>Customer</StyledHeaderCell>
+                <StyledHeaderCell>Date</StyledHeaderCell>
+                <StyledHeaderCell>Total</StyledHeaderCell>
+                <StyledHeaderCell>Status</StyledHeaderCell>
+                <StyledHeaderCell>Items</StyledHeaderCell>
+                <StyledHeaderCell>Actions</StyledHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {ordersList.map((order) => (
+                <StyledTableRow key={order.orderId}>
+                  <IdCell>#{order.orderId}</IdCell>
+                  <StyledHeaderCell>
+                    <CustomerName>
+                      {order.user?.fullName || "Unknown"}
+                    </CustomerName>
+                    <CustomerPhone>
+                      {order.user?.phoneNumber || "No phone"}
+                    </CustomerPhone>
+                  </StyledHeaderCell>
+                  <StyledHeaderCell>
+                    {formatDate(order.createdAt)}
+                  </StyledHeaderCell>
+                  <StyledHeaderCell>
+                    {formatCurrency(order.totalPrice)}
+                  </StyledHeaderCell>
+                  <StyledHeaderCell>
+                    <StatusChip
+                      label={getOrderStatusLabel(order.status)}
+                      size="small"
+                      statuscolor={getOrderStatusColor(order.status)}
+                    />
+                  </StyledHeaderCell>
+                  <StyledHeaderCell>
+                    {order.hasSellItems && (
+                      <OrderTypeChip label="Sell" size="small" />
+                    )}
+                    {order.hasRentItems && (
+                      // src/pages/OrderManagement/components/UnallocatedOrdersList.tsx (continued)
+                      <OrderTypeChip
+                        label="Rent"
+                        size="small"
+                        color="secondary"
+                      />
+                    )}
+                  </StyledHeaderCell>
+                  <StyledHeaderCell>
+                    <AllocateButton
+                      variant="contained"
+                      size="small"
+                      onClick={() => handleAllocateClick(order)}
+                    >
+                      Allocate
+                    </AllocateButton>
+                  </StyledHeaderCell>
+                </StyledTableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </StyledTableContainer>
       </StyledPaper>
+
       {/* Allocation Dialog */}
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
-        slotProps={{
-          paper: {
-            sx: {
-              borderRadius: 3,
-              boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
-              padding: 1,
-            },
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
+            padding: 1,
           },
         }}
       >
@@ -501,16 +285,16 @@ const UnallocatedOrdersList: React.FC = () => {
             pb: 1,
           }}
         >
-          Phân công đơn hàng #{selectedOrder?.orderId}
+          Allocate Order #{selectedOrder?.orderId}
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3, pb: 2 }}>
           <Box sx={{ mt: 1, minWidth: 300 }}>
             <FormControl fullWidth>
-              <InputLabel id="staff-select-label">Chọn nhân viên</InputLabel>
+              <InputLabel id="staff-select-label">Select Staff</InputLabel>
               <Select
                 labelId="staff-select-label"
                 value={selectedStaffId}
-                label="Chọn nhân viên"
+                label="Select Staff"
                 onChange={handleStaffChange}
                 sx={{
                   borderRadius: 2,
@@ -521,12 +305,12 @@ const UnallocatedOrdersList: React.FC = () => {
                 }}
               >
                 <MenuItem value={0} disabled>
-                  Chọn một nhân viên
+                  Select a staff member
                 </MenuItem>
                 {staff.map((staffMember) => (
                   <MenuItem
-                    key={staffMember.id}
-                    value={staffMember.id}
+                    key={staffMember.staffId}
+                    value={staffMember.staffId}
                     sx={{
                       borderRadius: 1,
                       my: 0.5,
@@ -562,7 +346,7 @@ const UnallocatedOrdersList: React.FC = () => {
               },
             }}
           >
-            Hủy bỏ
+            Cancel
           </DialogActionButton>
           <DialogActionButton
             onClick={handleAllocateOrder}
@@ -581,10 +365,11 @@ const UnallocatedOrdersList: React.FC = () => {
               },
             }}
           >
-            {allocating ? <CircularProgress size={24} /> : "Phân công"}
+            {allocating ? <CircularProgress size={24} /> : "Allocate"}
           </DialogActionButton>
         </DialogActions>
       </Dialog>
+
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}

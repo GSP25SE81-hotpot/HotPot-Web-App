@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Box,
   Card,
   CardContent,
   CardHeader,
+  Chip,
   Table,
   TableBody,
   TableCell,
@@ -36,6 +38,7 @@ interface CTbaleProps {
   size: number;
   page: number;
 }
+
 // Styled Components
 const StyledCard = styled(Card)(({ theme }) => ({
   background: `linear-gradient(135deg, ${alpha(
@@ -84,7 +87,6 @@ const CTable: React.FC<CTbaleProps> = ({
       .reduce((acc: any, part: any) => acc && acc[part], obj);
   }
 
-  //func định dạng dữ liệu
   function formatValue(value: any, column: any) {
     //date time
     if (column.format && column.format == "date") {
@@ -121,33 +123,108 @@ const CTable: React.FC<CTbaleProps> = ({
     }
 
     //status hotpot
+    //status hotpot
     if (column.format && column.format == "statusHotpot") {
       switch (value) {
         case "Pending":
-          return "Đang chờ";
+          return (
+            <Chip
+              label="Đang chờ"
+              color="warning"
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: "90px" }}
+            />
+          );
         case "Completed":
-          return "Hoàn thành";
+          return (
+            <Chip
+              label="Hoàn thành"
+              color="success"
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: "90px" }}
+            />
+          );
         case "In Progress":
-          return "Đang tiến hành";
+          return (
+            <Chip
+              label="Đang tiến hành"
+              color="info"
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: "90px" }}
+            />
+          );
+        case "Cancelled":
+          return (
+            <Chip
+              label="Huỷ"
+              color="error"
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: "90px" }}
+            />
+          );
         default:
-          return "-";
+          return (
+            <Chip
+              label="-"
+              color="default"
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: "90px" }}
+            />
+          );
       }
     }
+
     if (column.format && column.format == "statusDetailHopot") {
       switch (value) {
         case "Available":
-          return "Khả dụng";
+          return (
+            <Chip
+              label="Khả dụng"
+              color="success"
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: "90px" }}
+            />
+          );
         case "Damaged":
-          return "Bị hư";
+          return (
+            <Chip
+              label="Bị hư"
+              color="error"
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: "90px" }}
+            />
+          );
         case "Rented":
-          return "Đang Cho thuê";
+          return (
+            <Chip
+              label="Đang Cho thuê"
+              color="primary"
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: "90px" }}
+            />
+          );
         default:
-          return "-";
+          return (
+            <Chip
+              label="-"
+              color="default"
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: "90px" }}
+            />
+          );
       }
     }
 
     //price
-
     if (column.format && column.format == "price") {
       if (value === undefined || value === null) return "N/A";
       return value.toLocaleString("vi-VN") + " VND";
@@ -208,7 +285,6 @@ const CTable: React.FC<CTbaleProps> = ({
                     <TableCell>{page * size + index + 1}</TableCell>
                     {tableHeaderTitle.map((column: any) => (
                       <TableCell key={column.id} align={column.align || "left"}>
-                        {/* {formatValue(getNestedValue(row, column.id), column)} */}
                         {column.id == "imageURL" ? (
                           <img
                             src={getNestedValue(row, column.id)}
@@ -231,8 +307,10 @@ const CTable: React.FC<CTbaleProps> = ({
                               objectFit: "cover",
                             }}
                           />
-                        ) : (
+                        ) : getNestedValue(row, column.id) ? (
                           formatValue(getNestedValue(row, column.id), column)
+                        ) : (
+                          "-"
                         )}
                       </TableCell>
                     ))}

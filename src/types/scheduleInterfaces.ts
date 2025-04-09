@@ -1,12 +1,13 @@
+// src/types/scheduleInterfaces.ts
+
 export enum WorkDays {
-  None = 0,
-  Sunday = 1,
-  Monday = 2,
-  Tuesday = 4,
-  Wednesday = 8,
-  Thursday = 16,
-  Friday = 32,
-  Saturday = 64,
+  Monday = 1,
+  Tuesday = 2,
+  Wednesday = 4,
+  Thursday = 8,
+  Friday = 16,
+  Saturday = 32,
+  Sunday = 64,
 }
 
 export interface StaffDto {
@@ -14,7 +15,7 @@ export interface StaffDto {
   userId: number;
   userName: string;
   email: string | null;
-  workDays: WorkDays | null;
+  workDays: number;
 }
 
 export interface ManagerDto {
@@ -22,37 +23,22 @@ export interface ManagerDto {
   userId: number;
   userName: string;
   email: string | null;
-  workDays: WorkDays | null;
+  workDays: number;
+  workShifts: string[];
 }
 
 export interface WorkShiftDto {
   workShiftId: number;
   shiftStartTime: string;
-  daysOfWeek: WorkDays;
+  daysOfWeek: number;
   status: string | null;
   staff?: StaffDto[];
   managers?: ManagerDto[];
-}
-
-export interface ManagerWorkShiftDto {
-  workShiftId: number;
-  shiftStartTime: string;
-  daysOfWeek: WorkDays;
-  status: string | null;
-  managers?: ManagerDto[];
-}
-
-export interface StaffWorkShiftDto {
-  workShiftId: number;
-  shiftStartTime: string;
-  daysOfWeek: WorkDays;
-  status: string | null;
-  staff?: StaffDto[];
 }
 
 export interface StaffScheduleDto {
   staff: StaffDto;
-  workShifts: StaffWorkShiftDto[];
+  workShifts: WorkShiftDto[];
 }
 
 // Interface for the component's expected format

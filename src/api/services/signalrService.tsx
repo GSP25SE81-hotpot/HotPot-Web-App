@@ -25,11 +25,10 @@ class SignalRService {
    */
   private getOrCreateHubConnection(hubUrl: string): signalR.HubConnection {
     if (!this.hubConnections.has(hubUrl)) {
-      const apiBaseUrl = "https://localhost:7163";
       const connection = new signalR.HubConnectionBuilder()
-        .withUrl(`${apiBaseUrl}${hubUrl}`)
+        .withUrl(hubUrl)
         .withAutomaticReconnect(this.reconnectPolicy)
-        .configureLogging(signalR.LogLevel.Debug) // Change to Debug for more details
+        .configureLogging(signalR.LogLevel.Information)
         .build();
 
       // Set up connection state change handlers
@@ -45,11 +44,6 @@ class SignalRService {
 
       connection.onclose((error) => {
         console.log(`Connection to ${hubUrl} closed.`, error);
-        // Log more details about the error
-        if (error) {
-          console.error("Connection closed due to error:", error);
-        }
-
         // Remove from our maps when closed
         this.hubConnections.delete(hubUrl);
         this.connectionPromises.delete(hubUrl);
@@ -57,6 +51,7 @@ class SignalRService {
 
       this.hubConnections.set(hubUrl, connection);
     }
+
     return this.hubConnections.get(hubUrl)!;
   }
 
@@ -201,7 +196,7 @@ class SignalRService {
    * Ensure a connection to a hub is established
    * @param hubUrl The URL of the hub
    */
-  public async ensureConnection(hubUrl: string): Promise<void> {
+  private async ensureConnection(hubUrl: string): Promise<void> {
     if (
       !this.hubConnections.has(hubUrl) ||
       this.hubConnections.get(hubUrl)!.state !==
@@ -222,24 +217,8 @@ class SignalRService {
     userId: number,
     userType: string
   ): Promise<void> {
-    // Validate parameters
-    if (userId === undefined || userId === null || isNaN(userId)) {
-      throw new Error(`Invalid userId: ${userId}. Must be a valid number.`);
-    }
-
-    if (!userType) {
-      throw new Error("userType cannot be null or empty");
-    }
-
-    // Ensure userId is an integer
-    const userIdInt = Math.floor(userId);
-
-    console.log(
-      `Registering connection with userId: ${userIdInt} (type: ${typeof userIdInt}), userType: ${userType} (type: ${typeof userType})`
-    );
-
     await this.ensureConnection(hubUrl);
-    await this.invoke(hubUrl, "RegisterConnection", userIdInt, userType);
+    await this.invoke(hubUrl, "RegisterConnection", userId, userType);
   }
 
   /**

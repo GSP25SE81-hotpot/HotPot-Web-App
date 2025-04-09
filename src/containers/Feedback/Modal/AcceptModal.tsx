@@ -41,14 +41,13 @@ const ApproveFeedbackPopup: React.FC<ApproveFeedbackPopupProps> = ({
 
   const decodeData = Object(data);
 
-  console.log(decodeData);
   // Call API
   const handleAcceptFeedback = async () => {
     try {
       if (!dataFeedback) return;
 
       const prepareData = {
-        adminUserId: decodeData?.uid,
+        adminUserId: decodeData?.id,
       };
       const res: any = await adminFeedbackAPI.ApproveFeedback(
         dataFeedback.feedbackId,
@@ -63,18 +62,6 @@ const ApproveFeedbackPopup: React.FC<ApproveFeedbackPopupProps> = ({
       console.error(error);
     }
   };
-
-  //   const handleRejectFeedback = async () => {
-  //     try {
-  //       if (!dataFeedback) return;
-  //       const res: any = await adminFeedbackAPI.RejectFeedback(dataFeedback.id);
-  //       if (res) {
-  //         handleClose();
-  //       }
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
 
   return (
     <Dialog

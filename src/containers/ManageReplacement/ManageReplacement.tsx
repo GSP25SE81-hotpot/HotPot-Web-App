@@ -1,4 +1,3 @@
-// src/components/replacement/ManageReplacement.tsx
 import FilterListIcon from "@mui/icons-material/FilterList";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SearchIcon from "@mui/icons-material/Search";
@@ -36,20 +35,20 @@ import { alpha } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 import replacementService from "../../api/Services/replacementService";
 import staffService from "../../api/Services/staffService";
-import { equipmentHubService } from "../../api/Services/hubServices";
 import {
   AssignStaffDto,
+  CompleteReplacementDto,
   NotificationState,
   Order,
   OrderBy,
   ReplacementRequestDetailDto,
-  ReplacementRequestStatus,
   ReplacementRequestSummaryDto,
   ReviewReplacementRequestDto,
 } from "../../types/replacement";
-import { StaffAvailabilityDto } from "../../types/staff";
+import { StaffDto } from "../../types/staff";
 import { getAvailableActions } from "../../utils/replacementUtils";
 import AssignStaff from "./replacement/AssignStaff";
+import CompleteRequest from "./replacement/CompleteRequest";
 import CustomerInfo from "./replacement/CustomerInfo";
 import EquipmentInfo from "./replacement/EquipmentInfo";
 import MobileRequestCard from "./replacement/MobileRequestCard";
@@ -63,16 +62,14 @@ import {
   StyledPaper,
   StyledTable,
 } from "../../components/StyledComponents";
-import useAuth from "../../hooks/useAuth";
 
 const ManageReplacement: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const { auth } = useAuth(); // Get current user info
 
   // State
   const [requests, setRequests] = useState<ReplacementRequestSummaryDto[]>([]);
-  const [staff, setStaff] = useState<StaffAvailabilityDto[]>([]);
+  const [staff, setStaff] = useState<StaffDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [staffLoading, setStaffLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -92,66 +89,22 @@ const ManageReplacement: React.FC = () => {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
-  const [hubConnected, setHubConnected] = useState(false);
 
   // Form states
   const [reviewNotes, setReviewNotes] = useState("");
   const [isApproved, setIsApproved] = useState(true);
   const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null);
+  const [completionNotes, setCompletionNotes] = useState("");
 
   // Status options
-  const statusOptions = Object.values(ReplacementRequestStatus);
-
-  // Connect to SignalR hub
-  useEffect(() => {
-    const connectToHub = async () => {
-      if (!auth?.user?.userId) return;
-
-      try {
-        await equipmentHubService.connect(auth.user?.id, auth.user?.role);
-        setHubConnected(true);
-
-        // Register event handlers for real-time updates
-        equipmentHubService.onReceiveReplacementReview((id, isApproved) => {
-          const status = isApproved ? "approved" : "rejected";
-          setNotification({
-            open: true,
-            message: `Replacement request #${id} was ${status}`,
-            severity: "info",
-          });
-          fetchData(); // Refresh data
-        });
-
-        equipmentHubService.onReceiveAssignmentUpdate((id, equipmentName) => {
-          setNotification({
-            open: true,
-            message: `Staff assigned to replacement request #${id} for ${equipmentName}`,
-            severity: "info",
-          });
-          fetchData(); // Refresh data
-        });
-
-        equipmentHubService.onReceiveReplacementUpdate(
-          (id, equipmentName, status) => {
-            setNotification({
-              open: true,
-              message: `Replacement request #${id} for ${equipmentName} is now ${status}`,
-              severity: "info",
-            });
-            fetchData(); // Refresh data
-          }
-        );
-      } catch (error) {
-        console.error("Error connecting to SignalR hub:", error);
-      }
-    };
-
-    connectToHub();
-
-    return () => {
-      equipmentHubService.disconnect();
-    };
-  }, [auth]);
+  const statusOptions = [
+    "Pending",
+    "Approved",
+    "In Progress",
+    "Completed",
+    "Rejected",
+    "Cancelled",
+  ];
 
   // Fetch data
   const fetchData = async () => {
@@ -175,7 +128,7 @@ const ManageReplacement: React.FC = () => {
   const fetchStaffData = async () => {
     try {
       setStaffLoading(true);
-      const staffData = await staffService.getAvailableStaff();
+      const staffData = await staffService.getAllStaff();
       setStaff(staffData);
     } catch (error) {
       console.error("Error fetching staff data:", error);
@@ -192,13 +145,6 @@ const ManageReplacement: React.FC = () => {
   useEffect(() => {
     fetchData();
     fetchStaffData();
-
-    // Set up periodic refresh
-    const refreshInterval = setInterval(() => {
-      fetchData();
-    }, 60000); // Refresh every minute
-
-    return () => clearInterval(refreshInterval);
   }, []);
 
   // Handle view details
@@ -209,13 +155,17 @@ const ManageReplacement: React.FC = () => {
         request.replacementRequestId
       );
       setSelectedRequest(detailedRequest);
+
       // Reset form states
       setReviewNotes(detailedRequest.reviewNotes || "");
       setIsApproved(
-        detailedRequest.status === ReplacementRequestStatus.Approved ||
-          detailedRequest.status === ReplacementRequestStatus.InProgress
+        detailedRequest.status === "Approved" ||
+          detailedRequest.status === "InProgress" ||
+          detailedRequest.status === "In Progress"
       );
       setSelectedStaffId(detailedRequest.assignedStaffId || null);
+      setCompletionNotes("");
+
       setDetailDialogOpen(true);
     } catch (error) {
       console.error("Error fetching request details:", error);
@@ -232,17 +182,21 @@ const ManageReplacement: React.FC = () => {
   // Handle review request
   const handleReviewRequest = async () => {
     if (!selectedRequest) return;
+
     try {
       setActionLoading(true);
       setValidationError(null);
+
       const reviewData: ReviewReplacementRequestDto = {
         isApproved,
         reviewNotes,
       };
+
       const updatedRequest = await replacementService.reviewReplacement(
         selectedRequest.replacementRequestId,
         reviewData
       );
+
       // Update the requests list
       setRequests(
         requests.map((req) =>
@@ -255,7 +209,9 @@ const ManageReplacement: React.FC = () => {
             : req
         )
       );
+
       setSelectedRequest(updatedRequest);
+
       setNotification({
         open: true,
         message: `Request ${isApproved ? "approved" : "rejected"} successfully`,
@@ -277,16 +233,20 @@ const ManageReplacement: React.FC = () => {
   // Handle assign staff
   const handleAssignStaff = async () => {
     if (!selectedRequest || selectedStaffId === null) return;
+
     try {
       setActionLoading(true);
       setValidationError(null);
+
       const assignData: AssignStaffDto = {
         staffId: selectedStaffId,
       };
+
       const updatedRequest = await replacementService.assignStaff(
         selectedRequest.replacementRequestId,
         assignData
       );
+
       // Update the requests list
       setRequests(
         requests.map((req) =>
@@ -299,7 +259,9 @@ const ManageReplacement: React.FC = () => {
             : req
         )
       );
+
       setSelectedRequest(updatedRequest);
+
       setNotification({
         open: true,
         message: "Staff assigned successfully",
@@ -318,11 +280,62 @@ const ManageReplacement: React.FC = () => {
     }
   };
 
+  // Handle complete request
+  const handleCompleteRequest = async () => {
+    if (!selectedRequest) return;
+
+    try {
+      setActionLoading(true);
+      setValidationError(null);
+
+      const completeData: CompleteReplacementDto = {
+        completionNotes,
+      };
+
+      const updatedRequest = await replacementService.completeReplacement(
+        selectedRequest.replacementRequestId,
+        completeData
+      );
+
+      // Update the requests list
+      setRequests(
+        requests.map((req) =>
+          req.replacementRequestId === updatedRequest.replacementRequestId
+            ? {
+                ...req,
+                status: updatedRequest.status,
+                completionDate: updatedRequest.completionDate,
+              }
+            : req
+        )
+      );
+
+      setSelectedRequest(updatedRequest);
+
+      setNotification({
+        open: true,
+        message: "Request marked as completed successfully",
+        severity: "success",
+      });
+    } catch (error) {
+      console.error("Error completing request:", error);
+      setValidationError("Failed to complete request. Please try again.");
+      setNotification({
+        open: true,
+        message: "Failed to complete request",
+        severity: "error",
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   // Handle filter by status
   const handleStatusFilterChange = async (status: string) => {
     try {
       setLoading(true);
       setStatusFilter(status);
+
       let filteredRequests;
       if (status === "") {
         filteredRequests = await replacementService.getAllReplacements();
@@ -331,10 +344,10 @@ const ManageReplacement: React.FC = () => {
           status
         );
       }
-      setRequests(filteredRequests || []); // Ensure we always set an array
+
+      setRequests(filteredRequests);
     } catch (error) {
       console.error("Error filtering requests:", error);
-      setRequests([]); // Reset to empty array on error
       setNotification({
         open: true,
         message: "Failed to filter requests",
@@ -353,7 +366,7 @@ const ManageReplacement: React.FC = () => {
   };
 
   // Filter and sort requests
-  const filteredRequests = (requests || [])
+  const filteredRequests = requests
     .filter((request) => {
       const matchesSearch =
         request.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -366,9 +379,11 @@ const ManageReplacement: React.FC = () => {
     .sort((a, b) => {
       const aValue = a[orderBy];
       const bValue = b[orderBy];
+
       if (!aValue && !bValue) return 0;
       if (!aValue) return order === "asc" ? -1 : 1;
       if (!bValue) return order === "asc" ? 1 : -1;
+
       if (order === "asc") {
         return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
       } else {
@@ -418,32 +433,6 @@ const ManageReplacement: React.FC = () => {
       >
         <Typography variant="h4">Equipment Replacement Requests</Typography>
         <Stack direction="row" spacing={2}>
-          {hubConnected && (
-            <Tooltip title="Real-time updates active">
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  color: "success.main",
-                  bgcolor: alpha(theme.palette.success.main, 0.1),
-                  px: 2,
-                  py: 0.5,
-                  borderRadius: 2,
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    bgcolor: "success.main",
-                    mr: 1,
-                  }}
-                />
-                <Typography variant="body2">Live</Typography>
-              </Box>
-            </Tooltip>
-          )}
           <Tooltip title="Refresh">
             <FilterButton onClick={fetchData}>
               <RefreshIcon />
@@ -590,6 +579,8 @@ const ManageReplacement: React.FC = () => {
                       <TableRow key={request.replacementRequestId}>
                         <TableCell>#{request.replacementRequestId}</TableCell>
                         <TableCell>{request.customerName}</TableCell>
+                        // src/components/replacement/ManageReplacement.tsx
+                        (continued)
                         <TableCell>{request.equipmentName}</TableCell>
                         <TableCell>
                           <Tooltip title={request.requestReason}>
@@ -726,6 +717,14 @@ const ManageReplacement: React.FC = () => {
                     staff={staff}
                     loading={staffLoading}
                     onAssign={handleAssignStaff}
+                  />
+                )}
+
+                {getAvailableActions(selectedRequest.status).canComplete && (
+                  <CompleteRequest
+                    completionNotes={completionNotes}
+                    setCompletionNotes={setCompletionNotes}
+                    onComplete={handleCompleteRequest}
                   />
                 )}
 

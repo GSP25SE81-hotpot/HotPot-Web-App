@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/api/services/replacementService.ts
+// import { axiosClient } from "../axiosInstance";
 import {
   ApiResponse,
   AssignStaffDto,
-  NotifyCustomerRequest,
-  ReplacementDashboardDto,
+  CompleteReplacementDto,
   ReplacementRequestDetailDto,
   ReplacementRequestSummaryDto,
   ReviewReplacementRequestDto,
@@ -12,78 +11,59 @@ import {
 import axiosClient from "../axiosInstance";
 
 const replacementService = {
-  // Get all replacement requests
   getAllReplacements: async (): Promise<ReplacementRequestSummaryDto[]> => {
     const response = await axiosClient.get<
-      any,
       ApiResponse<ReplacementRequestSummaryDto[]>
     >("/manager/replacement/all");
-    return response.data;
+    return response.data.data;
   },
 
-  // Get replacement requests by status
   getReplacementsByStatus: async (
     status: string
   ): Promise<ReplacementRequestSummaryDto[]> => {
     const response = await axiosClient.get<
-      any,
       ApiResponse<ReplacementRequestSummaryDto[]>
     >(`/manager/replacement/status/${status}`);
-    return response.data;
+    return response.data.data;
   },
 
-  // Get replacement request by ID
   getReplacementById: async (
     id: number
   ): Promise<ReplacementRequestDetailDto> => {
     const response = await axiosClient.get<
-      any,
-      ApiResponse<ReplacementRequestDetailDto[]>
+      ApiResponse<ReplacementRequestDetailDto>
     >(`/manager/replacement/id/${id}`);
-    // Assuming the API returns an array but we want the first item
-    return response.data[0];
+    return response.data.data;
   },
 
-  // Review a replacement request (approve/reject)
   reviewReplacement: async (
     id: number,
     data: ReviewReplacementRequestDto
   ): Promise<ReplacementRequestDetailDto> => {
     const response = await axiosClient.put<
-      any,
-      ApiResponse<ReplacementRequestDetailDto[]>
+      ApiResponse<ReplacementRequestDetailDto>
     >(`/manager/replacement/${id}/review`, data);
-    return response.data[0];
+    return response.data.data;
   },
 
-  // Assign staff to a replacement request
   assignStaff: async (
     id: number,
     data: AssignStaffDto
   ): Promise<ReplacementRequestDetailDto> => {
     const response = await axiosClient.put<
-      any,
-      ApiResponse<ReplacementRequestDetailDto[]>
+      ApiResponse<ReplacementRequestDetailDto>
     >(`/manager/replacement/${id}/assign-staff`, data);
-    return response.data[0];
+    return response.data.data;
   },
 
-  // Get dashboard data for replacements
-  getDashboard: async (): Promise<ReplacementDashboardDto[]> => {
-    const response = await axiosClient.get<
-      any,
-      ApiResponse<ReplacementDashboardDto[]>
-    >(`/manager/replacement/dashboard`);
-    return response.data;
-  },
-
-  // Notify customer directly
-  notifyCustomer: async (data: NotifyCustomerRequest): Promise<boolean> => {
-    const response = await axiosClient.post<any, ApiResponse<boolean>>(
-      `/manager/replacement/notify-customer`,
-      data
-    );
-    return response.data;
+  completeReplacement: async (
+    id: number,
+    data: CompleteReplacementDto
+  ): Promise<ReplacementRequestDetailDto> => {
+    const response = await axiosClient.put<
+      ApiResponse<ReplacementRequestDetailDto>
+    >(`/manager/replacement/${id}/mark-complete`, data);
+    return response.data.data;
   },
 };
 

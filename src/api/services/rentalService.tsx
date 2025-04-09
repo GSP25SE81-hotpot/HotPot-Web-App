@@ -7,8 +7,10 @@ import {
   PickupAssignmentRequestDto,
   UpdateRentOrderDetailRequest,
   RentalHistoryItem,
+  Staff,
 } from "../../types/rentalTypes";
 import axiosClient from "../axiosInstance";
+// import { axiosClient } from "../axiosInstance"; // Import the authenticated axios instance
 
 const API_URL = "/manager/rentals";
 
@@ -16,20 +18,19 @@ const API_URL = "/manager/rentals";
 export const getUnassignedPickups = async (
   pageNumber = 1,
   pageSize = 10
-): Promise<ApiResponse<PagedResult<RentOrderDetail[]>>> => {
+): Promise<PagedResult<RentOrderDetail>> => {
   try {
-    const response = await axiosClient.get(
+    const response = await axiosClient.get<
+      ApiResponse<PagedResult<RentOrderDetail>>
+    >(
       `${API_URL}/unassigned-pickups?pageNumber=${pageNumber}&pageSize=${pageSize}`
     );
 
-    if (response.data && Array.isArray(response.data)) {
-      return {
-        success: true,
-        message: "Success",
-      };
+    if (!response.data.success) {
+      throw new Error(response.data.message);
     }
 
-    return response.data;
+    return response.data.data!;
   } catch (error) {
     console.error("Error fetching unassigned pickups:", error);
     throw error;
@@ -100,17 +101,6 @@ export const getRentalHistoryByUser = async (
     throw error;
   }
 };
-export const getAllRentalHistory = async (): Promise<RentalHistoryItem[]> => {
-  try {
-    const response = await axiosClient.get<RentalHistoryItem[]>(
-      `${API_URL}/all`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching rental history by user:", error);
-    throw error;
-  }
-};
 
 // Adjust return date for exception
 export const adjustReturnDateForException = async (
@@ -142,23 +132,42 @@ export const calculateLateFee = async (
 };
 
 // Get current assignments
-export async function getCurrentAssignments(
+export const getCurrentAssignments = async (
   pageNumber = 1,
   pageSize = 10
-): Promise<ApiResponse<PagedResult<StaffPickupAssignmentDto[]>>> {
+): Promise<PagedResult<StaffPickupAssignmentDto>> => {
   try {
-    const response = await axiosClient.get(
+    const response = await axiosClient.get<
+      ApiResponse<PagedResult<StaffPickupAssignmentDto>>
+    >(
       `${API_URL}/current-assignments?pageNumber=${pageNumber}&pageSize=${pageSize}`
     );
-    if (response.data && Array.isArray(response.data)) {
-      return {
-        success: true,
-        message: "Success",
-      };
+
+    if (!response.data.success) {
+      throw new Error(response.data.message);
     }
-    return response.data;
+
+    return response.data.data!;
   } catch (error) {
     console.error("Error fetching current assignments:", error);
     throw error;
   }
-}
+};
+
+// Get available staff (this would be from a different controller)
+export const getAvailableStaff = async (): Promise<Staff[]> => {
+  try {
+    const response = await axiosClient.get<ApiResponse<Staff[]>>(
+      "/api/manager/staff/available"
+    );
+
+    if (!response.data.success) {
+      throw new Error(response.data.message);
+    }
+
+    return response.data.data!;
+  } catch (error) {
+    console.error("Error fetching available staff:", error);
+    throw error;
+  }
+};

@@ -1,4 +1,6 @@
+// src/components/FeedbackManagement.tsx
 import { HubConnectionState } from "@microsoft/signalr";
+import { Star, StarBorder } from "@mui/icons-material";
 import {
   Alert,
   Button,
@@ -7,18 +9,14 @@ import {
   CircularProgress,
   Divider,
   Pagination,
+  Rating,
   Snackbar,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
-import feedbackService, {
-  FeedbackStats,
-  ManagerFeedbackListDto,
-} from "../../api/Services/feedbackService";
-import { toast } from "react-toastify";
-import { feedbackHubService } from "../../api/Services/hubServices";
+import feedbackService, { Feedback } from "../../api/Services/feedbackService";
 import {
   DateText,
   EmptyStateMessage,
@@ -29,6 +27,8 @@ import {
   LoadingContainer,
   OrderInfoText,
   PaginationContainer,
+  RatingContainer,
+  RatingScoreText,
   ResponseActionsContainer,
   ResponseButton,
   ResponseInputContainer,
@@ -39,108 +39,38 @@ import {
   StyledCard,
   StyledChip,
   SubmitButton,
-} from "../../components/StyledComponents";
+} from "../../components/StyledComponents"; // Adjust the import path as needed
+import { useSignalR } from "../../context/SignalRContext";
 
 const FeedbackManagement: React.FC = () => {
-  // State for feedback data
-  const [feedbacks, setFeedbacks] = useState<ManagerFeedbackListDto[]>([]);
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [responseText, setResponseText] = useState<string>("");
   const [activeFeedbackId, setActiveFeedbackId] = useState<number | null>(null);
   const [filter, setFilter] = useState<"all" | "pending">("all");
-
-  // State for UI
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  // State for pagination
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [pageSize] = useState<number>(10);
   const [totalCount, setTotalCount] = useState<number>(0);
-
-  // State for statistics
-  const [stats, setStats] = useState<FeedbackStats>({
+  const [stats, setStats] = useState({
     totalFeedbackCount: 0,
-    pendingFeedbackCount: 0,
-    approvedFeedbackCount: 0,
-    rejectedFeedbackCount: 0,
-    unrespondedFeedbackCount: 0,
     respondedFeedbackCount: 0,
+    unrespondedFeedbackCount: 0,
     responseRate: 0,
   });
 
-  // State for SignalR connection
-  const [hubConnectionState, setHubConnectionState] =
-    useState<HubConnectionState>(HubConnectionState.Disconnected);
+  // Get SignalR context
+  const { hubService, isInitialized, error: signalRError } = useSignalR();
 
   // Get manager ID from localStorage
   const managerId = parseInt(localStorage.getItem("uid") || "1");
-  const managerName = localStorage.getItem("userName") || "Manager";
-
-  // Initialize SignalR connection
-  useEffect(() => {
-    const initializeSignalR = async () => {
-      try {
-        // Connect to the feedback hub
-        await feedbackHubService.connect(managerId, "Manager");
-        setHubConnectionState(HubConnectionState.Connected);
-
-        // Register for connection confirmation
-        feedbackHubService.onConnectionRegistered((userId) => {
-          console.log(`Connection registered for user ${userId}`);
-        });
-
-        // Register for approved feedback notifications
-        feedbackHubService.onReceiveApprovedFeedback(
-          (feedbackTitle, adminName) => {
-            setSuccess(
-              `New feedback "${feedbackTitle}" approved by ${adminName}`
-            );
-            // Refresh the feedback list and stats
-            fetchFeedback();
-            fetchStats();
-          }
-        );
-
-        // Register for feedback response notifications
-        feedbackHubService.onReceiveFeedbackResponse(
-          (feedbackId, responseMessage, managerName, responseDate) => {
-            // Update the feedback in the list if it exists
-            setFeedbacks((prevFeedbacks) =>
-              prevFeedbacks.map((fb) =>
-                fb.feedbackId === feedbackId
-                  ? {
-                      ...fb,
-                      response: responseMessage,
-                      responseDate: responseDate,
-                      hasResponse: true,
-                    }
-                  : fb
-              )
-            );
-          }
-        );
-      } catch (err) {
-        console.error("Failed to initialize SignalR:", err);
-        setHubConnectionState(HubConnectionState.Disconnected);
-        setError("Failed to connect to real-time notifications");
-      }
-    };
-
-    initializeSignalR();
-
-    // Cleanup function to disconnect from SignalR
-    return () => {
-      feedbackHubService.disconnect();
-    };
-  }, [managerId]);
 
   // Fetch feedback based on current filter
   const fetchFeedback = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      console.log(`Fetching feedback with filter: ${filter}`);
       let response;
       if (filter === "pending") {
         response = await feedbackService.getUnrespondedFeedback(
@@ -150,28 +80,18 @@ const FeedbackManagement: React.FC = () => {
       } else {
         response = await feedbackService.getAllFeedback(pageNumber, pageSize);
       }
-
-      // Check if response is directly a PagedResult
-      // if (response.items !== undefined) {
-      //   setFeedbacks(response.items);
-      //   setTotalCount(response.totalCount);
-      // }
-      // Check if response is an ApiResponse with data property
-      if (response?.data?.items) {
+      if (response.isSuccess && response.data) {
         setFeedbacks(response.data.items);
         setTotalCount(response.data.totalCount);
-      }
-      // Neither structure matches
-      else {
-        console.error("Malformed data received:", response);
-        throw new Error("Invalid feedback data structure");
+      } else {
+        setError(response.message || "Failed to fetch feedback");
       }
     } catch (err: unknown) {
-      console.error("Full fetch error:", err);
       const errorMessage =
-        err instanceof Error ? err.message : "Unknown error occurred";
+        err instanceof Error
+          ? err.message
+          : "An error occurred while fetching feedback";
       setError(errorMessage);
-      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -181,7 +101,7 @@ const FeedbackManagement: React.FC = () => {
   const fetchStats = useCallback(async () => {
     try {
       const response = await feedbackService.getFeedbackStats();
-      if (response?.data) {
+      if (response.isSuccess && response.data) {
         setStats(response.data);
       }
     } catch (err) {
@@ -189,11 +109,67 @@ const FeedbackManagement: React.FC = () => {
     }
   }, []);
 
+  // Set up real-time updates using the SignalR context
+  useEffect(() => {
+    if (isInitialized) {
+      // Handle SignalR errors
+      if (signalRError) {
+        setError(`SignalR error: ${signalRError.message}`);
+      }
+
+      // Register for approved feedback notifications
+      const handleApprovedFeedback = (
+        _feedbackId: number,
+        title: string,
+        adminName: string
+      ) => {
+        setSuccess(`New feedback "${title}" approved by ${adminName}`);
+        // Refresh the feedback list and stats
+        fetchFeedback();
+        fetchStats();
+      };
+
+      // Register for feedback response notifications
+      const handleFeedbackResponse = (
+        feedbackId: number,
+        responseMessage: string,
+        managerName: string,
+        responseDate: Date
+      ) => {
+        // Update the feedback in the list if it exists
+        setFeedbacks((prevFeedbacks) =>
+          prevFeedbacks.map((fb) =>
+            fb.feedbackId === feedbackId
+              ? {
+                  ...fb,
+                  response: responseMessage,
+                  responseDate: responseDate,
+                  manager: fb.manager
+                    ? { ...fb.manager, name: managerName }
+                    : { name: managerName, id: 0 },
+                }
+              : fb
+          )
+        );
+      };
+
+      // Register event handlers with the hub service
+      hubService.feedback.onReceiveApprovedFeedback(handleApprovedFeedback);
+      hubService.feedback.onReceiveFeedbackResponse(handleFeedbackResponse);
+    }
+  }, [
+    isInitialized,
+    signalRError,
+    fetchFeedback,
+    fetchStats,
+    hubService.feedback,
+  ]);
+
   // Load data when component mounts or filter/page changes
   useEffect(() => {
     fetchFeedback();
     fetchStats();
-  }, [filter, pageNumber, fetchFeedback, fetchStats]);
+  }, [filter, pageNumber, pageSize, fetchFeedback, fetchStats]);
 
   // Handle filter change
   const handleFilterChange = (newFilter: "all" | "pending") => {
@@ -215,22 +191,15 @@ const FeedbackManagement: React.FC = () => {
       setError("Response cannot be empty");
       return;
     }
-
     setLoading(true);
     try {
-      const response = await feedbackService.respondToFeedback(
-        feedbackId,
-        {
-          managerId,
-          response: responseText,
-        },
-        {
-          userId: managerId,
-          name: managerName,
-        }
-      );
-
-      if (response && response.data) {
+      const response = await feedbackService.respondToFeedback(feedbackId, {
+        managerId,
+        response: responseText,
+      });
+      if (response.isSuccess && response.data) {
+        // Get the feedback and user info
+        const feedback = response.data;
         // Update the feedback in the list
         setFeedbacks(
           feedbacks.map((fb) =>
@@ -239,16 +208,36 @@ const FeedbackManagement: React.FC = () => {
                   ...fb,
                   response: responseText,
                   responseDate: new Date(),
-                  hasResponse: true,
+                  manager: fb.manager
+                    ? {
+                        ...fb.manager,
+                        name: localStorage.getItem("userName") || "Manager",
+                      }
+                    : {
+                        name: localStorage.getItem("userName") || "Manager",
+                        id: managerId,
+                      },
                 }
               : fb
           )
         );
-
         setSuccess("Response submitted successfully");
         setResponseText("");
         setActiveFeedbackId(null);
-
+        // Notify the user about the response via SignalR
+        if (isInitialized && feedback.userId) {
+          try {
+            const managerName = localStorage.getItem("userName") || "Manager";
+            await hubService.feedback.notifyFeedbackResponse(
+              feedback.userId,
+              feedbackId,
+              responseText,
+              managerName
+            );
+          } catch (err) {
+            console.error("Failed to send real-time notification:", err);
+          }
+        }
         // Refresh stats
         fetchStats();
       } else {
@@ -277,14 +266,19 @@ const FeedbackManagement: React.FC = () => {
     setResponseText("");
   };
 
+  // Get connection state
+  const connectionState = isInitialized
+    ? HubConnectionState.Connected
+    : HubConnectionState.Disconnected;
+
   return (
     <FeedbackContainer>
       <FeedbackTitle variant="h4">Quản lý Phản hồi Khách hàng</FeedbackTitle>
 
       {/* Connection status */}
-      {hubConnectionState !== HubConnectionState.Connected && (
+      {connectionState !== HubConnectionState.Connected && (
         <Alert severity="warning" sx={{ mb: 2 }}>
-          Trạng thái kết nối: {hubConnectionState}
+          Trạng thái kết nối: {connectionState}
         </Alert>
       )}
 
@@ -326,12 +320,14 @@ const FeedbackManagement: React.FC = () => {
       {/* Filters */}
       <FilterContainer>
         <Chip
+          key="all"
           label="Tất cả"
           onClick={() => handleFilterChange("all")}
           color={filter === "all" ? "primary" : "default"}
           sx={{ px: 2, borderRadius: "10px" }}
         />
         <Chip
+          key="pending"
           label="Chờ xử lý"
           onClick={() => handleFilterChange("pending")}
           color={filter === "pending" ? "primary" : "default"}
@@ -353,7 +349,6 @@ const FeedbackManagement: React.FC = () => {
           {error}
         </Alert>
       </Snackbar>
-
       <Snackbar
         open={!!success}
         autoHideDuration={6000}
@@ -396,8 +391,8 @@ const FeedbackManagement: React.FC = () => {
                       {feedback.user ? feedback.user.name : "Khách hàng"}
                     </Typography>
                     <StyledChip
-                      label={feedback.hasResponse ? "Đã phản hồi" : "Chờ xử lý"}
-                      status={feedback.hasResponse ? "Completed" : "Pending"}
+                      label={feedback.response ? "Đã phản hồi" : "Chờ xử lý"}
+                      status={feedback.response ? "Completed" : "Pending"}
                       size="small"
                     />
                   </Stack>
@@ -412,16 +407,30 @@ const FeedbackManagement: React.FC = () => {
                     "{feedback.comment}"
                   </Typography>
 
+                  {/* Rating Display */}
+                  {feedback.rating > 0 && (
+                    <RatingContainer>
+                      <Rating
+                        value={feedback.rating}
+                        readOnly
+                        precision={0.5}
+                        icon={<Star fontSize="inherit" />}
+                        emptyIcon={<StarBorder fontSize="inherit" />}
+                      />
+                      <RatingScoreText>({feedback.rating}/5)</RatingScoreText>
+                    </RatingContainer>
+                  )}
+
                   {/* Order Information */}
                   {feedback.order && (
                     <OrderInfoText>
-                      Đơn hàng: #{feedback.order.orderId} -
+                      Đơn hàng: #{feedback.order.orderNumber} -
                       {new Date(feedback.createdAt).toLocaleDateString("vi-VN")}
                     </OrderInfoText>
                   )}
 
                   {/* Response Section */}
-                  {feedback.hasResponse && feedback.responseDate && (
+                  {feedback.response && (
                     <>
                       <Divider />
                       <ResponseSection>
@@ -429,22 +438,22 @@ const FeedbackManagement: React.FC = () => {
                           Phản hồi của quản lý:
                         </Typography>
                         <Typography variant="body2">
-                          {/* This would be populated from the detailed feedback */}
-                          {/* For now, we'll show a placeholder */}
-                          Phản hồi đã được gửi
+                          {feedback.response}
                         </Typography>
-                        <DateText>
-                          Phản hồi lúc:{" "}
-                          {new Date(feedback.responseDate).toLocaleString(
-                            "vi-VN"
-                          )}
-                        </DateText>
+                        {feedback.responseDate && (
+                          <DateText>
+                            Phản hồi lúc:{" "}
+                            {new Date(feedback.responseDate).toLocaleString(
+                              "vi-VN"
+                            )}
+                          </DateText>
+                        )}
                       </ResponseSection>
                     </>
                   )}
 
                   {/* Response Input */}
-                  {!feedback.hasResponse && (
+                  {!feedback.response && (
                     <>
                       <Divider />
                       {activeFeedbackId === feedback.feedbackId ? (

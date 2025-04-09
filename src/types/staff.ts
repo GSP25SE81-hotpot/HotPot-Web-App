@@ -20,11 +20,11 @@ export interface StaffDto {
 }
 
 export interface StaffAvailabilityDto {
-  id: number;
+  staffId: number;
   name: string;
   email: string;
-  phone: string;
-  isAvailable: boolean;
+  phoneNumber: string;
+  available: boolean;
 }
 
 export interface StaffAvailabilityStatus {

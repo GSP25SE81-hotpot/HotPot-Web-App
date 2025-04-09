@@ -11,8 +11,14 @@ const FeedbackDetailPage: React.FC = () => {
         <HeaderBreadcrumbs
           heading={config.Vntext.Feedback.feedbackDetail}
           links={[
-            { name: config.Vntext.Dashboard.dashboard },
-            { name: config.Vntext.Feedback.feedbackPage },
+            {
+              name: config.Vntext.Dashboard.dashboard,
+              href: config.adminRoutes.dashboard,
+            },
+            {
+              name: config.Vntext.Feedback.feedbackPage,
+              href: config.adminRoutes.feedback,
+            },
             { name: config.Vntext.Feedback.feedbackDetailId },
           ]}
         />

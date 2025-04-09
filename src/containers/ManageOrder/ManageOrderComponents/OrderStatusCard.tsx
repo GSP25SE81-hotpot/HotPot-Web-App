@@ -26,13 +26,18 @@ const OrderStatusCard: React.FC<OrderStatusCardProps> = ({ status, count }) => {
   return (
     <StatusCardContainer statuscolor={statusColor} elevation={0}>
       <StatusLabel variant="h6">{statusLabel}</StatusLabel>
+
       <CountContainer>
+        {/* Fixed: Removed the component prop and using variant only */}
         <CountValue variant="h3" statuscolor={statusColor}>
           {count}
         </CountValue>
         <StatusDot statuscolor={statusColor} />
       </CountContainer>
-      <OrderCountLabel variant="body2"></OrderCountLabel>
+
+      <OrderCountLabel variant="body2">
+        {/* {count === 1 ? "order" : "orders"} */}
+      </OrderCountLabel>
     </StatusCardContainer>
   );
 };
