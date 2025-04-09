@@ -28,9 +28,9 @@ import { formatCurrency, formatDate } from "../../../utils/formatters";
 const RentalDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data, loading, error, execute } = useApi(
-    rentalService.getRentalDetail
-  );
+
+  // Updated to use getRentOrder instead of getRentalDetail
+  const { data, loading, error, execute } = useApi(rentalService.getRentOrder);
 
   useEffect(() => {
     if (id) {
@@ -40,9 +40,9 @@ const RentalDetail: React.FC = () => {
 
   const handleRecordReturn = () => {
     if (data) {
-      navigate("/record-return", {
+      navigate("/rentals/record-return", {
         state: {
-          rentOrderDetailId: data.rentOrderDetailId,
+          rentOrderId: data.orderId,
           customerName: data.customerName,
           equipmentName: data.utensilName || data.hotpotName,
           expectedReturnDate: data.expectedReturnDate,

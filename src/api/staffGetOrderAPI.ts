@@ -1,17 +1,18 @@
-import  axiosClient  from "./axiosInstance";
+import axiosClient from "./axiosInstance";
 
 const staffGetOrderApi = {
-
-    getAssignOrderByStaffId: ( id?:any ) =>
-        {
-          const url = `/staff/orders/assigned/${id}`;
-          return axiosClient.get(url);
-        },
-    updateStatus: ( id?:any, body?:any ) =>
-        {
-          const url = `/staff/orders/${id}/status`;
-          return axiosClient.put(url, body );
-        } 
+  getAssignOrderByStaffId: () => {
+    const url = `/staff/orders/assigned`;
+    return axiosClient.get(url);
+  },
+  shippingStatus: (id?: any, body?: any) => {
+    const url = `/staff/shipping/${id}/status`;
+    return axiosClient.put(url, body);
+  },
+  updateStatus: (id?: any, body?: any) => {
+    const url = `/staff/orders/${id}/status`;
+    return axiosClient.put(url, body);
+  },
 };
 
 export default staffGetOrderApi;

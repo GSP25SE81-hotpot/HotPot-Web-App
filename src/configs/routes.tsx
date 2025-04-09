@@ -57,7 +57,7 @@ export const staffRoutes = {
   rentalDetail: "/staff/rentals/:id",
   recordReturn: "/staff/rentals/record-return",
   pickupRental: "/pickup-rental",
-  staffMyAssignment: "/staff-assignment",
+  staffMyAssignment: "/staff-my-assignment",
   staffMyAssignmentDetail: "/staff-assignment/:orderId/:assignmentId",
   pickupReplacement: "/pickup-replacement",
   replacementDetail: "/replacements/:id",

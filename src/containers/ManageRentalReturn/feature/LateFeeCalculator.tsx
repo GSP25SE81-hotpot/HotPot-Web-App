@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/manager/LateFeeCalculator.tsx
 import { Alert, CircularProgress } from "@mui/material";
 import Grid from "@mui/material/Grid2";

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Box,
   Button,
@@ -50,7 +52,7 @@ const AssignOrder: React.FC = () => {
   //call api
   const getAssignOrderByStaffId = async () => {
     try {
-      const res = await staffGetOrderApi.getAssignOrderByStaffId(id);
+      const res = await staffGetOrderApi.getAssignOrderByStaffId();
       setOrders(res?.data);
     } catch (error: any) {
       console.log(error?.message);
@@ -59,7 +61,7 @@ const AssignOrder: React.FC = () => {
 
   React.useEffect(() => {
     getAssignOrderByStaffId();
-  }, [id]);
+  }, []);
 
   //Header arr
   const headerArr = [
@@ -71,8 +73,7 @@ const AssignOrder: React.FC = () => {
   ];
 
   const body = {
-    status: OrderStatus.Shipping,
-    notes: "R",
+    status: "Shipping",
   };
 
   //handle

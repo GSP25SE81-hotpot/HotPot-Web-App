@@ -3,9 +3,6 @@ import { Route, Routes } from "react-router-dom";
 import config from "../configs";
 // import Home from "../pages/Home/HomePage";
 
-import { ManageRentalsPage } from "../pages/Manager/ManageRental/ManageRentalsPage";
-import { ManageRentalStatusPage } from "../pages/Manager/ManageRental/ManageRentalStatusPage";
-import { ResolveEquipmentFailurePage } from "../pages/Manager/ResolveEquipmentFailure/ResolveEquipmentFailurePage";
 import HotpotComboDetailPage from "../pages/Admin/ComboDetail/HotpotComboDetailPage";
 import CreateComboPage from "../pages/Admin/Combohotpot/CreateComboPage";
 import CreateHotpotPage from "../pages/Admin/CreateHotpot/CreateHotpotPage";
@@ -35,10 +32,13 @@ import OrderDetail from "../containers/ManageOrder/SubPage/OrderDetail";
 import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
 import TableHotpotDetailPage from "../pages/Admin/TableHotpotDetail/TableHotpotDetailPage";
 import TableMaintenanceHotpotDetailPage from "../pages/Admin/TableMaintenanceHotpot/TableMaintenanceHopotPage";
-import ShippingListPage from "../pages/Staff/Shipping/ShippingListPage";
-import { ManageAssignmentStaffPage } from "../pages/Staff/ManageAssignemt/ManageAssigmentStaffPage";
-import { AssignmentDetailPage } from "../pages/Staff/ManageAssignemt/AssignmetDetailPage";
+import NotificationsPage from "../pages/Global/Notification/NotificationsPage";
+import { EquipmentConditionDetailPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionDetailPage";
+import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
+import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/ManageEquipmentStockPage";
 import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
+import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
+import { EquipmentAvailabilityPage } from "../pages/Manager/ManageRental/EquipmentAvailabilityPage";
 import { CurrentAssignmentsPage } from "../pages/Manager/ManagerRentalReturnPage/CurrentAssignmentsPage";
 import { LateFeeCalculatorPage } from "../pages/Manager/ManagerRentalReturnPage/LateFeeCalculatorPage";
 import { ManagerRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManagerRentalReturnPage";
@@ -48,16 +48,13 @@ import { UnassignedPickupsPage } from "../pages/Manager/ManagerRentalReturnPage/
 import StaffAssignmentPage from "../pages/Manager/WorkAssignmentSchedule/StaffAssignmentPage";
 import WorkAssignmentSchedulePage from "../pages/Manager/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
 import { AssignOrderPage } from "../pages/Staff/AssignOrder/AssignOrderPage";
+import { AssignmentDetailPage } from "../pages/Staff/ManageAssignemt/AssignmetDetailPage";
+import { ManageAssignmentStaffPage } from "../pages/Staff/ManageAssignemt/ManageAssigmentStaffPage";
 import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
 import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
 import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
 import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliveryPage";
-import NotificationsPage from "../pages/Global/Notification/NotificationsPage";
-import { EquipmentAvailabilityPage } from "../pages/Manager/ManageRental/EquipmentAvailabilityPage";
-import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/ManageEquipmentStockPage";
-import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
-import { EquipmentConditionDetailPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionDetailPage";
-import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
+import ShippingListPage from "../pages/Staff/Shipping/ShippingListPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -72,7 +69,7 @@ const AppRoute: React.FC = () => {
         path={config.authRoutes.notification}
         element={<NotificationsPage />}
       />
-<Route key="layoutManager" element={<ManagerLayout />}>
+      <Route key="layoutManager" element={<ManagerLayout />}>
         <Route
           path={config.managerRoutes.manageEquipmentStock}
           element={<ManageEquipmentStockPage />}

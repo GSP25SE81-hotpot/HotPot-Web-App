@@ -68,10 +68,10 @@ export const PickupRental: React.FC = () => {
     <StyledContainer maxWidth="xl">
       <Box sx={{ mt: 3, mb: 2 }}>
         <SectionHeading variant="h4" component="h1">
-          Quản lý thiết bị cho thuê
+          Thu hồi thiết bị
         </SectionHeading>
         <Typography variant="body1" color="text.secondary">
-          Quản lý lấy hàng, trả thiết bị cho thuê và theo dõi các mục quá hạn
+          Quản lý thu hồi, trả thiết bị cho thuê và theo dõi các mục quá hạn
         </Typography>
       </Box>
       <StyledDivider />

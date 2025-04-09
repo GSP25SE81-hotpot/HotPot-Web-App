@@ -1,8 +1,5 @@
 // src/components/manager/ManagerRentalDashboard.tsx
 import AssignmentIcon from "@mui/icons-material/Assignment";
-import CalculateIcon from "@mui/icons-material/Calculate";
-import EventIcon from "@mui/icons-material/Event";
-import HistoryIcon from "@mui/icons-material/History";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { Box, CardActions, CardContent, Typography } from "@mui/material";
@@ -10,17 +7,16 @@ import Grid from "@mui/material/Grid2";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  AnimatedButton,
   CardDescription,
   CardIcon,
   CardTitle,
   DashboardContainer,
   SectionContainer,
-  SectionHeading,
-  StyledDivider,
   StyledCard,
-  AnimatedButton,
-  StyledPaper,
   StyledContainer,
+  StyledDivider,
+  StyledPaper,
 } from "../../components/StyledComponents";
 
 const ManagerRentalDashboard: React.FC = () => {
@@ -35,11 +31,10 @@ const ManagerRentalDashboard: React.FC = () => {
       <StyledPaper elevation={0}>
         <DashboardContainer>
           <Typography variant="h4" gutterBottom>
-            Rental Management Dashboard
+            Quản lý thu hồi
           </Typography>
 
           <SectionContainer>
-            <SectionHeading variant="h5">Pickup Management</SectionHeading>
             <StyledDivider />
 
             <Grid container spacing={3}>
@@ -126,7 +121,7 @@ const ManagerRentalDashboard: React.FC = () => {
             </Grid>
           </SectionContainer>
 
-          <SectionContainer>
+          {/* <SectionContainer>
             <SectionHeading variant="h5">Rental History</SectionHeading>
             <StyledDivider />
 
@@ -158,9 +153,9 @@ const ManagerRentalDashboard: React.FC = () => {
                 </StyledCard>
               </Grid>
             </Grid>
-          </SectionContainer>
+          </SectionContainer> */}
 
-          <SectionContainer>
+          {/* <SectionContainer>
             <SectionHeading variant="h5">Management Tools</SectionHeading>
             <StyledDivider />
 
@@ -218,7 +213,7 @@ const ManagerRentalDashboard: React.FC = () => {
                 </StyledCard>
               </Grid>
             </Grid>
-          </SectionContainer>
+          </SectionContainer> */}
         </DashboardContainer>
       </StyledPaper>
     </StyledContainer>
