@@ -22,11 +22,9 @@ const TableFeedback = () => {
     const getListFeedback = async () => {
       try {
         const res: any = await adminFeedbackAPI.getListFeedback({
-          pageNumber: page + 1,
-          pageSize: size,
+          PageNumber: page + 1,
+          PageSize: size,
         });
-
-        console.log(res);
 
         setDataFeedback(res?.data?.items || []);
         setTotal(res?.data?.totalCount || 0);

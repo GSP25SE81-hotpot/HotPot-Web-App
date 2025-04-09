@@ -436,7 +436,7 @@ const EquipmentConditionLog: React.FC = () => {
                 fullWidth
                 label="Tên thiết bị"
                 value={filterParams.equipmentName || ""}
-                onChange={(e) =>
+                onChange={(e: any) =>
                   handleFilterChange("equipmentName", e.target.value)
                 }
                 size="small"
@@ -677,7 +677,7 @@ const EquipmentConditionLog: React.FC = () => {
                   label="Tên vấn đề"
                   required
                   value={newCondition.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  onChange={(e: any) => handleInputChange("name", e.target.value)}
                   error={formErrors.name}
                   helperText={formErrors.name ? "Tên vấn đề là bắt buộc" : ""}
                 />
@@ -689,7 +689,7 @@ const EquipmentConditionLog: React.FC = () => {
                   multiline
                   rows={3}
                   value={newCondition.description || ""}
-                  onChange={(e) =>
+                  onChange={(e: any) =>
                     handleInputChange("description", e.target.value)
                   }
                 />

@@ -173,9 +173,9 @@ const UnallocatedOrdersList: React.FC = () => {
         : [];
       setStaff(availableStaff);
       // Log how many staff members are available
-      console.log(
-        `Tìm thấy ${availableStaff.length} nhân viên khả dụng trong tổng số ${staffData.length} nhân viên`
-      );
+      // console.log(
+      //   `Tìm thấy ${availableStaff.length} nhân viên khả dụng trong tổng số ${staffData?.length} nhân viên`
+      // );
     } catch (err) {
       console.error("Error fetching staff members:", err);
       setStaff([]);

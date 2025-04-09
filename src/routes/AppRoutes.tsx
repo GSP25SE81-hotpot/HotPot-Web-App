@@ -3,6 +3,9 @@ import { Route, Routes } from "react-router-dom";
 import config from "../configs";
 // import Home from "../pages/Home/HomePage";
 
+import { ManageRentalsPage } from "../pages/Manager/ManageRental/ManageRentalsPage";
+import { ManageRentalStatusPage } from "../pages/Manager/ManageRental/ManageRentalStatusPage";
+import { ResolveEquipmentFailurePage } from "../pages/Manager/ResolveEquipmentFailure/ResolveEquipmentFailurePage";
 import HotpotComboDetailPage from "../pages/Admin/ComboDetail/HotpotComboDetailPage";
 import CreateComboPage from "../pages/Admin/Combohotpot/CreateComboPage";
 import CreateHotpotPage from "../pages/Admin/CreateHotpot/CreateHotpotPage";
@@ -20,8 +23,6 @@ import { AuthenticatePage } from "../pages/Global/Authenticate/SignIn";
 import { ChatWithCustomerPage } from "../pages/Manager/ChatWithCustomer/ChatWithCustomerPage";
 import { EquipmentConditionLogPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionLogPage";
 import { FeedbackManagementPage } from "../pages/Manager/FeedbackManagement/FeedbackManagementPage";
-import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock/EquipmentAvailabilityPage";
-import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/ManageEquipmentStockPage";
 import { ManageReplacementPage } from "../pages/Manager/ManageReplacement/ManageReplacementPage";
 import { CheckDeviceAfterReturnPage } from "../pages/Staff/CheckDeviceAfterReturn/CheckDeviceAfterReturnPage";
 import { OrderHistoryPage } from "../pages/Staff/OrderHistory/OrderHistoryPage";
@@ -34,10 +35,10 @@ import OrderDetail from "../containers/ManageOrder/SubPage/OrderDetail";
 import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
 import TableHotpotDetailPage from "../pages/Admin/TableHotpotDetail/TableHotpotDetailPage";
 import TableMaintenanceHotpotDetailPage from "../pages/Admin/TableMaintenanceHotpot/TableMaintenanceHopotPage";
-import { EquipmentConditionDetailPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionDetailPage";
-import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
+import ShippingListPage from "../pages/Staff/Shipping/ShippingListPage";
+import { ManageAssignmentStaffPage } from "../pages/Staff/ManageAssignemt/ManageAssigmentStaffPage";
+import { AssignmentDetailPage } from "../pages/Staff/ManageAssignemt/AssignmetDetailPage";
 import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
-import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
 import { CurrentAssignmentsPage } from "../pages/Manager/ManagerRentalReturnPage/CurrentAssignmentsPage";
 import { LateFeeCalculatorPage } from "../pages/Manager/ManagerRentalReturnPage/LateFeeCalculatorPage";
 import { ManagerRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManagerRentalReturnPage";
@@ -50,10 +51,13 @@ import { AssignOrderPage } from "../pages/Staff/AssignOrder/AssignOrderPage";
 import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
 import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
 import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
-import { PickupReplacementPage } from "../pages/Staff/PickupReplacement/PickupReplacementPage";
-import { ReplacementDetailPage } from "../pages/Staff/PickupReplacement/ReplacementDetailPage";
 import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliveryPage";
 import NotificationsPage from "../pages/Global/Notification/NotificationsPage";
+import { EquipmentAvailabilityPage } from "../pages/Manager/ManageRental/EquipmentAvailabilityPage";
+import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/ManageEquipmentStockPage";
+import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
+import { EquipmentConditionDetailPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionDetailPage";
+import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -68,7 +72,7 @@ const AppRoute: React.FC = () => {
         path={config.authRoutes.notification}
         element={<NotificationsPage />}
       />
-      <Route key="layoutManager" element={<ManagerLayout />}>
+<Route key="layoutManager" element={<ManagerLayout />}>
         <Route
           path={config.managerRoutes.manageEquipmentStock}
           element={<ManageEquipmentStockPage />}
@@ -238,9 +242,6 @@ const AppRoute: React.FC = () => {
           element={<TableHotpotDetailPage />}
         />
       </Route>
-      {/* <Route key="layout" path={config.routes.home} element={<StaffLayout />}>
-        <Route key="home" path={config.routes.home} element={<Home />} />
-      </Route> */}
 
       <Route
         key="layoutStaff"
@@ -280,12 +281,22 @@ const AppRoute: React.FC = () => {
           element={<PickupRentalPage />}
         />
         <Route
-          path={config.staffRoutes.pickupReplacement}
-          element={<PickupReplacementPage />}
+          path={config.staffRoutes.shippingOrder}
+          element={<ShippingListPage />}
+        />
+        {/* <Route
+          path={config.staffRoutes.retrieveRentalEquipment}
+          element={<RetrieveRentalEquipmentPage />}
+        /> */}
+
+        <Route
+          path={config.staffRoutes.staffMyAssignment}
+          element={<ManageAssignmentStaffPage />}
         />
         <Route
-          path={config.staffRoutes.replacementDetail}
-          element={<ReplacementDetailPage />}
+          key={"detailAssignment"}
+          path={config.staffRoutes.staffMyAssignmentDetail}
+          element={<AssignmentDetailPage />}
         />
       </Route>
     </Routes>

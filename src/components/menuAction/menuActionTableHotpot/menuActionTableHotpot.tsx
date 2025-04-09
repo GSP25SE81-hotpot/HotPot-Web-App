@@ -38,8 +38,6 @@ const MenuActionTableHotpot: React.FC<MenuActionTableHotpotDetailProps> = ({
   };
   const handleDetail = () => {
     onOpenDetail(hotpotData);
-    console.log(hotpotData, "detail");
-
     navigate(
       config.adminRoutes.DetailHotpotType.replace(
         ":hotpotId",

@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import BlockIcon from "@mui/icons-material/Block";
-import EditIcon from "@mui/icons-material/Edit";
 import InfoIcon from "@mui/icons-material/Info";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Button from "@mui/material/Button";
@@ -19,9 +17,7 @@ interface MenuActionTableFeedbackProps {
 
 const MenuActionTableFeedback: React.FC<MenuActionTableFeedbackProps> = ({
   feedbackData,
-  onOpenUpdate,
   onOpenDetail,
-  onOpenDelete,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<any>(null);
   const navigate = useNavigate();
@@ -32,25 +28,15 @@ const MenuActionTableFeedback: React.FC<MenuActionTableFeedbackProps> = ({
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleUpdate = () => {
-    onOpenUpdate(feedbackData);
-    setAnchorEl(null);
-  };
+
   const handleDetail = () => {
     onOpenDetail(feedbackData);
-    console.log(feedbackData, "detail");
-
     navigate(
       config.adminRoutes.feedbackDetail.replace(
         ":feedbackId",
         feedbackData.feedbackId
       )
     );
-  };
-
-  const handleDelete = () => {
-    onOpenDelete(feedbackData);
-    setAnchorEl(null);
   };
 
   return (
@@ -87,15 +73,6 @@ const MenuActionTableFeedback: React.FC<MenuActionTableFeedbackProps> = ({
         <MenuItem onClick={() => handleDetail()}>
           <InfoIcon sx={{ mr: "4px" }} color="info" />
           <span>Chi Tiết</span>
-        </MenuItem>
-        <MenuItem onClick={() => handleUpdate()}>
-          <EditIcon sx={{ mr: "4px", color: "#9ADE7B" }} />
-          <span>Cập nhật</span>
-        </MenuItem>
-
-        <MenuItem onClick={() => handleDelete()}>
-          <BlockIcon sx={{ mr: "4px" }} color="error" />
-          <span>Xóa</span>
         </MenuItem>
       </Menu>
     </div>

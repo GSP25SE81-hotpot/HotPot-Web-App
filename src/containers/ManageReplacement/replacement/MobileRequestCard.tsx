@@ -67,7 +67,7 @@ const MobileRequestCard: React.FC<MobileRequestCardProps> = ({
   onViewDetails,
 }) => {
   return (
-    <RequestCard status={request.status} onClick={() => onViewDetails(request)}>
+    <RequestCard status={request?.status} onClick={() => onViewDetails(request)}>
       <CardContent>
         <CardHeader>
           <CustomerName variant="subtitle1">

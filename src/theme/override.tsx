@@ -19,12 +19,12 @@ declare module "@mui/material/styles" {
 // Define your custom theme
 const theme = createTheme({
   typography: {
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"Lora", serif',
     h2: {
-      fontWeight: 500,
+      fontWeight: 600,
     },
     body1: {
-      fontWeight: 400,
+      fontWeight: 600,
     },
     button: { textTransform: "none" },
   },

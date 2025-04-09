@@ -15,6 +15,7 @@ import {
   FormProvider,
   RHFAutoComplete,
   RHFTextField,
+  RHFTextFieldNumber,
   RHFUploadSingleFile,
 } from "../../components/hook-form";
 import { LoadingButton } from "@mui/lab";
@@ -36,7 +37,7 @@ const CreateIngredients: React.FC = () => {
     measurementUnit: "",
     minStockLevel: 0,
     ingredientTypeID: "",
-    price: 0.01,
+    price: 0,
   };
 
   const validationSchema = Yup.object().shape({
@@ -69,18 +70,13 @@ const CreateIngredients: React.FC = () => {
   const {
     handleSubmit,
     setValue,
-    watch,
     reset,
     formState: { isSubmitting },
   } = methods;
 
-  console.log(watch("ingredientTypeID"));
-
   const fetchType = async () => {
     try {
       const data = await adminIngredientsAPI.getListIngredientsType();
-      console.log(data?.data);
-
       setType(data?.data);
     } catch (error) {
       console.error("Error fetching ingredient types:", error);
@@ -152,9 +148,6 @@ const CreateIngredients: React.FC = () => {
                 label="Mức tồn kho tối thiểu"
                 sx={{ mb: 2 }}
                 InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">VNĐ</InputAdornment>
-                  ),
                   type: "number",
                   inputProps: { min: 0 },
                 }}
@@ -164,7 +157,7 @@ const CreateIngredients: React.FC = () => {
                 options={type || []}
                 label="Chọn Loại nguyên liệu"
               />
-              <RHFTextField
+              <RHFTextFieldNumber
                 name="price"
                 type="number"
                 label="Giá"

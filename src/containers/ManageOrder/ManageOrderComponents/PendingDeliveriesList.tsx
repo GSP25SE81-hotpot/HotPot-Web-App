@@ -37,22 +37,23 @@ import {
   ActionsContainer,
   CustomerName,
   CustomerPhone,
-  DialogActionButton,
+
   EmptyStateContainer,
   EmptyStateSubtitle,
   EmptyStateTitle,
   IdCell,
   ListTitle,
   LoadingContainer,
-  OrderTypeChip,
-  OrdersListContainer,
+
   StyledHeaderCell,
   StyledPaper,
-  StyledTableCell,
+
   StyledTableContainer,
   StyledTableRow,
 } from "../../../components/manager/styles/PendingDeliveriesListStyles";
 import { formatDate } from "../../../utils/formatters";
+import { DialogActionButton, OrdersListContainer, OrderTypeChip } from "../../../components/manager/styles/UnallocatedOrdersListStyles";
+import { StyledTableCell } from "../../../components/manager/styles/OrdersByStatusListStyles";
 
 const PendingDeliveriesList: React.FC = () => {
   const [deliveries, setDeliveries] = useState<PendingDeliveryDTO[]>([]);
@@ -476,9 +477,9 @@ const PendingDeliveriesList: React.FC = () => {
           <DialogActionButton
             onClick={handleCloseDialog}
             sx={{
-              color: (theme) => theme.palette.text.secondary,
+              color: (theme: any) => theme.palette.text.secondary,
               "&:hover": {
-                backgroundColor: (theme) =>
+                backgroundColor: (theme: any) =>
                   alpha(theme.palette.text.secondary, 0.08),
               },
             }}
@@ -492,7 +493,7 @@ const PendingDeliveriesList: React.FC = () => {
             sx={{
               fontWeight: 600,
               "&:hover": {
-                backgroundColor: (theme) => theme.palette.success.dark,
+                backgroundColor: (theme: any) => theme.palette.success.dark,
               },
             }}
           >

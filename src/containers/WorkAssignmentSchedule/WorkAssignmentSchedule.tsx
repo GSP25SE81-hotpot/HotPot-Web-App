@@ -379,7 +379,7 @@ const WorkAssignmentSchedule: React.FC = () => {
                       (staff) =>
                         staff.employeeName !== personalSchedule?.employeeName
                     )
-                    .map((staff) => (
+                    .map((staff: any) => (
                       <TableRow
                         key={staff.employeeName}
                         sx={{
@@ -397,7 +397,7 @@ const WorkAssignmentSchedule: React.FC = () => {
                         <TableCell sx={{ fontSize: "1rem", p: 2 }}>
                           {staff.week}
                         </TableCell>
-                        {staff.schedule.map((shift, index) => (
+                        {staff.schedule.map((shift: any, index: any) => (
                           <TableCell key={index} align="center" sx={{ p: 2 }}>
                             <ShiftCell shift={shift} />
                           </TableCell>

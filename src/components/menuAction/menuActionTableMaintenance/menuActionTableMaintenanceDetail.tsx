@@ -14,11 +14,12 @@ interface MenuActionTableMaintenanceProps {
   onOpenUpdate?: any;
   onOpenDetail?: any;
   onOpenDelete?: any;
+  onFetch?: () => void;
 }
 
 const MenuActionTableMaintenanceDetail: React.FC<
   MenuActionTableMaintenanceProps
-> = ({ hotpotData, onOpenUpdate, onOpenDetail, onOpenDelete }) => {
+> = ({ hotpotData, onOpenUpdate, onOpenDetail, onOpenDelete, onFetch }) => {
   const [anchorEl, setAnchorEl] = React.useState<any>(null);
   const [openDetail, setOpenDetail] = React.useState<boolean>(false);
   const open = Boolean(anchorEl);
@@ -47,6 +48,12 @@ const MenuActionTableMaintenanceDetail: React.FC<
     setAnchorEl(null);
   };
 
+  const handleStatusUpdate = () => {
+    if (onFetch) {
+      onFetch();
+    }
+    handleCloseDetail();
+  };
   return (
     <div>
       <Button
@@ -98,6 +105,7 @@ const MenuActionTableMaintenanceDetail: React.FC<
           handleCloseModal={handleCloseDetail}
           hotpotData={hotpotData}
           open={openDetail}
+          onStatusUpdate={handleStatusUpdate}
         />
       )}
     </div>

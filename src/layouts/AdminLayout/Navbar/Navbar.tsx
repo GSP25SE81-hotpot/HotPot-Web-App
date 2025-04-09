@@ -10,6 +10,7 @@ import {
   MenuItem,
   ListItemIcon,
   Divider,
+  Button,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -134,12 +135,15 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick, isSidebarCollapsed }) => {
           </Link>
         </MenuItem>
         <Divider />
-        <MenuItem sx={{ color: "red" }} onClick={handleLogout}>
+        {/* <MenuItem sx={{ color: "red" }} onClick={() => handleLogout()}>
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>
           Đăng xuất
-        </MenuItem>
+        </MenuItem> */}
+        <Button onClick={() => handleLogout()} sx={{ color: "red" }}>
+          Đằng xuất
+        </Button>
       </Menu>
     </AppBar>
   );

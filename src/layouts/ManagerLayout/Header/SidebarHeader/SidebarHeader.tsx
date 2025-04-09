@@ -5,7 +5,6 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import PersonIcon from "@mui/icons-material/Person";
 import SyncIcon from "@mui/icons-material/Sync";
 import WifiIcon from "@mui/icons-material/Wifi";
@@ -13,9 +12,7 @@ import WifiOffIcon from "@mui/icons-material/WifiOff";
 import {
   AppBar,
   Avatar,
-  Badge,
   Box,
-  Button,
   Chip,
   Collapse,
   Divider,
@@ -30,15 +27,16 @@ import {
   Toolbar,
   Typography,
   useMediaQuery,
-  useTheme,
+  useTheme
 } from "@mui/material";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import authApi from "../../../../api/authAPI";
 import LogoContainer from "../../../../components/Logo/Logo";
 import { useNotifications } from "../../../../context/NotificationContext";
 import useAuth from "../../../../hooks/useAuth";
 import { ConnectionState, Notification } from "../../../../types/notifications";
-import { menuItems } from "../../../AdminLayout/Sidebar/MenuItems";
+import { menuItems } from "./MenuItems";
 
 export const drawerWidth = 280;
 
@@ -103,11 +101,15 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    // Add logout logic here
-    handleUserMenuClose();
-    // navigate to login page
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      localStorage.removeItem("userInfor");
+      handleUserMenuClose();
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   // Calculate unread notifications count
@@ -256,7 +258,7 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
             sx={{
               display: "flex",
               alignItems: "center",
-              "& > *": { transform: "scale(1.2)" }, // Make logo bigger
+              "& > *": { transform: "scale(1.2)" },
             }}
           >
             <LogoContainer />

@@ -3,8 +3,8 @@ import {
   Inventory as InventoryIcon,
   People as PeopleIcon,
   Settings as SettingsIcon,
-  Assignment as AssignmentIcon,
 } from "@mui/icons-material";
+import AssignmentIcon from "@mui/icons-material/Assignment";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -13,10 +13,13 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-import Iconify from "../../../components/Iconify";
-import config from "../../../configs";
-import { managerRoutes, staffRoutes } from "../../../configs/routes";
-import { MenuItemLayout } from "../../../types/menu";
+import Iconify from "../../../../components/Iconify";
+import config from "../../../../configs";
+import { managerRoutes, staffRoutes } from "../../../../configs/routes";
+import { MenuItemLayout } from "../../../../types/menu";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import { Role } from "../../../../routes/Roles";
 
 // const AccessType = {
 //   MANAGER_SALE: [RoleTypes.MANAGER, RoleTypes.SALE],
@@ -72,11 +75,6 @@ export const menuItems: MenuItemLayout[] = [
             path: config.adminRoutes.ingredientType,
           },
         ],
-      },
-      {
-        icon: <SettingsIcon />,
-        label: config.Vntext.SideBar.Settings,
-        path: "/settings",
       },
       {
         icon: <Iconify icon={"ri:feedback-line"} />,
@@ -195,6 +193,30 @@ export const menuItems: MenuItemLayout[] = [
             path: managerRoutes.customerChat,
           },
         ],
+      },
+    ],
+  },
+  {
+    role: Role.Staff,
+    menu: [
+      //Assign Order
+      {
+        icon: <ListAltIcon />,
+        label: config.Vntext.SideBar.Ordes,
+        path: staffRoutes.assignOrder,
+      },
+      //Shipping List
+      {
+        label: config.Vntext.SideBar.shippingList,
+        icon: <LocalShippingIcon />,
+        path: staffRoutes.shippingOrder,
+      },
+      //dashboard
+      {
+        icon: <DashboardIcon />,
+        label: "Công việc",
+        path: config.staffRoutes.staffMyAssignment,
+        // role: AccessType.ADMIN_ACCESS,
       },
     ],
   },
