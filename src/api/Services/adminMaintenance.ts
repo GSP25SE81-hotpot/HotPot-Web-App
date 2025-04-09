@@ -11,6 +11,15 @@ const adminMaintenanceAPI = {
       },
     });
   },
+  updateMaintenanceStatus: (id: string, params?: any) => {
+    const url = "/admin/maintenance/id";
+    const newUrl = url.replace("id", id);
+    return axiosClient.put(newUrl, params, {
+      paramsSerializer: {
+        indexes: null, // by default: false
+      },
+    });
+  },
   getMaintenanceDetails: (params?: any) => {
     const url = "/admin/maintenance/id";
     const newUrl = url.replace("id", params);

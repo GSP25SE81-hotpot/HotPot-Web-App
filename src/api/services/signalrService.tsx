@@ -65,6 +65,7 @@ class SignalRService {
 
       this.hubConnections.set(hubUrl, connection);
     }
+
     return this.hubConnections.get(hubUrl)!;
   }
 
@@ -240,7 +241,7 @@ class SignalRService {
    * Ensure a connection to a hub is established
    * @param hubUrl The URL of the hub
    */
-  public async ensureConnection(hubUrl: string): Promise<void> {
+  private async ensureConnection(hubUrl: string): Promise<void> {
     if (
       !this.hubConnections.has(hubUrl) ||
       this.hubConnections.get(hubUrl)!.state !==

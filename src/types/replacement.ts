@@ -31,26 +31,21 @@ export interface ReplacementRequestDetailDto {
   replacementRequestId: number;
   requestReason: string;
   additionalNotes?: string;
-  status: ReplacementRequestStatus;
+  status: string;
   requestDate: string;
   reviewDate?: string;
   reviewNotes?: string;
   completionDate?: string;
-  equipmentType: EquipmentType;
-  equipmentName: string;
-
-  customerId?: number;
+  equipmentType: string;
+  customerId: number;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
-
   assignedStaffId?: number;
   assignedStaffName?: string;
-
   hotPotInventoryId?: number;
   hotPotSeriesNumber?: string;
   hotPotName?: string;
-
   utensilId?: number;
   utensilName?: string;
   utensilType?: string;
@@ -65,26 +60,8 @@ export interface AssignStaffDto {
   staffId: number;
 }
 
-export interface NotifyCustomerRequest {
-  customerId: number;
-  conditionLogId: number;
-  message: string;
-  estimatedResolutionTime: Date;
-}
-
-export interface ReplacementDashboardDto {
-  totalRequests: number;
-  pendingRequests: number;
-  approvedRequests: number;
-  inProgressRequests: number;
-  completedRequests: number;
-  rejectedRequests: number;
-  cancelledRequests: number;
-
-  hotPotRequests: number;
-  utensilRequests: number;
-
-  recentRequests: ReplacementRequestSummaryDto[];
+export interface CompleteReplacementDto {
+  completionNotes: string;
 }
 
 export interface ApiResponse<T> {

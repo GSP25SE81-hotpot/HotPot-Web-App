@@ -7,12 +7,12 @@ export interface RentOrderDetail {
   equipmentName: string;
   rentalStartDate: string;
   expectedReturnDate: string;
-  actualReturnDate: string | null;
+  actualReturnDate?: string;
   status: string;
   customerName: string;
   customerAddress: string;
   customerPhone: string;
-  notes: string;
+  notes?: string;
 }
 
 export interface StaffPickupAssignmentDto {
@@ -42,7 +42,7 @@ export interface UpdateRentOrderDetailRequest {
 }
 
 export interface PagedResult<T> {
-  items: T;
+  items: T[];
   totalCount: number;
   pageNumber: number;
   pageSize: number;

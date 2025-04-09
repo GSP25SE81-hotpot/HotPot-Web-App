@@ -49,6 +49,26 @@ const adminIngredientsAPI = {
       },
     });
   },
+
+  updateIngredients: (id: any, params?: any) => {
+    const url = "/admin/ingredients/id";
+    const newUrl = url.replace("id", id);
+    return axiosClient.put(newUrl, params, {
+      paramsSerializer: {
+        indexes: null, // by default: false
+      },
+    });
+  },
+
+  removeIngredients: (id: any) => {
+    const url = "/admin/ingredients/id";
+    const newUrl = url.replace("id", id);
+    return axiosClient.delete(newUrl, {
+      paramsSerializer: {
+        indexes: null, // by default: false
+      },
+    });
+  },
 };
 
 export default adminIngredientsAPI;

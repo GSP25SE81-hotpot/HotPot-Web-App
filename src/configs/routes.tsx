@@ -52,10 +52,13 @@ export const staffRoutes = {
   checkDeviceAfterReturn: "/check-device-after-return",
   orderHistory: "/order-history",
   assignOrder: "/assign-order",
+  shippingOrder: "/shipping",
   proofOfDelivery: "/proof-of-delivery",
   rentalDetail: "/staff/rentals/:id",
   recordReturn: "/staff/rentals/record-return",
   pickupRental: "/pickup-rental",
+  staffMyAssignment: "/staff-assignment",
+  staffMyAssignmentDetail: "/staff-assignment/:orderId/:assignmentId",
   pickupReplacement: "/pickup-replacement",
   replacementDetail: "/replacements/:id",
 };

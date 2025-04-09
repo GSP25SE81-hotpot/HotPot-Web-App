@@ -11,6 +11,7 @@ export const Vntext = {
     Users: "Người dùng",
     Settings: "Cài đặt",
     Feedback: "Đánh giá",
+    shippingList: "Danh sách giao hàng",
   },
   CreateCombo: {
     hotpotName: "Tên món lẩu",

@@ -17,32 +17,36 @@ const TableMaintenanceHotpot = () => {
     setSelectedData(row);
   };
 
+  const getListMaintenance = async () => {
+    try {
+      const res: any = await adminMaintenanceAPI.getListMaintenance({
+        pageNumber: page + 1,
+        pageSize: size,
+        ascending: "true",
+        sortBy: "status",
+      });
+
+      setDataCombo(res?.data?.items || []);
+      setTotal(res?.data?.totalCount);
+    } catch (error: any) {
+      console.error("Error fetching ingredients:", error?.message);
+    }
+  };
   // Fetch ingredients data with pagination
   useEffect(() => {
-    const getListCombo = async () => {
-      try {
-        const res: any = await adminMaintenanceAPI.getListMaintenance({
-          pageNumber: page + 1, // API expects 1-based index
-          pageSize: size,
-        });
-
-        setDataCombo(res?.data?.items || []);
-        setTotal(res?.data?.totalCount);
-      } catch (error: any) {
-        console.error("Error fetching ingredients:", error?.message);
-      }
-    };
-
-    getListCombo();
+    getListMaintenance();
   }, [page, size]);
 
+  const UpdateStatus = () => {
+    getListMaintenance();
+  };
   const tableHeader = [
     {
       id: "hotPotInventorySeriesNumber",
       label: "Số hiệu nồi",
       align: "center",
     },
-    { id: "loggedDate", label: "Ngày tạo", align: "center" },
+    { id: "loggedDate", label: "Ngày tạo", align: "center", format: "date" },
     { id: "name", label: "Tiêu đề", align: "center" },
     {
       id: "statusName",
@@ -75,6 +79,7 @@ const TableMaintenanceHotpot = () => {
           <MenuActionTableHotpotDetail
             hotpotData={selectedData}
             onOpenDetail={selecteData}
+            onFetch={UpdateStatus}
           />
         }
         size={size}

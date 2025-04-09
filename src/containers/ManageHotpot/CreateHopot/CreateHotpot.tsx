@@ -72,14 +72,9 @@ const CreateHotpot: React.FC = () => {
   } = methods;
   const values = watch();
 
-  const { errors } = methods.formState;
-
-  console.log(errors);
-
   const onSubmit = async (values: CreateHotPotSchema) => {
     try {
-      const res = await adminHotpot.createHotpot(values);
-      console.log(res);
+      await adminHotpot.createHotpot(values);
 
       toast.success("Thêm lẩu mới thành công");
       navigate(config.adminRoutes.hotpotType);

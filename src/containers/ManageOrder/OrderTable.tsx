@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { IOrder } from "../../types/order";
@@ -57,7 +56,6 @@ const OrderTable = () => {
     { id: "notes", label: "Ghi chú", align: "center" },
     { id: "createdAt", label: "Đặt lúc", align: "center", format: "date" },
     { id: "totalPrice", label: "Tổng tiền", align: "center" },
-    { id: "totalDeposit", label: "Đã cọc", align: "center" },
     { id: "status", label: "Trạng thái", align: "center", format: "status" },
   ];
 

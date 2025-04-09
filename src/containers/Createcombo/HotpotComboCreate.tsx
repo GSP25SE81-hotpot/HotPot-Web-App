@@ -32,6 +32,8 @@ import styles from "./HotpotComboCreate.module.scss";
 import classNames from "classnames/bind";
 import IngredientsSelectorModal from "./ModalCombo/IngredientsSelectorModal";
 import adminComboAPI from "../../api/Services/adminComboAPI";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
 
 const cx = classNames.bind(styles);
 const LabelStyle = styled(Typography)(({ theme }) => ({
@@ -46,6 +48,7 @@ const HotpotComboCreate: React.FC = () => {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [ingredients, setIngredients] = useState<any[]>([]);
   const [broth, setBroth] = useState<any[]>([]);
+  const navigate = useNavigate();
 
   //meat modal
   const handleOpenModal = () => {
@@ -56,7 +59,7 @@ const HotpotComboCreate: React.FC = () => {
     const updatedIngredients = selectedMeats.map((ingredient) => ({
       ingredientId: ingredient.ingredientId || 0,
       name: ingredient.name || "",
-      quantity: ingredient.quantity || 1,
+      quantity: 0,
       measurementUnit: ingredient.measurementUnit || "g",
     }));
 
@@ -114,14 +117,9 @@ const HotpotComboCreate: React.FC = () => {
     formState: { isSubmitting },
   } = methods;
 
-  const { errors } = methods.formState;
-  console.log("Validation errors:", errors);
-
   const values = watch();
 
   const onSubmit = async (values: CreateHotPotFormSchema) => {
-    console.log("Form submitted", values);
-
     const prepareParams = {
       ...values,
       tutorialVideo: {
@@ -135,9 +133,11 @@ const HotpotComboCreate: React.FC = () => {
       })),
     };
     try {
-      console.log(" submitted", prepareParams);
-      const res = await adminComboAPI.CreateAdminCombo(prepareParams);
-      console.log(res);
+      await adminComboAPI.CreateAdminCombo(prepareParams);
+
+      toast.success("Tạo combo mới thành công");
+
+      navigate(config.adminRoutes.tableHotPotCombo);
     } catch (error) {
       console.error(error);
     }

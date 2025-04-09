@@ -16,12 +16,14 @@ interface MaintenanceProps {
   open: boolean;
   handleCloseModal: VoidFunction;
   hotpotData: any;
+  onFetch?: () => void;
 }
 
 const MaintenanceHotpotTableModal: React.FC<MaintenanceProps> = ({
   open,
   handleCloseModal,
   hotpotData,
+  onFetch,
 }) => {
   const [data, setData] = useState<any>();
   const [dataLog, setDataLog] = useState<any[]>([]);
@@ -34,8 +36,6 @@ const MaintenanceHotpotTableModal: React.FC<MaintenanceProps> = ({
   const selecteData = (row: any) => {
     setSelectedData(row);
   };
-
-  console.log(hotpotData);
 
   useEffect(() => {
     const fetchMaintenance = async () => {
@@ -114,6 +114,7 @@ const MaintenanceHotpotTableModal: React.FC<MaintenanceProps> = ({
               <MenuActionTableMaintenanceDetail
                 hotpotData={selectedData}
                 onOpenDetail={selecteData}
+                onFetch={onFetch}
               />
             }
             size={size}

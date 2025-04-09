@@ -2,6 +2,7 @@
 import BlockIcon from "@mui/icons-material/Block";
 import EditIcon from "@mui/icons-material/Edit";
 import InfoIcon from "@mui/icons-material/Info";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
@@ -10,12 +11,15 @@ import * as React from "react";
 import DetailPopup from "../../../containers/ManageUser/Popup/DetailPopup";
 import UpdatePopup from "../../../containers/ManageUser/Popup/UpdatePopup";
 import DeleteUser from "../../../containers/ManageUser/Popup/DeleteUser";
+import { UserInterface } from "../../../types/user";
+import AssignWorkSchedule from "../../../containers/ManageUser/Popup/AssignWorkSchedule";
 
 interface MenuActionTableUserProps {
-  userData: any;
+  userData: UserInterface;
   onOpenUpdate?: any;
   onOpenDetail?: any;
   onOpenDelete?: any;
+  onOpenAssign?: any;
   fetchData: () => void;
 }
 
@@ -24,6 +28,7 @@ const MenuActionTableUser: React.FC<MenuActionTableUserProps> = ({
   onOpenUpdate,
   onOpenDetail,
   onOpenDelete,
+  onOpenAssign,
   fetchData,
 }) => {
   console.log("data dc chọn: ", userData);
@@ -31,6 +36,7 @@ const MenuActionTableUser: React.FC<MenuActionTableUserProps> = ({
   const [openDetail, setOpenDetail] = React.useState<boolean>(false);
   const [openUpdate, setOpenUpdate] = React.useState<boolean>(false);
   const [openDelete, setOpenDelete] = React.useState<boolean>(false);
+  const [openAssign, setOpenAssign] = React.useState<boolean>(false);
   const open = Boolean(anchorEl);
 
   //func
@@ -40,6 +46,7 @@ const MenuActionTableUser: React.FC<MenuActionTableUserProps> = ({
   const handleClose = () => {
     setAnchorEl(null);
   };
+
   const handleUpdate = () => {
     onOpenUpdate(userData);
     setOpenUpdate(true);
@@ -48,6 +55,7 @@ const MenuActionTableUser: React.FC<MenuActionTableUserProps> = ({
   const handleCloseUpdate = () => {
     setOpenUpdate(false);
   };
+
   const handleDetail = () => {
     onOpenDetail(userData);
     setOpenDetail(true);
@@ -56,6 +64,7 @@ const MenuActionTableUser: React.FC<MenuActionTableUserProps> = ({
   const handleCloseDetail = () => {
     setOpenDetail(false);
   };
+
   const handleDelete = () => {
     onOpenDelete(userData);
     setOpenDelete(true);
@@ -63,6 +72,15 @@ const MenuActionTableUser: React.FC<MenuActionTableUserProps> = ({
   };
   const handleCloseDelete = () => {
     setOpenDelete(false);
+  };
+
+  const handleAssign = () => {
+    onOpenAssign(userData);
+    setOpenAssign(true);
+    setAnchorEl(null);
+  };
+  const handleCloseAssign = () => {
+    setOpenAssign(false);
   };
 
   return (
@@ -110,10 +128,12 @@ const MenuActionTableUser: React.FC<MenuActionTableUserProps> = ({
           <span>Xóa</span>
         </MenuItem>
 
-        {/* <MenuItem onClick={() => handleStartFeedBack(id)}>
-          <FeedbackOutlinedIcon sx={{ mr: "4px" }} color="success" />
-          <span>Mở phản hồi</span>
-        </MenuItem> */}
+        {userData?.roleName == "Manager" ? (
+          <MenuItem onClick={() => handleAssign()}>
+            <ListAltIcon sx={{ mr: "4px" }} color="success" />
+            <span>Lịch làm việc</span>
+          </MenuItem>
+        ) : null}
       </Menu>
       {openDetail == true && (
         <DetailPopup
@@ -135,6 +155,15 @@ const MenuActionTableUser: React.FC<MenuActionTableUserProps> = ({
         <DeleteUser
           onOpen={openDelete}
           onClose={handleCloseDelete}
+          data={userData}
+          fetchData={fetchData}
+        />
+      )}
+
+      {openAssign == true && (
+        <AssignWorkSchedule
+          onOpen={openAssign}
+          onClose={handleCloseAssign}
           data={userData}
           fetchData={fetchData}
         />

@@ -38,6 +38,7 @@ const AddNewUser: React.FC<addModelProps> = ({ onOpen, onClose }) => {
     address: "",
     roleName: "",
   };
+
   const validationSchema = Yup.object().shape({
     name: Yup.string()
       .trim()
@@ -88,6 +89,7 @@ const AddNewUser: React.FC<addModelProps> = ({ onOpen, onClose }) => {
       console.error(error);
     }
   };
+
   //role list
   const roleList = [
     { id: 1, role: Role.Admin, subName: "Quản trị viên" },

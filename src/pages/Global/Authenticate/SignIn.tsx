@@ -12,7 +12,8 @@ import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import authApi from "../../../api/authAPI";
 import useAuth from "../../../hooks/useAuth";
-import styles from "./authenticate.module.scss";
+import { useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 
 export const AuthenticatePage = () => {
   const navigate = useNavigate();
