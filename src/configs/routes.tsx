@@ -23,6 +23,7 @@ export const managerRoutes = {
 
 export const authRoutes = {
   authenticate: "/auth",
+  notification: "/notifications",
 };
 
 export const adminRoutes = {

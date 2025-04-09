@@ -5,18 +5,14 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import BuildIcon from "@mui/icons-material/Build";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CloseIcon from "@mui/icons-material/Close";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import InfoIcon from "@mui/icons-material/Info";
 import LocalDiningIcon from "@mui/icons-material/LocalDining";
-import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import SendIcon from "@mui/icons-material/Send";
 import SortIcon from "@mui/icons-material/Sort";
-import WarningIcon from "@mui/icons-material/Warning";
 import {
   Alert,
-  Badge,
   Box,
   Button,
   CircularProgress,
@@ -24,15 +20,9 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
-  Drawer,
   FormControl,
   FormControlLabel,
   IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   MenuItem,
   Radio,
   RadioGroup,
@@ -50,14 +40,7 @@ import React, { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import stockService from "../../api/Services/stockService";
-import { useEquipmentNotifications } from "../../hooks/useStockNotification";
-import {
-  EquipmentStatusDto,
-  HotPotInventoryDto,
-  HotpotStatus,
-  NotifyAdminStockRequest,
-  UtensilDto,
-} from "../../types/stock";
+// import { useEquipmentNotifications } from "../../hooks/useStockNotification";
 import {
   ConditionChip,
   EmptyStateContainer,
@@ -77,6 +60,13 @@ import {
   StatusChip,
   StyledCardContent,
 } from "../../components/manager/styles/EquipmentAvailabilityStyles";
+import {
+  EquipmentStatusDto,
+  HotPotInventoryDto,
+  HotpotStatus,
+  NotifyAdminStockRequest,
+  UtensilDto,
+} from "../../types/stock";
 
 // Combined equipment interface for both hotpots and utensils
 interface Equipment {
@@ -236,14 +226,14 @@ const EquipmentAvailability: React.FC = () => {
   };
 
   // Use our custom hook for equipment notifications
-  const {
-    notifications,
-    unreadCount,
-    markAsRead,
-    markAllAsRead,
-    clearNotifications,
-    addNotification,
-  } = useEquipmentNotifications();
+  // const {
+  //   notifications,
+  //   unreadCount,
+  //   markAsRead,
+  //   markAllAsRead,
+  //   clearNotifications,
+  //   addNotification,
+  // } = useEquipmentNotifications();
 
   // Fetch equipment data
   useEffect(() => {
@@ -451,13 +441,13 @@ const EquipmentAvailability: React.FC = () => {
           severity: "success",
         });
         // Add to local notifications
-        addNotification({
-          type: "StatusChange",
-          equipmentType: selectedEquipment.type,
-          equipmentName: selectedEquipment.name,
-          message: `Report sent: ${reportMessage}`,
-          timestamp: new Date(),
-        });
+        // addNotification({
+        //   type: "StatusChange",
+        //   equipmentType: selectedEquipment.type,
+        //   equipmentName: selectedEquipment.name,
+        //   message: `Report sent: ${reportMessage}`,
+        //   timestamp: new Date(),
+        // });
         setReportDialogOpen(false);
       } catch (error) {
         console.error("Error sending report:", error);
@@ -609,9 +599,9 @@ const EquipmentAvailability: React.FC = () => {
                   borderRadius: "50%",
                 }}
               >
-                <Badge badgeContent={unreadCount} color="error">
+                {/* <Badge badgeContent={unreadCount} color="error">
                   <NotificationsIcon />
-                </Badge>
+                </Badge> */}
               </IconButton>
             </Stack>
           </Stack>
@@ -1141,7 +1131,7 @@ const EquipmentAvailability: React.FC = () => {
       </Dialog>
 
       {/* Notifications Drawer */}
-      <Drawer
+      {/* <Drawer
         anchor="right"
         open={notificationsDrawerOpen}
         onClose={() => setNotificationsDrawerOpen(false)}
@@ -1266,7 +1256,7 @@ const EquipmentAvailability: React.FC = () => {
             </List>
           )}
         </Box>
-      </Drawer>
+      </Drawer> */}
 
       {/* Notification Snackbar */}
       <Snackbar

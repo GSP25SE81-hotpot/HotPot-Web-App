@@ -53,6 +53,7 @@ import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
 import { PickupReplacementPage } from "../pages/Staff/PickupReplacement/PickupReplacementPage";
 import { ReplacementDetailPage } from "../pages/Staff/PickupReplacement/ReplacementDetailPage";
 import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliveryPage";
+import NotificationsPage from "../pages/Global/Notification/NotificationsPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -62,7 +63,11 @@ const AppRoute: React.FC = () => {
         path={config.managerRoutes.home}
         element={<AuthenticatePage />}
       />
-
+      <Route
+        key={"Notification"}
+        path={config.authRoutes.notification}
+        element={<NotificationsPage />}
+      />
       <Route key="layoutManager" element={<ManagerLayout />}>
         <Route
           path={config.managerRoutes.manageEquipmentStock}

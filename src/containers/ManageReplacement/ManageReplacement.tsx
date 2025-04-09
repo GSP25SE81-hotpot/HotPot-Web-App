@@ -11,6 +11,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   InputAdornment,
   MenuItem,
   Paper,
@@ -24,19 +25,33 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
-  TextField,
   Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { IconButton } from "@mui/material";
-import { formatDate } from "../../utils/replacementUtils";
-import { alpha, styled } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 import replacementService from "../../api/Services/replacementService";
 import staffService from "../../api/Services/staffService";
-import { equipmentHubService } from "../../api/Services/hubServices";
+import { formatDate } from "../../utils/replacementUtils";
+// Remove the direct import of equipmentHubService
+// import { equipmentHubService } from "../../api/Services/hubServices";
+import {
+  FilterButton,
+  StyledChip,
+  StyledContainer,
+  StyledFormControl,
+  StyledPaper,
+  StyledTable,
+} from "../../components/StyledComponents";
+import {
+  DialogHeader,
+  LoadingOverlay,
+  NoActionsMessage,
+  NoResultsMessage,
+  PageTitle,
+  SearchField,
+} from "../../components/manager/styles/manageReplacementStyles";
 import {
   AssignStaffDto,
   NotificationState,
@@ -55,76 +70,8 @@ import EquipmentInfo from "./replacement/EquipmentInfo";
 import MobileRequestCard from "./replacement/MobileRequestCard";
 import NotesInfo from "./replacement/NotesInfo";
 import ReviewRequest from "./replacement/ReviewRequest";
-import {
-  FilterButton,
-  StyledChip,
-  StyledContainer,
-  StyledFormControl,
-  StyledPaper,
-  StyledTable,
-} from "../../components/StyledComponents";
-import useAuth from "../../hooks/useAuth";
-
-// Styled components
-const PageTitle = styled(Typography)(({ theme }) => ({
-  fontSize: theme.typography.h4.fontSize,
-  fontWeight: theme.typography.fontWeightBold,
-}));
-
-const SearchField = styled(TextField)(({ theme }) => ({
-  flexGrow: 1,
-  "& .MuiOutlinedInput-root": {
-    borderRadius: theme.shape.borderRadius * 3,
-  },
-}));
-
-const LiveIndicator = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  color: theme.palette.success.main,
-  backgroundColor: alpha(theme.palette.success.main, 0.1),
-  padding: `${theme.spacing(0.5)} ${theme.spacing(2)}`,
-  borderRadius: theme.shape.borderRadius * 2,
-}));
-
-const LiveDot = styled(Box)(({ theme }) => ({
-  width: 8,
-  height: 8,
-  borderRadius: "50%",
-  backgroundColor: theme.palette.success.main,
-  marginRight: theme.spacing(1),
-}));
-
-const NoResultsMessage = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  padding: theme.spacing(3),
-  textAlign: "center",
-}));
-
-const DialogHeader = styled(Stack)({
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-});
-
-const LoadingOverlay = styled(Box)(() => ({
-  position: "absolute",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  backgroundColor: alpha("#fff", 0.7),
-  zIndex: 1,
-}));
-
-const NoActionsMessage = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(2),
-  borderRadius: theme.shape.borderRadius * 2,
-  backgroundColor: alpha(theme.palette.info.light, 0.1),
-}));
+// Import the notification context
+// import { useNotificationContext } from "../../context/NotificationContext";
 
 // Improved getStatusText function with better type handling
 const getStatusText = (
@@ -134,11 +81,9 @@ const getStatusText = (
   if (status === null || status === undefined || status === "") {
     return "Tất cả trạng thái";
   }
-
   // Convert string to number if needed
   const statusValue =
     typeof status === "string" ? parseInt(status, 10) : status;
-
   // Use a switch statement instead of statusTextMap
   switch (statusValue) {
     case ReplacementRequestStatus.Pending:
@@ -161,7 +106,10 @@ const getStatusText = (
 const ManageReplacement: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const { auth } = useAuth(); // Lấy thông tin người dùng hiện tại
+
+  // Use the notification context instead of direct hub connection
+  // const { isConnected, equipmentAlerts, statusAlerts, equipmentUpdates } =
+  //   useNotificationContext();
 
   // Trạng thái
   const [requests, setRequests] = useState<ReplacementRequestSummaryDto[]>([]);
@@ -187,7 +135,6 @@ const ManageReplacement: React.FC = () => {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
-  const [hubConnected, setHubConnected] = useState(false);
 
   // Trạng thái biểu mẫu
   const [reviewNotes, setReviewNotes] = useState("");
@@ -199,52 +146,29 @@ const ManageReplacement: React.FC = () => {
     (value) => typeof value === "number"
   ) as ReplacementRequestStatus[];
 
-  // Kết nối với SignalR hub
-  useEffect(() => {
-    const connectToHub = async () => {
-      if (!auth?.user?.id) return;
-      try {
-        await equipmentHubService.connect();
-        setHubConnected(true);
-        // Đăng ký trình xử lý sự kiện cho cập nhật thời gian thực
-        equipmentHubService.onReceiveReplacementReview((id, isApproved) => {
-          const status = isApproved ? "đã phê duyệt" : "đã từ chối";
-          setNotification({
-            open: true,
-            message: `Yêu cầu thay thế #${id} đã được ${status}`,
-            severity: "info",
-          });
-          fetchData(); // Làm mới dữ liệu
-        });
-        equipmentHubService.onReceiveAssignmentUpdate((id, equipmentName) => {
-          setNotification({
-            open: true,
-            message: `Đã phân công nhân viên cho yêu cầu thay thế #${id} cho ${equipmentName}`,
-            severity: "info",
-          });
-          fetchData(); // Làm mới dữ liệu
-        });
-        equipmentHubService.onReceiveReplacementUpdate(
-          (id, equipmentName, status) => {
-            setNotification({
-              open: true,
-              message: `Yêu cầu thay thế #${id} cho ${equipmentName} hiện đang ${getStatusText(
-                status as unknown as ReplacementRequestStatus
-              )}`,
-              severity: "info",
-            });
-            fetchData(); // Làm mới dữ liệu
-          }
-        );
-      } catch (error) {
-        console.error("Lỗi kết nối đến SignalR hub:", error);
-      }
-    };
-    connectToHub();
-    return () => {
-      equipmentHubService.disconnect();
-    };
-  }, [auth]);
+  // Listen for equipment updates from the notification context
+  // useEffect(() => {
+  //   // When we receive equipment updates, refresh the data
+  //   if (equipmentUpdates.length > 0) {
+  //     fetchData();
+  //   }
+  // }, [equipmentUpdates]);
+
+  // // Listen for status alerts from the notification context
+  // useEffect(() => {
+  //   // When we receive status alerts, refresh the data
+  //   if (statusAlerts.length > 0) {
+  //     fetchData();
+  //   }
+  // }, [statusAlerts]);
+
+  // // Listen for equipment alerts from the notification context
+  // useEffect(() => {
+  //   // When we receive equipment alerts, refresh the data
+  //   if (equipmentAlerts.length > 0) {
+  //     fetchData();
+  //   }
+  // }, [equipmentAlerts]);
 
   // Lấy dữ liệu
   const fetchData = async () => {
@@ -530,14 +454,14 @@ const ManageReplacement: React.FC = () => {
       >
         <PageTitle>Yêu cầu thay thế thiết bị</PageTitle>
         <Stack direction="row" spacing={2}>
-          {hubConnected && (
+          {/* {isConnected && (
             <Tooltip title="Cập nhật thời gian thực đang hoạt động">
               <LiveIndicator>
                 <LiveDot />
                 <Typography variant="body2">Trực tiếp</Typography>
               </LiveIndicator>
             </Tooltip>
-          )}
+          )} */}
           <Tooltip title="Làm mới">
             <FilterButton onClick={fetchData}>
               <RefreshIcon />

@@ -56,21 +56,6 @@ export const allocateStaffForPickup = async (
   }
 };
 
-// Get rental history by utensil
-export const getRentalHistoryByUtensil = async (
-  utensilId: number
-): Promise<RentalHistoryItem[]> => {
-  try {
-    const response = await axiosClient.get<RentalHistoryItem[]>(
-      `${API_URL}/equipment/${utensilId}`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching rental history by utensil:", error);
-    throw error;
-  }
-};
-
 // Get rental history by hotpot
 export const getRentalHistoryByHotpot = async (
   hotpotInventoryId: number
