@@ -131,6 +131,15 @@ export interface CustomerDirectNotificationDto extends GeneralNotificationDto {
 
 // Add the missing types below:
 
+export type NotificationPriority = "high" | "medium" | "low";
+export type NotificationGroup =
+  | "equipment"
+  | "feedback"
+  | "rental"
+  | "replacement"
+  | "schedule"
+  | "system";
+
 // Frontend notification model
 export interface Notification {
   id: number;
@@ -138,6 +147,8 @@ export interface Notification {
   data: any;
   timestamp: Date;
   read: boolean;
+  priority: NotificationPriority;
+  group: NotificationGroup;
 }
 
 // Connection state type
@@ -166,6 +177,10 @@ export interface NotificationContextType {
   clearNotification: (notificationId: number) => void;
   clearAllNotifications: () => void;
   sendNotification: (methodName: string, ...args: any[]) => Promise<boolean>;
+  getNotificationsByGroup: (group: NotificationGroup) => Notification[];
+  getNotificationsByPriority: (
+    priority: NotificationPriority
+  ) => Notification[];
 
   // Specific notification methods
   notifyConditionIssue: (alert: EquipmentAlertDto) => Promise<boolean>;

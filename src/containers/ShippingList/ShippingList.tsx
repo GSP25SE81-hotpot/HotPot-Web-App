@@ -115,29 +115,32 @@ const ShippingList = () => {
                   </TableCell>
                   <TableCell align="left">{row?.orderStatus}</TableCell>
                   <TableCell align="left">
-                    {row?.orderStatus !== "Delivered" && (
-                      <>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          startIcon={<DeliveryDiningIcon />}
-                          onClick={() => handleViewOnMap(row?.deliveryAddress)}
-                        >
-                          Chỉ đường
-                        </Button>
-                        <Button
-                          sx={{
-                            border: "1px solid #4caf50",
-                            color: "#4caf50",
-                            ml: 2,
-                          }}
-                          startIcon={<DoneIcon />}
-                          onClick={() => handleConfirmDelivery(row?.orderID)}
-                        >
-                          Đã giao
-                        </Button>
-                      </>
-                    )}
+                    {row?.orderStatus !== "Delivered" &&
+                      row?.orderStatus !== "Completed" && (
+                        <>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<DeliveryDiningIcon />}
+                            onClick={() =>
+                              handleViewOnMap(row?.deliveryAddress)
+                            }
+                          >
+                            Chỉ đường
+                          </Button>
+                          <Button
+                            sx={{
+                              border: "1px solid #4caf50",
+                              color: "#4caf50",
+                              ml: 2,
+                            }}
+                            startIcon={<DoneIcon />}
+                            onClick={() => handleConfirmDelivery(row?.orderID)}
+                          >
+                            Đã giao
+                          </Button>
+                        </>
+                      )}
                   </TableCell>
                 </TableRow>
               ))}

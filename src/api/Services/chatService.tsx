@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosClient from "../axiosInstance";
+import socketService from "./socketService";
 import {
   ApiResponse,
   AssignManagerRequest,
@@ -11,6 +12,41 @@ import {
 } from "../../types/chat";
 
 export class ChatService {
+  constructor() {
+    // Initialize Socket.IO connection
+    socketService.connect();
+  }
+
+  // Authenticate with Socket.IO
+  public authenticateSocket(userId: number, role: string): void {
+    socketService.authenticate(userId, role);
+  }
+
+  // Register Socket.IO event handlers
+  public onNewChatRequest(callback: (data: any) => void): void {
+    socketService.on("onNewChatRequest", callback);
+  }
+
+  public onChatAccepted(callback: (data: any) => void): void {
+    socketService.on("onChatAccepted", callback);
+  }
+
+  public onChatTaken(callback: (data: any) => void): void {
+    socketService.on("onChatTaken", callback);
+  }
+
+  public onReceiveMessage(callback: (data: ChatMessageDto) => void): void {
+    socketService.on("onReceiveMessage", callback);
+  }
+
+  public onMessageRead(callback: (messageId: number) => void): void {
+    socketService.on("onMessageRead", callback);
+  }
+
+  public onChatEnded(callback: (sessionId: number) => void): void {
+    socketService.on("onChatEnded", callback);
+  }
+
   // Get active chat sessions
   public async getActiveSessions(): Promise<ApiResponse<ChatSessionDto[]>> {
     try {
@@ -44,7 +80,9 @@ export class ChatService {
   // Assign a manager to a chat session
   public async assignManagerToSession(
     sessionId: number,
-    managerId: number
+    managerId: number,
+    managerName: string,
+    customerId: number
   ): Promise<ApiResponse<ChatSessionDto>> {
     try {
       const request: AssignManagerRequest = { managerId };
@@ -52,6 +90,10 @@ export class ChatService {
         `/manager/chat/sessions/${sessionId}/assign`,
         request
       );
+
+      // Notify via Socket.IO
+      socketService.acceptChat(sessionId, managerId, managerName, customerId);
+
       return response;
     } catch (error) {
       console.error("Error assigning manager to session:", error);
@@ -60,7 +102,6 @@ export class ChatService {
   }
 
   // Shared functionality methods
-
   // Get messages for a specific chat session
   public async getSessionMessages(
     sessionId: number,
@@ -114,13 +155,19 @@ export class ChatService {
 
   // End a chat session
   public async endChatSession(
-    sessionId: number
+    sessionId: number,
+    customerId: number,
+    managerId?: number
   ): Promise<ApiResponse<ChatSessionDto>> {
     try {
       const response = await axiosClient.put<any, ApiResponse<ChatSessionDto>>(
         `/manager/chat/sessions/${sessionId}/end`,
         {}
       );
+
+      // Notify via Socket.IO
+      socketService.endChat(sessionId, customerId, managerId);
+
       return response!;
     } catch (error) {
       console.error("Error ending chat session:", error);
@@ -140,6 +187,15 @@ export class ChatService {
         "/manager/chat/messages",
         request
       );
+
+      // Notify via Socket.IO
+      socketService.sendMessage(
+        response.data!.chatMessageId,
+        senderId,
+        receiverId,
+        message
+      );
+
       return response;
     } catch (error) {
       console.error("Error sending message:", error);
@@ -149,13 +205,18 @@ export class ChatService {
 
   // Mark a message as read
   public async markMessageAsRead(
-    messageId: number
+    messageId: number,
+    senderId: number
   ): Promise<ApiResponse<boolean>> {
     try {
       const response = await axiosClient.put<any, ApiResponse<boolean>>(
         `/manager/chat/messages/${messageId}/read`,
         {}
       );
+
+      // Notify via Socket.IO
+      socketService.markMessageAsRead(messageId, senderId);
+
       return response || false;
     } catch (error) {
       console.error("Error marking message as read:", error);
@@ -179,11 +240,11 @@ export class ChatService {
     }
   }
 
-  // Customer-specific methods (these would typically be in a separate service)
-
+  // Customer-specific methods
   // Create a new chat session
   public async createChatSession(
     customerId: number,
+    customerName: string,
     topic: string
   ): Promise<ApiResponse<ChatSessionDto>> {
     try {
@@ -192,6 +253,17 @@ export class ChatService {
         "/customer/chat/sessions",
         request
       );
+
+      // Notify via Socket.IO
+      if (response.data) {
+        socketService.sendNewChatRequest(
+          response.data.chatSessionId,
+          customerId,
+          customerName,
+          topic
+        );
+      }
+
       return response;
     } catch (error) {
       console.error("Error creating chat session:", error);
@@ -199,3 +271,7 @@ export class ChatService {
     }
   }
 }
+
+// Create a singleton instance
+const chatService = new ChatService();
+export default chatService;
