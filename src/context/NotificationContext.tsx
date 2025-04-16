@@ -15,13 +15,9 @@ import {
   Notification,
   NotificationContextType,
   ConnectionState,
-  EquipmentAlertDto,
-  EquipmentStatusDto,
-  StockAlertDto,
-  FeedbackResponseDto,
-  ScheduleUpdateDto,
   NotificationGroup,
   NotificationPriority,
+  GenericNotificationDto,
 } from "../types/notifications";
 import useAuth from "../hooks/useAuth";
 
@@ -121,7 +117,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       hubConnection
         .invoke("RegisterConnection")
         .then(() => {
-          // console.log("Connection registered for user:", auth?.user?.id);
           setRegistrationStatus("registered");
         })
         .catch((err) => {
@@ -137,11 +132,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         if (!auth?.accessToken) {
           throw new Error("No access token available");
         }
-
         await connection.start();
         console.log("SignalR Connected");
         setConnectionState("connected");
-
         if (auth?.user?.id) {
           await connection.invoke("RegisterConnection");
           setRegistrationStatus("registered");
@@ -157,16 +150,14 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
           connectionState,
           timestamp: new Date().toISOString(),
         });
-
         setConnectionState("error");
         setRegistrationStatus("failed");
-
-        handleNotification("Error", {
+        handleNotification({
           type: "Error",
           title: "Connection Error",
           message: errorMessage,
           timestamp: new Date(),
-          severity: "error",
+          data: { severity: "error" },
         });
 
         // Retry connection after delay
@@ -180,133 +171,33 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     [auth]
   );
 
-  // Register all notification handlers
+  // Register the new simplified notification handlers
   useEffect(() => {
     if (!hubConnection) return;
 
-    // Equipment notifications
-    hubConnection.on("ReceiveConditionAlert", (alert: EquipmentAlertDto) => {
-      handleNotification("ConditionAlert", alert);
-    });
-
-    hubConnection.on("ReceiveLowStockAlert", (alert: StockAlertDto) => {
-      handleNotification("LowStockAlert", alert);
-    });
-
+    // Main notification handler for user-specific notifications
     hubConnection.on(
-      "ReceiveStatusChangeAlert",
-      (status: EquipmentStatusDto) => {
-        handleNotification("StatusChange", status);
+      "ReceiveNotification",
+      (notification: GenericNotificationDto) => {
+        handleNotification(notification);
       }
     );
 
-    hubConnection.on("ReceiveStatusUpdate", (statusUpdate: any) => {
-      handleNotification("StatusUpdate", statusUpdate);
-    });
-
-    // Feedback notifications
+    // Role-based notification handler
     hubConnection.on(
-      "ReceiveFeedbackResponse",
-      (response: FeedbackResponseDto) => {
-        handleNotification("FeedbackResponse", response);
+      "ReceiveRoleNotification",
+      (notification: GenericNotificationDto) => {
+        handleNotification(notification);
       }
     );
 
+    // Broadcast notification handler
     hubConnection.on(
-      "ReceiveNewFeedback",
-      (
-        feedbackId: number,
-        customerName: string,
-        feedbackTitle: string,
-        timestamp: Date
-      ) => {
-        handleNotification("NewFeedback", {
-          feedbackId,
-          customerName,
-          feedbackTitle,
-          timestamp,
-        });
+      "ReceiveBroadcastNotification",
+      (notification: GenericNotificationDto) => {
+        handleNotification(notification);
       }
     );
-
-    hubConnection.on(
-      "ReceiveApprovedFeedback",
-      (
-        feedbackId: number,
-        feedbackTitle: string,
-        adminName: string,
-        timestamp: Date
-      ) => {
-        handleNotification("ApprovedFeedback", {
-          feedbackId,
-          feedbackTitle,
-          adminName,
-          timestamp,
-        });
-      }
-    );
-
-    // Schedule notifications
-    hubConnection.on("ReceiveScheduleUpdate", (update: ScheduleUpdateDto) => {
-      handleNotification("ScheduleUpdate", update);
-    });
-
-    hubConnection.on("ReceiveAllScheduleUpdates", () => {
-      handleNotification("AllScheduleUpdates", {
-        message: "All schedules have been updated",
-      });
-    });
-
-    // Resolution notifications
-    hubConnection.on(
-      "ReceiveResolutionUpdate",
-      (
-        conditionLogId: number,
-        status: string,
-        estimatedResolutionTime: Date,
-        message: string
-      ) => {
-        handleNotification("ResolutionUpdate", {
-          conditionLogId,
-          status,
-          estimatedResolutionTime,
-          message,
-        });
-      }
-    );
-
-    hubConnection.on(
-      "ReceiveEquipmentUpdate",
-      (
-        conditionLogId: number,
-        equipmentName: string,
-        status: string,
-        estimatedResolutionTime: Date,
-        message: string
-      ) => {
-        handleNotification("EquipmentUpdate", {
-          conditionLogId,
-          equipmentName,
-          status,
-          estimatedResolutionTime,
-          message,
-        });
-      }
-    );
-
-    // Rental notifications
-    hubConnection.on("ReceiveRentalNotification", (notification: any) => {
-      handleNotification("RentalNotification", notification);
-    });
-
-    // Replacement notifications
-    hubConnection.on("ReceiveReplacementNotification", (notification: any) => {
-      handleNotification("ReplacementNotification", notification);
-    });
-
-    hubConnection.on("ReceiveDirectNotification", (notification: any) => {
-      handleNotification("DirectNotification", notification);
-    });
 
     // Handle reconnection
     hubConnection.onreconnected(() => {
@@ -329,20 +220,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
     return () => {
       // Unregister all handlers when component unmounts
-      hubConnection.off("ReceiveConditionAlert");
-      hubConnection.off("ReceiveLowStockAlert");
-      hubConnection.off("ReceiveStatusChangeAlert");
-      hubConnection.off("ReceiveStatusUpdate");
-      hubConnection.off("ReceiveFeedbackResponse");
-      hubConnection.off("ReceiveNewFeedback");
-      hubConnection.off("ReceiveApprovedFeedback");
-      hubConnection.off("ReceiveScheduleUpdate");
-      hubConnection.off("ReceiveAllScheduleUpdates");
-      hubConnection.off("ReceiveResolutionUpdate");
-      hubConnection.off("ReceiveEquipmentUpdate");
-      hubConnection.off("ReceiveRentalNotification");
-      hubConnection.off("ReceiveReplacementNotification");
-      hubConnection.off("ReceiveDirectNotification");
+      hubConnection.off("ReceiveNotification");
+      hubConnection.off("ReceiveRoleNotification");
+      hubConnection.off("ReceiveBroadcastNotification");
     };
   }, [hubConnection]);
 
@@ -350,46 +230,73 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     if (
       type.includes("Equipment") ||
       type.includes("Stock") ||
-      type.includes("Condition")
+      type.includes("Condition") ||
+      type.includes("Utensil") ||
+      type.includes("HotPot") ||
+      type.includes("Inventory") ||
+      type.includes("OutOfStock") ||
+      type.includes("LowStock")
     ) {
       return "equipment";
     }
     if (type.includes("Feedback")) {
       return "feedback";
     }
-    if (type.includes("Rental")) {
+    if (
+      type.includes("Rental") ||
+      type.includes("Return") ||
+      type.includes("Pickup")
+    ) {
       return "rental";
     }
     if (type.includes("Replacement")) {
       return "replacement";
     }
-    if (type.includes("Schedule")) {
+    if (
+      type.includes("Schedule") ||
+      type.includes("Shift") ||
+      type.includes("WorkDay")
+    ) {
       return "schedule";
     }
     return "system";
   };
 
   const determineNotificationPriority = (
-    type: string,
-    data: any
+    notification: GenericNotificationDto
   ): NotificationPriority => {
+    // Check if priority is explicitly set in the data
+    if (notification.data && notification.data.priority) {
+      const dataPriority = notification.data.priority.toLowerCase();
+      if (
+        dataPriority === "high" ||
+        dataPriority === "medium" ||
+        dataPriority === "low"
+      ) {
+        return dataPriority as NotificationPriority;
+      }
+    }
+
     // High priority for critical equipment issues and urgent matters
     if (
-      type === "ConditionAlert" ||
-      type === "Error" ||
-      data?.status === "critical" ||
-      data?.priority === "high" ||
-      type.includes("Emergency")
+      notification.type === "ConditionIssue" ||
+      notification.type === "Error" ||
+      notification.type === "OutOfStock" ||
+      notification.type === "Emergency" ||
+      notification.type.includes("Critical") ||
+      notification.type.includes("Urgent")
     ) {
       return "high";
     }
 
     // Medium priority for important but not critical notifications
     if (
-      type === "LowStockAlert" ||
-      type.includes("Status") ||
-      type === "NewFeedback" ||
-      type.includes("Resolution")
+      notification.type === "LowStock" ||
+      notification.type.includes("Status") ||
+      notification.type === "FeedbackResponse" ||
+      notification.type === "ReplacementVerified" ||
+      notification.type === "ReplacementCompleted" ||
+      notification.type === "DirectMessage"
     ) {
       return "medium";
     }
@@ -398,22 +305,27 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     return "low";
   };
 
-  const handleNotification = useCallback((type: string, data: any) => {
-    const group = determineNotificationGroup(type);
-    const priority = determineNotificationPriority(type, data);
+  const handleNotification = useCallback(
+    (notification: GenericNotificationDto) => {
+      const group = determineNotificationGroup(notification.type);
+      const priority = determineNotificationPriority(notification);
 
-    const newNotification: Notification = {
-      id: Date.now(),
-      type,
-      data,
-      timestamp: new Date(),
-      read: false,
-      group,
-      priority,
-    };
+      const newNotification: Notification = {
+        id: Date.now(),
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        data: notification.data || {},
+        timestamp: new Date(notification.timestamp),
+        read: false,
+        group,
+        priority,
+      };
 
-    setNotifications((prev) => [newNotification, ...prev]);
-  }, []);
+      setNotifications((prev) => [newNotification, ...prev]);
+    },
+    []
+  );
 
   const getNotificationsByGroup = useCallback(
     (group: NotificationGroup) => {
@@ -474,16 +386,14 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
             userId: auth?.user?.id,
             timestamp: new Date().toISOString(),
           });
-
-          handleNotification("Error", {
+          handleNotification({
             type: "Error",
             title: `Failed to send ${methodName}`,
             message:
               error instanceof Error ? error.message : "Unknown error occurred",
             timestamp: new Date(),
-            severity: "error",
+            data: { severity: "error" },
           });
-
           return false;
         }
       } else {
@@ -498,6 +408,60 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     [hubConnection, connectionState, auth?.user?.id]
   );
 
+  // New simplified notification methods
+  const notifyUser = useCallback(
+    (
+      userId: number,
+      type: string,
+      title: string,
+      message: string,
+      data?: any
+    ) => {
+      return sendNotification(
+        "NotifyUser",
+        userId,
+        type,
+        title,
+        message,
+        data || {}
+      );
+    },
+    [sendNotification]
+  );
+
+  const notifyRole = useCallback(
+    (
+      role: string,
+      type: string,
+      title: string,
+      message: string,
+      data?: any
+    ) => {
+      return sendNotification(
+        "NotifyRole",
+        role,
+        type,
+        title,
+        message,
+        data || {}
+      );
+    },
+    [sendNotification]
+  );
+
+  const notifyBroadcast = useCallback(
+    (type: string, title: string, message: string, data?: any) => {
+      return sendNotification(
+        "NotifyBroadcast",
+        type,
+        title,
+        message,
+        data || {}
+      );
+    },
+    [sendNotification]
+  );
+
   const value: NotificationContextType = {
     notifications,
     connectionState,
@@ -508,69 +472,170 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     sendNotification,
     getNotificationsByGroup,
     getNotificationsByPriority,
-    // Specific notification methods
+
+    // New simplified notification methods
+    notifyUser,
+    notifyRole,
+    notifyBroadcast,
+
+    // Legacy methods mapped to new system for backward compatibility
     notifyConditionIssue: (alert: any) =>
-      sendNotification("NotifyConditionIssue", alert),
+      notifyRole(
+        "Administrators",
+        "ConditionIssue",
+        "New Equipment Condition Issue",
+        `Issue reported for ${alert.equipmentName}: ${alert.issueName}`,
+        {
+          conditionLogId: alert.conditionLogId,
+          equipmentType: alert.equipmentType,
+          equipmentName: alert.equipmentName,
+          issueName: alert.issueName,
+          description: alert.description,
+          scheduleType: alert.scheduleType,
+        }
+      ),
+
     notifyStatusChange: (status: any) =>
-      sendNotification("NotifyStatusChange", status),
-    notifyLowStock: (alert: any) => sendNotification("NotifyLowStock", alert),
-    notifyFeedbackResponse: (userId: any, response: any) =>
-      sendNotification("NotifyFeedbackResponse", userId, response),
+      notifyRole(
+        "Administrators",
+        "EquipmentStatusChange",
+        `${status.equipmentType} Status Changed`,
+        `${status.equipmentName} is now ${
+          status.isAvailable ? "Available" : "Unavailable"
+        }`,
+        {
+          equipmentType: status.equipmentType,
+          equipmentId: status.equipmentId,
+          equipmentName: status.equipmentName,
+          isAvailable: status.isAvailable,
+          reason: status.reason,
+        }
+      ),
+
+    notifyLowStock: (alert: any) =>
+      notifyRole(
+        "InventoryManagers",
+        "LowStock",
+        "Low Stock Alert",
+        `Low stock for ${alert.equipmentName}: ${alert.currentQuantity} remaining (threshold: ${alert.threshold})`,
+        {
+          equipmentType: alert.equipmentType,
+          equipmentName: alert.equipmentName,
+          currentQuantity: alert.currentQuantity,
+          threshold: alert.threshold,
+        }
+      ),
+
+    notifyFeedbackResponse: (userId: number, response: any) =>
+      notifyUser(
+        userId,
+        "FeedbackResponse",
+        "Response to Your Feedback",
+        `A manager has responded to your feedback: ${response.responseMessage}`,
+        {
+          feedbackId: response.feedbackId,
+          responseMessage: response.responseMessage,
+          responderName: response.responderName,
+        }
+      ),
+
     notifyNewFeedback: (
-      feedbackId: any,
-      customerName: any,
-      feedbackTitle: any
+      feedbackId: number,
+      customerName: string,
+      feedbackTitle: string
     ) =>
-      sendNotification(
-        "NotifyNewFeedback",
-        feedbackId,
-        customerName,
-        feedbackTitle
+      notifyRole(
+        "Managers",
+        "NewFeedback",
+        "New Feedback Received",
+        `New feedback from ${customerName}: ${feedbackTitle}`,
+        {
+          feedbackId: feedbackId,
+          customerName: customerName,
+          feedbackTitle: feedbackTitle,
+        }
       ),
+
     notifyFeedbackApproved: (
-      feedbackId: any,
-      adminName: any,
-      feedbackTitle: any
+      feedbackId: number,
+      adminName: string,
+      feedbackTitle: string
     ) =>
-      sendNotification(
-        "NotifyFeedbackApproved",
-        feedbackId,
-        adminName,
-        feedbackTitle
+      notifyRole(
+        "Managers",
+        "FeedbackApproved",
+        "Feedback Approved",
+        `Feedback "${feedbackTitle}" was approved by ${adminName}`,
+        {
+          feedbackId: feedbackId,
+          adminName: adminName,
+          feedbackTitle: feedbackTitle,
+        }
       ),
+
     notifyScheduleUpdate: (update: any) =>
-      sendNotification("NotifyScheduleUpdate", update),
-    notifyAllScheduleUpdates: () =>
-      sendNotification("NotifyAllScheduleUpdates"),
-    sendResolutionUpdate: (
-      conditionLogId: any,
-      status: any,
-      estimatedResolutionTime: any,
-      message: any
-    ) =>
-      sendNotification(
-        "SendResolutionUpdate",
-        conditionLogId,
-        status,
-        estimatedResolutionTime,
-        message
+      notifyUser(
+        update.userId,
+        "ScheduleUpdate",
+        "Schedule Update",
+        `Your work schedule has been updated for ${new Date(
+          update.shiftDate
+        ).toLocaleDateString()}`,
+        {
+          userId: update.userId,
+          shiftDate: update.shiftDate,
+        }
       ),
-    sendCustomerUpdate: (
-      customerId: any,
-      conditionLogId: any,
-      equipmentName: any,
-      status: any,
-      estimatedResolutionTime: any,
-      message: any
+
+    notifyAllScheduleUpdates: () =>
+      notifyRole(
+        "Staff",
+        "ScheduleUpdate",
+        "Schedule Update Available",
+        "The work schedule has been updated. Please check your assignments.",
+        {
+          updateTime: new Date(),
+        }
+      ),
+
+    sendResolutionUpdate: (
+      conditionLogId: number,
+      status: string,
+      estimatedResolutionTime: Date,
+      message: string
     ) =>
-      sendNotification(
-        "SendCustomerUpdate",
+      notifyRole(
+        "Administrators",
+        "ResolutionUpdate",
+        "Resolution Update",
+        `Status update for condition log #${conditionLogId}: ${status}`,
+        {
+          conditionLogId: conditionLogId,
+          status: status,
+          estimatedResolutionTime: estimatedResolutionTime,
+          message: message,
+        }
+      ),
+
+    sendCustomerUpdate: (
+      customerId: number,
+      conditionLogId: number,
+      equipmentName: string,
+      status: string,
+      estimatedResolutionTime: Date,
+      message: string
+    ) =>
+      notifyUser(
         customerId,
-        conditionLogId,
-        equipmentName,
-        status,
-        estimatedResolutionTime,
-        message
+        "EquipmentUpdate",
+        `Update on ${equipmentName}`,
+        message,
+        {
+          conditionLogId: conditionLogId,
+          equipmentName: equipmentName,
+          status: status,
+          estimatedResolutionTime: estimatedResolutionTime,
+        }
       ),
   };
 

@@ -146,7 +146,7 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
 
     // Handle navigation based on notification type
     switch (notification.type) {
-      case "ConditionAlert":
+      case "ConditionIssue":
         navigate(`/equipment/condition/${notification.data.conditionLogId}`);
         break;
       case "FeedbackResponse":
@@ -158,15 +158,21 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
       case "RentalNotification":
         navigate("/rentals");
         break;
-      case "ReplacementNotification":
-        navigate(`/replacements/${notification.data.replacementRequestId}`);
+      case "ReplacementVerified":
+      case "ReplacementCompleted":
+        navigate(`/replacements/${notification.data.RequestId}`);
+        break;
+      case "LowStock":
+        navigate("/inventory");
+        break;
+      case "UnavailableEquipment":
+        navigate("/equipment");
         break;
       // Add more navigation cases as needed
       default:
         // Default action for other notification types
         break;
     }
-
     handleNotificationClose();
   };
 
@@ -179,55 +185,19 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
     markAllAsRead();
   };
 
-  // Get notification message
-  const getNotificationMessage = (notification: Notification): string => {
-    const { type, data } = notification;
-
-    if (data.message) return data.message;
-
-    switch (type) {
-      case "ConditionAlert":
-        return `Issue reported for ${data.equipmentName}: ${data.issueName}`;
-      case "LowStockAlert":
-        return `${data.equipmentName} is running low (${data.currentQuantity}/${data.threshold})`;
-      case "StatusChange":
-        return `${data.equipmentName} is now ${
-          data.isAvailable ? "available" : "unavailable"
-        }`;
-      case "NewFeedback":
-        return `New feedback from ${data.customerName}: ${data.feedbackTitle}`;
-      case "ApprovedFeedback":
-        return `Feedback "${data.feedbackTitle}" approved by ${data.adminName}`;
-      case "ScheduleUpdate":
-        return `Your schedule has been updated for ${new Date(
-          data.shiftDate
-        ).toLocaleDateString()}`;
-      case "ResolutionUpdate":
-        return `Resolution update for issue #${data.conditionLogId}: ${data.status}`;
-      case "EquipmentUpdate":
-        return `Update for ${data.equipmentName}: ${data.status}`;
-      default:
-        return data.title || "New notification";
-    }
-  };
-
   // Format timestamp
   const formatTimestamp = (timestamp: Date): string => {
     const now = new Date();
     const notificationTime = new Date(timestamp);
     const diffMs = now.getTime() - notificationTime.getTime();
     const diffMins = Math.round(diffMs / 60000);
-
     if (diffMins < 1) return "Just now";
     if (diffMins < 60) return `${diffMins} min ago`;
-
     const diffHours = Math.floor(diffMins / 60);
     if (diffHours < 24)
       return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-
     const diffDays = Math.floor(diffHours / 24);
     if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-
     return notificationTime.toLocaleDateString();
   };
 
@@ -250,15 +220,12 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
   // Get filtered notifications
   const getFilteredNotifications = () => {
     let filtered = [...notifications];
-
     if (selectedGroup !== "all") {
       filtered = filtered.filter((n) => n.group === selectedGroup);
     }
-
     if (selectedPriority !== "all") {
       filtered = filtered.filter((n) => n.priority === selectedPriority);
     }
-
     return filtered;
   };
 
@@ -324,7 +291,6 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
             <LogoContainer />
           </Box>
           <Box sx={{ flexGrow: 1 }} />
-
           {/* Connection status indicator */}
           <Box sx={{ mr: 2, display: "flex", alignItems: "center" }}>
             <Chip
@@ -344,7 +310,6 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
               variant="outlined"
             />
           </Box>
-
           {/* Notification section */}
           <Box sx={{ mr: 2 }}>
             <IconButton
@@ -458,7 +423,6 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
                   </Box>
                 </Box>
               </Box>
-
               {/* Notification list */}
               {getFilteredNotifications().length > 0 ? (
                 <>
@@ -492,7 +456,6 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
                             alignSelf: "stretch",
                           }}
                         />
-
                         {/* Notification content */}
                         <Box sx={{ flexGrow: 1 }}>
                           <Box
@@ -512,14 +475,28 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
                                   : "bold",
                               }}
                             >
-                              {getNotificationMessage(notification)}
+                              {notification.title}
                             </Typography>
                           </Box>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {notification.message}
+                          </Typography>
                           <Box
                             sx={{
                               display: "flex",
                               alignItems: "center",
                               gap: 1,
+                              mt: 0.5,
                             }}
                           >
                             <Typography
@@ -545,7 +522,6 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
                             </Typography>
                           </Box>
                         </Box>
-
                         {!notification.read && (
                           <Box
                             sx={{
@@ -588,7 +564,6 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
               )}
             </Menu>
           </Box>
-
           {/* User profile section */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Chip
