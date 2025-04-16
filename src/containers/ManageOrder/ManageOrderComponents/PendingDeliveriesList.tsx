@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 // src/pages/OrderManagement/components/PendingDeliveriesList.tsx
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ClearIcon from "@mui/icons-material/Clear";
 import InfoIcon from "@mui/icons-material/Info";
 import SearchIcon from "@mui/icons-material/Search";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
 import {
   Alert,
   Box,
@@ -24,36 +27,60 @@ import {
   TableSortLabel,
   TextField,
   Tooltip,
+  Typography,
+  Chip,
   alpha,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { orderManagementService } from "../../../api/Services/orderManagementService";
 import {
   DeliveryStatusUpdateRequest,
   PendingDeliveryDTO,
   ShippingOrderQueryParams,
-  orderManagementService,
-} from "../../../api/Services/orderManagementService";
+  VehicleType,
+} from "../../../types/orderManagement";
 import {
   ActionsContainer,
   CustomerName,
   CustomerPhone,
-
   EmptyStateContainer,
   EmptyStateSubtitle,
   EmptyStateTitle,
   IdCell,
   ListTitle,
   LoadingContainer,
-
   StyledHeaderCell,
   StyledPaper,
-
   StyledTableContainer,
   StyledTableRow,
 } from "../../../components/manager/styles/PendingDeliveriesListStyles";
 import { formatDate } from "../../../utils/formatters";
-import { DialogActionButton, OrdersListContainer, OrderTypeChip } from "../../../components/manager/styles/UnallocatedOrdersListStyles";
+import {
+  DialogActionButton,
+  OrdersListContainer,
+  OrderTypeChip,
+} from "../../../components/manager/styles/UnallocatedOrdersListStyles";
 import { StyledTableCell } from "../../../components/manager/styles/OrdersByStatusListStyles";
+
+// Helper function to get vehicle icon based on type
+const getVehicleIcon = (type?: VehicleType) => {
+  if (type === VehicleType.Car) {
+    return <DirectionsCarIcon fontSize="small" />;
+  } else if (type === VehicleType.Scooter) {
+    return <TwoWheelerIcon fontSize="small" />;
+  }
+  return undefined;
+};
+
+// Helper function to get vehicle type name in Vietnamese
+const getVehicleTypeName = (type?: VehicleType): string => {
+  if (type === VehicleType.Car) {
+    return "Ô tô";
+  } else if (type === VehicleType.Scooter) {
+    return "Xe máy";
+  }
+  return "Không có";
+};
 
 const PendingDeliveriesList: React.FC = () => {
   const [deliveries, setDeliveries] = useState<PendingDeliveryDTO[]>([]);
@@ -68,13 +95,16 @@ const PendingDeliveriesList: React.FC = () => {
     message: "",
     severity: "success" as "success" | "error",
   });
+
   // Pagination state
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+
   // Sorting state
   const [sortBy, setSortBy] = useState<string>("deliverytime");
   const [sortDescending, setSortDescending] = useState(true);
+
   // Search state
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -94,9 +124,11 @@ const PendingDeliveriesList: React.FC = () => {
         searchTerm: searchTerm || undefined,
         isDelivered: false, // Only get pending deliveries
       };
+
       const response = await orderManagementService.getPendingDeliveries(
         queryParams
       );
+
       // Update state with paginated data
       setDeliveries(response.items);
       setTotalCount(response.totalCount);
@@ -158,21 +190,25 @@ const PendingDeliveriesList: React.FC = () => {
   // Handle confirm delivery
   const handleConfirmDelivery = async () => {
     if (!selectedDelivery) return;
+
     try {
       const request: DeliveryStatusUpdateRequest = {
         isDelivered: true,
         notes: deliveryNotes || undefined,
       };
+
       await orderManagementService.updateDeliveryStatus(
         selectedDelivery.shippingOrderId,
         request
       );
+
       // Show success message
       setSnackbar({
         open: true,
         message: `Đơn hàng #${selectedDelivery.orderId} đã được đánh dấu là đã giao thành công`,
         severity: "success",
       });
+
       // Close dialog and refresh list
       setOpenDialog(false);
       fetchDeliveries();
@@ -322,6 +358,7 @@ const PendingDeliveriesList: React.FC = () => {
                       </TableSortLabel>
                     </StyledHeaderCell>
                     <StyledHeaderCell>Địa chỉ</StyledHeaderCell>
+                    <StyledHeaderCell>Phương tiện</StyledHeaderCell>
                     <StyledHeaderCell>Trạng thái</StyledHeaderCell>
                     <StyledHeaderCell>Thao tác</StyledHeaderCell>
                   </TableRow>
@@ -353,6 +390,34 @@ const PendingDeliveriesList: React.FC = () => {
                             {delivery.address || "Không có địa chỉ"}
                           </Box>
                         </Tooltip>
+                      </StyledTableCell>
+                      <StyledTableCell>
+                        {delivery.vehicleInfo ? (
+                          <Tooltip
+                            title={`${delivery.vehicleInfo.vehicleName} - ${delivery.vehicleInfo.licensePlate}`}
+                          >
+                            <Chip
+                              icon={getVehicleIcon(
+                                delivery.vehicleInfo.vehicleType
+                              )}
+                              label={getVehicleTypeName(
+                                delivery.vehicleInfo.vehicleType
+                              )}
+                              size="small"
+                              color={
+                                delivery.vehicleInfo.vehicleType ===
+                                VehicleType.Car
+                                  ? "primary"
+                                  : "secondary"
+                              }
+                              sx={{ fontWeight: 500 }}
+                            />
+                          </Tooltip>
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">
+                            Không có
+                          </Typography>
+                        )}
                       </StyledTableCell>
                       <StyledTableCell>
                         <OrderTypeChip
@@ -432,6 +497,7 @@ const PendingDeliveriesList: React.FC = () => {
           </>
         )}
       </StyledPaper>
+
       {/* Mark as Delivered Dialog */}
       <Dialog
         open={openDialog}
@@ -456,6 +522,25 @@ const PendingDeliveriesList: React.FC = () => {
           Đánh dấu đơn hàng #{selectedDelivery?.orderId} là đã giao
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3, pb: 2 }}>
+          {/* Display vehicle information if available */}
+          {selectedDelivery?.vehicleInfo && (
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ mb: 1, color: "text.secondary" }}
+              >
+                Thông tin phương tiện
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                {getVehicleIcon(selectedDelivery.vehicleInfo.vehicleType)}
+                <Typography variant="body2">
+                  {selectedDelivery.vehicleInfo.vehicleName} -{" "}
+                  {selectedDelivery.vehicleInfo.licensePlate}
+                </Typography>
+              </Box>
+            </Box>
+          )}
+
           <Box sx={{ mt: 1, minWidth: 300 }}>
             <TextField
               label="Ghi chú giao hàng (Tùy chọn)"
@@ -501,6 +586,7 @@ const PendingDeliveriesList: React.FC = () => {
           </DialogActionButton>
         </DialogActions>
       </Dialog>
+
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
@@ -535,7 +621,6 @@ const getStatusTranslation = (status: string): string => {
     Completed: "Hoàn thành",
     Cancelled: "Đã hủy",
     Returning: "Đang trả",
-
     "1": "Đang chờ",
     "2": "Đang xử lý",
     "3": "Đang giao",
@@ -544,7 +629,6 @@ const getStatusTranslation = (status: string): string => {
     "6": "Đã hủy",
     "7": "Đang trả",
   };
-
   return statusMap[status] || status;
 };
 

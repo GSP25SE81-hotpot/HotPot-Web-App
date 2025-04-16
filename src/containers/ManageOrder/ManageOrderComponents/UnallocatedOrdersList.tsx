@@ -3,6 +3,8 @@
 // src/pages/OrderManagement/components/UnallocatedOrdersList.tsx
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
 import {
   Alert,
   Box,
@@ -26,17 +28,25 @@ import {
   TableRow,
   TableSortLabel,
   TextField,
+  Typography,
   alpha,
+  Chip,
+  Divider,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { orderManagementService } from "../../../api/Services/orderManagementService";
 import {
-  AllocateOrderRequest,
+  AllocateOrderWithVehicleRequest,
   OrderQueryParams,
   UnallocatedOrderDTO,
-  orderManagementService,
   OrderStatus,
-} from "../../../api/Services/orderManagementService";
+  OrderSize,
+  VehicleType,
+  OrderSizeDTO,
+} from "../../../types/orderManagement";
+import { VehicleDTO } from "../../../types/vehicle";
 import staffService from "../../../api/Services/staffService";
+import vehicleService from "../../../api/Services/vehicleService";
 import {
   AllocateButton,
   CountBadge,
@@ -85,7 +95,6 @@ const getVietnameseOrderStatusLabel = (status: any): string => {
       return statusMap[statusEnum] || statusEnum;
     }
   }
-
   // If status is a string, use it directly
   if (typeof status === "string") {
     const statusMap: Record<string, string> = {
@@ -99,33 +108,59 @@ const getVietnameseOrderStatusLabel = (status: any): string => {
     };
     return statusMap[status] || status;
   }
-
   // Otherwise, convert to string and return
   return String(status);
+};
+
+// Helper function to translate order size into Vietnamese
+const getVietnameseOrderSizeLabel = (size: OrderSize): string => {
+  const sizeMap: Record<OrderSize, string> = {
+    [OrderSize.Small]: "Nhỏ",
+    [OrderSize.Large]: "Lớn",
+  };
+  return sizeMap[size] || "Không xác định";
+};
+
+// Helper function to translate vehicle type into Vietnamese
+const getVietnameseVehicleTypeLabel = (type: VehicleType): string => {
+  const typeMap: Record<VehicleType, string> = {
+    [VehicleType.Scooter]: "Xe máy",
+    [VehicleType.Car]: "Ô tô",
+  };
+  return typeMap[type] || "Không xác định";
 };
 
 const UnallocatedOrdersList: React.FC = () => {
   const [orders, setOrders] = useState<UnallocatedOrderDTO[]>([]);
   const [staff, setStaff] = useState<StaffAvailabilityDto[]>([]);
+  const [vehicles, setVehicles] = useState<VehicleDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [allocating, setAllocating] = useState(false);
   const [selectedOrder, setSelectedOrder] =
     useState<UnallocatedOrderDTO | null>(null);
   const [selectedStaffId, setSelectedStaffId] = useState<number>(0);
+  const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(
+    null
+  );
+  const [orderSize, setOrderSize] = useState<OrderSizeDTO | null>(null);
+  const [estimatingSize, setEstimatingSize] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success" as "success" | "error",
   });
+
   // Pagination state
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+
   // Sorting state
   const [sortBy, setSortBy] = useState<string>("date");
   const [sortDescending, setSortDescending] = useState(true);
+
   // Search state
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -134,6 +169,7 @@ const UnallocatedOrdersList: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+
       // Prepare query parameters
       const queryParams: OrderQueryParams = {
         pageNumber,
@@ -142,15 +178,13 @@ const UnallocatedOrdersList: React.FC = () => {
         sortDescending,
         searchTerm: searchTerm.trim() || undefined,
       };
-      // Call the API
+
+      // Use the service method to fetch unallocated orders
       const result = await orderManagementService.getUnallocatedOrders(
         queryParams
       );
-      // Update state with the response data
       setOrders(result.items);
       setTotalCount(result.totalCount);
-      // Also fetch staff members for allocation
-      fetchStaffMembers();
     } catch (err) {
       console.error("Error fetching unallocated orders:", err);
       setError(
@@ -172,10 +206,6 @@ const UnallocatedOrdersList: React.FC = () => {
         ? staffData.filter((staff) => staff.isAvailable === true)
         : [];
       setStaff(availableStaff);
-      // Log how many staff members are available
-      // console.log(
-      //   `Tìm thấy ${availableStaff.length} nhân viên khả dụng trong tổng số ${staffData?.length} nhân viên`
-      // );
     } catch (err) {
       console.error("Error fetching staff members:", err);
       setStaff([]);
@@ -188,6 +218,55 @@ const UnallocatedOrdersList: React.FC = () => {
           severity: "error",
         });
       }
+    }
+  };
+
+  // Fetch available vehicles
+  const fetchAvailableVehicles = async () => {
+    try {
+      const vehiclesData = await vehicleService.getAvailableVehicles();
+      setVehicles(vehiclesData);
+    } catch (err) {
+      console.error("Error fetching available vehicles:", err);
+      setVehicles([]);
+      if (openDialog) {
+        setSnackbar({
+          open: true,
+          message:
+            "Không thể tải dữ liệu phương tiện khả dụng. Vui lòng thử lại sau.",
+          severity: "error",
+        });
+      }
+    }
+  };
+
+  // Estimate order size
+  const estimateOrderSize = async (orderId: number) => {
+    try {
+      setEstimatingSize(true);
+      const sizeData = await orderManagementService.estimateOrderSize(orderId);
+      setOrderSize(sizeData);
+
+      // Pre-select a vehicle based on the suggested vehicle type if available
+      if (sizeData.suggestedVehicleType && vehicles.length > 0) {
+        const suggestedVehicle = vehicles.find(
+          (v) => v.type === sizeData.suggestedVehicleType
+        );
+        if (suggestedVehicle) {
+          setSelectedVehicleId(suggestedVehicle.vehicleId);
+        }
+      }
+    } catch (err) {
+      console.error("Error estimating order size:", err);
+      setSnackbar({
+        open: true,
+        message:
+          "Không thể ước tính kích thước đơn hàng. Vui lòng thử lại sau.",
+        severity: "error",
+      });
+      setOrderSize(null);
+    } finally {
+      setEstimatingSize(false);
     }
   };
 
@@ -231,19 +310,37 @@ const UnallocatedOrdersList: React.FC = () => {
     }
   };
 
-  const handleAllocateClick = (order: UnallocatedOrderDTO) => {
+  const handleAllocateClick = async (order: UnallocatedOrderDTO) => {
     setSelectedOrder(order);
     setSelectedStaffId(0);
+    setSelectedVehicleId(null);
+    setOrderSize(null);
+
+    // Fetch staff and vehicles before opening dialog
+    await fetchStaffMembers();
+    await fetchAvailableVehicles();
+
+    // Open dialog and then estimate order size
     setOpenDialog(true);
+
+    // Estimate order size after dialog is open
+    if (order.orderId) {
+      estimateOrderSize(order.orderId);
+    }
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedOrder(null);
+    setOrderSize(null);
   };
 
   const handleStaffChange = (event: SelectChangeEvent<number>) => {
     setSelectedStaffId(Number(event.target.value));
+  };
+
+  const handleVehicleChange = (event: SelectChangeEvent<number>) => {
+    setSelectedVehicleId(Number(event.target.value));
   };
 
   const handleAllocateOrder = async () => {
@@ -255,20 +352,28 @@ const UnallocatedOrdersList: React.FC = () => {
       });
       return;
     }
+
     try {
       setAllocating(true);
-      const request: AllocateOrderRequest = {
+
+      const request: AllocateOrderWithVehicleRequest = {
         orderId: selectedOrder.orderId,
         staffId: selectedStaffId,
+        vehicleId: selectedVehicleId || undefined,
       };
-      await orderManagementService.allocateOrderToStaff(request);
+
+      // Use the new method that supports vehicle allocation
+      await orderManagementService.allocateOrderToStaffWithVehicle(request);
+
       // Refresh the data after allocation
       fetchData();
+
       setSnackbar({
         open: true,
         message: `Đơn hàng #${selectedOrder.orderCode} đã được phân công thành công`,
         severity: "success",
       });
+
       handleCloseDialog();
     } catch (err) {
       console.error("Error allocating order:", err);
@@ -286,6 +391,23 @@ const UnallocatedOrdersList: React.FC = () => {
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
+  };
+
+  // Get filtered vehicles based on order size
+  const getFilteredVehicles = () => {
+    if (!orderSize) return vehicles;
+
+    return vehicles.filter((vehicle) => {
+      // For small orders, both scooters and cars are fine
+      if (orderSize.size === OrderSize.Small) return true;
+
+      // For large orders, only cars are suitable
+      if (orderSize.size === OrderSize.Large) {
+        return vehicle.type === VehicleType.Car;
+      }
+
+      return true;
+    });
   };
 
   if (loading && orders.length === 0) {
@@ -482,7 +604,8 @@ const UnallocatedOrdersList: React.FC = () => {
           </>
         )}
       </StyledPaper>
-      {/* Allocation Dialog */}
+
+      {/* Enhanced Allocation Dialog with Vehicle Selection */}
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
@@ -492,6 +615,7 @@ const UnallocatedOrdersList: React.FC = () => {
               borderRadius: 3,
               boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
               padding: 1,
+              maxWidth: 450,
             },
           },
         }}
@@ -506,7 +630,75 @@ const UnallocatedOrdersList: React.FC = () => {
           Phân công đơn hàng #{selectedOrder?.orderCode}
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3, pb: 2 }}>
-          <Box sx={{ mt: 1, minWidth: 300 }}>
+          {/* Order Size Information */}
+          <Box sx={{ mb: 3 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ mb: 1, color: "text.secondary" }}
+            >
+              Thông tin đơn hàng
+            </Typography>
+
+            {estimatingSize ? (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <CircularProgress size={20} />
+                <Typography variant="body2">
+                  Đang ước tính kích thước đơn hàng...
+                </Typography>
+              </Box>
+            ) : orderSize ? (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Chip
+                    label={`Kích thước: ${getVietnameseOrderSizeLabel(
+                      orderSize.size
+                    )}`}
+                    size="small"
+                    color={
+                      orderSize.size === OrderSize.Large ? "warning" : "success"
+                    }
+                  />
+                  <Chip
+                    label={`Phương tiện đề xuất: ${getVietnameseVehicleTypeLabel(
+                      orderSize.suggestedVehicleType
+                    )}`}
+                    size="small"
+                    color="info"
+                    icon={
+                      orderSize.suggestedVehicleType === VehicleType.Car ? (
+                        <DirectionsCarIcon fontSize="small" />
+                      ) : (
+                        <TwoWheelerIcon fontSize="small" />
+                      )
+                    }
+                  />
+                </Box>
+                <Typography
+                  variant="body2"
+                  sx={{ color: "text.secondary", mt: 0.5 }}
+                >
+                  {orderSize.size === OrderSize.Large
+                    ? "Đơn hàng lớn, nên sử dụng ô tô để vận chuyển."
+                    : "Đơn hàng nhỏ, có thể sử dụng xe máy để vận chuyển."}
+                </Typography>
+              </Box>
+            ) : (
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                Không thể ước tính kích thước đơn hàng.
+              </Typography>
+            )}
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          {/* Staff Selection */}
+          <Box sx={{ mt: 2, mb: 3 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ mb: 1, color: "text.secondary" }}
+            >
+              Chọn nhân viên giao hàng
+            </Typography>
             <FormControl fullWidth>
               <InputLabel id="staff-select-label">Chọn nhân viên</InputLabel>
               <Select
@@ -567,6 +759,95 @@ const UnallocatedOrdersList: React.FC = () => {
               </Select>
             </FormControl>
           </Box>
+
+          {/* Vehicle Selection */}
+          <Box sx={{ mt: 2 }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ mb: 1, color: "text.secondary" }}
+            >
+              Chọn phương tiện vận chuyển
+            </Typography>
+            <FormControl fullWidth>
+              <InputLabel id="vehicle-select-label">
+                Chọn phương tiện
+              </InputLabel>
+              <Select
+                labelId="vehicle-select-label"
+                value={selectedVehicleId || 0}
+                label="Chọn phương tiện"
+                onChange={handleVehicleChange}
+                sx={{
+                  borderRadius: 2,
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) =>
+                      alpha(theme.palette.primary.main, 0.2),
+                  },
+                }}
+              >
+                <MenuItem value={0}>Không sử dụng phương tiện</MenuItem>
+                {getFilteredVehicles().map((vehicle) => (
+                  <MenuItem
+                    key={vehicle.vehicleId}
+                    value={vehicle.vehicleId}
+                    sx={{
+                      borderRadius: 1,
+                      my: 0.5,
+                      "&:hover": {
+                        backgroundColor: (theme) =>
+                          alpha(theme.palette.primary.main, 0.08),
+                      },
+                      "&.Mui-selected": {
+                        backgroundColor: (theme) =>
+                          alpha(theme.palette.primary.main, 0.12),
+                        "&:hover": {
+                          backgroundColor: (theme) =>
+                            alpha(theme.palette.primary.main, 0.16),
+                        },
+                      },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        width: "100%",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        {vehicle.type === VehicleType.Car ? (
+                          <DirectionsCarIcon fontSize="small" color="primary" />
+                        ) : (
+                          <TwoWheelerIcon fontSize="small" color="secondary" />
+                        )}
+                        <Typography>{vehicle.name}</Typography>
+                      </Box>
+                      <Typography
+                        variant="caption"
+                        sx={{ color: "text.secondary" }}
+                      >
+                        {vehicle.licensePlate}
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {orderSize &&
+              orderSize.size === OrderSize.Large &&
+              selectedVehicleId &&
+              vehicles.find((v) => v.vehicleId === selectedVehicleId)?.type ===
+                VehicleType.Scooter && (
+                <Alert severity="warning" sx={{ mt: 2, borderRadius: 2 }}>
+                  Đơn hàng lớn nên sử dụng ô tô để vận chuyển. Xe máy có thể
+                  không đủ không gian.
+                </Alert>
+              )}
+          </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
           <DialogActionButton
@@ -602,6 +883,7 @@ const UnallocatedOrdersList: React.FC = () => {
           </DialogActionButton>
         </DialogActions>
       </Dialog>
+
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
