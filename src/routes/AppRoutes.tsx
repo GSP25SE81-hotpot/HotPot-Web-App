@@ -55,6 +55,7 @@ import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
 import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
 import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliveryPage";
 import ShippingListPage from "../pages/Staff/Shipping/ShippingListPage";
+import { ManageVehiclePage } from "../pages/Manager/ManageVehicle/ManageVehiclePage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -141,6 +142,10 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.lowStockUtensil}
           element={<LowStockUtensilsPage />}
+        />
+        <Route
+          path={config.managerRoutes.manageVehicle}
+          element={<ManageVehiclePage />}
         />
       </Route>
 

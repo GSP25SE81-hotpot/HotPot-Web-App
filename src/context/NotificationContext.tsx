@@ -90,7 +90,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     }
 
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("https://hpty.vinhuser.one/notificationHub", {
+      // https://localhost:7163
+      // https://hpty.vinhuser.one
+      .withUrl("https://localhost:7163/notificationHub", {
         accessTokenFactory: () => auth.accessToken || "",
       })
       .withAutomaticReconnect()

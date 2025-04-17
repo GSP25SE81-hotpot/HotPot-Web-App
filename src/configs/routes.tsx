@@ -19,6 +19,7 @@ export const managerRoutes = {
   adjustReturnDate: "/adjust-return-date",
   orderDetail: "/orders/:orderId",
   staffAssignment: "staff-assignment",
+  manageVehicle: "/manage-vehicle",
 };
 
 export const authRoutes = {

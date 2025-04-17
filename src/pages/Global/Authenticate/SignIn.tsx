@@ -2,8 +2,10 @@
 // import React from "react";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 // import { toast } from "react-toastify";
 import { FaLock, FaUser } from "react-icons/fa";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import * as Yup from "yup";
 // import authApi from "../../services/api/AuthAPI";
 // import "./SignIn.scss";
@@ -18,6 +20,7 @@ export const AuthenticatePage = () => {
   const navigate = useNavigate();
   const cx = classNames.bind(styles);
   const { setAuth } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
 
   const validationSchema = Yup.object({
     phoneNumber: Yup.string()
@@ -84,13 +87,33 @@ export const AuthenticatePage = () => {
           <div className={cx("input-box")}>
             <input
               id="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               className={cx("input-text")}
               style={{ color: "black" }}
               placeholder="Mật khẩu *"
               {...formik.getFieldProps("password")}
             />
             <FaLock className={cx("icon")} />
+            <span
+              style={{
+                position: "absolute",
+                right: "40px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                cursor: "pointer",
+                zIndex: 2,
+              }}
+              onClick={() => setShowPassword((prev) => !prev)}
+              tabIndex={0}
+              role="button"
+              aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+            >
+              {showPassword ? (
+                <AiOutlineEyeInvisible size={20} />
+              ) : (
+                <AiOutlineEye size={20} />
+              )}
+            </span>
           </div>
           {formik.touched.password && formik.errors.password ? (
             <div className={cx("error")}>{formik.errors.password}</div>

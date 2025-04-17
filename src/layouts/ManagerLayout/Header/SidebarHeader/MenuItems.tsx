@@ -13,6 +13,7 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import PaymentIcon from "@mui/icons-material/Payment";
 import Iconify from "../../../../components/Iconify";
 import config from "../../../../configs";
 import { managerRoutes, staffRoutes } from "../../../../configs/routes";
@@ -103,11 +104,6 @@ export const menuItems: MenuItemLayout[] = [
         icon: <ReceiptIcon />,
         path: "#",
         children: [
-          // {
-          //   label: "Xem đơn hàng được giao",
-          //   icon: <ReceiptIcon />,
-          //   path: staffRoutes.assignOrder,
-          // },
           {
             label: "Quản lý đơn hàng",
             icon: <InventoryIcon />,
@@ -136,6 +132,11 @@ export const menuItems: MenuItemLayout[] = [
             icon: <SwapHorizIcon />,
             path: managerRoutes.manageReplacement,
           },
+          {
+            label: "Quản lý xe",
+            icon: <SwapHorizIcon />,
+            path: managerRoutes.manageVehicle,
+          },
         ],
       },
       //report items
@@ -156,30 +157,11 @@ export const menuItems: MenuItemLayout[] = [
           },
         ],
       },
-      //payments
-      // {
-      //   label: "Thanh toán",
-      //   icon: <EngineeringIcon />,
-      //   path: "#",
-      //   children: [
-      //     {
-      //       label: "Quản lý thanh toán",
-      //       icon: <PaymentIcon />,
-      //       path: staffRoutes.paymentManagement,
-      //     },
-      //   ],
-      // },
-      //customer
       {
         label: "Dịch vụ khách hàng",
         icon: <SupportAgentIcon />,
         path: "#",
         children: [
-          // {
-          //   label: "Nhận lại thiết bị cho thuê",
-          //   icon: <InventoryIcon />,
-          //   path: staffRoutes.checkDeviceAfterReturn,
-          // },
           {
             label: "Quản lý trả thiết bị thuê",
             icon: <InventoryIcon />,
@@ -215,6 +197,11 @@ export const menuItems: MenuItemLayout[] = [
         label: "Công việc",
         path: config.staffRoutes.staffMyAssignment,
         // role: AccessType.ADMIN_ACCESS,
+      },
+      {
+        label: "Quản lý thanh toán",
+        icon: <PaymentIcon />,
+        path: staffRoutes.paymentManagement,
       },
     ],
   },
