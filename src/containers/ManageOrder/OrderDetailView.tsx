@@ -77,7 +77,11 @@ import {
 } from "../../types/orderManagement";
 import { StaffAvailabilityDto } from "../../types/staff";
 import { VehicleDTO } from "../../types/vehicle";
-import { formatCurrency, formatDate } from "../../utils/formatters";
+import {
+  formatCurrency,
+  formatDate,
+  formatDetailDate,
+} from "../../utils/formatters";
 
 // Helper function to get vehicle icon based on type
 const getVehicleIcon = (type?: VehicleType) => {
@@ -517,9 +521,12 @@ const OrderDetailView: React.FC = () => {
             <StyledCardHeader title="Thông tin khách hàng" />
             <Divider />
             <StyledCardContent>
+              <SectionTitle>Tên khách hàng</SectionTitle>
               <CustomerName>
                 {order.userName || "Khách hàng không xác định"}
               </CustomerName>
+              <SectionTitle>Số Điện thoại</SectionTitle>
+              <SectionValue>0{order.userPhone}</SectionValue>
               <SectionTitle>Địa chỉ giao hàng</SectionTitle>
               <SectionValue>{order.address || "Không có địa chỉ"}</SectionValue>
               {order.notes && (
@@ -609,7 +616,7 @@ const OrderDetailView: React.FC = () => {
                   <SectionTitle>Thời gian giao hàng dự kiến</SectionTitle>
                   <SectionValue>
                     {order.shippingInfo.deliveryTime
-                      ? formatDate(order.shippingInfo.deliveryTime)
+                      ? formatDetailDate(order.shippingInfo.deliveryTime)
                       : "Chưa lên lịch"}
                   </SectionValue>
                   {order.shippingInfo.deliveryNotes && (
@@ -658,7 +665,7 @@ const OrderDetailView: React.FC = () => {
         {/* Order Items */}
         <Grid size={{ xs: 12 }}>
           <DetailCard>
-            <StyledCardHeader title="Các mặt hàng trong đơn" />
+            <StyledCardHeader title="Chi tiết đơn hàng" />
             <Divider />
             <StyledCardContent>
               <OrderItemsContainer>

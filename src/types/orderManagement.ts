@@ -110,6 +110,7 @@ export interface OrderDetailDTO {
   updatedAt?: string;
   userId: number;
   userName: string;
+  userPhone: string;
   shippingInfo?: ShippingDetailDTO;
   hasSellItems: boolean;
   hasRentItems: boolean;
