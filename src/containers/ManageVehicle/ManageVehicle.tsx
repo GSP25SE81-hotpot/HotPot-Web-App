@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   Dialog,
@@ -20,15 +20,15 @@ import {
   TableRow,
   TextField,
   Typography,
-  Alert,
 } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import vehicleService from "../../api/Services/vehicleService";
+import { VehicleStatus, VehicleType } from "../../types/orderManagement";
 import {
-  VehicleDTO,
   CreateVehicleRequest,
   UpdateVehicleRequest,
+  VehicleDTO,
 } from "../../types/vehicle";
-import { VehicleType, VehicleStatus } from "../../types/orderManagement";
 
 const defaultForm: CreateVehicleRequest = {
   name: "",
