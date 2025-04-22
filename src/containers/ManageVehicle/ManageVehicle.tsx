@@ -2,20 +2,12 @@
 import {
   Alert,
   Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
   InputLabel,
   MenuItem,
   Select,
   Snackbar,
-  Table,
   TableBody,
   TableCell,
-  TableHead,
   TablePagination,
   TableRow,
   TextField,
@@ -23,6 +15,33 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import vehicleService from "../../api/Services/vehicleService";
+import {
+  ActionButton,
+  AddButton,
+  CancelButton,
+  ControlsContainer,
+  DialogSubtitle,
+  EmptyMessage,
+  EmptyRow,
+  EnhancedDialogContent,
+  EnhancedDialogTitle,
+  FormDivider,
+  FormSection,
+  FormSectionTitle,
+  PageContainer,
+  PageHeader,
+  SaveButton,
+  SortableTableCell,
+  StatusChip,
+  StyledDialog,
+  StyledDialogActions,
+  StyledFormControl,
+  StyledTable,
+  StyledTableRow,
+  StyledTextField,
+  TableHeader,
+  TypeChip,
+} from "../../components/manager/styles/ManageVehicleStyles";
 import { VehicleStatus, VehicleType } from "../../types/orderManagement";
 import {
   CreateVehicleRequest,
@@ -44,8 +63,8 @@ const ManageVehicle: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<string>("status"); // Default sort by status
-  const [sortDescending, setSortDescending] = useState<boolean>(true); // Default descending
+  const [sortBy, setSortBy] = useState<string>("status");
+  const [sortDescending, setSortDescending] = useState<boolean>(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [editVehicle, setEditVehicle] = useState<VehicleDTO | null>(null);
   const [form, setForm] = useState<CreateVehicleRequest>(defaultForm);
@@ -66,11 +85,11 @@ const ManageVehicle: React.FC = () => {
         sortBy,
         sortDescending,
       });
-      setVehicles(res.items || []); // Add fallback to empty array
-      setTotal(res.totalCount || 0); // Add fallback to 0
+      setVehicles(res.items || []);
+      setTotal(res.totalCount || 0);
     } catch (error) {
       console.error("Error fetching vehicles:", error);
-      setVehicles([]); // Reset to empty array on error
+      setVehicles([]);
       setTotal(0);
       setSnackbar({
         open: true,
@@ -175,82 +194,91 @@ const ManageVehicle: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Quản lý phương tiện
-      </Typography>
-      <Box sx={{ display: "flex", mb: 2, gap: 2 }}>
+    <PageContainer>
+      <PageHeader variant="h4">Quản lý phương tiện</PageHeader>
+
+      <ControlsContainer>
         <TextField
           size="small"
           label="Tìm kiếm"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           sx={{ width: 300 }}
+          variant="outlined"
         />
-        <Button variant="contained" onClick={() => handleOpenDialog()}>
+        <AddButton onClick={() => handleOpenDialog()}>
           Thêm phương tiện
-        </Button>
-      </Box>
-      <Table>
-        <TableHead>
+        </AddButton>
+      </ControlsContainer>
+
+      <StyledTable>
+        <TableHeader>
           <TableRow>
             <TableCell>Tên</TableCell>
             <TableCell>Biển số</TableCell>
-            <TableCell
+            <SortableTableCell
               onClick={() => handleSort("type")}
-              sx={{ cursor: "pointer" }}
+              active={sortBy === "type"}
             >
               Loại {sortBy === "type" && (sortDescending ? "▼" : "▲")}
-            </TableCell>
-            <TableCell
+            </SortableTableCell>
+            <SortableTableCell
               onClick={() => handleSort("status")}
-              sx={{ cursor: "pointer" }}
+              active={sortBy === "status"}
             >
               Trạng thái {sortBy === "status" && (sortDescending ? "▼" : "▲")}
-            </TableCell>
+            </SortableTableCell>
             <TableCell>Ghi chú</TableCell>
             <TableCell>Hành động</TableCell>
           </TableRow>
-        </TableHead>
+        </TableHeader>
         <TableBody>
           {vehicles.map((vehicle) => (
-            <TableRow key={vehicle.vehicleId}>
+            <StyledTableRow key={vehicle.vehicleId}>
               <TableCell>{vehicle.name}</TableCell>
               <TableCell>{vehicle.licensePlate}</TableCell>
               <TableCell>
-                {vehicle.type === VehicleType.Car ? "Ô tô" : "Xe máy"}
+                <TypeChip type={vehicle.type}>
+                  {vehicle.type === VehicleType.Car ? "Ô tô" : "Xe máy"}
+                </TypeChip>
               </TableCell>
               <TableCell>
-                {vehicle.status === VehicleStatus.Available
-                  ? "Sẵn sàng"
-                  : vehicle.status === VehicleStatus.InUse
-                  ? "Đang sử dụng"
-                  : "Không khả dụng"}
+                <StatusChip status={vehicle.status}>
+                  {vehicle.status === VehicleStatus.Available
+                    ? "Sẵn sàng"
+                    : vehicle.status === VehicleStatus.InUse
+                    ? "Đang sử dụng"
+                    : "Không khả dụng"}
+                </StatusChip>
               </TableCell>
               <TableCell>{vehicle.notes}</TableCell>
               <TableCell>
-                <Button size="small" onClick={() => handleOpenDialog(vehicle)}>
+                <ActionButton
+                  size="small"
+                  variant="outlined"
+                  onClick={() => handleOpenDialog(vehicle)}
+                >
                   Sửa
-                </Button>
-                <Button
+                </ActionButton>
+                <ActionButton
                   size="small"
                   color="error"
+                  variant="outlined"
                   onClick={() => handleDelete(vehicle.vehicleId)}
                 >
                   Xóa
-                </Button>
+                </ActionButton>
               </TableCell>
-            </TableRow>
+            </StyledTableRow>
           ))}
           {vehicles.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={6} align="center">
-                Không có dữ liệu
-              </TableCell>
-            </TableRow>
+            <EmptyRow>
+              <EmptyMessage colSpan={6}>Không có dữ liệu</EmptyMessage>
+            </EmptyRow>
           )}
         </TableBody>
-      </Table>
+      </StyledTable>
+
       <TablePagination
         component="div"
         count={total}
@@ -262,73 +290,201 @@ const ManageVehicle: React.FC = () => {
           setPage(0);
         }}
         rowsPerPageOptions={[5, 10, 25]}
+        sx={{
+          marginTop: 2,
+          backgroundColor: "white",
+          borderRadius: "8px",
+          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.08)",
+        }}
       />
-      {/* Add/Edit Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>
-          {editVehicle ? "Cập nhật phương tiện" : "Thêm phương tiện"}
-        </DialogTitle>
-        <DialogContent sx={{ minWidth: 350 }}>
-          <TextField
-            margin="dense"
-            label="Tên phương tiện"
-            fullWidth
-            value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          />
-          <TextField
-            margin="dense"
-            label="Biển số"
-            fullWidth
-            value={form.licensePlate}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, licensePlate: e.target.value }))
-            }
-          />
-          <FormControl fullWidth margin="dense">
-            <InputLabel>Loại</InputLabel>
-            <Select
-              value={form.type}
-              label="Loại"
+
+      {/* Enhanced Add/Edit Dialog */}
+      <StyledDialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <EnhancedDialogTitle>
+          <Typography variant="h6" fontWeight={600}>
+            {editVehicle ? "Cập nhật phương tiện" : "Thêm phương tiện"}
+          </Typography>
+          <DialogSubtitle>
+            {editVehicle
+              ? "Chỉnh sửa thông tin phương tiện hiện có"
+              : "Thêm phương tiện mới vào hệ thống"}
+          </DialogSubtitle>
+        </EnhancedDialogTitle>
+
+        <EnhancedDialogContent>
+          <FormSection>
+            <FormSectionTitle>Thông tin cơ bản</FormSectionTitle>
+            <StyledTextField
+              label="Tên phương tiện"
+              fullWidth
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              variant="outlined"
+              placeholder="Nhập tên phương tiện"
+              InputProps={{
+                startAdornment: (
+                  <Box component="span" sx={{ color: "primary.main", mr: 1 }}>
+                    <span role="img" aria-label="vehicle">
+                      🚗
+                    </span>
+                  </Box>
+                ),
+              }}
+            />
+            <StyledTextField
+              label="Biển số"
+              fullWidth
+              value={form.licensePlate}
               onChange={(e) =>
-                setForm((f) => ({ ...f, type: Number(e.target.value) }))
+                setForm((f) => ({ ...f, licensePlate: e.target.value }))
               }
-            >
-              <MenuItem value={VehicleType.Car}>Ô tô</MenuItem>
-              <MenuItem value={VehicleType.Scooter}>Xe máy</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth margin="dense">
-            <InputLabel>Trạng thái</InputLabel>
-            <Select
-              value={form.status}
-              label="Trạng thái"
+              variant="outlined"
+              placeholder="Nhập biển số xe"
+              InputProps={{
+                startAdornment: (
+                  <Box component="span" sx={{ color: "primary.main", mr: 1 }}>
+                    <span role="img" aria-label="license">
+                      🔢
+                    </span>
+                  </Box>
+                ),
+              }}
+            />
+          </FormSection>
+
+          <FormDivider />
+
+          <FormSection>
+            <FormSectionTitle>Phân loại</FormSectionTitle>
+            <StyledFormControl fullWidth variant="outlined">
+              <InputLabel>Loại phương tiện</InputLabel>
+              <Select
+                value={form.type}
+                label="Loại phương tiện"
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, type: Number(e.target.value) }))
+                }
+              >
+                <MenuItem value={VehicleType.Car}>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <span
+                      role="img"
+                      aria-label="car"
+                      style={{ marginRight: 8 }}
+                    >
+                      🚗
+                    </span>
+                    Ô tô
+                  </Box>
+                </MenuItem>
+                <MenuItem value={VehicleType.Scooter}>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <span
+                      role="img"
+                      aria-label="scooter"
+                      style={{ marginRight: 8 }}
+                    >
+                      🛵
+                    </span>
+                    Xe máy
+                  </Box>
+                </MenuItem>
+              </Select>
+            </StyledFormControl>
+
+            <StyledFormControl fullWidth variant="outlined">
+              <InputLabel>Trạng thái</InputLabel>
+              <Select
+                value={form.status}
+                label="Trạng thái"
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, status: Number(e.target.value) }))
+                }
+              >
+                <MenuItem value={VehicleStatus.Available}>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Box
+                      component="span"
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        bgcolor: "success.main",
+                        mr: 1,
+                        display: "inline-block",
+                      }}
+                    />
+                    Sẵn sàng
+                  </Box>
+                </MenuItem>
+                <MenuItem value={VehicleStatus.InUse}>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Box
+                      component="span"
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        bgcolor: "warning.main",
+                        mr: 1,
+                        display: "inline-block",
+                      }}
+                    />
+                    Đang sử dụng
+                  </Box>
+                </MenuItem>
+                <MenuItem value={VehicleStatus.Unavailable}>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Box
+                      component="span"
+                      sx={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: "50%",
+                        bgcolor: "error.main",
+                        mr: 1,
+                        display: "inline-block",
+                      }}
+                    />
+                    Không khả dụng
+                  </Box>
+                </MenuItem>
+              </Select>
+            </StyledFormControl>
+          </FormSection>
+
+          <FormDivider />
+
+          <FormSection>
+            <FormSectionTitle>Thông tin bổ sung</FormSectionTitle>
+            <StyledTextField
+              label="Ghi chú"
+              fullWidth
+              value={form.notes}
               onChange={(e) =>
-                setForm((f) => ({ ...f, status: Number(e.target.value) }))
+                setForm((f) => ({ ...f, notes: e.target.value }))
               }
-            >
-              <MenuItem value={VehicleStatus.Available}>Sẵn sàng</MenuItem>
-              <MenuItem value={VehicleStatus.InUse}>Đang sử dụng</MenuItem>
-              <MenuItem value={VehicleStatus.Unavailable}>
-                Không khả dụng
-              </MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            margin="dense"
-            label="Ghi chú"
-            fullWidth
-            value={form.notes}
-            onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Hủy</Button>
-          <Button variant="contained" onClick={handleSave}>
+              variant="outlined"
+              multiline
+              rows={3}
+              placeholder="Nhập ghi chú về phương tiện (nếu có)"
+            />
+          </FormSection>
+        </EnhancedDialogContent>
+
+        <StyledDialogActions>
+          <CancelButton onClick={handleCloseDialog}>Hủy</CancelButton>
+          <SaveButton onClick={handleSave}>
             {editVehicle ? "Cập nhật" : "Thêm"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </SaveButton>
+        </StyledDialogActions>
+      </StyledDialog>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
@@ -338,11 +494,17 @@ const ManageVehicle: React.FC = () => {
         <Alert
           severity={snackbar.severity}
           onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+          sx={{
+            width: "100%",
+            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+            borderRadius: "8px",
+            fontWeight: 500,
+          }}
         >
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </PageContainer>
   );
 };
 

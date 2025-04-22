@@ -235,7 +235,7 @@ const ChatWithCustomer: React.FC = () => {
       senderId: number,
       receiverId: number,
       message: string,
-      sessionId: number
+      _sessionId: number
     ) => {
       try {
         const response = await chatService.sendMessage(
@@ -505,8 +505,6 @@ const ChatWithCustomer: React.FC = () => {
     [selectedChatId, acceptChat, user?.id]
   );
 
-  // Effects
-  // Mark messages as read when they are viewed
   // Effects
   // Mark messages as read when they are viewed
   useEffect(() => {

@@ -74,6 +74,7 @@ import {
   OrderDetailDTO,
   OrderStatus,
   VehicleType,
+  StaffTaskType,
 } from "../../types/orderManagement";
 import { StaffAvailabilityDto } from "../../types/staff";
 import { VehicleDTO } from "../../types/vehicle";
@@ -125,6 +126,9 @@ const OrderDetailView: React.FC = () => {
   const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(
     null
   );
+  const [selectedTaskType, setSelectedTaskType] = useState<StaffTaskType>(
+    StaffTaskType.Shipping
+  );
   const [isDelivered, setIsDelivered] = useState(false);
   const [deliveryNotes, setDeliveryNotes] = useState("");
   const [deliveryTime, setDeliveryTime] = useState<Date | null>(null);
@@ -142,13 +146,11 @@ const OrderDetailView: React.FC = () => {
       if (!orderId) return;
       try {
         setLoading(true);
-
         // Get order details
         const orderData = await orderManagementService.getOrderWithDetails(
           orderId
         );
         setOrder(orderData);
-
         // Get available staff
         const staffData = await staffService.getAvailableStaff();
         // Check if staffData is an array, if not, convert it to an array
@@ -164,11 +166,9 @@ const OrderDetailView: React.FC = () => {
           // If it's null or undefined, set an empty array
           setStaff([]);
         }
-
         // Get available vehicles
         const vehiclesData = await vehicleService.getAvailableVehicles();
         setVehicles(vehiclesData);
-
         // Initialize form states based on order data
         setNewStatus(orderData.status);
         if (orderData.shippingInfo) {
@@ -182,7 +182,6 @@ const OrderDetailView: React.FC = () => {
           setSelectedStaffId(orderData.shippingInfo.staffId);
           setSelectedVehicleId(orderData.vehicleInfo?.vehicleId || null);
         }
-
         setError(null);
       } catch (err) {
         console.error("Error fetching order details:", err);
@@ -191,7 +190,6 @@ const OrderDetailView: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [orderId]);
 
@@ -246,6 +244,10 @@ const OrderDetailView: React.FC = () => {
     setSelectedVehicleId(Number(event.target.value) || null);
   };
 
+  const handleTaskTypeChange = (event: SelectChangeEvent<number>) => {
+    setSelectedTaskType(Number(event.target.value) as StaffTaskType);
+  };
+
   // Action handlers
   const handleUpdateStatus = async () => {
     if (!order) return;
@@ -285,29 +287,24 @@ const OrderDetailView: React.FC = () => {
       });
       return;
     }
-
     try {
       setUpdating(true);
-
       // Use the new API method that supports vehicle allocation
       const request: AllocateOrderWithVehicleRequest = {
         orderId: Number(order.orderId),
         staffId: selectedStaffId,
+        taskType: selectedTaskType,
         vehicleId: selectedVehicleId || undefined,
       };
-
       const shippingOrder =
         await orderManagementService.allocateOrderToStaffWithVehicle(request);
-
       // Update the order with the new shipping info
       setOrder({ ...order, shippingInfo: shippingOrder });
-
       setSnackbar({
         open: true,
         message: `Đơn hàng đã được phân công cho nhân viên thành công`,
         severity: "success",
       });
-
       handleCloseAllocateDialog();
     } catch (err) {
       console.error("Error allocating order:", err);
@@ -336,7 +333,6 @@ const OrderDetailView: React.FC = () => {
           order.shippingInfo.shippingOrderId,
           request
         );
-
       // Merge the updated delivery status with the existing shipping info
       // instead of replacing the entire object
       const updatedShippingInfo = {
@@ -346,16 +342,13 @@ const OrderDetailView: React.FC = () => {
           updatedDeliveryStatus.deliveryNotes ||
           order.shippingInfo.deliveryNotes,
       };
-
       // Update the order with the merged shipping info
       setOrder({ ...order, shippingInfo: updatedShippingInfo });
-
       setSnackbar({
         open: true,
         message: `Trạng thái giao hàng đã được cập nhật thành công`,
         severity: "success",
       });
-
       handleCloseDeliveryStatusDialog();
     } catch (err) {
       console.error("Error updating delivery status:", err);
@@ -383,23 +376,19 @@ const OrderDetailView: React.FC = () => {
           order.shippingInfo.shippingOrderId,
           request
         );
-
       // Merge the updated delivery time with the existing shipping info
       // instead of replacing the entire object
       const updatedShippingInfo = {
         ...order.shippingInfo,
         deliveryTime: updatedDeliveryTime.deliveryTime,
       };
-
       // Update the order with the merged shipping info
       setOrder({ ...order, shippingInfo: updatedShippingInfo });
-
       setSnackbar({
         open: true,
         message: `Thời gian giao hàng đã được cập nhật thành công`,
         severity: "success",
       });
-
       handleCloseDeliveryTimeDialog();
     } catch (err) {
       console.error("Error updating delivery time:", err);
@@ -514,7 +503,6 @@ const OrderDetailView: React.FC = () => {
             </ActionButtonsContainer>
           </HeaderPaper>
         </Grid>
-
         {/* Customer Information */}
         <Grid size={{ xs: 12, md: 6 }}>
           <DetailCard>
@@ -538,7 +526,6 @@ const OrderDetailView: React.FC = () => {
             </StyledCardContent>
           </DetailCard>
         </Grid>
-
         {/* Shipping Information */}
         <Grid size={{ xs: 12, md: 6 }}>
           <DetailCard>
@@ -570,7 +557,6 @@ const OrderDetailView: React.FC = () => {
                   <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                     {order.shippingInfo.staffName || "Nhân viên không xác định"}
                   </Typography>
-
                   {/* Vehicle Information - New Section */}
                   {order.vehicleInfo && (
                     <>
@@ -603,7 +589,6 @@ const OrderDetailView: React.FC = () => {
                       </Box>
                     </>
                   )}
-
                   <SectionTitle>Trạng thái giao hàng</SectionTitle>
                   <DeliveryChip
                     label={
@@ -660,8 +645,6 @@ const OrderDetailView: React.FC = () => {
             </StyledCardContent>
           </DetailCard>
         </Grid>
-
-        {/* Order Items */}
         {/* Order Items */}
         <Grid size={{ xs: 12 }}>
           <DetailCard>
@@ -715,7 +698,6 @@ const OrderDetailView: React.FC = () => {
                     Không có mặt hàng nào trong đơn hàng này.
                   </Typography>
                 )}
-
                 {/* Display rental information if available */}
                 {order.hasRentItems && order.rentalInfo && (
                   <Box
@@ -753,7 +735,6 @@ const OrderDetailView: React.FC = () => {
                     </Grid>
                   </Box>
                 )}
-
                 {/* Order Summary */}
                 <OrderTotalContainer>
                   <OrderTotal>
@@ -765,7 +746,6 @@ const OrderDetailView: React.FC = () => {
           </DetailCard>
         </Grid>
       </Grid>
-
       {/* Update Status Dialog */}
       <Dialog
         open={openStatusDialog}
@@ -844,8 +824,7 @@ const OrderDetailView: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Allocate Order Dialog - Updated with Vehicle Selection */}
+      {/* Allocate Order Dialog - Updated with Task Type and Vehicle Selection */}
       <Dialog
         open={openAllocateDialog}
         onClose={handleCloseAllocateDialog}
@@ -869,6 +848,29 @@ const OrderDetailView: React.FC = () => {
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3, pb: 2 }}>
           <Box sx={{ mt: 1, minWidth: 300 }}>
+            {/* Task Type Selection - New Section */}
+            <FormControl fullWidth sx={{ mb: 3 }}>
+              <InputLabel id="task-type-select-label">Loại nhiệm vụ</InputLabel>
+              <Select
+                labelId="task-type-select-label"
+                value={selectedTaskType}
+                label="Loại nhiệm vụ"
+                onChange={handleTaskTypeChange}
+                sx={{
+                  borderRadius: 2,
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: (theme) =>
+                      alpha(theme.palette.primary.main, 0.2),
+                  },
+                }}
+              >
+                <MenuItem value={StaffTaskType.Preparation}>
+                  Chuẩn bị đơn hàng
+                </MenuItem>
+                <MenuItem value={StaffTaskType.Shipping}>Giao hàng</MenuItem>
+              </Select>
+            </FormControl>
+
             <FormControl fullWidth sx={{ mb: 3 }}>
               <InputLabel id="staff-select-label">Chọn nhân viên</InputLabel>
               <Select
@@ -895,47 +897,51 @@ const OrderDetailView: React.FC = () => {
               </Select>
             </FormControl>
 
-            {/* Vehicle Selection - New Section */}
-            <FormControl fullWidth>
-              <InputLabel id="vehicle-select-label">
-                Chọn phương tiện (Tùy chọn)
-              </InputLabel>
-              <Select
-                labelId="vehicle-select-label"
-                value={selectedVehicleId || 0}
-                label="Chọn phương tiện (Tùy chọn)"
-                onChange={handleVehicleChange}
-                sx={{
-                  borderRadius: 2,
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: (theme) =>
-                      alpha(theme.palette.primary.main, 0.2),
-                  },
-                }}
-              >
-                <MenuItem value={0}>Không sử dụng phương tiện</MenuItem>
-                {vehicles.map((vehicle) => (
-                  <MenuItem key={vehicle.vehicleId} value={vehicle.vehicleId}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      {getVehicleIcon(vehicle.type)}
-                      <span>
-                        {vehicle.name} - {vehicle.licensePlate}
-                      </span>
-                      <Chip
-                        label={getVehicleTypeName(vehicle.type)}
-                        size="small"
-                        color={
-                          vehicle.type === VehicleType.Car
-                            ? "primary"
-                            : "secondary"
-                        }
-                        sx={{ ml: 1, fontWeight: 500 }}
-                      />
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            {/* Vehicle Selection - Only show for shipping task type */}
+            {selectedTaskType === StaffTaskType.Shipping && (
+              <FormControl fullWidth>
+                <InputLabel id="vehicle-select-label">
+                  Chọn phương tiện (Tùy chọn)
+                </InputLabel>
+                <Select
+                  labelId="vehicle-select-label"
+                  value={selectedVehicleId || 0}
+                  label="Chọn phương tiện (Tùy chọn)"
+                  onChange={handleVehicleChange}
+                  sx={{
+                    borderRadius: 2,
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: (theme) =>
+                        alpha(theme.palette.primary.main, 0.2),
+                    },
+                  }}
+                >
+                  <MenuItem value={0}>Không sử dụng phương tiện</MenuItem>
+                  {vehicles.map((vehicle) => (
+                    <MenuItem key={vehicle.vehicleId} value={vehicle.vehicleId}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        {getVehicleIcon(vehicle.type)}
+                        <span>
+                          {vehicle.name} - {vehicle.licensePlate}
+                        </span>
+                        <Chip
+                          label={getVehicleTypeName(vehicle.type)}
+                          size="small"
+                          color={
+                            vehicle.type === VehicleType.Car
+                              ? "primary"
+                              : "secondary"
+                          }
+                          sx={{ ml: 1, fontWeight: 500 }}
+                        />
+                      </Box>
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
@@ -966,7 +972,6 @@ const OrderDetailView: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* Update Delivery Status Dialog */}
       <Dialog
         open={openDeliveryStatusDialog}
@@ -1007,7 +1012,6 @@ const OrderDetailView: React.FC = () => {
                 </Box>
               </Box>
             )}
-
             <FormControl fullWidth sx={{ mb: 3 }}>
               <InputLabel id="delivery-status-label">
                 Trạng thái giao hàng
@@ -1082,7 +1086,6 @@ const OrderDetailView: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* Update Delivery Time Dialog */}
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <Dialog
@@ -1126,7 +1129,6 @@ const OrderDetailView: React.FC = () => {
                   </Box>
                 </Box>
               )}
-
               <DateTimePicker
                 label="Thời gian giao hàng"
                 value={deliveryTime}
@@ -1177,7 +1179,6 @@ const OrderDetailView: React.FC = () => {
           </DialogActions>
         </Dialog>
       </LocalizationProvider>
-
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}

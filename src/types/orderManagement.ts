@@ -155,11 +155,11 @@ export interface ShippingOrderAllocationDTO {
   orderCode: string;
   staffId: number;
   staffName: string;
-  isDelivered: boolean;
-  createdAt: string;
   vehicleId?: number;
   vehicleName?: string;
   vehicleType?: VehicleType;
+  isDelivered: boolean;
+  createdAt: string;
   orderSize?: OrderSize;
 }
 
@@ -203,6 +203,7 @@ export interface AllocateOrderRequest {
 export interface AllocateOrderWithVehicleRequest {
   orderId: number;
   staffId: number;
+  taskType: StaffTaskType;
   vehicleId?: number;
 }
 
@@ -272,4 +273,36 @@ export interface UnallocatedOrderDTO {
   userName: string;
   hasSellItems: boolean;
   hasRentItems: boolean;
+}
+
+export interface StaffAssignmentRequest {
+  orderId: number;
+  staffId: number;
+  taskType: StaffTaskType;
+  vehicleId?: number;
+}
+
+export interface StaffAssignmentResponse {
+  orderId: number;
+  orderCode: string;
+  staffId: number;
+  staffName: string;
+  status: OrderStatus;
+  assignedAt: string;
+
+  // Shipping-specific properties
+  shippingOrderId?: number;
+  isDelivered?: boolean;
+  vehicleId?: number;
+  vehicleName?: string;
+  vehicleType?: VehicleType;
+  orderSize?: OrderSize;
+
+  // Task type that was performed
+  taskType: StaffTaskType;
+}
+
+export enum StaffTaskType {
+  Preparation = 1,
+  Shipping = 2,
 }

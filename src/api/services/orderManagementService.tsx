@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  AllocateOrderRequest,
+  StaffAssignmentRequest,
+  StaffAssignmentResponse,
   ShippingOrderAllocationDTO,
   ApiResponse,
   AllocateOrderWithVehicleRequest,
@@ -27,13 +28,13 @@ const API_URL = "/manager/order-management";
 
 export const orderManagementService = {
   // Order allocation
-  allocateOrderToStaff: async (
-    request: AllocateOrderRequest
-  ): Promise<ShippingOrderAllocationDTO> => {
+  assignStaffToOrder: async (
+    request: StaffAssignmentRequest
+  ): Promise<StaffAssignmentResponse> => {
     const response = await axiosClient.post<
       any,
-      ApiResponse<ShippingOrderAllocationDTO>
-    >(`${API_URL}/allocate`, request);
+      ApiResponse<StaffAssignmentResponse>
+    >(`${API_URL}/assign-staff`, request);
     return response.data;
   },
 

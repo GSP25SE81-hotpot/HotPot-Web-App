@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ApiResponse } from "../../types/replacement";
 import { StaffAvailabilityDto, StaffDto } from "../../types/staff";
+import { StaffTaskType } from "../../types/orderManagement";
 import axiosClient from "../axiosInstance";
 
 const staffService = {
@@ -54,18 +55,18 @@ const staffService = {
    * Get available staff members
    * @throws {Error} When request fails or unauthorized
    */
-  getAvailableStaff: async (): Promise<StaffAvailabilityDto[]> => {
+  getAvailableStaff: async (
+    taskType?: StaffTaskType
+  ): Promise<StaffAvailabilityDto[]> => {
     try {
       // Add a timeout to the request to prevent hanging
+      const url = taskType
+        ? `/staff/available-staff?taskType=${taskType}`
+        : "/staff/available-staff";
+
       const response = await axiosClient.get<
         ApiResponse<StaffAvailabilityDto[]>
-      >(
-        "/staff/available",
-        { timeout: 10000 } // 10 second timeout
-      );
-
-      // Log the full response for debugging
-      // console.log("Staff API response:", response);
+      >(url, { timeout: 10000 }); // 10 second timeout
 
       // Check if the response has the expected structure
       if (response && response.data && Array.isArray(response.data)) {
@@ -77,21 +78,15 @@ const staffService = {
       ) {
         return response.data.data;
       } else {
-        // console.warn("Unexpected staff API response structure:", response);
-        // Return empty array as fallback
         return [];
       }
     } catch (error: any) {
-      // console.error("Error fetching available staff:", error);
-
       // If this is an authentication error, we might want to refresh the token
       if (error.response && error.response.status === 401) {
-        // You could implement token refresh logic here
-        // console.warn(
-        //   "Authentication error when fetching staff. Token may need refresh."
-        // );
+        console.warn(
+          "Authentication error when fetching staff. Token may need refresh."
+        );
       }
-
       // Return empty array instead of throwing to prevent UI errors
       return [];
     }
