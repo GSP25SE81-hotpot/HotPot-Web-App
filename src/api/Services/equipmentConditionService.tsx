@@ -65,7 +65,6 @@ export interface UpdateConditionStatusRequest {
 // Request to notify administrators
 export interface NotifyAdminRequest {
   conditionLogId: number;
-  equipmentType: string;
   equipmentName: string;
   issueName: string;
   description: string;

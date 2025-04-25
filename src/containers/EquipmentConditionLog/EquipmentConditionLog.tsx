@@ -109,7 +109,6 @@ const EquipmentConditionLog: React.FC = () => {
   const columns: ColumnConfig[] = [
     { field: "damageDeviceId", label: "ID", sortable: true },
     { field: "name", label: "Tên", sortable: false },
-    { field: "equipmentType", label: "Loại thiết bị", sortable: false },
     { field: "equipmentName", label: "Tên thiết bị", sortable: false },
     { field: "loggedDate", label: "Ngày ghi nhận", sortable: true },
     { field: "status", label: "Trạng thái", sortable: true },
@@ -123,12 +122,6 @@ const EquipmentConditionLog: React.FC = () => {
         ...newCondition,
         hotPotInventoryId: undefined,
         utensilId: undefined,
-      });
-    } else if (type === "utensil") {
-      setNewCondition({
-        ...newCondition,
-        utensilId: undefined,
-        hotPotInventoryId: undefined,
       });
     } else {
       setNewCondition({
@@ -254,7 +247,6 @@ const EquipmentConditionLog: React.FC = () => {
       equipmentId:
         (selectedEquipmentType === "hotpot" &&
           !newCondition.hotPotInventoryId) ||
-        (selectedEquipmentType === "utensil" && !newCondition.utensilId) ||
         !selectedEquipmentType,
     };
     setFormErrors(errors);
@@ -345,7 +337,6 @@ const EquipmentConditionLog: React.FC = () => {
       // Tạo yêu cầu thông báo với mô tả được cung cấp
       const notifyRequest: NotifyAdminRequest = {
         conditionLogId: currentNotificationLog.damageDeviceId,
-        equipmentType: currentNotificationLog.equipmentType,
         equipmentName: currentNotificationLog.equipmentName,
         issueName: currentNotificationLog.name,
         description: description, // Sử dụng mô tả từ hộp thoại
@@ -547,7 +538,6 @@ const EquipmentConditionLog: React.FC = () => {
                       <TableRow key={log.damageDeviceId}>
                         <TableCell>{log.damageDeviceId}</TableCell>
                         <TableCell>{log.name}</TableCell>
-                        <TableCell>{log.equipmentType}</TableCell>
                         <TableCell>{log.equipmentName}</TableCell>
                         <TableCell>
                           {new Date(log.loggedDate).toLocaleDateString()}
@@ -677,7 +667,9 @@ const EquipmentConditionLog: React.FC = () => {
                   label="Tên vấn đề"
                   required
                   value={newCondition.name}
-                  onChange={(e: any) => handleInputChange("name", e.target.value)}
+                  onChange={(e: any) =>
+                    handleInputChange("name", e.target.value)
+                  }
                   error={formErrors.name}
                   helperText={formErrors.name ? "Tên vấn đề là bắt buộc" : ""}
                 />
@@ -703,9 +695,7 @@ const EquipmentConditionLog: React.FC = () => {
                     label="Loại thiết bị"
                     onChange={(e) => handleEquipmentTypeChange(e.target.value)}
                   >
-                    <MenuItem value="">Chọn loại</MenuItem>
                     <MenuItem value="hotpot">Nồi lẩu</MenuItem>
-                    <MenuItem value="utensil">Dụng cụ</MenuItem>
                   </Select>
                   {formErrors.equipmentId && (
                     <FormHelperText>
@@ -745,27 +735,6 @@ const EquipmentConditionLog: React.FC = () => {
                     </Select>
                     {formErrors.equipmentId && (
                       <FormHelperText>Vui lòng chọn nồi lẩu</FormHelperText>
-                    )}
-                  </FormControl>
-                ) : selectedEquipmentType === "utensil" ? (
-                  <FormControl fullWidth error={formErrors.equipmentId}>
-                    <InputLabel>Dụng cụ</InputLabel>
-                    <Select
-                      value={newCondition.utensilId || ""}
-                      label="Dụng cụ"
-                      onChange={(e) =>
-                        handleInputChange("utensilId", Number(e.target.value))
-                      }
-                    >
-                      <MenuItem value="">Chọn dụng cụ</MenuItem>
-                      {utensilList.map((item) => (
-                        <MenuItem key={item.utensilId} value={item.utensilId}>
-                          {item.name} (Loại: {item.utensilTypeName})
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {formErrors.equipmentId && (
-                      <FormHelperText>Vui lòng chọn dụng cụ</FormHelperText>
                     )}
                   </FormControl>
                 ) : null}

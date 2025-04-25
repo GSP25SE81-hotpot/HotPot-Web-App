@@ -20,7 +20,7 @@ import { ShippingOrder } from "../../types/shippingOrder";
 import DoneIcon from "@mui/icons-material/Done";
 import DeliveryDiningIcon from "@mui/icons-material/DeliveryDining";
 import useAuth from "../../hooks/useAuth";
-import { OrderStatus } from "../../api/Services/orderManagementService";
+import { OrderStatus } from "../../types/orderManagement";
 import staffGetOrderApi from "../../api/staffGetOrderAPI";
 import { toast } from "react-toastify";
 

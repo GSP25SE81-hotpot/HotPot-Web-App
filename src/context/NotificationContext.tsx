@@ -84,8 +84,11 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
   // Initialize SignalR connection
   useEffect(() => {
-    if (!auth?.accessToken) {
-      console.log("User not authenticated, not connecting to SignalR");
+    // Wait for both accessToken and userId to be available
+    if (!auth?.accessToken || !auth?.user?.id) {
+      console.log(
+        "User not authenticated or userId missing, not connecting to SignalR"
+      );
       return;
     }
 
@@ -106,7 +109,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         connection.stop();
       }
     };
-  }, [auth?.accessToken]);
+  }, [auth?.accessToken, auth?.user?.id]);
 
   // Register connection when user ID becomes available
   useEffect(() => {
@@ -134,14 +137,22 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         if (!auth?.accessToken) {
           throw new Error("No access token available");
         }
-        await connection.start();
-        console.log("SignalR Connected");
-        setConnectionState("connected");
-        if (auth?.user?.id) {
-          await connection.invoke("RegisterConnection");
-          setRegistrationStatus("registered");
+        // Only start if the connection is disconnected
+        if (connection.state === signalR.HubConnectionState.Disconnected) {
+          await connection.start();
+          console.log("SignalR Connected");
+          setConnectionState("connected");
+          if (auth?.user?.id) {
+            await connection.invoke("RegisterConnection");
+            setRegistrationStatus("registered");
+          } else {
+            throw new Error("User ID not available for SignalR connection");
+          }
         } else {
-          throw new Error("User ID not available for SignalR connection");
+          console.log(
+            "SignalR connection is not in 'Disconnected' state, current state:",
+            connection.state
+          );
         }
       } catch (err) {
         const errorMessage =

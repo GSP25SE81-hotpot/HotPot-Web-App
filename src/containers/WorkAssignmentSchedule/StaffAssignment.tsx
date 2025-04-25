@@ -43,9 +43,7 @@ const days = [
 const StaffAssignment: React.FC = () => {
   const navigate = useNavigate();
   const { auth } = useAuth();
-  const [selectedDay, setSelectedDay] = useState<WorkDays | string>(
-    WorkDays.Monday
-  );
+  const [selectedDay, setSelectedDay] = useState<WorkDays | string>("All");
   const [staffList, setStaffList] = useState<StaffSDto[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +57,10 @@ const StaffAssignment: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const staff = await scheduleService.getStaffByDay(day as WorkDays);
+        // Pass empty string when "All" is selected
+        const staff = await scheduleService.getStaffByDay(
+          day === "All" ? "" : (day as WorkDays)
+        );
         setStaffList(staff);
       } catch (err) {
         setError("Không thể lấy danh sách nhân viên cho ngày đã chọn");
@@ -118,7 +119,7 @@ const StaffAssignment: React.FC = () => {
       <StyledFormControl fullWidth>
         <InputLabel>Chọn ngày</InputLabel>
         <Select
-          value={selectedDay === "" ? "All" : selectedDay}
+          value={selectedDay}
           label="Chọn ngày"
           onChange={handleDayChange}
         >
