@@ -104,6 +104,23 @@ const getVehicleTypeName = (type?: VehicleType): string => {
   return "Không có";
 };
 
+const getItemTypeDisplay = (itemType: string) => {
+  switch (itemType) {
+    case "Ingredient":
+      return { label: "Nguyên liệu", color: "primary" };
+    case "Customization":
+      return { label: "Tùy chỉnh", color: "secondary" };
+    case "Combo":
+      return { label: "Combo", color: "success" };
+    case "Utensil":
+      return { label: "Dụng cụ", color: "info" };
+    case "Hotpot":
+      return { label: "Lẩu", color: "warning" };
+    default:
+      return { label: itemType, color: "default" };
+  }
+};
+
 const OrderDetailView: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
@@ -672,17 +689,24 @@ const OrderDetailView: React.FC = () => {
                           <TableRow key={item.orderDetailId}>
                             <TableCell>{item.itemName}</TableCell>
                             <TableCell>
-                              <Chip
-                                label={
-                                  item.itemType === "Sell" ? "Bán" : "Thuê"
-                                }
-                                color={
-                                  item.itemType === "Sell"
-                                    ? "primary"
-                                    : "secondary"
-                                }
-                                size="small"
-                              />
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 1,
+                                }}
+                              >
+                                <Chip
+                                  label={
+                                    getItemTypeDisplay(item.itemType).label
+                                  }
+                                  color={
+                                    getItemTypeDisplay(item.itemType)
+                                      .color as any
+                                  }
+                                  size="small"
+                                />
+                              </Box>
                             </TableCell>
                             <TableCell>{item.quantity}</TableCell>
                           </TableRow>

@@ -109,7 +109,7 @@ const CurrentAssignments: React.FC = () => {
                       mb: 2,
                     }}
                   />
-                  <PageTitle variant="h5">No Current Assignments</PageTitle>
+                  {/* <PageTitle variant="h5">Không có công việc</PageTitle> */}
                   <InfoText>
                     Hiện tại không có nhân viên nào được phân công phụ trách thu
                     hồi thiết bị.

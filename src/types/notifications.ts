@@ -111,39 +111,4 @@ export interface NotificationContextType {
     message: string,
     data?: any
   ) => Promise<boolean>;
-
-  // Legacy notification methods (kept for backward compatibility)
-  notifyConditionIssue: (alert: EquipmentAlertDto) => Promise<boolean>;
-  notifyStatusChange: (status: EquipmentStatusDto) => Promise<boolean>;
-  notifyLowStock: (alert: StockAlertDto) => Promise<boolean>;
-  notifyFeedbackResponse: (
-    userId: number,
-    response: FeedbackResponseDto
-  ) => Promise<boolean>;
-  notifyNewFeedback: (
-    feedbackId: number,
-    customerName: string,
-    feedbackTitle: string
-  ) => Promise<boolean>;
-  notifyFeedbackApproved: (
-    feedbackId: number,
-    adminName: string,
-    feedbackTitle: string
-  ) => Promise<boolean>;
-  notifyScheduleUpdate: (update: ScheduleUpdateDto) => Promise<boolean>;
-  notifyAllScheduleUpdates: () => Promise<boolean>;
-  sendResolutionUpdate: (
-    conditionLogId: number,
-    status: string,
-    estimatedResolutionTime: Date,
-    message: string
-  ) => Promise<boolean>;
-  sendCustomerUpdate: (
-    customerId: number,
-    conditionLogId: number,
-    equipmentName: string,
-    status: string,
-    estimatedResolutionTime: Date,
-    message: string
-  ) => Promise<boolean>;
 }

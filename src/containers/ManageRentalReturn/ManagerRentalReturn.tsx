@@ -112,7 +112,7 @@ const ManagerRentalDashboard: React.FC = () => {
                       fullWidth
                       onClick={() => navigateTo("/current-assignments")}
                     >
-                      View Current Assignments
+                      Xem nhiệm vụ của nhân viên
                     </AnimatedButton>
                   </CardActions>
                 </StyledCard>

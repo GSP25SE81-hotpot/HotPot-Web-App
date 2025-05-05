@@ -93,6 +93,7 @@ const getVietnameseOrderStatusLabel = (status: any): string => {
       const statusMap: Record<string, string> = {
         Pending: "Chờ xử lý",
         Processing: "Đang xử lý",
+        Processed: "Đã xử lý",
         Shipping: "Đang giao",
         Delivered: "Đã giao",
         Completed: "Hoàn thành",
@@ -107,6 +108,7 @@ const getVietnameseOrderStatusLabel = (status: any): string => {
     const statusMap: Record<string, string> = {
       Pending: "Chờ xử lý",
       Processing: "Đang xử lý",
+      Processed: "Đã xử lý",
       Shipping: "Đang giao",
       Delivered: "Đã giao",
       Completed: "Hoàn thành",
@@ -165,7 +167,7 @@ const UnallocatedOrdersList: React.FC = () => {
 
   // Selected task types (multiple selection)
   const [selectedTaskTypes, setSelectedTaskTypes] = useState<StaffTaskType[]>([
-    StaffTaskType.Shipping,
+    StaffTaskType.Preparation,
   ]);
 
   // Staff for each task type

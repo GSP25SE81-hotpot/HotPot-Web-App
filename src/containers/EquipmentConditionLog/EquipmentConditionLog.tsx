@@ -100,7 +100,7 @@ const EquipmentConditionLog: React.FC = () => {
   const [hotPotInventoryList, setHotPotInventoryList] = useState<
     HotPotInventoryDto[]
   >([]);
-  const [utensilList, setUtensilList] = useState<UtensilDto[]>([]);
+  const [_utensilList, setUtensilList] = useState<UtensilDto[]>([]);
   const [loadingEquipment, setLoadingEquipment] = useState(false);
   const [selectedEquipmentType, setSelectedEquipmentType] =
     useState<string>("");

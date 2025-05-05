@@ -112,6 +112,7 @@ const OrdersByStatusList: React.FC = () => {
   const tabToStatus = [
     OrderStatus.Pending,
     OrderStatus.Processing,
+    OrderStatus.Processed,
     OrderStatus.Shipping,
     OrderStatus.Delivered,
     OrderStatus.Completed,
@@ -351,8 +352,9 @@ const OrdersByStatusList: React.FC = () => {
           scrollButtons="auto"
           aria-label="order status tabs"
         >
-          <StyledTab label="Chờ xử lý" />
+          {/* <StyledTab label="Chờ xử lý" /> */}
           <StyledTab label="Đang xử lý" />
+          <StyledTab label="Đã xử lý" />
           <StyledTab label="Đang giao" />
           <StyledTab label="Đã giao" />
           <StyledTab label="Hoàn thành" />
@@ -649,8 +651,10 @@ const OrdersByStatusList: React.FC = () => {
 // Hàm trợ giúp để dịch trạng thái đơn hàng sang tiếng Việt
 const getVietnameseOrderStatusLabel = (status: OrderStatus): string => {
   const statusMap: Record<OrderStatus, string> = {
+    [OrderStatus.Cart]: "Trong giỏ hàng",
     [OrderStatus.Pending]: "Chờ xử lý",
     [OrderStatus.Processing]: "Đang xử lý",
+    [OrderStatus.Processed]: "Đã xử lý",
     [OrderStatus.Shipping]: "Đang giao",
     [OrderStatus.Delivered]: "Đã giao",
     [OrderStatus.Completed]: "Hoàn thành",

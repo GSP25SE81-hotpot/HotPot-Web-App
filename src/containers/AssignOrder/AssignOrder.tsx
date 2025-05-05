@@ -16,7 +16,7 @@ import {
   useTheme,
 } from "@mui/material";
 import React, { useState } from "react";
-import { OrderStatus } from "../../api/Services/orderManagementService";
+import { OrderStatus } from "../../types/orderManagement";
 import staffGetOrderApi from "../../api/staffGetOrderAPI";
 import useAuth from "../../hooks/useAuth";
 import { AssignOrderType } from "../../types/assignOrder";

@@ -34,7 +34,7 @@ export const printReceipt = (receipt: PaymentReceiptDto): void => {
           
           <div class="row">
             <div class="label">Số điện thoại khách hàng:</div>
-            <div class="value">${receipt.customerPhone}</div>
+            <div class="value">0${receipt.customerPhone}</div>
           </div>
           
           <div class="row">

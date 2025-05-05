@@ -36,6 +36,23 @@ import {
   LoadingContainer,
 } from "../../../components/manager/styles/UnassignedPickupsStyles";
 
+const translateStatus = (status: string): string => {
+  switch (status.toLowerCase()) {
+    case "pending":
+      return "Chờ xử lý";
+    case "assigned":
+      return "Đã phân công";
+    case "in progress":
+      return "Đang xử lý";
+    case "completed":
+      return "Hoàn thành";
+    case "cancelled":
+      return "Đã hủy";
+    default:
+      return status;
+  }
+};
+
 const UnassignedPickups: React.FC = () => {
   const [pickups, setPickups] = useState<PagedResult<RentOrderDetail> | null>(
     null
@@ -135,7 +152,7 @@ const UnassignedPickups: React.FC = () => {
                   </TableHead>
                   <TableBody>
                     {pickups?.items.length === 0 ? (
-                      <StyledTableRow>
+                      <StyledTableRow key="empty-row">
                         <BodyTableCell colSpan={7}>
                           <EmptyMessage>
                             Không tìm thấy đơn hàng chưa được phân công
@@ -164,7 +181,7 @@ const UnassignedPickups: React.FC = () => {
                           </BodyTableCell>
                           <BodyTableCell>
                             <StatusChip
-                              label={pickup.status}
+                              label={translateStatus(pickup.status)}
                               status={pickup.status.toLowerCase()}
                               size="small"
                             />
@@ -176,7 +193,7 @@ const UnassignedPickups: React.FC = () => {
                               size="small"
                               onClick={() => handleAssignClick(pickup)}
                             >
-                              Assign Staff
+                              Phân công
                             </AssignButton>
                           </BodyTableCell>
                         </StyledTableRow>
