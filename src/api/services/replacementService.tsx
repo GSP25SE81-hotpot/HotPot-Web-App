@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/api/services/replacementService.ts
 // import { axiosClient } from "../axiosInstance";
 import {

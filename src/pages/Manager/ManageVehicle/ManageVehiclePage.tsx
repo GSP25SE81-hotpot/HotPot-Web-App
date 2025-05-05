@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
-import ManageOrder from "../../../containers/ManageOrder/ManageOrder";
+import ManageVehicle from "../../../containers/ManageVehicle/ManageVehicle";
 import ErrorBoundary from "../../../components/ErrorBoundary";
 
-export const ManageOrderPage = () => {
+export const ManageVehiclePage = () => {
   return (
     <Box>
       <ErrorBoundary>
-        <ManageOrder />
+        <ManageVehicle />
       </ErrorBoundary>
     </Box>
   );

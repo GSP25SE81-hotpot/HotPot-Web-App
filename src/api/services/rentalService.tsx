@@ -16,19 +16,11 @@ const API_URL = "/manager/rentals";
 export const getUnassignedPickups = async (
   pageNumber = 1,
   pageSize = 10
-): Promise<ApiResponse<PagedResult<RentOrderDetail[]>>> => {
+): Promise<ApiResponse<PagedResult<RentOrderDetail>>> => {
   try {
     const response = await axiosClient.get(
       `${API_URL}/unassigned-pickups?pageNumber=${pageNumber}&pageSize=${pageSize}`
     );
-
-    if (response.data && Array.isArray(response.data)) {
-      return {
-        success: true,
-        message: "Success",
-      };
-    }
-
     return response.data;
   } catch (error) {
     console.error("Error fetching unassigned pickups:", error);

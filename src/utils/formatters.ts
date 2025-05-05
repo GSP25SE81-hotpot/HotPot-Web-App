@@ -1,9 +1,13 @@
 import { format, differenceInDays } from "date-fns";
 import { vi } from "date-fns/locale";
-import { OrderStatus } from "../api/Services/orderManagementService";
+import { OrderStatus } from "../types/orderManagement";
 
 export const formatDate = (dateString: string): string => {
-  return format(new Date(dateString), "dd MMM, yyyy", { locale: vi });
+  return format(new Date(dateString), "dd/MM/yyyy", { locale: vi });
+};
+
+export const formatDetailDate = (dateString: string): string => {
+  return format(new Date(dateString), "dd/MM/yyyy, HH:mm", { locale: vi });
 };
 
 export const formatCurrency = (amount: number): string => {

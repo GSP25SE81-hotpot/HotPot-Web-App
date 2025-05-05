@@ -1,292 +1,240 @@
-// src/pages/NotificationsPage.tsx
-import React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/components/NotificationCenter.tsx
+import React, { useState, useMemo } from "react";
+import { useNotifications } from "../../../context/NotificationContext";
 import {
   Box,
-  Container,
-  Typography,
+  Badge,
+  IconButton,
+  Popover,
   List,
   ListItem,
-  ListItemAvatar,
   ListItemText,
-  Avatar,
-  IconButton,
+  Typography,
+  Tabs,
+  Tab,
   Divider,
-  Paper,
   Button,
+  Chip,
+  ListItemSecondaryAction,
   Tooltip,
 } from "@mui/material";
 import {
-  Warning as WarningIcon,
-  Info as InfoIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
+  Notifications as NotificationsIcon,
   Delete as DeleteIcon,
-  MarkEmailRead as MarkReadIcon,
+  CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
-import { useNotifications } from "../../../context/NotificationContext";
-import { Notification } from "../../../types/notifications";
-import { useNavigate } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
+import { NotificationGroup } from "../../../types/notifications";
 
-const NotificationsPage: React.FC = () => {
+const NotificationCenter: React.FC = () => {
   const {
     notifications,
     markAsRead,
     markAllAsRead,
     clearNotification,
     clearAllNotifications,
+    getNotificationsByGroup,
   } = useNotifications();
-  const navigate = useNavigate();
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "ConditionAlert":
-      case "LowStockAlert":
-        return <WarningIcon color="warning" />;
-      case "Error":
-        return <ErrorIcon color="error" />;
-      case "FeedbackResponse":
-      case "ScheduleUpdate":
-        return <CheckCircleIcon color="success" />;
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [activeTab, setActiveTab] = useState<NotificationGroup | "all">("all");
+
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.read).length,
+    [notifications]
+  );
+
+  const filteredNotifications = useMemo(() => {
+    if (activeTab === "all") return notifications;
+    return getNotificationsByGroup(activeTab as NotificationGroup);
+  }, [activeTab, notifications, getNotificationsByGroup]);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleTabChange = (
+    _: React.SyntheticEvent,
+    newValue: NotificationGroup | "all"
+  ) => {
+    setActiveTab(newValue);
+  };
+
+  const handleNotificationClick = (id: number) => {
+    markAsRead(id);
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return "error";
+      case "medium":
+        return "warning";
+      case "low":
+        return "info";
       default:
-        return <InfoIcon color="info" />;
+        return "default";
     }
   };
 
-  const getNotificationTitle = (notification: Notification): string => {
-    const { type, data } = notification;
-
-    if (data.title) return data.title;
-
-    switch (type) {
-      case "ConditionAlert":
-        return "Equipment Condition Alert";
-      case "LowStockAlert":
-        return "Low Stock Alert";
-      case "StatusChange":
-        return "Equipment Status Change";
-      case "FeedbackResponse":
-        return "Feedback Response";
-      case "NewFeedback":
-        return "New Feedback Received";
-      case "ApprovedFeedback":
-        return "Feedback Approved";
-      case "ScheduleUpdate":
-        return "Schedule Update";
-      case "ResolutionUpdate":
-        return "Resolution Update";
-      case "EquipmentUpdate":
-        return "Equipment Update";
-      case "RentalNotification":
-        return "Rental Notification";
-      case "ReplacementNotification":
-        return "Replacement Notification";
-      case "DirectNotification":
-        return "Direct Notification";
-      default:
-        return "Notification";
-    }
-  };
-
-  const getNotificationMessage = (notification: Notification): string => {
-    const { type, data } = notification;
-
-    if (data.message) return data.message;
-
-    switch (type) {
-      case "ConditionAlert":
-        return `Issue reported for ${data.equipmentName}: ${data.issueName}`;
-      case "LowStockAlert":
-        return `${data.equipmentName} is running low (${data.currentQuantity}/${data.threshold})`;
-      case "StatusChange":
-        return `${data.equipmentName} is now ${
-          data.isAvailable ? "available" : "unavailable"
-        }`;
-      case "NewFeedback":
-        return `New feedback from ${data.customerName}: ${data.feedbackTitle}`;
-      case "ApprovedFeedback":
-        return `Feedback "${data.feedbackTitle}" approved by ${data.adminName}`;
-      case "ScheduleUpdate":
-        return `Your schedule has been updated for ${new Date(
-          data.shiftDate
-        ).toLocaleDateString()}`;
-      case "ResolutionUpdate":
-        return `Resolution update for issue #${data.conditionLogId}: ${data.status}`;
-      case "EquipmentUpdate":
-        return `Update for ${data.equipmentName}: ${data.status}`;
-      default:
-        return JSON.stringify(data);
-    }
-  };
-
-  const formatTimestamp = (timestamp: Date): string => {
-    return new Date(timestamp).toLocaleString();
-  };
-
-  const handleNotificationClick = (notification: Notification) => {
-    // Mark notification as read
-    if (!notification.read) {
-      markAsRead(notification.id);
-    }
-
-    // Handle navigation based on notification type
-    switch (notification.type) {
-      case "ConditionAlert":
-        navigate(`/equipment/condition/${notification.data.conditionLogId}`);
-        break;
-      case "FeedbackResponse":
-        navigate(`/feedback/${notification.data.feedbackId}`);
-        break;
-      case "ScheduleUpdate":
-        navigate("/schedule");
-        break;
-      case "RentalNotification":
-        navigate("/rentals");
-        break;
-      case "ReplacementNotification":
-        navigate(`/replacements/${notification.data.replacementRequestId}`);
-        break;
-      // Add more navigation cases as needed
-      default:
-        // Default action for other notification types
-        break;
-    }
-  };
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const open = Boolean(anchorEl);
+  const id = open ? "notification-popover" : undefined;
 
   return (
-    <Container maxWidth="md" sx={{ mt: 10, mb: 4 }}>
-      <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+    <>
+      <IconButton color="inherit" aria-describedby={id} onClick={handleClick}>
+        <Badge badgeContent={unreadCount} color="error">
+          <NotificationsIcon />
+        </Badge>
+      </IconButton>
+
+      <Popover
+        id={id}
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+        PaperProps={{
+          style: { width: "400px", maxHeight: "500px" },
+        }}
+      >
         <Box
           sx={{
+            p: 2,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            mb: 3,
           }}
         >
-          <Typography variant="h5" component="h1" gutterBottom>
-            Notifications
-          </Typography>
-          <Box sx={{ display: "flex", gap: 2 }}>
-            {unreadCount > 0 && (
-              <Button
-                variant="outlined"
-                startIcon={<MarkReadIcon />}
-                onClick={markAllAsRead}
-              >
-                Mark all as read
-              </Button>
-            )}
-            {notifications.length > 0 && (
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<DeleteIcon />}
-                onClick={clearAllNotifications}
-              >
-                Clear all
-              </Button>
-            )}
+          <Typography variant="h6">Notifications</Typography>
+          <Box>
+            <Button size="small" onClick={markAllAsRead}>
+              Mark all as read
+            </Button>
+            <Button size="small" color="error" onClick={clearAllNotifications}>
+              Clear all
+            </Button>
           </Box>
         </Box>
 
-        {notifications.length === 0 ? (
-          <Box sx={{ textAlign: "center", py: 5 }}>
-            <InfoIcon sx={{ fontSize: 60, color: "text.secondary", mb: 2 }} />
-            <Typography variant="h6" color="text.secondary">
-              No notifications to display
-            </Typography>
-          </Box>
-        ) : (
-          <List sx={{ width: "100%" }}>
-            {notifications.map((notification) => (
-              <React.Fragment key={notification.id}>
-                <ListItem
-                  alignItems="flex-start"
-                  sx={{
-                    py: 2,
-                    bgcolor: notification.read ? "transparent" : "action.hover",
-                    "&:hover": { bgcolor: "action.selected" },
-                    cursor: "pointer",
-                    borderRadius: 1,
-                  }}
-                  secondaryAction={
-                    <Box sx={{ display: "flex" }}>
-                      {!notification.read && (
-                        <Tooltip title="Mark as read">
-                          <IconButton
-                            edge="end"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              markAsRead(notification.id);
-                            }}
-                          >
-                            <MarkReadIcon />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                      <Tooltip title="Delete">
-                        <IconButton
-                          edge="end"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            clearNotification(notification.id);
-                          }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  }
-                  onClick={() => handleNotificationClick(notification)}
-                >
-                  <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: "background.paper" }}>
-                      {getNotificationIcon(notification.type)}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
+        <Divider />
+
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ borderBottom: 1, borderColor: "divider" }}
+        >
+          <Tab label="All" value="all" />
+          <Tab label="Equipment" value="equipment" />
+          <Tab label="Feedback" value="feedback" />
+          <Tab label="Rental" value="rental" />
+          <Tab label="Replacement" value="replacement" />
+          <Tab label="Schedule" value="schedule" />
+          <Tab label="System" value="system" />
+        </Tabs>
+
+        <List sx={{ maxHeight: "350px", overflow: "auto" }}>
+          {filteredNotifications.length === 0 ? (
+            <ListItem>
+              <ListItemText primary="No notifications" />
+            </ListItem>
+          ) : (
+            filteredNotifications.map((notification) => (
+              <ListItem
+                key={notification.id}
+                onClick={() => handleNotificationClick(notification.id)}
+                sx={{
+                  backgroundColor: notification.read
+                    ? "transparent"
+                    : "rgba(0, 0, 0, 0.04)",
+                  "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.08)" },
+                  cursor: "pointer",
+                }}
+                divider
+              >
+                <ListItemText
+                  primary={
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Typography
                         variant="subtitle1"
-                        component="div"
                         sx={{
                           fontWeight: notification.read ? "normal" : "bold",
                         }}
                       >
-                        {getNotificationTitle(notification)}
+                        {notification.title}
                       </Typography>
-                    }
-                    secondary={
-                      <>
-                        <Typography
-                          variant="body2"
-                          color="text.primary"
-                          component="span"
-                          sx={{ display: "block", mb: 0.5 }}
-                        >
-                          {getNotificationMessage(notification)}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          component="span"
-                        >
-                          {formatTimestamp(notification.timestamp)}
-                        </Typography>
-                      </>
-                    }
-                  />
-                </ListItem>
-                <Divider variant="inset" component="li" />
-              </React.Fragment>
-            ))}
-          </List>
-        )}
-      </Paper>
-    </Container>
+                      <Chip
+                        label={notification.priority}
+                        size="small"
+                        color={getPriorityColor(notification.priority) as any}
+                        sx={{ height: 20 }}
+                      />
+                    </Box>
+                  }
+                  secondary={
+                    <>
+                      <Typography variant="body2" component="span">
+                        {notification.message}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        display="block"
+                        color="text.secondary"
+                      >
+                        {formatDistanceToNow(new Date(notification.timestamp), {
+                          addSuffix: true,
+                        })}
+                      </Typography>
+                    </>
+                  }
+                />
+                <ListItemSecondaryAction>
+                  <Tooltip title="Mark as read">
+                    <IconButton
+                      edge="end"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        markAsRead(notification.id);
+                      }}
+                    >
+                      <CheckCircleIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Delete">
+                    <IconButton
+                      edge="end"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        clearNotification(notification.id);
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))
+          )}
+        </List>
+      </Popover>
+    </>
   );
 };
 
-export default NotificationsPage;
+export default NotificationCenter;

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Box,
   Button,
@@ -18,7 +20,7 @@ import { ShippingOrder } from "../../types/shippingOrder";
 import DoneIcon from "@mui/icons-material/Done";
 import DeliveryDiningIcon from "@mui/icons-material/DeliveryDining";
 import useAuth from "../../hooks/useAuth";
-import { OrderStatus } from "../../api/Services/orderManagementService";
+import { OrderStatus } from "../../types/orderManagement";
 import staffGetOrderApi from "../../api/staffGetOrderAPI";
 import { toast } from "react-toastify";
 
@@ -31,7 +33,7 @@ const ShippingList = () => {
   //Call api
   const getShippingList = async () => {
     try {
-      const res = await staffShippingListApi.getShippingOrderByStaffId(id);
+      const res = await staffShippingListApi.getShippingOrderByStaffId();
       setShippingList(res?.data);
     } catch (error: any) {
       console.log(error?.message);
@@ -39,7 +41,7 @@ const ShippingList = () => {
   };
   React.useEffect(() => {
     getShippingList();
-  }, [id]);
+  }, []);
 
   //handle redirect to gg map
   const handleViewOnMap = (address: any) => {
@@ -53,8 +55,8 @@ const ShippingList = () => {
   };
 
   const body = {
-    status: OrderStatus.Delivered,
-    notes: "R",
+    status: "Delivered",
+    notes: "",
   };
 
   //handle confirm delivery
@@ -113,25 +115,32 @@ const ShippingList = () => {
                   </TableCell>
                   <TableCell align="left">{row?.orderStatus}</TableCell>
                   <TableCell align="left">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      startIcon={<DeliveryDiningIcon />}
-                      onClick={() => handleViewOnMap(row?.deliveryAddress)}
-                    >
-                      Chỉ đường
-                    </Button>
-                    <Button
-                      sx={{
-                        border: "1px solid #4caf50",
-                        color: "#4caf50",
-                        ml: 2,
-                      }}
-                      startIcon={<DoneIcon />}
-                      onClick={() => handleConfirmDelivery(row?.orderID)}
-                    >
-                      Đã giao
-                    </Button>
+                    {row?.orderStatus !== "Delivered" &&
+                      row?.orderStatus !== "Completed" && (
+                        <>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<DeliveryDiningIcon />}
+                            onClick={() =>
+                              handleViewOnMap(row?.deliveryAddress)
+                            }
+                          >
+                            Chỉ đường
+                          </Button>
+                          <Button
+                            sx={{
+                              border: "1px solid #4caf50",
+                              color: "#4caf50",
+                              ml: 2,
+                            }}
+                            startIcon={<DoneIcon />}
+                            onClick={() => handleConfirmDelivery(row?.orderID)}
+                          >
+                            Đã giao
+                          </Button>
+                        </>
+                      )}
                   </TableCell>
                 </TableRow>
               ))}

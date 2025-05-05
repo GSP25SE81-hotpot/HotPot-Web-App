@@ -14,7 +14,8 @@ export interface PagedResult<T> {
 
 export interface StaffPickupAssignment {
   assignmentId: number;
-  rentOrderDetailId: number;
+  orderId: number;
+  orderCode: string;
   staffId: number;
   staffName: string;
   assignedDate: string;
@@ -23,9 +24,9 @@ export interface StaffPickupAssignment {
   customerName: string;
   customerAddress: string;
   customerPhone: string;
-  equipmentName: string;
-  quantity: number;
-  expectedReturnDate: string;
+  rentalStartDate: string | null;
+  expectedReturnDate: string | null;
+  equipmentSummary: string;
 }
 
 export interface RentalListing {
@@ -68,7 +69,7 @@ export interface RentOrderDetail {
 
 export interface UnifiedReturnRequest {
   assignmentId?: number;
-  rentOrderDetailId?: number;
+  rentOrderId?: number;
   completedDate: string;
   returnCondition: string;
   damageFee?: number;

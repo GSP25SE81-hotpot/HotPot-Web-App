@@ -1,4 +1,3 @@
-// src/pages/OverdueRentals/OverdueRentals.tsx
 import {
   TableBody,
   TableCell,
@@ -31,19 +30,19 @@ import {
 import { useApi } from "../../../hooks/useApi";
 import { RentalListing } from "../../../types/rentalPickup";
 import { formatDate, getDaysOverdue } from "../../../utils/formatters";
-// Thành phần được tạo kiểu bổ sung cho số ngày quá hạn
 import { Box } from "@mui/material";
 
 const OverdueRentals: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const { data, loading, error, execute } = useApi(
-    rentalService.getOverdueRentals
+    rentalService.getRentalListings
   );
 
   useEffect(() => {
-    execute(page + 1, rowsPerPage);
+    execute("overdue", page + 1, rowsPerPage);
   }, [execute, page, rowsPerPage]);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -64,7 +63,7 @@ const OverdueRentals: React.FC = () => {
   const handleRecordReturn = (rental: RentalListing) => {
     navigate("/rentals/record-return", {
       state: {
-        rentOrderDetailId: rental.rentOrderDetailId,
+        rentOrderId: rental.orderId,
         customerName: rental.customerName,
         equipmentName: rental.equipmentName,
         expectedReturnDate: rental.expectedReturnDate,
@@ -82,7 +81,8 @@ const OverdueRentals: React.FC = () => {
     <Box>
       {loading && <LoadingSpinner />}
       {error && <ErrorAlert message={error} />}
-      {data && data.items.length === 0 ? (
+
+      {!loading && !error && data?.items?.length === 0 ? (
         <EmptyStateContainer>
           <Typography variant="h6" fontWeight={600}>
             Không tìm thấy thuê quá hạn
@@ -107,7 +107,7 @@ const OverdueRentals: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data?.items.map((rental) => {
+                {data?.items?.map((rental) => {
                   const daysOverdue = getDaysOverdue(rental.expectedReturnDate);
                   const severity = getSeverity(daysOverdue);
                   return (
@@ -170,6 +170,7 @@ const OverdueRentals: React.FC = () => {
               </TableBody>
             </StyledTable>
           </StyledTableContainer>
+
           <StyledTablePagination
             rowsPerPageOptions={[5, 10, 25]}
             count={data?.totalCount || 0}

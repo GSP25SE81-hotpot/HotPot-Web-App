@@ -4,7 +4,7 @@ export const Vntext = {
     Hotpot: {
       hotpotSidebar: "Lẩu",
       hotpotIngredients: "Nguyên liệu lẩu",
-      hotpotCombo: "Lẩu",
+      hotpotCombo: "Combo Lẩu",
       hotpot: "Nồi lẩu",
     },
     Ordes: "Đơn hàng",
