@@ -247,14 +247,28 @@ const UnallocatedOrdersList: React.FC = () => {
 
       // Fetch shipping staff if that task type is selected
       if (selectedTaskTypes.includes(StaffTaskType.Shipping)) {
+        // Pass the orderId to get context-specific availability for shipping
         const shippingStaffData = await staffService.getAvailableStaff(
-          StaffTaskType.Shipping
+          StaffTaskType.Shipping,
+          selectedOrder?.orderId
         );
+
         const availableShippingStaff = Array.isArray(shippingStaffData)
           ? shippingStaffData.filter(
               (staff) => staff.isAvailable === true && staff.isEligible === true
             )
           : [];
+
+        // Sort the shipping staff to prioritize staff who prepared this order
+        availableShippingStaff.sort((a, b) => {
+          // Staff who prepared this order should be at the top
+          if (a.preparedThisOrder && !b.preparedThisOrder) return -1;
+          if (!a.preparedThisOrder && b.preparedThisOrder) return 1;
+
+          // Then sort by assignment count (less busy staff first)
+          return a.assignmentCount - b.assignmentCount;
+        });
+
         setShippingStaff(availableShippingStaff);
       }
     } catch (err) {
@@ -348,6 +362,21 @@ const UnallocatedOrdersList: React.FC = () => {
     fetchData();
   }, [pageNumber, pageSize, sortBy, sortDescending]);
 
+  useEffect(() => {
+    // If we have shipping staff and no selection yet, auto-select the staff who prepared this order
+    if (
+      selectedTaskTypes.includes(StaffTaskType.Shipping) &&
+      shippingStaff.length > 0 &&
+      !selectedShippingStaffId
+    ) {
+      // Find staff who prepared this order
+      const preparer = shippingStaff.find((staff) => staff.preparedThisOrder);
+      if (preparer) {
+        setSelectedShippingStaffId(preparer.id);
+      }
+    }
+  }, [shippingStaff, selectedTaskTypes, selectedShippingStaffId]);
+
   // Handle search
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -397,7 +426,7 @@ const UnallocatedOrdersList: React.FC = () => {
     // Open dialog first
     setOpenDialog(true);
 
-    // Then fetch data
+    // Then fetch data with the specific order context
     await fetchStaffMembers();
     await fetchAvailableVehicles();
 
@@ -1022,16 +1051,28 @@ const UnallocatedOrdersList: React.FC = () => {
                         sx={{
                           borderRadius: 1,
                           my: 0.5,
+                          backgroundColor: staffMember.preparedThisOrder
+                            ? (theme) => alpha(theme.palette.success.light, 0.1)
+                            : "inherit",
                           "&:hover": {
-                            backgroundColor: (theme) =>
-                              alpha(theme.palette.primary.main, 0.08),
+                            backgroundColor: staffMember.preparedThisOrder
+                              ? (theme) =>
+                                  alpha(theme.palette.success.light, 0.2)
+                              : (theme) =>
+                                  alpha(theme.palette.primary.main, 0.08),
                           },
                           "&.Mui-selected": {
-                            backgroundColor: (theme) =>
-                              alpha(theme.palette.primary.main, 0.12),
+                            backgroundColor: staffMember.preparedThisOrder
+                              ? (theme) =>
+                                  alpha(theme.palette.success.main, 0.15)
+                              : (theme) =>
+                                  alpha(theme.palette.primary.main, 0.12),
                             "&:hover": {
-                              backgroundColor: (theme) =>
-                                alpha(theme.palette.primary.main, 0.16),
+                              backgroundColor: staffMember.preparedThisOrder
+                                ? (theme) =>
+                                    alpha(theme.palette.success.main, 0.25)
+                                : (theme) =>
+                                    alpha(theme.palette.primary.main, 0.16),
                             },
                           },
                         }}
@@ -1053,9 +1094,21 @@ const UnallocatedOrdersList: React.FC = () => {
                           >
                             <LocalShippingIcon
                               fontSize="small"
-                              color="secondary"
+                              color={
+                                staffMember.preparedThisOrder
+                                  ? "success"
+                                  : "secondary"
+                              }
                             />
                             <Typography>{staffMember.name}</Typography>
+                            {staffMember.preparedThisOrder && (
+                              <Chip
+                                label="Đã chuẩn bị đơn này"
+                                size="small"
+                                color="success"
+                                sx={{ ml: 1, height: 20, fontSize: "0.7rem" }}
+                              />
+                            )}
                           </Box>
                           {staffMember.assignmentCount > 0 && (
                             <Box

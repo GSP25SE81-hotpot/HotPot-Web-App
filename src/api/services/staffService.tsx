@@ -56,14 +56,28 @@ const staffService = {
    * @throws {Error} When request fails or unauthorized
    */
   getAvailableStaff: async (
-    taskType?: StaffTaskType
+    taskType?: StaffTaskType,
+    orderId?: number
   ): Promise<StaffAvailabilityDto[]> => {
     try {
-      // Add a timeout to the request to prevent hanging
-      const url = taskType
-        ? `/staff/available-staff?taskType=${taskType}`
-        : "/staff/available-staff";
+      // Build the URL with query parameters
+      let url = "/staff/available-staff";
+      const params = new URLSearchParams();
 
+      if (taskType !== undefined) {
+        params.append("taskType", taskType.toString());
+      }
+
+      if (orderId !== undefined) {
+        params.append("orderId", orderId.toString());
+      }
+
+      // Add query parameters if any exist
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+
+      // Add a timeout to the request to prevent hanging
       const response = await axiosClient.get<
         ApiResponse<StaffAvailabilityDto[]>
       >(url, { timeout: 10000 }); // 10 second timeout
@@ -78,6 +92,7 @@ const staffService = {
       ) {
         return response.data.data;
       } else {
+        console.warn("Unexpected response format from staff API:", response);
         return [];
       }
     } catch (error: any) {
@@ -86,6 +101,8 @@ const staffService = {
         console.warn(
           "Authentication error when fetching staff. Token may need refresh."
         );
+      } else {
+        console.error("Error fetching available staff:", error);
       }
       // Return empty array instead of throwing to prevent UI errors
       return [];
