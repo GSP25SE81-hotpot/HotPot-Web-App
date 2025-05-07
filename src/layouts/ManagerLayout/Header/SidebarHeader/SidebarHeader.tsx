@@ -51,6 +51,7 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import SystemUpdateIcon from "@mui/icons-material/SystemUpdate";
+import config from "../../../../configs";
 
 export const drawerWidth = 280;
 
@@ -141,43 +142,57 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
   };
 
   const handleNotificationClick = (notification: Notification) => {
-    // Mark notification as read
     markAsRead(notification.id);
 
-    // Handle navigation based on notification type
+    // Use config.adminRoutes for navigation
     switch (notification.type) {
       case "ConditionIssue":
-        navigate(`/equipment/condition/${notification.data.conditionLogId}`);
+        // Equipment Condition Log Detail
+        navigate(
+          config.adminRoutes.MaintenanceHotpot.replace(
+            ":id",
+            notification.data.conditionLogId?.toString() || ""
+          )
+        );
         break;
       case "FeedbackResponse":
-        navigate(`/feedback/${notification.data.feedbackId}`);
+        // Feedback Management Detail
+        navigate(
+          config.adminRoutes.feedbackDetail +
+            "/" +
+            (notification.data.feedbackId || "")
+        );
         break;
       case "ScheduleUpdate":
-        navigate("/schedule");
+        navigate(config.adminRoutes.manageUsers);
         break;
       case "RentalNotification":
-        navigate("/rentals");
+        navigate(config.adminRoutes.dashboard);
         break;
       case "ReplacementVerified":
       case "ReplacementCompleted":
-        navigate(`/replacements/${notification.data.RequestId}`);
+        navigate(
+          config.staffRoutes.replacementDetail +
+            "/" +
+            (notification.data.RequestId || "")
+        );
         break;
       case "LowStock":
-        navigate("/inventory");
+        navigate(config.adminRoutes.manageIngredients);
         break;
       case "UnavailableEquipment":
-        navigate("/equipment");
+        navigate(config.adminRoutes.HotpotDetail);
         break;
       // Add more navigation cases as needed
       default:
-        // Default action for other notification types
         break;
     }
     handleNotificationClose();
   };
 
   const handleViewAllNotifications = () => {
-    navigate("/notifications");
+    // Use config.adminRoutes or fallback to "/notifications"
+    navigate(config.adminRoutes.dashboard);
     handleNotificationClose();
   };
 
@@ -337,14 +352,16 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
               onClose={handleNotificationClose}
               transformOrigin={{ horizontal: "right", vertical: "top" }}
               anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-              PaperProps={{
-                elevation: 3,
-                sx: {
-                  width: 350,
-                  maxHeight: 500,
-                  overflowY: "auto",
-                  borderRadius: 2,
-                  mt: 1,
+              slotProps={{
+                paper: {
+                  elevation: 3,
+                  sx: {
+                    width: 350,
+                    maxHeight: 500,
+                    overflowY: "auto",
+                    borderRadius: 2,
+                    mt: 1,
+                  },
                 },
               }}
             >

@@ -17,9 +17,10 @@ import {
   ConnectionState,
   NotificationGroup,
   NotificationPriority,
-  GenericNotificationDto,
-} from "../types/notifications";
-import useAuth from "../hooks/useAuth";
+  GenericNotificationDto, // Assuming this is the DTO for incoming notifications
+  ClientNotificationDto,
+} from "../types/notifications"; // Ensure this path is correct
+import useAuth from "../hooks/useAuth"; // Ensure this path is correct
 
 const STORAGE_KEY = "hotpot_notifications";
 const MAX_STORED_NOTIFICATIONS = 50;
@@ -71,7 +72,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   // Persist notifications to localStorage
   useEffect(() => {
     try {
-      // Only store the most recent notifications to prevent storage issues
       const recentNotifications = notifications.slice(
         0,
         MAX_STORED_NOTIFICATIONS
@@ -84,160 +84,214 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
   // Initialize SignalR connection
   useEffect(() => {
-    // Wait for both accessToken and userId to be available
     if (!auth?.accessToken || !auth?.user?.id) {
       console.log(
         "User not authenticated or userId missing, not connecting to SignalR"
       );
+      if (hubConnection) {
+        // Ensure any existing connection is stopped if auth disappears
+        hubConnection.stop();
+        setHubConnection(null);
+        setConnectionState("disconnected");
+        setRegistrationStatus("pending");
+      }
+      return;
+    }
+
+    // Ensure a new connection isn't created if one already exists and is not disconnected
+    if (
+      hubConnection &&
+      hubConnection.state !== signalR.HubConnectionState.Disconnected
+    ) {
+      console.log("SignalR connection already exists and is not disconnected.");
       return;
     }
 
     const connection = new signalR.HubConnectionBuilder()
-      // https://localhost:7163
-      // https://hpty.vinhuser.one
       .withUrl("https://hpty.vinhuser.one/notificationHub", {
+        // Ensure this URL is correct
         accessTokenFactory: () => auth.accessToken || "",
       })
       .withAutomaticReconnect()
       .build();
 
     setHubConnection(connection);
-    startConnection(connection);
+    // `startConnection` is now called within the registration useEffect or when auth changes.
+    // This avoids race conditions with `auth.user.id` potentially not being immediately available.
 
     return () => {
       if (connection) {
         connection.stop();
       }
     };
-  }, [auth?.accessToken, auth?.user?.id]);
+  }, [auth?.accessToken]); // Removed auth?.user?.id as start/register handles it.
 
-  // Register connection when user ID becomes available
+  // Start connection and Register connection when user ID and hubConnection are available
   useEffect(() => {
     if (
+      hubConnection &&
+      auth?.accessToken &&
+      auth?.user?.id &&
+      connectionState === "disconnected" &&
+      registrationStatus === "pending"
+    ) {
+      startConnection(hubConnection);
+    } else if (
       hubConnection &&
       connectionState === "connected" &&
       auth?.user?.id &&
       registrationStatus === "pending"
     ) {
+      // If already connected but not registered (e.g., after a quick auth update)
+      console.log("Connection established, attempting to register.");
       hubConnection
         .invoke("RegisterConnection")
         .then(() => {
+          console.log("SignalR Connection Registered (from effect).");
           setRegistrationStatus("registered");
         })
         .catch((err) => {
-          console.error("Error registering connection:", err);
+          console.error("Error registering connection (from effect):", err);
           setRegistrationStatus("failed");
         });
     }
-  }, [hubConnection, connectionState, auth?.user?.id, registrationStatus]);
+  }, [
+    hubConnection,
+    connectionState,
+    auth?.accessToken,
+    auth?.user?.id,
+    registrationStatus,
+  ]);
 
   const startConnection = useCallback(
     async (connection: signalR.HubConnection) => {
-      try {
-        if (!auth?.accessToken) {
-          throw new Error("No access token available");
-        }
-        // Only start if the connection is disconnected
-        if (connection.state === signalR.HubConnectionState.Disconnected) {
-          await connection.start();
-          console.log("SignalR Connected");
-          setConnectionState("connected");
-          if (auth?.user?.id) {
+      if (connection.state !== signalR.HubConnectionState.Disconnected) {
+        console.log(
+          "StartConnection called, but connection not in Disconnected state. Current state:",
+          connection.state
+        );
+        // If it's already connected and registration is pending, try to register.
+        if (
+          connection.state === signalR.HubConnectionState.Connected &&
+          auth?.user?.id &&
+          registrationStatus === "pending"
+        ) {
+          console.log("Attempting to register on an already connected hub.");
+          try {
             await connection.invoke("RegisterConnection");
             setRegistrationStatus("registered");
-          } else {
-            throw new Error("User ID not available for SignalR connection");
+            console.log("SignalR Connection Re-Registered successfully.");
+          } catch (err) {
+            console.error("Error re-registering connection:", err);
+            setRegistrationStatus("failed");
           }
+        }
+        return;
+      }
+
+      setConnectionState("connecting");
+      try {
+        if (!auth?.accessToken) {
+          throw new Error("No access token available for starting connection.");
+        }
+        await connection.start();
+        console.log("SignalR Connected successfully.");
+        setConnectionState("connected");
+
+        if (auth?.user?.id) {
+          console.log("Attempting to register connection post-start.");
+          await connection.invoke("RegisterConnection");
+          setRegistrationStatus("registered");
+          console.log("SignalR Connection Registered post-start.");
         } else {
-          console.log(
-            "SignalR connection is not in 'Disconnected' state, current state:",
-            connection.state
+          setRegistrationStatus("pending"); // User ID might not be available yet, will be picked up by useEffect
+          console.warn(
+            "User ID not available immediately after SignalR connection, registration pending."
           );
         }
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Unknown connection error";
         console.error("SignalR Connection Error: ", {
           error: err,
           userId: auth?.user?.id,
-          connectionState,
+          connectionState: "error", // local state before setting
           timestamp: new Date().toISOString(),
         });
         setConnectionState("error");
         setRegistrationStatus("failed");
-        handleNotification({
-          type: "Error",
-          title: "Connection Error",
-          message: errorMessage,
-          timestamp: new Date(),
-          data: { severity: "error" },
-        });
-
-        // Retry connection after delay
-        setTimeout(() => {
-          if (auth?.accessToken) {
-            startConnection(connection);
-          }
-        }, 5000);
+        // It's generally better to let withAutomaticReconnect handle retries
+        // unless specific UI feedback or logic is needed for manual retries.
+        // If you keep setTimeout, ensure it doesn't conflict with withAutomaticReconnect.
+        // For now, relying on withAutomaticReconnect.
       }
     },
-    [auth]
+    [auth?.accessToken, auth?.user?.id, registrationStatus] // Added registrationStatus
   );
 
-  // Register the new simplified notification handlers
+  // Register SignalR event handlers
   useEffect(() => {
     if (!hubConnection) return;
 
-    // Main notification handler for user-specific notifications
+    // Main notification handler for all server-sent notifications
+    // The backend uses "ReceiveNotification" for user, role, and other notifications.
     hubConnection.on(
       "ReceiveNotification",
       (notification: GenericNotificationDto) => {
+        // Ensure GenericNotificationDto matches server's NotificationDto
+        console.log("Received notification from server:", notification);
         handleNotification(notification);
       }
     );
 
-    // Role-based notification handler
-    hubConnection.on(
-      "ReceiveRoleNotification",
-      (notification: GenericNotificationDto) => {
-        handleNotification(notification);
-      }
-    );
+    // REMOVED: hubConnection.on("ReceiveRoleNotification", ...);
+    // REMOVED: hubConnection.on("ReceiveBroadcastNotification", ...);
+    // Backend sends all notifications via "ReceiveNotification"
 
-    // Broadcast notification handler
-    hubConnection.on(
-      "ReceiveBroadcastNotification",
-      (notification: GenericNotificationDto) => {
-        handleNotification(notification);
-      }
-    );
-
-    // Handle reconnection
-    hubConnection.onreconnected(() => {
+    hubConnection.onreconnected(async (connectionId?: string) => {
+      console.log("SignalR Reconnected. Connection ID:", connectionId);
       setConnectionState("connected");
-      // Re-register connection
-      hubConnection
-        .invoke("RegisterConnection")
-        .catch((err) =>
-          console.error("Error re-registering connection: ", err)
+      setRegistrationStatus("pending"); // Set to pending to trigger re-registration
+      // Re-registration will be handled by the useEffect watching [hubConnection, connectionState, auth?.user?.id, registrationStatus]
+      // or by startConnection if it's called during reconnect logic.
+      // Explicitly invoking here can also work if the above effect doesn't cover all cases.
+      if (auth?.user?.id) {
+        try {
+          await hubConnection.invoke("RegisterConnection");
+          setRegistrationStatus("registered");
+          console.log(
+            "SignalR Connection Re-Registered successfully onreconnected."
+          );
+        } catch (err) {
+          console.error("Error re-registering connection onreconnected: ", err);
+          setRegistrationStatus("failed");
+        }
+      } else {
+        console.warn(
+          "Cannot re-register onreconnected: User ID not available."
         );
+      }
     });
 
-    hubConnection.onreconnecting(() => {
+    hubConnection.onreconnecting((error?: Error) => {
+      console.log("SignalR Reconnecting...", error || "");
       setConnectionState("reconnecting");
+      setRegistrationStatus("pending"); // Connection is not stable yet
     });
 
-    hubConnection.onclose(() => {
+    hubConnection.onclose((error?: Error) => {
+      console.log("SignalR Connection Closed.", error || "");
       setConnectionState("disconnected");
+      setRegistrationStatus("pending"); // Reset registration status on close
     });
 
     return () => {
-      // Unregister all handlers when component unmounts
+      // Unregister all handlers when component unmounts or hubConnection changes
       hubConnection.off("ReceiveNotification");
-      hubConnection.off("ReceiveRoleNotification");
-      hubConnection.off("ReceiveBroadcastNotification");
+      // No need to off "ReceiveRoleNotification" or "ReceiveBroadcastNotification" as they were removed
+      hubConnection.off("onreconnected");
+      hubConnection.off("onreconnecting");
+      hubConnection.off("onclose");
     };
-  }, [hubConnection]);
+  }, [hubConnection, auth?.user?.id]); // Added auth.user.id for re-registration logic
 
   const determineNotificationGroup = (type: string): NotificationGroup => {
     if (
@@ -276,21 +330,14 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   };
 
   const determineNotificationPriority = (
-    notification: GenericNotificationDto
+    notification: GenericNotificationDto // Using GenericNotificationDto as received from server
   ): NotificationPriority => {
-    // Check if priority is explicitly set in the data
     if (notification.data && notification.data.priority) {
-      const dataPriority = notification.data.priority.toLowerCase();
-      if (
-        dataPriority === "high" ||
-        dataPriority === "medium" ||
-        dataPriority === "low"
-      ) {
+      const dataPriority = String(notification.data.priority).toLowerCase();
+      if (["high", "medium", "low"].includes(dataPriority)) {
         return dataPriority as NotificationPriority;
       }
     }
-
-    // High priority for critical equipment issues and urgent matters
     if (
       notification.type === "ConditionIssue" ||
       notification.type === "Error" ||
@@ -301,8 +348,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     ) {
       return "high";
     }
-
-    // Medium priority for important but not critical notifications
     if (
       notification.type === "LowStock" ||
       notification.type.includes("Status") ||
@@ -313,31 +358,33 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     ) {
       return "medium";
     }
-
-    // Low priority for routine updates and informational notifications
     return "low";
   };
 
   const handleNotification = useCallback(
-    (notification: GenericNotificationDto) => {
-      const group = determineNotificationGroup(notification.type);
-      const priority = determineNotificationPriority(notification);
+    (notificationDto: GenericNotificationDto) => {
+      // Parameter is GenericNotificationDto
+      const group = determineNotificationGroup(notificationDto.type);
+      const priority = determineNotificationPriority(notificationDto);
 
       const newNotification: Notification = {
-        id: Date.now(),
-        type: notification.type,
-        title: notification.title,
-        message: notification.message,
-        data: notification.data || {},
-        timestamp: new Date(notification.timestamp),
+        id: Date.now() + Math.random(), // Add Math.random for better uniqueness if ms are same
+        type: notificationDto.type,
+        title: notificationDto.title,
+        message: notificationDto.message,
+        data: notificationDto.data || {},
+        timestamp: new Date(notificationDto.timestamp), // Ensure Date type
         read: false,
         group,
         priority,
       };
 
-      setNotifications((prev) => [newNotification, ...prev]);
+      setNotifications((prev) => [
+        newNotification,
+        ...prev.slice(0, MAX_STORED_NOTIFICATIONS - 1),
+      ]);
     },
-    []
+    [] // determineNotificationGroup and determineNotificationPriority are stable
   );
 
   const getNotificationsByGroup = useCallback(
@@ -384,112 +431,168 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     setNotifications([]);
   }, []);
 
-  // Methods to send notifications to the server
-  const sendNotification = useCallback(
+  // Generic method to send notifications to the server
+  const sendNotificationToServer = useCallback(
+    // Renamed for clarity
     async (methodName: string, ...args: any[]): Promise<boolean> => {
-      if (hubConnection && connectionState === "connected") {
+      if (
+        hubConnection &&
+        hubConnection.state === signalR.HubConnectionState.Connected &&
+        registrationStatus === "registered"
+      ) {
         try {
           await hubConnection.invoke(methodName, ...args);
+          console.log(`Successfully invoked ${methodName} on server.`);
           return true;
         } catch (error) {
-          console.error(`Error in ${methodName}:`, {
+          console.error(`Error invoking ${methodName} on server:`, {
             error,
             args,
-            connectionState,
+            connectionState: hubConnection.state,
+            registrationStatus,
             userId: auth?.user?.id,
             timestamp: new Date().toISOString(),
           });
+          // Optionally, create a local error notification for the user
           handleNotification({
             type: "Error",
-            title: `Failed to send ${methodName}`,
+            title: `Failed to send: ${methodName}`,
             message:
-              error instanceof Error ? error.message : "Unknown error occurred",
-            timestamp: new Date(),
-            data: { severity: "error" },
+              error instanceof Error ? error.message : "Unknown server error",
+            timestamp: new Date(), // Use Date object
+            data: { severity: "error", originalMethod: methodName },
           });
           return false;
         }
       } else {
-        console.warn("Cannot send notification: Hub not connected", {
-          methodName,
-          connectionState,
-          hasHub: !!hubConnection,
+        console.warn(
+          "Cannot send notification: Hub not connected or not registered.",
+          {
+            methodName,
+            connectionState: hubConnection?.state,
+            registrationStatus,
+            hasHub: !!hubConnection,
+          }
+        );
+        // Optionally, create a local warning notification
+        handleNotification({
+          type: "Warning",
+          title: "Cannot Send Notification",
+          message:
+            "Connection to the notification server is not active. Please try again later.",
+          timestamp: new Date(), // Use Date object
+          data: { severity: "warning" },
         });
         return false;
       }
     },
-    [hubConnection, connectionState, auth?.user?.id]
+    [hubConnection, registrationStatus, auth?.user?.id, handleNotification] // Added handleNotification
   );
 
-  // New simplified notification methods
+  // --- Client-to-Server Notification Methods ---
+
   const notifyUser = useCallback(
-    (
+    async (
       userId: number,
       type: string,
       title: string,
       message: string,
-      data?: any
-    ) => {
-      return sendNotification(
-        "NotifyUser",
+      data?: Record<string, any>
+    ): Promise<boolean> => {
+      const notificationDto: ClientNotificationDto = {
+        Type: type,
+        Title: title,
+        Message: message,
+        Timestamp: new Date().toISOString(),
+        Data: data || {},
+      };
+      // Server's Hub Method: public async Task SendUserNotification(int userId, NotificationDto notification)
+      return sendNotificationToServer(
+        "SendUserNotification", // Corrected method name
         userId,
-        type,
-        title,
-        message,
-        data || {}
+        notificationDto // Pass DTO as the second argument
       );
     },
-    [sendNotification]
+    [sendNotificationToServer]
   );
 
   const notifyRole = useCallback(
-    (
+    async (
       role: string,
       type: string,
       title: string,
       message: string,
-      data?: any
-    ) => {
-      return sendNotification(
-        "NotifyRole",
+      data?: Record<string, any>
+    ): Promise<boolean> => {
+      const notificationDto: ClientNotificationDto = {
+        Type: type,
+        Title: title,
+        Message: message,
+        Timestamp: new Date().toISOString(),
+        Data: data || {},
+      };
+      // Server's Hub Method: public async Task SendRoleNotification(string role, NotificationDto notification)
+      return sendNotificationToServer(
+        "SendRoleNotification", // Corrected method name
         role,
-        type,
-        title,
-        message,
-        data || {}
+        notificationDto // Pass DTO as the second argument
       );
     },
-    [sendNotification]
+    [sendNotificationToServer]
   );
 
   const notifyBroadcast = useCallback(
-    (type: string, title: string, message: string, data?: any) => {
-      return sendNotification(
-        "NotifyBroadcast",
-        type,
-        title,
-        message,
-        data || {}
+    async (
+      type: string,
+      title: string,
+      message: string,
+      data?: Record<string, any>
+    ): Promise<boolean> => {
+      const notificationDto: ClientNotificationDto = {
+        Type: type,
+        Title: title,
+        Message: message,
+        Timestamp: new Date().toISOString(),
+        Data: data || {},
+      };
+      // IMPORTANT: "SendBroadcastNotification" method needs to be implemented on the backend NotificationHub.
+      // Example backend hub method:
+      // public async Task SendBroadcastNotification(NotificationDto notification)
+      // {
+      //     await Clients.All.ReceiveNotification(notification); // Or a specific group for broadcasts
+      // }
+      console.warn(
+        "notifyBroadcast called. Ensure 'SendBroadcastNotification' method exists on the backend SignalR Hub and is configured to broadcast as intended."
+      );
+      return sendNotificationToServer(
+        "SendBroadcastNotification",
+        notificationDto // Pass DTO as the argument
       );
     },
-    [sendNotification]
+    [sendNotificationToServer]
   );
 
   const value: NotificationContextType = {
     notifications,
     connectionState,
+    registrationStatus, // Added for transparency
     markAsRead,
     markAllAsRead,
     clearNotification,
     clearAllNotifications,
-    sendNotification,
+    // sendNotification: sendNotificationToServer, // Expose generic sender if needed, or rely on specific methods
     getNotificationsByGroup,
     getNotificationsByPriority,
-
-    // New simplified notification methods
     notifyUser,
     notifyRole,
     notifyBroadcast,
+    // Forcing a reconnect attempt if needed (use with caution, SignalR has auto-reconnect)
+    // attemptReconnect: () => {
+    //   if (hubConnection && hubConnection.state === signalR.HubConnectionState.Disconnected) {
+    //     console.log("Attempting manual reconnect...");
+    //     startConnection(hubConnection);
+    //   }
+    // }
   };
 
   return (

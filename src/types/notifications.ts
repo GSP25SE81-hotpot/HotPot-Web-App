@@ -6,44 +6,16 @@ export interface GenericNotificationDto {
   type: string;
   title: string;
   message: string;
-  timestamp: Date;
+  timestamp: Date; // Stays as Date, client will receive string and parse to Date
   data?: any;
 }
 
-// Legacy notification DTOs (kept for backward compatibility)
-export interface EquipmentAlertDto {
-  conditionLogId: number;
-  equipmentType: string;
-  equipmentName: string;
-  issueName: string;
-  description: string;
-  scheduleType: string;
-}
-
-export interface EquipmentStatusDto {
-  equipmentType: string;
-  equipmentId: number;
-  equipmentName: string;
-  isAvailable: boolean;
-  reason: string;
-}
-
-export interface StockAlertDto {
-  equipmentType: string;
-  equipmentName: string;
-  currentQuantity: number;
-  threshold: number;
-}
-
-export interface FeedbackResponseDto {
-  feedbackId: number;
-  responseMessage: string;
-  responderName: string;
-}
-
-export interface ScheduleUpdateDto {
-  userId: number;
-  shiftDate: Date;
+export interface ClientNotificationDto {
+  Type: string;
+  Title: string;
+  Message: string;
+  Timestamp: string; // ISO string format for DateTime
+  Data: Record<string, any>;
 }
 
 export type NotificationPriority = "high" | "medium" | "low";
@@ -74,17 +46,19 @@ export type ConnectionState =
   | "connected"
   | "disconnected"
   | "reconnecting"
+  | "connecting" // Added "connecting"
   | "error";
 
 // Notification context type
 export interface NotificationContextType {
   notifications: Notification[];
   connectionState: ConnectionState;
+  registrationStatus: "pending" | "registered" | "failed"; // Added registrationStatus
   markAsRead: (notificationId: number) => void;
   markAllAsRead: () => void;
   clearNotification: (notificationId: number) => void;
   clearAllNotifications: () => void;
-  sendNotification: (methodName: string, ...args: any[]) => Promise<boolean>;
+  // sendNotification: (methodName: string, ...args: any[]) => Promise<boolean>; // This was commented out in the provided context, keeping it so. If needed, it can be uncommented.
   getNotificationsByGroup: (group: NotificationGroup) => Notification[];
   getNotificationsByPriority: (
     priority: NotificationPriority
