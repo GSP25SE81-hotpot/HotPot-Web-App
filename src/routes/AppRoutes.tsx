@@ -38,7 +38,6 @@ import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowS
 import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/ManageEquipmentStockPage";
 import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
 import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
-import { EquipmentAvailabilityPage } from "../pages/Manager/ManageRental/EquipmentAvailabilityPage";
 import { CurrentAssignmentsPage } from "../pages/Manager/ManagerRentalReturnPage/CurrentAssignmentsPage";
 import { LateFeeCalculatorPage } from "../pages/Manager/ManagerRentalReturnPage/LateFeeCalculatorPage";
 import { ManagerRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManagerRentalReturnPage";
@@ -56,6 +55,7 @@ import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
 import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliveryPage";
 import ShippingListPage from "../pages/Staff/Shipping/ShippingListPage";
 import { ManageVehiclePage } from "../pages/Manager/ManageVehicle/ManageVehiclePage";
+import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock/EquipmentAvailabilityPage";
 
 const AppRoute: React.FC = () => {
   return (
