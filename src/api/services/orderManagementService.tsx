@@ -50,9 +50,9 @@ export const orderManagementService = {
   },
 
   // New method for estimating order size
-  estimateOrderSize: async (orderId: number): Promise<OrderSizeDTO> => {
+  estimateOrderSize: async (orderCode: string): Promise<OrderSizeDTO> => {
     const response = await axiosClient.get<any, ApiResponse<OrderSizeDTO>>(
-      `${API_URL}/estimate-size/${orderId}`
+      `${API_URL}/estimate-size/${orderCode}`
     );
     return response.data;
   },

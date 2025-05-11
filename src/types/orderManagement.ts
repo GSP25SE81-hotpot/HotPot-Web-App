@@ -123,7 +123,7 @@ export interface OrderDetailDTO {
 
 export interface PendingDeliveryDTO {
   shippingOrderId: number;
-  orderId: string;
+  orderId: string; // Changed to string (orderCode)
   deliveryTime?: string;
   deliveryNotes?: string;
   address: string;
@@ -137,7 +137,7 @@ export interface PendingDeliveryDTO {
 
 export interface StaffShippingOrderDTO {
   shippingOrderId: number;
-  orderId: string;
+  orderId: string; // Changed to string (orderCode)
   deliveryTime?: string;
   deliveryNotes?: string;
   isDelivered: boolean;
@@ -191,19 +191,19 @@ export interface DeliveryTimeUpdateDTO {
 }
 
 export interface OrderSizeDTO {
-  orderId: number;
+  orderCode: string; // Changed to string (orderCode)
   size: OrderSize;
   suggestedVehicleType: VehicleType;
 }
 
 // Request interfaces
 export interface AllocateOrderRequest {
-  orderId: number;
+  orderCode: string; // Changed to string (orderCode)
   staffId: number;
 }
 
 export interface AllocateOrderWithVehicleRequest {
-  orderId: number;
+  orderCode: string; // Changed to string (orderCode)
   staffId: number;
   taskType: StaffTaskType;
   vehicleId?: number;
@@ -278,7 +278,7 @@ export interface UnallocatedOrderDTO {
 }
 
 export interface StaffAssignmentRequest {
-  orderId: number;
+  orderCode: string; // Changed to string (orderCode)
   staffId: number;
   taskType: StaffTaskType;
   vehicleId?: number;
@@ -291,7 +291,6 @@ export interface StaffAssignmentResponse {
   staffName: string;
   status: OrderStatus;
   assignedAt: string;
-
   // Shipping-specific properties
   shippingOrderId?: number;
   isDelivered?: boolean;
@@ -299,7 +298,6 @@ export interface StaffAssignmentResponse {
   vehicleName?: string;
   vehicleType?: VehicleType;
   orderSize?: OrderSize;
-
   // Task type that was performed
   taskType: StaffTaskType;
 }

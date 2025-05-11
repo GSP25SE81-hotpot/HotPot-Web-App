@@ -142,34 +142,28 @@ const getVietnameseTaskTypeLabel = (type: StaffTaskType): string => {
 const OrdersByStatusList: React.FC = () => {
   // State for active tab
   const [activeTab, setActiveTab] = useState(0);
-
   // State for orders data
   const [orders, setOrders] = useState<OrderWithDetailsDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   // Pagination state
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
-
   // Sorting state
   const [sortBy, setSortBy] = useState<string>("date");
   const [sortDescending, setSortDescending] = useState(true);
-
   // Filtering state
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [fromDate, setFromDate] = useState<Date | null>(null);
   const [toDate, setToDate] = useState<Date | null>(null);
   const [customerId, setCustomerId] = useState<number | null>(null);
-
   // Allocation dialog state
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedOrder, setSelectedOrder] =
     useState<OrderWithDetailsDTO | null>(null);
   const [allocating, setAllocating] = useState(false);
-
   // Staff selection state
   const [selectedTaskTypes, setSelectedTaskTypes] = useState<StaffTaskType[]>([
     StaffTaskType.Preparation,
@@ -181,17 +175,14 @@ const OrdersByStatusList: React.FC = () => {
   const [selectedPrepStaffId, setSelectedPrepStaffId] = useState<number>(0);
   const [selectedShippingStaffId, setSelectedShippingStaffId] =
     useState<number>(0);
-
   // Vehicle selection state
   const [vehicles, setVehicles] = useState<VehicleDTO[]>([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(
     null
   );
-
   // Order size state
   const [orderSize, setOrderSize] = useState<OrderSizeDTO | null>(null);
   const [estimatingSize, setEstimatingSize] = useState(false);
-
   // Snackbar state
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -220,7 +211,6 @@ const OrdersByStatusList: React.FC = () => {
     try {
       setLoading(true);
       const status = tabToStatus[activeTab];
-
       // Create query params object
       const queryParams: Omit<OrderQueryParams, "status"> = {
         pageNumber,
@@ -232,12 +222,10 @@ const OrdersByStatusList: React.FC = () => {
         toDate: toDate ? toDate.toISOString() : undefined,
         customerId: customerId || undefined,
       };
-
       const response = await orderManagementService.getOrdersByStatus(
         status,
         queryParams
       );
-
       // Update state with paginated data
       setOrders(response.items);
       setTotalCount(response.totalCount);
@@ -329,20 +317,17 @@ const OrdersByStatusList: React.FC = () => {
           : [];
         setPrepStaff(availablePrepStaff);
       }
-
       // Fetch shipping staff if that task type is selected
       if (selectedTaskTypes.includes(StaffTaskType.Shipping) && selectedOrder) {
-        // Pass the orderId to get context-specific availability for shipping
+        // Pass the orderCode to get context-specific availability for shipping
         const shippingStaffData = await staffService.getAvailableStaff(
-          StaffTaskType.Shipping,
-          Number(selectedOrder.orderId) // Convert string to number
+          StaffTaskType.Shipping
         );
         const availableShippingStaff = Array.isArray(shippingStaffData)
           ? shippingStaffData.filter(
               (staff) => staff.isAvailable === true && staff.isEligible === true
             )
           : [];
-
         // Sort the shipping staff to prioritize staff who prepared this order
         availableShippingStaff.sort((a, b) => {
           // Staff who prepared this order should be at the top
@@ -351,7 +336,6 @@ const OrdersByStatusList: React.FC = () => {
           // Then sort by assignment count (less busy staff first)
           return a.assignmentCount - b.assignmentCount;
         });
-
         setShippingStaff(availableShippingStaff);
       }
     } catch (err) {
@@ -388,13 +372,14 @@ const OrdersByStatusList: React.FC = () => {
     }
   };
 
-  // Estimate order size
-  const estimateOrderSize = async (orderId: number) => {
+  // Estimate order size - Updated to use orderCode (string)
+  const estimateOrderSize = async (orderCode: string) => {
     try {
       setEstimatingSize(true);
-      const sizeData = await orderManagementService.estimateOrderSize(orderId);
+      const sizeData = await orderManagementService.estimateOrderSize(
+        orderCode
+      );
       setOrderSize(sizeData);
-
       // Pre-select a vehicle based on the suggested vehicle type if available
       if (sizeData.suggestedVehicleType && vehicles.length > 0) {
         const suggestedVehicle = vehicles.find(
@@ -463,20 +448,16 @@ const OrdersByStatusList: React.FC = () => {
     setSelectedShippingStaffId(0);
     setSelectedVehicleId(null);
     setOrderSize(null);
-
     // Default to shipping task type for new allocations
     setSelectedTaskTypes([StaffTaskType.Shipping]);
-
     // Open dialog first
     setOpenDialog(true);
-
     // Then fetch data with the specific order context
     await fetchStaffMembers();
     await fetchAvailableVehicles();
-
     // Estimate order size after dialog is open
     if (order.orderId) {
-      estimateOrderSize(Number(order.orderId)); // Convert string to number
+      estimateOrderSize(order.orderId); // Now using orderCode (string)
     }
   };
 
@@ -487,7 +468,7 @@ const OrdersByStatusList: React.FC = () => {
     setOrderSize(null);
   };
 
-  // Handle allocate order
+  // Handle allocate order - Updated to use orderCode (string)
   const handleAllocateOrder = async () => {
     // Validate selections based on selected task types
     if (
@@ -503,28 +484,23 @@ const OrdersByStatusList: React.FC = () => {
       });
       return;
     }
-
     if (!selectedOrder) {
       return;
     }
-
     try {
       setAllocating(true);
-
       // Track successful assignments
       const successfulAssignments: StaffTaskType[] = [];
-
       // Assign preparation staff if selected
       if (
         selectedTaskTypes.includes(StaffTaskType.Preparation) &&
         selectedPrepStaffId
       ) {
         const prepRequest: StaffAssignmentRequest = {
-          orderId: Number(selectedOrder.orderId), // Convert string to number
+          orderCode: selectedOrder.orderId, // Now using orderCode (string)
           staffId: selectedPrepStaffId,
           taskType: StaffTaskType.Preparation,
         };
-
         try {
           await orderManagementService.assignStaffToOrder(prepRequest);
           successfulAssignments.push(StaffTaskType.Preparation);
@@ -533,19 +509,17 @@ const OrdersByStatusList: React.FC = () => {
           // Continue with shipping assignment even if preparation assignment fails
         }
       }
-
       // Assign shipping staff if selected
       if (
         selectedTaskTypes.includes(StaffTaskType.Shipping) &&
         selectedShippingStaffId
       ) {
         const shippingRequest: StaffAssignmentRequest = {
-          orderId: Number(selectedOrder.orderId), // Convert string to number
+          orderCode: selectedOrder.orderId, // Now using orderCode (string)
           staffId: selectedShippingStaffId,
           taskType: StaffTaskType.Shipping,
           vehicleId: selectedVehicleId || undefined,
         };
-
         try {
           await orderManagementService.assignStaffToOrder(shippingRequest);
           successfulAssignments.push(StaffTaskType.Shipping);
@@ -554,10 +528,8 @@ const OrdersByStatusList: React.FC = () => {
           // Continue with showing results even if shipping assignment fails
         }
       }
-
       // Refresh the data after allocation
       fetchOrders();
-
       // Show appropriate success message based on successful assignments
       if (successfulAssignments.length === 0) {
         setSnackbar({
@@ -582,7 +554,6 @@ const OrdersByStatusList: React.FC = () => {
           severity: "success",
         });
       }
-
       handleCloseDialog();
     } catch (err) {
       console.error("Error allocating order:", err);
@@ -601,16 +572,13 @@ const OrdersByStatusList: React.FC = () => {
   // Get filtered vehicles based on order size
   const getFilteredVehicles = () => {
     if (!orderSize) return vehicles;
-
     return vehicles.filter((vehicle) => {
       // For small orders, both scooters and cars are fine
       if (orderSize.size === OrderSize.Small) return true;
-
       // For large orders, only cars are suitable
       if (orderSize.size === OrderSize.Large) {
         return vehicle.type === VehicleType.Car;
       }
-
       return true;
     });
   };
@@ -706,9 +674,7 @@ const OrdersByStatusList: React.FC = () => {
     if (order.status !== OrderStatus.Shipping || !order.vehicleInfo) {
       return null;
     }
-
     const vehicleInfo = order.vehicleInfo;
-
     return (
       <Tooltip
         title={`${vehicleInfo?.vehicleName} - ${vehicleInfo?.licensePlate}`}
@@ -801,9 +767,7 @@ const OrdersByStatusList: React.FC = () => {
             />
           </FormGroup>
         </Box>
-
         <Divider sx={{ my: 2 }} />
-
         {/* Preparation Staff Selection - Only show if preparation task type is selected */}
         {selectedTaskTypes.includes(StaffTaskType.Preparation) && (
           <Box sx={{ mt: 2, mb: 3 }}>
@@ -896,12 +860,10 @@ const OrdersByStatusList: React.FC = () => {
             </FormControl>
           </Box>
         )}
-
         {selectedTaskTypes.includes(StaffTaskType.Preparation) &&
           selectedTaskTypes.includes(StaffTaskType.Shipping) && (
             <Divider sx={{ my: 2 }} />
           )}
-
         {/* Shipping Staff and Vehicle Selection - Only show if shipping task type is selected */}
         {selectedTaskTypes.includes(StaffTaskType.Shipping) && (
           <>
@@ -964,7 +926,6 @@ const OrdersByStatusList: React.FC = () => {
                 </Typography>
               )}
             </Box>
-
             {/* Shipping Staff Selection */}
             <Box sx={{ mt: 2, mb: 3 }}>
               <Typography
@@ -1080,7 +1041,6 @@ const OrdersByStatusList: React.FC = () => {
                 </Select>
               </FormControl>
             </Box>
-
             {/* Vehicle Selection */}
             <Box sx={{ mt: 2 }}>
               <Typography
@@ -1248,7 +1208,6 @@ const OrdersByStatusList: React.FC = () => {
           <StyledTab label="Đã hủy" />
           <StyledTab label="Đang trả" />
         </StyledTabs>
-
         {/* Search and filter toolbar */}
         <Box
           sx={{
@@ -1338,10 +1297,8 @@ const OrdersByStatusList: React.FC = () => {
             </Tooltip>
           </Box>
         </Box>
-
         {/* Filters section */}
         {renderFilters()}
-
         {/* Loading state */}
         {loading && orders.length === 0 ? (
           <LoadingContainer>
@@ -1484,13 +1441,12 @@ const OrdersByStatusList: React.FC = () => {
                               </Button>
                             </Tooltip>
                           )}
-
                           {/* View Details Button */}
                           <Tooltip title="Xem chi tiết đơn hàng">
                             <ViewDetailsButton
                               size="small"
                               onClick={() => {
-                                // Navigate to order details
+                                // Navigate to order details - using orderCode (string) now
                                 window.location.href = `/orders/${order.orderId}`;
                               }}
                             >
@@ -1504,7 +1460,6 @@ const OrdersByStatusList: React.FC = () => {
                 </TableBody>
               </Table>
             </StyledTableContainer>
-
             {/* Pagination */}
             <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
               <TablePagination
@@ -1532,10 +1487,8 @@ const OrdersByStatusList: React.FC = () => {
           </>
         )}
       </StyledPaper>
-
       {/* Allocation Dialog */}
       {renderAllocationDialog()}
-
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
