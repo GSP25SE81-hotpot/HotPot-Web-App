@@ -179,30 +179,65 @@ export const menuItems: MenuItemLayout[] = [
   {
     role: Role.Staff,
     menu: [
-      //Assign Order
+      // Order Management
       {
         icon: <ListAltIcon />,
         label: config.Vntext.SideBar.Ordes,
         path: staffRoutes.assignOrder,
       },
-      //Shipping List
+      // Shipping Management
       {
         label: config.Vntext.SideBar.shippingList,
         icon: <LocalShippingIcon />,
         path: staffRoutes.shippingOrder,
       },
-      //dashboard
+      // My Assignments
       {
-        icon: <DashboardIcon />,
+        icon: <AssignmentIcon />,
         label: "Công việc",
         path: config.staffRoutes.staffMyAssignment,
-        // role: AccessType.ADMIN_ACCESS,
       },
+      // Payment Management
       {
         label: "Quản lý thanh toán",
         icon: <PaymentIcon />,
         path: staffRoutes.paymentManagement,
       },
+      // Rental Management
+      {
+        label: "Lấy thiết bị thuê",
+        icon: <Iconify icon="mdi:package-variant-closed" />,
+        path: staffRoutes.pickupRental,
+        // children: [
+        //   {
+        //     label: "Lấy thiết bị thuê",
+        //     icon: <Iconify icon="mdi:package-variant-closed" />,
+        //     path: staffRoutes.pickupRental,
+        //   },
+        //   // {
+        //   //   label: "Ghi nhận trả thiết bị",
+        //   //   icon: <Iconify icon="mdi:keyboard-return" />,
+        //   //   path: staffRoutes.recordReturn,
+        //   // },
+        //   // {
+        //   //   label: "Kiểm tra thiết bị sau trả",
+        //   //   icon: <Iconify icon="mdi:clipboard-check-outline" />,
+        //   //   path: staffRoutes.checkDeviceAfterReturn,
+        //   // },
+        // ],
+      },
+      // Order History
+      {
+        label: "Lịch sử đơn hàng",
+        icon: <Iconify icon="mdi:history" />,
+        path: staffRoutes.orderHistory,
+      },
+      // Proof of Delivery
+      // {
+      //   label: "Bằng chứng giao hàng",
+      //   icon: <Iconify icon="mdi:file-document-outline" />,
+      //   path: staffRoutes.proofOfDelivery,
+      // },
     ],
   },
 ];

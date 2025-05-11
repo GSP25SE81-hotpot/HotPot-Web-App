@@ -3,11 +3,11 @@
 
 // New simplified notification DTO
 export interface GenericNotificationDto {
-  type: string;
-  title: string;
-  message: string;
-  timestamp: Date; // Stays as Date, client will receive string and parse to Date
-  data?: any;
+  Type: string;
+  Title: string;
+  Message: string;
+  Timestamp: string; // Server sends string, client will parse to Date
+  Data?: Record<string, any>;
 }
 
 export interface ClientNotificationDto {
@@ -29,11 +29,29 @@ export type NotificationGroup =
   | "system";
 
 // Updated frontend notification model
+export const notificationTranslations: Record<string, { title: string; message: string }> = {
+  "ConditionIssue": {
+    title: "Vấn đề về thiết bị",
+    message: "Thiết bị {equipmentName} có vấn đề: {issue}"
+  },
+  "LowStock": {
+    title: "Hàng tồn kho thấp",
+    message: "Thiết bị {equipmentName} sắp hết hàng. Số lượng hiện tại: {currentQuantity}"
+  },
+  "FeedbackResponse": {
+    title: "Phản hồi từ quản lý",
+    message: "Bạn đã nhận được phản hồi về góp ý của mình"
+  },
+  // Add more translations as needed
+};
+
 export interface Notification {
   id: number;
   type: string;
   title: string;
   message: string;
+  translatedTitle?: string; // Add translated fields
+  translatedMessage?: string;
   data: any;
   timestamp: Date;
   read: boolean;

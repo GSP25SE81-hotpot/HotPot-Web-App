@@ -332,29 +332,29 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   const determineNotificationPriority = (
     notification: GenericNotificationDto // Using GenericNotificationDto as received from server
   ): NotificationPriority => {
-    if (notification.data && notification.data.priority) {
-      const dataPriority = String(notification.data.priority).toLowerCase();
+    if (notification.Data && notification.Data.priority) {
+      const dataPriority = String(notification.Data.priority).toLowerCase();
       if (["high", "medium", "low"].includes(dataPriority)) {
         return dataPriority as NotificationPriority;
       }
     }
     if (
-      notification.type === "ConditionIssue" ||
-      notification.type === "Error" ||
-      notification.type === "OutOfStock" ||
-      notification.type === "Emergency" ||
-      notification.type.includes("Critical") ||
-      notification.type.includes("Urgent")
+      notification.Type === "ConditionIssue" ||
+      notification.Type === "Error" ||
+      notification.Type === "OutOfStock" ||
+      notification.Type === "Emergency" ||
+      notification.Type.includes("Critical") ||
+      notification.Type.includes("Urgent")
     ) {
       return "high";
     }
     if (
-      notification.type === "LowStock" ||
-      notification.type.includes("Status") ||
-      notification.type === "FeedbackResponse" ||
-      notification.type === "ReplacementVerified" ||
-      notification.type === "ReplacementCompleted" ||
-      notification.type === "DirectMessage"
+      notification.Type === "LowStock" ||
+      notification.Type.includes("Status") ||
+      notification.Type === "FeedbackResponse" ||
+      notification.Type === "ReplacementVerified" ||
+      notification.Type === "ReplacementCompleted" ||
+      notification.Type === "DirectMessage"
     ) {
       return "medium";
     }
@@ -363,17 +363,27 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
   const handleNotification = useCallback(
     (notificationDto: GenericNotificationDto) => {
-      // Parameter is GenericNotificationDto
-      const group = determineNotificationGroup(notificationDto.type);
+      // Check for duplicate notification before adding
+      const isDuplicate = notifications.some(
+        (n) => 
+          n.type === notificationDto.Type &&
+          n.title === notificationDto.Title &&
+          n.message === notificationDto.Message &&
+          new Date(n.timestamp).getTime() - new Date(notificationDto.Timestamp).getTime() < 1000
+      );
+
+      if (isDuplicate) return;
+
+      const group = determineNotificationGroup(notificationDto.Type);
       const priority = determineNotificationPriority(notificationDto);
 
       const newNotification: Notification = {
-        id: Date.now() + Math.random(), // Add Math.random for better uniqueness if ms are same
-        type: notificationDto.type,
-        title: notificationDto.title,
-        message: notificationDto.message,
-        data: notificationDto.data || {},
-        timestamp: new Date(notificationDto.timestamp), // Ensure Date type
+        id: Date.now() + Math.random(),
+        type: notificationDto.Type,
+        title: notificationDto.Title,
+        message: notificationDto.Message,
+        data: notificationDto.Data || {},
+        timestamp: new Date(notificationDto.Timestamp),
         read: false,
         group,
         priority,
@@ -455,12 +465,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
           });
           // Optionally, create a local error notification for the user
           handleNotification({
-            type: "Error",
-            title: `Failed to send: ${methodName}`,
-            message:
+            Type: "Error",
+            Title: `Failed to send: ${methodName}`,
+            Message:
               error instanceof Error ? error.message : "Unknown server error",
-            timestamp: new Date(), // Use Date object
-            data: { severity: "error", originalMethod: methodName },
+            Timestamp: new Date().toISOString(), // Convert Date to ISO string format
+            Data: { severity: "error", originalMethod: methodName },
           });
           return false;
         }
@@ -476,12 +486,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         );
         // Optionally, create a local warning notification
         handleNotification({
-          type: "Warning",
-          title: "Cannot Send Notification",
-          message:
+          Type: "Warning",
+          Title: "Cannot Send Notification",
+          Message:
             "Connection to the notification server is not active. Please try again later.",
-          timestamp: new Date(), // Use Date object
-          data: { severity: "warning" },
+          Timestamp: new Date().toISOString(), // Use Date object
+          Data: { severity: "warning" },
         });
         return false;
       }

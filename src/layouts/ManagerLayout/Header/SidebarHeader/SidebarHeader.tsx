@@ -41,6 +41,7 @@ import {
   Notification,
   NotificationGroup,
   NotificationPriority,
+  notificationTranslations,
 } from "../../../../types/notifications";
 import { menuItems } from "./MenuItems";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -143,7 +144,6 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
 
   const handleNotificationClick = (notification: Notification) => {
     markAsRead(notification.id);
-
     // Use config.adminRoutes for navigation
     switch (notification.type) {
       case "ConditionIssue":
@@ -192,7 +192,7 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
 
   const handleViewAllNotifications = () => {
     // Use config.adminRoutes or fallback to "/notifications"
-    navigate(config.adminRoutes.dashboard);
+    navigate("/notifications");
     handleNotificationClose();
   };
 
@@ -270,6 +270,28 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
       case "low":
         return "#4caf50";
     }
+  };
+
+  // Translate notification
+  const getTranslatedNotification = (notification: Notification) => {
+    const translation = notificationTranslations[notification.type] || {
+      title: notification.title,
+      message: notification.message,
+    };
+
+    // Replace placeholders with actual data
+    let translatedMessage = translation.message;
+    for (const [key, value] of Object.entries(notification.data || {})) {
+      translatedMessage = translatedMessage.replace(
+        new RegExp(`\\{${key}\\}`, "g"),
+        String(value)
+      );
+    }
+
+    return {
+      title: translation.title,
+      message: translatedMessage,
+    };
   };
 
   // Find menu items for the current user role
@@ -443,117 +465,122 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
               {/* Notification list */}
               {getFilteredNotifications().length > 0 ? (
                 <>
-                  {getFilteredNotifications().map((notification) => (
-                    <MenuItem
-                      key={notification.id}
-                      onClick={() => handleNotificationClick(notification)}
-                      sx={{
-                        py: 1.5,
-                        px: 2,
-                        borderBottom: 1,
-                        borderColor: "divider",
-                        backgroundColor: notification.read
-                          ? "transparent"
-                          : "action.hover",
-                        "&:hover": {
+                  {getFilteredNotifications().map((notification) => {
+                    const translated = getTranslatedNotification(notification);
+                    return (
+                      <MenuItem
+                        key={notification.id}
+                        onClick={() => handleNotificationClick(notification)}
+                        sx={{
+                          py: 1.5,
+                          px: 2,
+                          borderBottom: 1,
+                          borderColor: "divider",
                           backgroundColor: notification.read
-                            ? "action.hover"
-                            : "action.selected",
-                        },
-                      }}
-                    >
-                      <Box sx={{ display: "flex", width: "100%" }}>
-                        {/* Priority indicator */}
-                        <Box
-                          sx={{
-                            width: 4,
-                            borderRadius: 2,
-                            bgcolor: getPriorityColor(notification.priority),
-                            mr: 2,
-                            alignSelf: "stretch",
-                          }}
-                        />
-                        {/* Notification content */}
-                        <Box sx={{ flexGrow: 1 }}>
+                            ? "transparent"
+                            : "action.hover",
+                          "&:hover": {
+                            backgroundColor: notification.read
+                              ? "action.hover"
+                              : "action.selected",
+                          },
+                        }}
+                      >
+                        <Box sx={{ display: "flex", width: "100%" }}>
+                          {/* Priority indicator */}
                           <Box
                             sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              mb: 0.5,
-                            }}
-                          >
-                            {getNotificationIcon(notification.group)}
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                ml: 1,
-                                fontWeight: notification.read
-                                  ? "normal"
-                                  : "bold",
-                              }}
-                            >
-                              {notification.title}
-                            </Typography>
-                          </Box>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                              display: "-webkit-box",
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
-                            {notification.message}
-                          </Typography>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                              mt: 0.5,
-                            }}
-                          >
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              {formatTimestamp(notification.timestamp)}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                color: getPriorityColor(notification.priority),
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 0.5,
-                              }}
-                            >
-                              {notification.priority === "high" && (
-                                <PriorityHighIcon sx={{ fontSize: 14 }} />
-                              )}
-                              {notification.priority.charAt(0).toUpperCase() +
-                                notification.priority.slice(1)}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        {!notification.read && (
-                          <Box
-                            sx={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: "50%",
-                              bgcolor: "primary.main",
-                              ml: 1,
-                              mt: 0.8,
+                              width: 4,
+                              borderRadius: 2,
+                              bgcolor: getPriorityColor(notification.priority),
+                              mr: 2,
+                              alignSelf: "stretch",
                             }}
                           />
-                        )}
-                      </Box>
-                    </MenuItem>
-                  ))}
+                          {/* Notification content */}
+                          <Box sx={{ flexGrow: 1 }}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                mb: 0.5,
+                              }}
+                            >
+                              {getNotificationIcon(notification.group)}
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  ml: 1,
+                                  fontWeight: notification.read
+                                    ? "normal"
+                                    : "bold",
+                                }}
+                              >
+                                {translated.title}
+                              </Typography>
+                            </Box>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{
+                                display: "-webkit-box",
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: "vertical",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {translated.message}
+                            </Typography>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                                mt: 0.5,
+                              }}
+                            >
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {formatTimestamp(notification.timestamp)}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: getPriorityColor(
+                                    notification.priority
+                                  ),
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 0.5,
+                                }}
+                              >
+                                {notification.priority === "high" && (
+                                  <PriorityHighIcon sx={{ fontSize: 14 }} />
+                                )}
+                                {notification.priority.charAt(0).toUpperCase() +
+                                  notification.priority.slice(1)}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          {!notification.read && (
+                            <Box
+                              sx={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: "50%",
+                                bgcolor: "primary.main",
+                                ml: 1,
+                                mt: 0.8,
+                              }}
+                            />
+                          )}
+                        </Box>
+                      </MenuItem>
+                    );
+                  })}
                   <Box
                     sx={{
                       p: 1.5,
