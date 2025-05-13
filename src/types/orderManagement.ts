@@ -97,6 +97,15 @@ export interface OrderWithDetailsDTO {
   hasRentItems: boolean;
   userId: number;
   userName: string;
+
+  // Staff assignment status
+  isPreparationStaffAssigned: boolean;
+  isShippingStaffAssigned: boolean;
+
+  // Staff assignments
+  preparationAssignment?: StaffAssignmentSummaryDTO;
+  shippingAssignment?: StaffAssignmentSummaryDTO;
+
   shippingInfo?: ShippingInfoDTO;
   vehicleInfo?: VehicleInfoDto;
 }
@@ -113,6 +122,11 @@ export interface OrderDetailDTO {
   userId: number;
   userName: string;
   userPhone: string;
+
+  // Staff assignments
+  preparationAssignment?: StaffAssignmentDTO;
+  shippingAssignment?: StaffAssignmentDTO;
+
   shippingInfo?: ShippingDetailDTO;
   hasSellItems: boolean;
   hasRentItems: boolean;
@@ -305,4 +319,54 @@ export interface StaffAssignmentResponse {
 export enum StaffTaskType {
   Preparation = 1,
   Shipping = 2,
+  Pickup = 3,
+}
+
+export interface MultiStaffAssignmentRequest {
+  orderCode: string;
+  preparationStaffId: number;
+  shippingStaffId: number;
+  vehicleId?: number;
+}
+
+// Define the new response interface
+export interface MultiStaffAssignmentResponse {
+  orderId: number;
+  orderCode: string;
+  status: OrderStatus;
+
+  // Preparation staff details
+  preparationStaffId: number;
+  preparationStaffName: string;
+  preparationAssignmentId: number;
+  preparationAssignedAt: string;
+
+  // Shipping staff details
+  shippingStaffId: number;
+  shippingStaffName: string;
+  shippingAssignmentId: number;
+  shippingAssignedAt: string;
+
+  // Shipping details
+  shippingOrderId?: number;
+  isDelivered: boolean;
+  vehicleId?: number;
+  vehicleName?: string;
+  vehicleType?: VehicleType;
+  orderSize: OrderSize;
+}
+
+export interface StaffAssignmentDTO {
+  assignmentId: number;
+  staffId: number;
+  staffName: string;
+  taskType: StaffTaskType;
+  assignedDate: string;
+  completedDate?: string;
+}
+
+export interface StaffAssignmentSummaryDTO {
+  staffId: number;
+  staffName: string;
+  assignedDate: string;
 }

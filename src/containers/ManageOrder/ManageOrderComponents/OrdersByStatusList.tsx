@@ -1,36 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-// src/pages/OrderManagement/components/OrdersByStatusList.tsx
-import ClearIcon from "@mui/icons-material/Clear";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import InfoIcon from "@mui/icons-material/Info";
-import SearchIcon from "@mui/icons-material/Search";
-import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
-import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
-import BuildIcon from "@mui/icons-material/Build";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import {
   Alert,
   Box,
   Button,
-  Checkbox,
-  Chip,
   CircularProgress,
   Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  FormLabel,
   IconButton,
   InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
   Snackbar,
   Table,
   TableBody,
@@ -40,29 +16,24 @@ import {
   TableSortLabel,
   TextField,
   Tooltip,
-  Typography,
-  alpha,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
+import React, { useEffect, useState } from "react";
+import ClearIcon from "@mui/icons-material/Clear";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import InfoIcon from "@mui/icons-material/Info";
+import SearchIcon from "@mui/icons-material/Search";
+import { SelectChangeEvent } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import React, { useEffect, useState } from "react";
+
 import { orderManagementService } from "../../../api/Services/orderManagementService";
 import staffService from "../../../api/Services/staffService";
 import vehicleService from "../../../api/Services/vehicleService";
-import {
-  OrderQueryParams,
-  OrderSize,
-  OrderSizeDTO,
-  OrderStatus,
-  OrderWithDetailsDTO,
-  StaffAssignmentRequest,
-  StaffTaskType,
-  VehicleType,
-} from "../../../types/orderManagement";
-import { StaffAvailabilityDto } from "../../../types/staff";
-import { VehicleDTO } from "../../../types/vehicle";
+import OrderAllocationDialog from "./Dialog/OrderAllocationDialog";
+import StaffAssignmentStatus from "./StaffAssignmentStatus";
 import {
   ActionsContainer,
   CustomerName,
@@ -76,68 +47,29 @@ import {
   ShippingStatusChip,
   StyledHeaderCell,
   StyledPaper,
+  StyledTab,
   StyledTableCell,
   StyledTableContainer,
   StyledTableRow,
-  StyledTab,
   StyledTabs,
   UnallocatedChip,
   ViewDetailsButton,
 } from "../../../components/manager/styles/OrdersByStatusListStyles";
+import VehicleInfoDisplay from "./VehicleInfoDisplay";
+import {
+  MultiStaffAssignmentRequest,
+  OrderQueryParams,
+  OrderSize,
+  OrderSizeDTO,
+  OrderStatus,
+  OrderWithDetailsDTO,
+  StaffTaskType,
+  VehicleType,
+} from "../../../types/orderManagement";
+import { StaffAvailabilityDto } from "../../../types/staff";
+import { VehicleDTO } from "../../../types/vehicle";
 import { formatCurrency } from "../../../utils/formatters";
-import { DialogActionButton } from "../../../components/manager/styles/UnallocatedOrdersListStyles";
-
-// Helper function to get vehicle icon based on type
-const getVehicleIcon = (type?: VehicleType) => {
-  if (type === VehicleType.Car) {
-    return <DirectionsCarIcon fontSize="small" />;
-  } else if (type === VehicleType.Scooter) {
-    return <TwoWheelerIcon fontSize="small" />;
-  }
-  return undefined;
-};
-
-// Helper function to get vehicle type name in Vietnamese
-const getVehicleTypeName = (type?: VehicleType): string => {
-  if (type === VehicleType.Car) {
-    return "Ô tô";
-  } else if (type === VehicleType.Scooter) {
-    return "Xe máy";
-  }
-  return "Không có";
-};
-
-// Helper function to translate order status into Vietnamese
-const getVietnameseOrderStatusLabel = (status: OrderStatus): string => {
-  const statusMap = {
-    [OrderStatus.Pending]: "Chờ xử lý",
-    [OrderStatus.Processing]: "Đang xử lý",
-    [OrderStatus.Shipping]: "Đang giao",
-    [OrderStatus.Delivered]: "Đã giao",
-    [OrderStatus.Completed]: "Hoàn thành",
-    [OrderStatus.Cancelled]: "Đã hủy",
-    [OrderStatus.Returning]: "Đang trả",
-  } as Record<OrderStatus, string>;
-  return statusMap[status] || "Không xác định";
-};
-
-// Helper function to translate order size into Vietnamese
-const getVietnameseOrderSizeLabel = (size: OrderSize): string => {
-  const sizeMap: Record<OrderSize, string> = {
-    [OrderSize.Small]: "Nhỏ",
-    [OrderSize.Large]: "Lớn",
-  };
-  return sizeMap[size] || "Không xác định";
-};
-
-// Helper function to translate task type into Vietnamese
-const getVietnameseTaskTypeLabel = (type: StaffTaskType): string => {
-  const typeMap: Record<StaffTaskType, string> = {
-    [StaffTaskType.Preparation]: "Chuẩn bị",
-    [StaffTaskType.Shipping]: "Giao hàng",
-  };
-  return typeMap[type] || "Không xác định";
-};
+import { getVietnameseOrderStatusLabel } from "./utils/orderHelpers";
 
 const OrdersByStatusList: React.FC = () => {
   // State for active tab
@@ -444,12 +376,37 @@ const OrdersByStatusList: React.FC = () => {
   // Handle allocate button click
   const handleAllocateClick = async (order: OrderWithDetailsDTO) => {
     setSelectedOrder(order);
-    setSelectedPrepStaffId(0);
-    setSelectedShippingStaffId(0);
-    setSelectedVehicleId(null);
+    // Pre-select staff if already assigned
+    if (order.isPreparationStaffAssigned && order.preparationAssignment) {
+      setSelectedPrepStaffId(order.preparationAssignment.staffId);
+    } else {
+      setSelectedPrepStaffId(0);
+    }
+    if (order.isShippingStaffAssigned && order.shippingAssignment) {
+      setSelectedShippingStaffId(order.shippingAssignment.staffId);
+    } else {
+      setSelectedShippingStaffId(0);
+    }
+    // Pre-select vehicle if already assigned
+    if (order.vehicleInfo && order.vehicleInfo.vehicleId) {
+      setSelectedVehicleId(order.vehicleInfo.vehicleId);
+    } else {
+      setSelectedVehicleId(null);
+    }
     setOrderSize(null);
-    // Default to shipping task type for new allocations
-    setSelectedTaskTypes([StaffTaskType.Shipping]);
+    // Set task types based on what's already assigned
+    const taskTypes: StaffTaskType[] = [];
+    if (!order.isPreparationStaffAssigned) {
+      taskTypes.push(StaffTaskType.Preparation);
+    }
+    if (!order.isShippingStaffAssigned) {
+      taskTypes.push(StaffTaskType.Shipping);
+    }
+    // If both are already assigned, allow reassigning both
+    if (taskTypes.length === 0) {
+      taskTypes.push(StaffTaskType.Preparation, StaffTaskType.Shipping);
+    }
+    setSelectedTaskTypes(taskTypes);
     // Open dialog first
     setOpenDialog(true);
     // Then fetch data with the specific order context
@@ -457,7 +414,7 @@ const OrdersByStatusList: React.FC = () => {
     await fetchAvailableVehicles();
     // Estimate order size after dialog is open
     if (order.orderId) {
-      estimateOrderSize(order.orderId); // Now using orderCode (string)
+      estimateOrderSize(order.orderId);
     }
   };
 
@@ -489,71 +446,60 @@ const OrdersByStatusList: React.FC = () => {
     }
     try {
       setAllocating(true);
-      // Track successful assignments
-      const successfulAssignments: StaffTaskType[] = [];
-      // Assign preparation staff if selected
-      if (
+      // Check which task types are selected
+      const prepSelected =
         selectedTaskTypes.includes(StaffTaskType.Preparation) &&
-        selectedPrepStaffId
-      ) {
-        const prepRequest: StaffAssignmentRequest = {
-          orderCode: selectedOrder.orderId, // Now using orderCode (string)
-          staffId: selectedPrepStaffId,
-          taskType: StaffTaskType.Preparation,
-        };
-        try {
-          await orderManagementService.assignStaffToOrder(prepRequest);
-          successfulAssignments.push(StaffTaskType.Preparation);
-        } catch (err) {
-          console.error("Error assigning preparation staff:", err);
-          // Continue with shipping assignment even if preparation assignment fails
-        }
-      }
-      // Assign shipping staff if selected
-      if (
+        selectedPrepStaffId;
+      const shippingSelected =
         selectedTaskTypes.includes(StaffTaskType.Shipping) &&
-        selectedShippingStaffId
-      ) {
-        const shippingRequest: StaffAssignmentRequest = {
-          orderCode: selectedOrder.orderId, // Now using orderCode (string)
-          staffId: selectedShippingStaffId,
-          taskType: StaffTaskType.Shipping,
+        selectedShippingStaffId;
+      // If both preparation and shipping are selected, use the new endpoint
+      if (prepSelected && shippingSelected) {
+        const multiRequest: MultiStaffAssignmentRequest = {
+          orderCode: selectedOrder.orderId,
+          preparationStaffId: selectedPrepStaffId,
+          shippingStaffId: selectedShippingStaffId,
           vehicleId: selectedVehicleId || undefined,
         };
-        try {
-          await orderManagementService.assignStaffToOrder(shippingRequest);
-          successfulAssignments.push(StaffTaskType.Shipping);
-        } catch (err) {
-          console.error("Error assigning shipping staff:", err);
-          // Continue with showing results even if shipping assignment fails
-        }
-      }
-      // Refresh the data after allocation
-      fetchOrders();
-      // Show appropriate success message based on successful assignments
-      if (successfulAssignments.length === 0) {
-        setSnackbar({
-          open: true,
-          message: `Không thể phân công đơn hàng #${selectedOrder.orderId}`,
-          severity: "error",
-        });
-      } else if (successfulAssignments.length === 1) {
-        const taskTypeText =
-          successfulAssignments[0] === StaffTaskType.Preparation
-            ? "chuẩn bị"
-            : "giao hàng";
-        setSnackbar({
-          open: true,
-          message: `Đơn hàng #${selectedOrder.orderId} đã được phân công ${taskTypeText} thành công`,
-          severity: "success",
-        });
-      } else {
+        await orderManagementService.assignMultipleStaffToOrder(multiRequest);
         setSnackbar({
           open: true,
           message: `Đơn hàng #${selectedOrder.orderId} đã được phân công chuẩn bị và giao hàng thành công`,
           severity: "success",
         });
       }
+      // If only preparation is selected
+      else if (prepSelected) {
+        const multiRequest: MultiStaffAssignmentRequest = {
+          orderCode: selectedOrder.orderId,
+          preparationStaffId: selectedPrepStaffId,
+          shippingStaffId: 0, // Use 0 or another default value for unused staff
+          vehicleId: undefined,
+        };
+        await orderManagementService.assignMultipleStaffToOrder(multiRequest);
+        setSnackbar({
+          open: true,
+          message: `Đơn hàng #${selectedOrder.orderId} đã được phân công chuẩn bị thành công`,
+          severity: "success",
+        });
+      }
+      // If only shipping is selected
+      else if (shippingSelected) {
+        const multiRequest: MultiStaffAssignmentRequest = {
+          orderCode: selectedOrder.orderId,
+          preparationStaffId: 0, // Use 0 or another default value for unused staff
+          shippingStaffId: selectedShippingStaffId,
+          vehicleId: selectedVehicleId || undefined,
+        };
+        await orderManagementService.assignMultipleStaffToOrder(multiRequest);
+        setSnackbar({
+          open: true,
+          message: `Đơn hàng #${selectedOrder.orderId} đã được phân công giao hàng thành công`,
+          severity: "success",
+        });
+      }
+      // Refresh the data after allocation
+      fetchOrders();
       handleCloseDialog();
     } catch (err) {
       console.error("Error allocating order:", err);
@@ -666,527 +612,6 @@ const OrdersByStatusList: React.FC = () => {
         </Grid>
       </Box>
     </Collapse>
-  );
-
-  // Render vehicle information for shipping orders
-  const renderVehicleInfo = (order: OrderWithDetailsDTO) => {
-    // Only show vehicle info for shipping orders
-    if (order.status !== OrderStatus.Shipping || !order.vehicleInfo) {
-      return null;
-    }
-    const vehicleInfo = order.vehicleInfo;
-    return (
-      <Tooltip
-        title={`${vehicleInfo?.vehicleName} - ${vehicleInfo?.licensePlate}`}
-      >
-        <Chip
-          icon={
-            vehicleInfo?.vehicleType
-              ? getVehicleIcon(vehicleInfo.vehicleType)
-              : undefined
-          }
-          label={getVehicleTypeName(vehicleInfo?.vehicleType)}
-          size="small"
-          color={
-            vehicleInfo?.vehicleType === VehicleType.Car
-              ? "primary"
-              : "secondary"
-          }
-          sx={{ ml: 1, fontWeight: 500 }}
-        />
-      </Tooltip>
-    );
-  };
-
-  // Render allocation dialog
-  const renderAllocationDialog = () => (
-    <Dialog
-      open={openDialog}
-      onClose={handleCloseDialog}
-      slotProps={{
-        paper: {
-          sx: {
-            borderRadius: 3,
-            boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
-            padding: 1,
-            maxWidth: 450,
-          },
-        },
-      }}
-    >
-      <DialogTitle
-        sx={{
-          fontSize: "1.25rem",
-          fontWeight: 600,
-          pb: 1,
-        }}
-      >
-        Phân công đơn hàng #{selectedOrder?.orderId}
-      </DialogTitle>
-      <DialogContent sx={{ pt: 2, px: 3, pb: 2 }}>
-        {/* Task Type Selection with Checkboxes */}
-        <Box sx={{ mb: 3 }}>
-          <FormLabel
-            component="legend"
-            sx={{ color: "text.secondary", mb: 1, fontSize: "0.875rem" }}
-          >
-            Loại nhiệm vụ
-          </FormLabel>
-          <FormGroup row>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={selectedTaskTypes.includes(
-                    StaffTaskType.Preparation
-                  )}
-                  onChange={() =>
-                    handleTaskTypeChange(StaffTaskType.Preparation)
-                  }
-                />
-              }
-              label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <BuildIcon fontSize="small" />
-                  <Typography>Chuẩn bị</Typography>
-                </Box>
-              }
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={selectedTaskTypes.includes(StaffTaskType.Shipping)}
-                  onChange={() => handleTaskTypeChange(StaffTaskType.Shipping)}
-                />
-              }
-              label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <LocalShippingIcon fontSize="small" />
-                  <Typography>Giao hàng</Typography>
-                </Box>
-              }
-            />
-          </FormGroup>
-        </Box>
-        <Divider sx={{ my: 2 }} />
-        {/* Preparation Staff Selection - Only show if preparation task type is selected */}
-        {selectedTaskTypes.includes(StaffTaskType.Preparation) && (
-          <Box sx={{ mt: 2, mb: 3 }}>
-            <Typography
-              variant="subtitle2"
-              sx={{ mb: 1, color: "text.secondary" }}
-            >
-              Chọn nhân viên chuẩn bị
-            </Typography>
-            <FormControl fullWidth>
-              <InputLabel id="prep-staff-select-label">
-                Chọn nhân viên chuẩn bị
-              </InputLabel>
-              <Select
-                labelId="prep-staff-select-label"
-                value={selectedPrepStaffId}
-                label="Chọn nhân viên chuẩn bị"
-                onChange={handlePrepStaffChange}
-                sx={{
-                  borderRadius: 2,
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: (theme) =>
-                      alpha(theme.palette.primary.main, 0.2),
-                  },
-                }}
-              >
-                <MenuItem value={0} disabled>
-                  Chọn một nhân viên chuẩn bị
-                </MenuItem>
-                {prepStaff.map((staffMember) => (
-                  <MenuItem
-                    key={staffMember.id}
-                    value={staffMember.id}
-                    sx={{
-                      borderRadius: 1,
-                      my: 0.5,
-                      "&:hover": {
-                        backgroundColor: (theme) =>
-                          alpha(theme.palette.primary.main, 0.08),
-                      },
-                      "&.Mui-selected": {
-                        backgroundColor: (theme) =>
-                          alpha(theme.palette.primary.main, 0.12),
-                        "&:hover": {
-                          backgroundColor: (theme) =>
-                            alpha(theme.palette.primary.main, 0.16),
-                        },
-                      },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        width: "100%",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 0.5,
-                        }}
-                      >
-                        <BuildIcon fontSize="small" color="info" />
-                        <Typography>{staffMember.name}</Typography>
-                      </Box>
-                      {staffMember.assignmentCount > 0 && (
-                        <Box
-                          component="span"
-                          sx={{
-                            ml: 2,
-                            bgcolor: "action.hover",
-                            px: 1,
-                            py: 0.5,
-                            borderRadius: 1,
-                            fontSize: "0.75rem",
-                            fontWeight: "medium",
-                            color: "text.secondary",
-                          }}
-                        >
-                          {staffMember.assignmentCount} đơn
-                        </Box>
-                      )}
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-        )}
-        {selectedTaskTypes.includes(StaffTaskType.Preparation) &&
-          selectedTaskTypes.includes(StaffTaskType.Shipping) && (
-            <Divider sx={{ my: 2 }} />
-          )}
-        {/* Shipping Staff and Vehicle Selection - Only show if shipping task type is selected */}
-        {selectedTaskTypes.includes(StaffTaskType.Shipping) && (
-          <>
-            {/* Order Size Information */}
-            <Box sx={{ mb: 3 }}>
-              <Typography
-                variant="subtitle2"
-                sx={{ mb: 1, color: "text.secondary" }}
-              >
-                Thông tin đơn hàng
-              </Typography>
-              {estimatingSize ? (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <CircularProgress size={20} />
-                  <Typography variant="body2">
-                    Đang ước tính kích thước đơn hàng...
-                  </Typography>
-                </Box>
-              ) : orderSize ? (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Chip
-                      label={`Kích thước: ${getVietnameseOrderSizeLabel(
-                        orderSize.size
-                      )}`}
-                      size="small"
-                      color={
-                        orderSize.size === OrderSize.Large
-                          ? "warning"
-                          : "success"
-                      }
-                    />
-                    <Chip
-                      label={`Phương tiện đề xuất: ${getVehicleTypeName(
-                        orderSize.suggestedVehicleType
-                      )}`}
-                      size="small"
-                      color="info"
-                      icon={
-                        orderSize.suggestedVehicleType === VehicleType.Car ? (
-                          <DirectionsCarIcon fontSize="small" />
-                        ) : (
-                          <TwoWheelerIcon fontSize="small" />
-                        )
-                      }
-                    />
-                  </Box>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: "text.secondary", mt: 0.5 }}
-                  >
-                    {orderSize.size === OrderSize.Large
-                      ? "Đơn hàng lớn, nên sử dụng ô tô để vận chuyển."
-                      : "Đơn hàng nhỏ, có thể sử dụng xe máy để vận chuyển."}
-                  </Typography>
-                </Box>
-              ) : (
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  Không thể ước tính kích thước đơn hàng.
-                </Typography>
-              )}
-            </Box>
-            {/* Shipping Staff Selection */}
-            <Box sx={{ mt: 2, mb: 3 }}>
-              <Typography
-                variant="subtitle2"
-                sx={{ mb: 1, color: "text.secondary" }}
-              >
-                Chọn nhân viên giao hàng
-              </Typography>
-              <FormControl fullWidth>
-                <InputLabel id="shipping-staff-select-label">
-                  Chọn nhân viên giao hàng
-                </InputLabel>
-                <Select
-                  labelId="shipping-staff-select-label"
-                  value={selectedShippingStaffId}
-                  label="Chọn nhân viên giao hàng"
-                  onChange={handleShippingStaffChange}
-                  sx={{
-                    borderRadius: 2,
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: (theme) =>
-                        alpha(theme.palette.primary.main, 0.2),
-                    },
-                  }}
-                >
-                  <MenuItem value={0} disabled>
-                    Chọn một nhân viên giao hàng
-                  </MenuItem>
-                  {shippingStaff.map((staffMember) => (
-                    <MenuItem
-                      key={staffMember.id}
-                      value={staffMember.id}
-                      sx={{
-                        borderRadius: 1,
-                        my: 0.5,
-                        backgroundColor: staffMember.preparedThisOrder
-                          ? (theme) => alpha(theme.palette.success.light, 0.1)
-                          : "inherit",
-                        "&:hover": {
-                          backgroundColor: staffMember.preparedThisOrder
-                            ? (theme) => alpha(theme.palette.success.light, 0.2)
-                            : (theme) =>
-                                alpha(theme.palette.primary.main, 0.08),
-                        },
-                        "&.Mui-selected": {
-                          backgroundColor: staffMember.preparedThisOrder
-                            ? (theme) => alpha(theme.palette.success.main, 0.15)
-                            : (theme) =>
-                                alpha(theme.palette.primary.main, 0.12),
-                          "&:hover": {
-                            backgroundColor: staffMember.preparedThisOrder
-                              ? (theme) =>
-                                  alpha(theme.palette.success.main, 0.25)
-                              : (theme) =>
-                                  alpha(theme.palette.primary.main, 0.16),
-                          },
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          width: "100%",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                          }}
-                        >
-                          <LocalShippingIcon
-                            fontSize="small"
-                            color={
-                              staffMember.preparedThisOrder
-                                ? "success"
-                                : "secondary"
-                            }
-                          />
-                          <Typography>{staffMember.name}</Typography>
-                          {staffMember.preparedThisOrder && (
-                            <Chip
-                              label="Đã chuẩn bị đơn này"
-                              size="small"
-                              color="success"
-                              sx={{ ml: 1, height: 20, fontSize: "0.7rem" }}
-                            />
-                          )}
-                        </Box>
-                        {staffMember.assignmentCount > 0 && (
-                          <Box
-                            component="span"
-                            sx={{
-                              ml: 2,
-                              bgcolor: "action.hover",
-                              px: 1,
-                              py: 0.5,
-                              borderRadius: 1,
-                              fontSize: "0.75rem",
-                              fontWeight: "medium",
-                              color: "text.secondary",
-                            }}
-                          >
-                            {staffMember.assignmentCount} đơn
-                          </Box>
-                        )}
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-            {/* Vehicle Selection */}
-            <Box sx={{ mt: 2 }}>
-              <Typography
-                variant="subtitle2"
-                sx={{ mb: 1, color: "text.secondary" }}
-              >
-                Chọn phương tiện vận chuyển
-              </Typography>
-              <FormControl fullWidth>
-                <InputLabel id="vehicle-select-label">
-                  Chọn phương tiện
-                </InputLabel>
-                <Select
-                  labelId="vehicle-select-label"
-                  value={selectedVehicleId || 0}
-                  label="Chọn phương tiện"
-                  onChange={handleVehicleChange}
-                  sx={{
-                    borderRadius: 2,
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: (theme) =>
-                        alpha(theme.palette.primary.main, 0.2),
-                    },
-                  }}
-                >
-                  <MenuItem value={0}>Không sử dụng phương tiện</MenuItem>
-                  {getFilteredVehicles().map((vehicle) => (
-                    <MenuItem
-                      key={vehicle.vehicleId}
-                      value={vehicle.vehicleId}
-                      sx={{
-                        borderRadius: 1,
-                        my: 0.5,
-                        "&:hover": {
-                          backgroundColor: (theme) =>
-                            alpha(theme.palette.primary.main, 0.08),
-                        },
-                        "&.Mui-selected": {
-                          backgroundColor: (theme) =>
-                            alpha(theme.palette.primary.main, 0.12),
-                          "&:hover": {
-                            backgroundColor: (theme) =>
-                              alpha(theme.palette.primary.main, 0.16),
-                          },
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          width: "100%",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1,
-                          }}
-                        >
-                          {vehicle.type === VehicleType.Car ? (
-                            <DirectionsCarIcon
-                              fontSize="small"
-                              color="primary"
-                            />
-                          ) : (
-                            <TwoWheelerIcon
-                              fontSize="small"
-                              color="secondary"
-                            />
-                          )}
-                          <Typography>{vehicle.name}</Typography>
-                        </Box>
-                        <Typography
-                          variant="caption"
-                          sx={{ color: "text.secondary" }}
-                        >
-                          {vehicle.licensePlate}
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              {orderSize &&
-                orderSize.size === OrderSize.Large &&
-                selectedVehicleId &&
-                vehicles.find((v) => v.vehicleId === selectedVehicleId)
-                  ?.type === VehicleType.Scooter && (
-                  <Alert severity="warning" sx={{ mt: 2, borderRadius: 2 }}>
-                    Đơn hàng lớn nên sử dụng ô tô để vận chuyển. Xe máy có thể
-                    không đủ không gian.
-                  </Alert>
-                )}
-            </Box>
-          </>
-        )}
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 3 }}>
-        <DialogActionButton
-          onClick={handleCloseDialog}
-          sx={{
-            color: (theme) => theme.palette.text.secondary,
-            "&:hover": {
-              backgroundColor: (theme) =>
-                alpha(theme.palette.text.secondary, 0.08),
-            },
-          }}
-        >
-          Hủy bỏ
-        </DialogActionButton>
-        <DialogActionButton
-          onClick={handleAllocateOrder}
-          variant="contained"
-          disabled={
-            allocating ||
-            (selectedTaskTypes.includes(StaffTaskType.Preparation) &&
-              !selectedPrepStaffId) ||
-            (selectedTaskTypes.includes(StaffTaskType.Shipping) &&
-              !selectedShippingStaffId)
-          }
-          sx={{
-            backgroundColor: (theme) => theme.palette.primary.main,
-            color: "white",
-            "&:hover": {
-              backgroundColor: (theme) => theme.palette.primary.dark,
-            },
-            "&.Mui-disabled": {
-              backgroundColor: (theme) =>
-                alpha(theme.palette.primary.main, 0.3),
-              color: "white",
-            },
-          }}
-        >
-          {allocating ? (
-            <CircularProgress size={24} color="inherit" />
-          ) : selectedTaskTypes.length > 1 ? (
-            "Phân công chuẩn bị và giao hàng"
-          ) : (
-            `Phân công ${getVietnameseTaskTypeLabel(selectedTaskTypes[0])}`
-          )}
-        </DialogActionButton>
-      </DialogActions>
-    </Dialog>
   );
 
   return (
@@ -1357,6 +782,7 @@ const OrdersByStatusList: React.FC = () => {
                         Sản phẩm
                       </TableSortLabel>
                     </StyledHeaderCell>
+                    <StyledHeaderCell>Nhân viên</StyledHeaderCell>
                     <StyledHeaderCell>Trạng thái</StyledHeaderCell>
                     <StyledHeaderCell>Thao tác</StyledHeaderCell>
                   </TableRow>
@@ -1387,6 +813,9 @@ const OrdersByStatusList: React.FC = () => {
                         )}
                       </StyledTableCell>
                       <StyledTableCell>
+                        <StaffAssignmentStatus order={order} />
+                      </StyledTableCell>
+                      <StyledTableCell>
                         {order.shippingInfo ? (
                           <Box
                             sx={{
@@ -1412,7 +841,7 @@ const OrdersByStatusList: React.FC = () => {
                                 delivered={order.shippingInfo.isDelivered}
                               />
                             </Tooltip>
-                            {renderVehicleInfo(order)}
+                            <VehicleInfoDisplay order={order} />
                           </Box>
                         ) : (
                           <UnallocatedChip
@@ -1423,24 +852,25 @@ const OrdersByStatusList: React.FC = () => {
                       </StyledTableCell>
                       <StyledTableCell>
                         <ActionsContainer>
-                          {/* Allocate Button - Only show for unallocated orders */}
-                          {!order.shippingInfo && (
-                            <Tooltip title="Phân công đơn hàng">
-                              <Button
-                                variant="contained"
-                                size="small"
-                                onClick={() => handleAllocateClick(order)}
-                                sx={{
-                                  ml: 1,
-                                  borderRadius: 2,
-                                  textTransform: "none",
-                                  fontWeight: 600,
-                                }}
-                              >
-                                Phân công
-                              </Button>
-                            </Tooltip>
-                          )}
+                          {/* Allocate Button - Show for all orders to allow reassignment */}
+                          <Tooltip title="Phân công đơn hàng">
+                            <Button
+                              variant="contained"
+                              size="small"
+                              onClick={() => handleAllocateClick(order)}
+                              sx={{
+                                ml: 1,
+                                borderRadius: 2,
+                                textTransform: "none",
+                                fontWeight: 600,
+                              }}
+                            >
+                              {order.isPreparationStaffAssigned ||
+                              order.isShippingStaffAssigned
+                                ? "Phân công lại"
+                                : "Phân công"}
+                            </Button>
+                          </Tooltip>
                           {/* View Details Button */}
                           <Tooltip title="Xem chi tiết đơn hàng">
                             <ViewDetailsButton
@@ -1487,8 +917,30 @@ const OrdersByStatusList: React.FC = () => {
           </>
         )}
       </StyledPaper>
+
       {/* Allocation Dialog */}
-      {renderAllocationDialog()}
+      <OrderAllocationDialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        selectedOrder={selectedOrder}
+        selectedTaskTypes={selectedTaskTypes}
+        onTaskTypeChange={handleTaskTypeChange}
+        prepStaff={prepStaff}
+        shippingStaff={shippingStaff}
+        selectedPrepStaffId={selectedPrepStaffId}
+        selectedShippingStaffId={selectedShippingStaffId}
+        onPrepStaffChange={handlePrepStaffChange}
+        onShippingStaffChange={handleShippingStaffChange}
+        vehicles={vehicles}
+        filteredVehicles={getFilteredVehicles()}
+        selectedVehicleId={selectedVehicleId}
+        onVehicleChange={handleVehicleChange}
+        orderSize={orderSize}
+        estimatingSize={estimatingSize}
+        onAllocate={handleAllocateOrder}
+        allocating={allocating}
+      />
+
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
