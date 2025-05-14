@@ -28,7 +28,6 @@ import Grid from "@mui/material/Grid2";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-
 import { orderManagementService } from "../../../api/Services/orderManagementService";
 import staffService from "../../../api/Services/staffService";
 import vehicleService from "../../../api/Services/vehicleService";
@@ -312,13 +311,45 @@ const OrdersByStatusList: React.FC = () => {
         orderCode
       );
       setOrderSize(sizeData);
+
       // Pre-select a vehicle based on the suggested vehicle type if available
-      if (sizeData.suggestedVehicleType && vehicles.length > 0) {
-        const suggestedVehicle = vehicles.find(
-          (v) => v.type === sizeData.suggestedVehicleType
-        );
-        if (suggestedVehicle) {
-          setSelectedVehicleId(suggestedVehicle.vehicleId);
+      if (vehicles.length > 0) {
+        // For large orders, prioritize cars
+        if (sizeData.size === OrderSize.Large) {
+          // First try to find a car
+          const cars = vehicles.filter((v) => v.type === VehicleType.Car);
+          if (cars.length > 0) {
+            setSelectedVehicleId(cars[0].vehicleId);
+          } else {
+            // If no cars available, select any vehicle
+            setSelectedVehicleId(vehicles[0].vehicleId);
+          }
+        }
+        // For small orders with a suggested vehicle type
+        else if (sizeData.suggestedVehicleType) {
+          // Try to find a vehicle of the suggested type
+          const suggestedVehicles = vehicles.filter(
+            (v) => v.type === sizeData.suggestedVehicleType
+          );
+
+          if (suggestedVehicles.length > 0) {
+            // Select the first available vehicle of the suggested type
+            setSelectedVehicleId(suggestedVehicles[0].vehicleId);
+          } else {
+            // If no vehicles of the suggested type are available, select any available vehicle
+            setSelectedVehicleId(vehicles[0].vehicleId);
+          }
+        }
+        // For small orders without a suggested vehicle type, prefer scooters
+        else {
+          const scooters = vehicles.filter(
+            (v) => v.type === VehicleType.Scooter
+          );
+          if (scooters.length > 0) {
+            setSelectedVehicleId(scooters[0].vehicleId);
+          } else {
+            setSelectedVehicleId(vehicles[0].vehicleId);
+          }
         }
       }
     } catch (err) {
@@ -518,15 +549,30 @@ const OrdersByStatusList: React.FC = () => {
   // Get filtered vehicles based on order size
   const getFilteredVehicles = () => {
     if (!orderSize) return vehicles;
-    return vehicles.filter((vehicle) => {
-      // For small orders, both scooters and cars are fine
-      if (orderSize.size === OrderSize.Small) return true;
-      // For large orders, only cars are suitable
-      if (orderSize.size === OrderSize.Large) {
-        return vehicle.type === VehicleType.Car;
-      }
-      return true;
-    });
+
+    // For large orders, prioritize cars but still show scooters (with warning in the dialog)
+    if (orderSize.size === OrderSize.Large) {
+      // Sort vehicles to show cars first
+      return [...vehicles].sort((a, b) => {
+        if (a.type === VehicleType.Car && b.type !== VehicleType.Car) return -1;
+        if (a.type !== VehicleType.Car && b.type === VehicleType.Car) return 1;
+        return 0;
+      });
+    }
+
+    // For small orders, prioritize scooters but show all vehicles
+    if (orderSize.size === OrderSize.Small) {
+      // Sort vehicles to show scooters first
+      return [...vehicles].sort((a, b) => {
+        if (a.type === VehicleType.Scooter && b.type !== VehicleType.Scooter)
+          return -1;
+        if (a.type !== VehicleType.Scooter && b.type === VehicleType.Scooter)
+          return 1;
+        return 0;
+      });
+    }
+
+    return vehicles;
   };
 
   // Render filters section
@@ -853,24 +899,27 @@ const OrdersByStatusList: React.FC = () => {
                       <StyledTableCell>
                         <ActionsContainer>
                           {/* Allocate Button - Show for all orders to allow reassignment */}
-                          <Tooltip title="Phân công đơn hàng">
-                            <Button
-                              variant="contained"
-                              size="small"
-                              onClick={() => handleAllocateClick(order)}
-                              sx={{
-                                ml: 1,
-                                borderRadius: 2,
-                                textTransform: "none",
-                                fontWeight: 600,
-                              }}
-                            >
-                              {order.isPreparationStaffAssigned ||
-                              order.isShippingStaffAssigned
-                                ? "Phân công lại"
-                                : "Phân công"}
-                            </Button>
-                          </Tooltip>
+                          {(order.status === OrderStatus.Pending ||
+                            order.status === OrderStatus.Processing) && (
+                            <Tooltip title="Phân công đơn hàng">
+                              <Button
+                                variant="contained"
+                                size="small"
+                                onClick={() => handleAllocateClick(order)}
+                                sx={{
+                                  ml: 1,
+                                  borderRadius: 2,
+                                  textTransform: "none",
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {order.isPreparationStaffAssigned ||
+                                order.isShippingStaffAssigned
+                                  ? "Phân công lại"
+                                  : "Phân công"}
+                              </Button>
+                            </Tooltip>
+                          )}
                           {/* View Details Button */}
                           <Tooltip title="Xem chi tiết đơn hàng">
                             <ViewDetailsButton

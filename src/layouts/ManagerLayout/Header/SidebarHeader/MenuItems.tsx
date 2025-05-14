@@ -2,6 +2,8 @@ import {
   Dashboard as DashboardIcon,
   Inventory as InventoryIcon,
   People as PeopleIcon,
+  TakeoutDining as TakeoutDiningIcon,
+  SetMeal as IngredientIcon,
 } from "@mui/icons-material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import EngineeringIcon from "@mui/icons-material/Engineering";
@@ -92,9 +94,14 @@ export const menuItems: MenuItemLayout[] = [
         path: "#",
         children: [
           {
-            label: "Tình trạng thiết bị trong kho",
-            icon: <InventoryIcon />,
-            path: managerRoutes.manageEquipmentStock,
+            label: "Quản lý nồi",
+            icon: <TakeoutDiningIcon />,
+            path: managerRoutes.equipmentAvailability,
+          },
+          {
+            label: "Quản lý nguyên liệu",
+            icon: <IngredientIcon />,
+            path: managerRoutes.equipmentAvailability,
           },
         ],
       },
