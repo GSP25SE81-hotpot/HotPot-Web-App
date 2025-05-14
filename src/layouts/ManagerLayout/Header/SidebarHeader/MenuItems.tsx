@@ -101,7 +101,7 @@ export const menuItems: MenuItemLayout[] = [
           {
             label: "Quản lý nguyên liệu",
             icon: <IngredientIcon />,
-            path: managerRoutes.equipmentAvailability,
+            path: config.adminRoutes.manageIngredients,
           },
         ],
       },
