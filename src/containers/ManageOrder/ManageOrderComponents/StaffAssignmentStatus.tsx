@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
-import { Box, Chip, Typography } from "@mui/material";
+import { Box, Chip, Typography, Tooltip } from "@mui/material";
 import BuildIcon from "@mui/icons-material/Build";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import PeopleIcon from "@mui/icons-material/People";
 import { OrderWithDetailsDTO } from "../../../types/orderManagement";
+// import { StaffName } from "../../../components/manager/styles/PendingDeliveriesListStyles";
 
 interface StaffAssignmentStatusProps {
   order: OrderWithDetailsDTO;
@@ -13,6 +16,10 @@ interface StaffAssignmentStatusProps {
 const StaffAssignmentStatus: React.FC<StaffAssignmentStatusProps> = ({
   order,
 }) => {
+  // Check if we have multiple preparation staff assignments
+  const hasMultiplePrepStaff =
+    order.preparationAssignments && order.preparationAssignments.length > 1;
+
   if (order.isPreparationStaffAssigned && order.isShippingStaffAssigned) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
@@ -22,15 +29,53 @@ const StaffAssignmentStatus: React.FC<StaffAssignmentStatusProps> = ({
           size="small"
           icon={<CheckCircleIcon fontSize="small" />}
         />
-        {order.preparationAssignment && (
+
+        {/* Display multiple preparation staff if available */}
+        {hasMultiplePrepStaff ? (
+          <Tooltip
+            title={
+              <Box sx={{ p: 0.5 }}>
+                {order.preparationAssignments!.map((assignment, _index) => (
+                  <Typography
+                    key={assignment.staffId}
+                    variant="caption"
+                    display="block"
+                  >
+                    {assignment.staffName}
+                  </Typography>
+                ))}
+              </Box>
+            }
+          >
+            <Typography
+              variant="caption"
+              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+            >
+              <PeopleIcon fontSize="small" color="info" />
+              {`${order.preparationAssignments!.length} nhân viên chuẩn bị`}
+            </Typography>
+          </Tooltip>
+        ) : order.preparationAssignments &&
+          order.preparationAssignments.length === 1 ? (
           <Typography
             variant="caption"
             sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
           >
             <BuildIcon fontSize="small" color="info" />
-            {order.preparationAssignment.staffName}
+            {order.preparationAssignments[0].staffName}
           </Typography>
+        ) : (
+          order.preparationAssignments && (
+            <Typography
+              variant="caption"
+              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+            >
+              <BuildIcon fontSize="small" color="info" />
+              {order.preparationAssignments[0].staffName}
+            </Typography>
+          )
         )}
+
         {order.shippingAssignment && (
           <Typography
             variant="caption"
@@ -45,19 +90,59 @@ const StaffAssignmentStatus: React.FC<StaffAssignmentStatusProps> = ({
   } else if (order.isPreparationStaffAssigned) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+        {/* Use different icon and label for multiple staff */}
         <Chip
-          label="Đã phân công"
+          label={
+            hasMultiplePrepStaff ? "Nhiều nhân viên chuẩn bị" : "Đã phân công"
+          }
           color="info"
           size="small"
-          icon={<BuildIcon fontSize="small" />}
+          icon={
+            hasMultiplePrepStaff ? (
+              <PeopleIcon fontSize="small" />
+            ) : (
+              <BuildIcon fontSize="small" />
+            )
+          }
         />
-        {order.preparationAssignment && (
+
+        {/* Display multiple preparation staff if available */}
+        {hasMultiplePrepStaff ? (
+          <Tooltip
+            title={
+              <Box sx={{ p: 0.5 }}>
+                {order.preparationAssignments!.map((assignment, index) => (
+                  <Typography key={index} variant="caption" display="block">
+                    {assignment.staffName}
+                  </Typography>
+                ))}
+              </Box>
+            }
+          >
+            <Typography
+              variant="caption"
+              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+            >
+              {order.preparationAssignments!.length} nhân viên
+            </Typography>
+          </Tooltip>
+        ) : order.preparationAssignments &&
+          order.preparationAssignments.length === 1 ? (
           <Typography
             variant="caption"
             sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
           >
-            {order.preparationAssignment.staffName}
+            {order.preparationAssignments[0].staffName}
           </Typography>
+        ) : (
+          order.preparationAssignments && (
+            <Typography
+              variant="caption"
+              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+            >
+              {order.preparationAssignments[0].staffName}
+            </Typography>
+          )
         )}
       </Box>
     );

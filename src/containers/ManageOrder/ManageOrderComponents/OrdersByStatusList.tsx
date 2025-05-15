@@ -103,7 +103,9 @@ const OrdersByStatusList: React.FC = () => {
   const [shippingStaff, setShippingStaff] = useState<StaffAvailabilityDto[]>(
     []
   );
-  const [selectedPrepStaffId, setSelectedPrepStaffId] = useState<number>(0);
+  const [selectedPrepStaffIds, setSelectedPrepStaffIds] = useState<number[]>(
+    []
+  );
   const [selectedShippingStaffId, setSelectedShippingStaffId] =
     useState<number>(0);
   // Vehicle selection state
@@ -374,7 +376,7 @@ const OrdersByStatusList: React.FC = () => {
         const result = prev.filter((type) => type !== taskType);
         // Reset the corresponding staff selection
         if (taskType === StaffTaskType.Preparation) {
-          setSelectedPrepStaffId(0);
+          setSelectedPrepStaffIds([]); // Changed from 0 to empty array
         } else if (taskType === StaffTaskType.Shipping) {
           setSelectedShippingStaffId(0);
           setSelectedVehicleId(null);
@@ -390,8 +392,8 @@ const OrdersByStatusList: React.FC = () => {
   };
 
   // Handle preparation staff selection
-  const handlePrepStaffChange = (event: SelectChangeEvent<number>) => {
-    setSelectedPrepStaffId(Number(event.target.value));
+  const handlePrepStaffChange = (staffIds: number[]) => {
+    setSelectedPrepStaffIds(staffIds);
   };
 
   // Handle shipping staff selection
@@ -408,10 +410,10 @@ const OrdersByStatusList: React.FC = () => {
   const handleAllocateClick = async (order: OrderWithDetailsDTO) => {
     setSelectedOrder(order);
     // Pre-select staff if already assigned
-    if (order.isPreparationStaffAssigned && order.preparationAssignment) {
-      setSelectedPrepStaffId(order.preparationAssignment.staffId);
+    if (order.isPreparationStaffAssigned && order.preparationAssignments) {
+      setSelectedPrepStaffIds([order.preparationAssignments[0].staffId]);
     } else {
-      setSelectedPrepStaffId(0);
+      setSelectedPrepStaffIds([]);
     }
     if (order.isShippingStaffAssigned && order.shippingAssignment) {
       setSelectedShippingStaffId(order.shippingAssignment.staffId);
@@ -456,12 +458,12 @@ const OrdersByStatusList: React.FC = () => {
     setOrderSize(null);
   };
 
-  // Handle allocate order - Updated to use orderCode (string)
+  // Handle allocate order
   const handleAllocateOrder = async () => {
     // Validate selections based on selected task types
     if (
       (selectedTaskTypes.includes(StaffTaskType.Preparation) &&
-        !selectedPrepStaffId) ||
+        selectedPrepStaffIds.length === 0) ||
       (selectedTaskTypes.includes(StaffTaskType.Shipping) &&
         !selectedShippingStaffId)
     ) {
@@ -472,23 +474,27 @@ const OrdersByStatusList: React.FC = () => {
       });
       return;
     }
+
     if (!selectedOrder) {
       return;
     }
+
     try {
       setAllocating(true);
+
       // Check which task types are selected
       const prepSelected =
         selectedTaskTypes.includes(StaffTaskType.Preparation) &&
-        selectedPrepStaffId;
+        selectedPrepStaffIds.length > 0;
       const shippingSelected =
         selectedTaskTypes.includes(StaffTaskType.Shipping) &&
         selectedShippingStaffId;
+
       // If both preparation and shipping are selected, use the new endpoint
       if (prepSelected && shippingSelected) {
         const multiRequest: MultiStaffAssignmentRequest = {
           orderCode: selectedOrder.orderId,
-          preparationStaffId: selectedPrepStaffId,
+          preparationStaffIds: selectedPrepStaffIds,
           shippingStaffId: selectedShippingStaffId,
           vehicleId: selectedVehicleId || undefined,
         };
@@ -503,8 +509,8 @@ const OrdersByStatusList: React.FC = () => {
       else if (prepSelected) {
         const multiRequest: MultiStaffAssignmentRequest = {
           orderCode: selectedOrder.orderId,
-          preparationStaffId: selectedPrepStaffId,
-          shippingStaffId: 0, // Use 0 or another default value for unused staff
+          preparationStaffIds: selectedPrepStaffIds,
+          shippingStaffId: undefined,
           vehicleId: undefined,
         };
         await orderManagementService.assignMultipleStaffToOrder(multiRequest);
@@ -518,7 +524,7 @@ const OrdersByStatusList: React.FC = () => {
       else if (shippingSelected) {
         const multiRequest: MultiStaffAssignmentRequest = {
           orderCode: selectedOrder.orderId,
-          preparationStaffId: 0, // Use 0 or another default value for unused staff
+          preparationStaffIds: [],
           shippingStaffId: selectedShippingStaffId,
           vehicleId: selectedVehicleId || undefined,
         };
@@ -529,6 +535,7 @@ const OrdersByStatusList: React.FC = () => {
           severity: "success",
         });
       }
+
       // Refresh the data after allocation
       fetchOrders();
       handleCloseDialog();
@@ -968,6 +975,7 @@ const OrdersByStatusList: React.FC = () => {
       </StyledPaper>
 
       {/* Allocation Dialog */}
+      {/* Allocation Dialog */}
       <OrderAllocationDialog
         open={openDialog}
         onClose={handleCloseDialog}
@@ -976,7 +984,7 @@ const OrdersByStatusList: React.FC = () => {
         onTaskTypeChange={handleTaskTypeChange}
         prepStaff={prepStaff}
         shippingStaff={shippingStaff}
-        selectedPrepStaffId={selectedPrepStaffId}
+        selectedPrepStaffIds={selectedPrepStaffIds}
         selectedShippingStaffId={selectedShippingStaffId}
         onPrepStaffChange={handlePrepStaffChange}
         onShippingStaffChange={handleShippingStaffChange}

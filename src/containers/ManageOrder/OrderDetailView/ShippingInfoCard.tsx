@@ -34,16 +34,15 @@ const ShippingInfoCard: React.FC<ShippingInfoCardProps> = ({
       <StyledCardHeader title="Thông tin giao hàng" />
       <Divider />
       <StyledCardContent>
-        {/* Staff Assignment Information - New Section */}
+        {/* Staff Assignment Information - Updated to use preparationAssignments */}
         <StaffAssignmentInfo
-          preparationAssignment={order.preparationAssignment}
+          preparationAssignments={order.preparationAssignments}
           shippingAssignment={order.shippingAssignment}
         />
 
         {order.shippingInfo ? (
           <>
             <Divider sx={{ my: 2 }} />
-
             <SectionTitle>Thông tin giao hàng</SectionTitle>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               {order.shippingInfo.staffName || "Nhân viên không xác định"}

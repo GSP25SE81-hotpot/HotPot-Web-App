@@ -51,9 +51,9 @@ interface OrderAllocationDialogProps {
   onTaskTypeChange: (taskType: StaffTaskType) => void;
   prepStaff: StaffAvailabilityDto[];
   shippingStaff: StaffAvailabilityDto[];
-  selectedPrepStaffId: number;
+  selectedPrepStaffIds: number[]; // Changed from selectedPrepStaffId: number
   selectedShippingStaffId: number;
-  onPrepStaffChange: (event: SelectChangeEvent<number>) => void;
+  onPrepStaffChange: (staffIds: number[]) => void; // Changed to accept an array
   onShippingStaffChange: (event: SelectChangeEvent<number>) => void;
   vehicles: VehicleDTO[];
   filteredVehicles: VehicleDTO[];
@@ -73,7 +73,7 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
   onTaskTypeChange,
   prepStaff,
   shippingStaff,
-  selectedPrepStaffId,
+  selectedPrepStaffIds,
   selectedShippingStaffId,
   onPrepStaffChange,
   onShippingStaffChange,
@@ -142,11 +142,11 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
                 />
                 <Typography variant="body2">
                   {selectedOrder.isPreparationStaffAssigned &&
-                  selectedOrder.preparationAssignment
+                  selectedOrder.preparationAssignments
                     ? `Nhân viên chuẩn bị: ${
-                        selectedOrder.preparationAssignment.staffName
+                        selectedOrder.preparationAssignments[0].staffName
                       } (${formatDate(
-                        selectedOrder.preparationAssignment.assignedDate
+                        selectedOrder.preparationAssignments[0].assignedDate
                       )})`
                     : "Chưa phân công nhân viên chuẩn bị"}
                 </Typography>
@@ -249,15 +249,47 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
             >
               Chọn nhân viên chuẩn bị
             </Typography>
+
+            {/* Display selected staff with remove option */}
+            {selectedPrepStaffIds.length > 0 && (
+              <Box sx={{ mb: 2, display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {selectedPrepStaffIds.map((staffId) => {
+                  const staff = prepStaff.find((s) => s.id === staffId);
+                  return (
+                    <Chip
+                      key={staffId}
+                      label={staff?.name || `ID: ${staffId}`}
+                      onDelete={() => {
+                        const newIds = selectedPrepStaffIds.filter(
+                          (id) => id !== staffId
+                        );
+                        onPrepStaffChange(newIds);
+                      }}
+                      icon={<BuildIcon fontSize="small" />}
+                      color="primary"
+                      variant="outlined"
+                      sx={{ borderRadius: 2 }}
+                    />
+                  );
+                })}
+              </Box>
+            )}
+
+            {/* Staff selection dropdown */}
             <FormControl fullWidth>
               <InputLabel id="prep-staff-select-label">
-                Chọn nhân viên chuẩn bị
+                Thêm nhân viên chuẩn bị
               </InputLabel>
               <Select
                 labelId="prep-staff-select-label"
-                value={selectedPrepStaffId}
-                label="Chọn nhân viên chuẩn bị"
-                onChange={onPrepStaffChange}
+                value={0} // Always show placeholder
+                label="Thêm nhân viên chuẩn bị"
+                onChange={(e) => {
+                  const staffId = Number(e.target.value);
+                  if (staffId > 0 && !selectedPrepStaffIds.includes(staffId)) {
+                    onPrepStaffChange([...selectedPrepStaffIds, staffId]);
+                  }
+                }}
                 sx={{
                   borderRadius: 2,
                   "& .MuiOutlinedInput-notchedOutline": {
@@ -269,69 +301,82 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
                 <MenuItem value={0} disabled>
                   Chọn một nhân viên chuẩn bị
                 </MenuItem>
-                {prepStaff.map((staffMember) => (
-                  <MenuItem
-                    key={staffMember.id}
-                    value={staffMember.id}
-                    sx={{
-                      borderRadius: 1,
-                      my: 0.5,
-                      "&:hover": {
-                        backgroundColor: (theme) =>
-                          alpha(theme.palette.primary.main, 0.08),
-                      },
-                      "&.Mui-selected": {
-                        backgroundColor: (theme) =>
-                          alpha(theme.palette.primary.main, 0.12),
+                {prepStaff
+                  .filter((staff) => !selectedPrepStaffIds.includes(staff.id))
+                  .map((staffMember) => (
+                    <MenuItem
+                      key={staffMember.id}
+                      value={staffMember.id}
+                      sx={{
+                        borderRadius: 1,
+                        my: 0.5,
                         "&:hover": {
                           backgroundColor: (theme) =>
-                            alpha(theme.palette.primary.main, 0.16),
+                            alpha(theme.palette.primary.main, 0.08),
                         },
-                      },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        width: "100%",
+                        "&.Mui-selected": {
+                          backgroundColor: (theme) =>
+                            alpha(theme.palette.primary.main, 0.12),
+                          "&:hover": {
+                            backgroundColor: (theme) =>
+                              alpha(theme.palette.primary.main, 0.16),
+                          },
+                        },
                       }}
                     >
                       <Box
                         sx={{
                           display: "flex",
                           alignItems: "center",
-                          gap: 0.5,
+                          justifyContent: "space-between",
+                          width: "100%",
                         }}
                       >
-                        <BuildIcon fontSize="small" color="info" />
-                        <Typography>{staffMember.name}</Typography>
-                      </Box>
-                      {staffMember.assignmentCount > 0 && (
                         <Box
-                          component="span"
                           sx={{
-                            ml: 2,
-                            bgcolor: "action.hover",
-                            px: 1,
-                            py: 0.5,
-                            borderRadius: 1,
-                            fontSize: "0.75rem",
-                            fontWeight: "medium",
-                            color: "text.secondary",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
                           }}
                         >
-                          {staffMember.assignmentCount} đơn
+                          <BuildIcon fontSize="small" color="info" />
+                          <Typography>{staffMember.name}</Typography>
                         </Box>
-                      )}
-                    </Box>
-                  </MenuItem>
-                ))}
+                        {staffMember.assignmentCount > 0 && (
+                          <Box
+                            component="span"
+                            sx={{
+                              ml: 2,
+                              bgcolor: "action.hover",
+                              px: 1,
+                              py: 0.5,
+                              borderRadius: 1,
+                              fontSize: "0.75rem",
+                              fontWeight: "medium",
+                              color: "text.secondary",
+                            }}
+                          >
+                            {staffMember.assignmentCount} đơn
+                          </Box>
+                        )}
+                      </Box>
+                    </MenuItem>
+                  ))}
               </Select>
             </FormControl>
+
+            {selectedPrepStaffIds.length === 0 && (
+              <Typography
+                variant="body2"
+                color="error"
+                sx={{ mt: 1, display: "flex", alignItems: "center", gap: 0.5 }}
+              >
+                Vui lòng chọn ít nhất một nhân viên chuẩn bị
+              </Typography>
+            )}
           </Box>
         )}
+
         {selectedTaskTypes.includes(StaffTaskType.Preparation) &&
           selectedTaskTypes.includes(StaffTaskType.Shipping) && (
             <Divider sx={{ my: 2 }} />
@@ -977,7 +1022,7 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
           disabled={
             allocating ||
             (selectedTaskTypes.includes(StaffTaskType.Preparation) &&
-              !selectedPrepStaffId) ||
+              !selectedPrepStaffIds) ||
             (selectedTaskTypes.includes(StaffTaskType.Shipping) &&
               (!selectedShippingStaffId || !selectedVehicleId))
           }

@@ -103,7 +103,7 @@ export interface OrderWithDetailsDTO {
   isShippingStaffAssigned: boolean;
 
   // Staff assignments
-  preparationAssignment?: StaffAssignmentSummaryDTO;
+  preparationAssignments?: StaffAssignmentSummaryDTO[];
   shippingAssignment?: StaffAssignmentSummaryDTO;
 
   shippingInfo?: ShippingInfoDTO;
@@ -124,7 +124,7 @@ export interface OrderDetailDTO {
   userPhone: string;
 
   // Staff assignments
-  preparationAssignment?: StaffAssignmentDTO;
+  preparationAssignments?: StaffAssignmentDTO[];
   shippingAssignment?: StaffAssignmentDTO;
 
   shippingInfo?: ShippingDetailDTO;
@@ -324,8 +324,8 @@ export enum StaffTaskType {
 
 export interface MultiStaffAssignmentRequest {
   orderCode: string;
-  preparationStaffId: number;
-  shippingStaffId: number;
+  preparationStaffIds?: number[];
+  shippingStaffId?: number;
   vehicleId?: number;
 }
 
@@ -336,10 +336,7 @@ export interface MultiStaffAssignmentResponse {
   status: OrderStatus;
 
   // Preparation staff details
-  preparationStaffId: number;
-  preparationStaffName: string;
-  preparationAssignmentId: number;
-  preparationAssignedAt: string;
+  preparationStaffAssignments: StaffAssignmentSummary[];
 
   // Shipping staff details
   shippingStaffId: number;
@@ -355,7 +352,11 @@ export interface MultiStaffAssignmentResponse {
   vehicleType?: VehicleType;
   orderSize: OrderSize;
 }
-
+export interface StaffAssignmentSummary {
+  staffId: number;
+  staffName: string;
+  assignedDate: string; // ISO date string
+}
 export interface StaffAssignmentDTO {
   assignmentId: number;
   staffId: number;
