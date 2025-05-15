@@ -32,6 +32,7 @@ export const getVietnameseOrderStatusLabel = (status: OrderStatus): string => {
   const statusMap = {
     [OrderStatus.Pending]: "Chờ xử lý",
     [OrderStatus.Processing]: "Đang xử lý",
+    [OrderStatus.Processed]: "Đã xử lý",
     [OrderStatus.Shipping]: "Đang giao",
     [OrderStatus.Delivered]: "Đã giao",
     [OrderStatus.Completed]: "Hoàn thành",

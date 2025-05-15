@@ -127,6 +127,7 @@ const OrdersByStatusList: React.FC = () => {
   const tabToStatus = [
     OrderStatus.Pending,
     OrderStatus.Processing,
+    OrderStatus.Processed,
     OrderStatus.Shipping,
     OrderStatus.Delivered,
     OrderStatus.Completed,
@@ -680,6 +681,7 @@ const OrdersByStatusList: React.FC = () => {
         >
           <StyledTab label="Chờ xử lý" />
           <StyledTab label="Đang xử lý" />
+          <StyledTab label="Đã xử lý" />
           <StyledTab label="Đang giao" />
           <StyledTab label="Đã giao" />
           <StyledTab label="Hoàn thành" />
