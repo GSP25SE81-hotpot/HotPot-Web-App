@@ -32,7 +32,6 @@ import OrderDetail from "../containers/ManageOrder/SubPage/OrderDetail";
 import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
 import TableHotpotDetailPage from "../pages/Admin/TableHotpotDetail/TableHotpotDetailPage";
 import TableMaintenanceHotpotDetailPage from "../pages/Admin/TableMaintenanceHotpot/TableMaintenanceHopotPage";
-import NotificationsPage from "../pages/Global/Notification/NotificationsPage";
 import { EquipmentConditionDetailPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionDetailPage";
 import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
 import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/ManageEquipmentStockPage";
@@ -56,6 +55,7 @@ import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliv
 import ShippingListPage from "../pages/Staff/Shipping/ShippingListPage";
 import { ManageVehiclePage } from "../pages/Manager/ManageVehicle/ManageVehiclePage";
 import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock/EquipmentAvailabilityPage";
+import NotificationCenter from "../pages/Global/Notification/NotificationsPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -68,7 +68,7 @@ const AppRoute: React.FC = () => {
       <Route
         key={"Notification"}
         path={config.authRoutes.notification}
-        element={<NotificationsPage />}
+        element={<NotificationCenter />}
       />
       <Route key="layoutManager" element={<ManagerLayout />}>
         <Route
