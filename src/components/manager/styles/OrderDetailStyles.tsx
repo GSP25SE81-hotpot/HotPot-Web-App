@@ -11,7 +11,7 @@ import {
   styled,
   alpha,
 } from "@mui/material";
-import { OrderStatus } from "../../../api/Services/orderManagementService";
+import { OrderStatus } from "../../../types/orderManagement";
 
 // Main container for the order detail page
 export const DetailPageContainer = styled(Box)(({ theme }) => ({

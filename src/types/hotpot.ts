@@ -1,7 +1,6 @@
 export interface Ingredient {
   ingredientId: number;
   quantity: number;
-  measurementUnit: string;
 }
 
 export interface CreateHotPotFormSchema {
@@ -9,7 +8,6 @@ export interface CreateHotPotFormSchema {
   description: string;
   imageURLs: (string | undefined)[] | undefined;
   size: number;
-  hotpotBrothID: number;
   tutorialVideo: {
     name: string;
     description: string;

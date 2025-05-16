@@ -19,6 +19,7 @@ export const managerRoutes = {
   adjustReturnDate: "/adjust-return-date",
   orderDetail: "/orders/:orderId",
   staffAssignment: "staff-assignment",
+  manageVehicle: "/manage-vehicle",
 };
 
 export const authRoutes = {
@@ -57,7 +58,7 @@ export const staffRoutes = {
   rentalDetail: "/staff/rentals/:id",
   recordReturn: "/staff/rentals/record-return",
   pickupRental: "/pickup-rental",
-  staffMyAssignment: "/staff-assignment",
+  staffMyAssignment: "/staff-my-assignment",
   staffMyAssignmentDetail: "/staff-assignment/:orderId/:assignmentId",
   pickupReplacement: "/pickup-replacement",
   replacementDetail: "/replacements/:id",

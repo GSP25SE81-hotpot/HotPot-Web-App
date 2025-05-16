@@ -4,6 +4,8 @@ import ClearIcon from "@mui/icons-material/Clear";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import InfoIcon from "@mui/icons-material/Info";
 import SearchIcon from "@mui/icons-material/Search";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
 import {
   Alert,
   Box,
@@ -21,6 +23,7 @@ import {
   TableSortLabel,
   TextField,
   Tooltip,
+  Chip,
   alpha,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
@@ -28,12 +31,13 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import React, { useEffect, useState } from "react";
+import { orderManagementService } from "../../../api/Services/orderManagementService";
 import {
   OrderQueryParams,
   OrderStatus,
   OrderWithDetailsDTO,
-  orderManagementService,
-} from "../../../api/Services/orderManagementService";
+  VehicleType,
+} from "../../../types/orderManagement";
 import {
   ActionsContainer,
   CustomerName,
@@ -47,15 +51,35 @@ import {
   ShippingStatusChip,
   StyledHeaderCell,
   StyledPaper,
-  StyledTab,
   StyledTableCell,
   StyledTableContainer,
   StyledTableRow,
+  StyledTab,
   StyledTabs,
   UnallocatedChip,
   ViewDetailsButton,
 } from "../../../components/manager/styles/OrdersByStatusListStyles";
 import { formatCurrency } from "../../../utils/formatters";
+
+// Helper function to get vehicle icon based on type
+const getVehicleIcon = (type?: VehicleType) => {
+  if (type === VehicleType.Car) {
+    return <DirectionsCarIcon fontSize="small" />;
+  } else if (type === VehicleType.Scooter) {
+    return <TwoWheelerIcon fontSize="small" />;
+  }
+  return undefined;
+};
+
+// Helper function to get vehicle type name in Vietnamese
+const getVehicleTypeName = (type?: VehicleType): string => {
+  if (type === VehicleType.Car) {
+    return "Ô tô";
+  } else if (type === VehicleType.Scooter) {
+    return "Xe máy";
+  }
+  return "Không có";
+};
 
 const OrdersByStatusList: React.FC = () => {
   // State for active tab
@@ -88,6 +112,7 @@ const OrdersByStatusList: React.FC = () => {
   const tabToStatus = [
     OrderStatus.Pending,
     OrderStatus.Processing,
+    OrderStatus.Processed,
     OrderStatus.Shipping,
     OrderStatus.Delivered,
     OrderStatus.Completed,
@@ -105,6 +130,7 @@ const OrdersByStatusList: React.FC = () => {
     try {
       setLoading(true);
       const status = tabToStatus[activeTab];
+
       // Create query params object
       const queryParams: Omit<OrderQueryParams, "status"> = {
         pageNumber,
@@ -116,10 +142,12 @@ const OrdersByStatusList: React.FC = () => {
         toDate: toDate ? toDate.toISOString() : undefined,
         customerId: customerId || undefined,
       };
+
       const response = await orderManagementService.getOrdersByStatus(
         status,
         queryParams
       );
+
       // Update state with paginated data
       setOrders(response.items);
       setTotalCount(response.totalCount);
@@ -248,28 +276,6 @@ const OrdersByStatusList: React.FC = () => {
               />
             </LocalizationProvider>
           </Grid>
-          {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Khách hàng</InputLabel>
-              <Select
-                value={customerId || ""}
-                label="Khách hàng"
-                onChange={(e) =>
-                  setCustomerId((e.target.value as number) || null)
-                }
-                sx={{
-                  borderRadius: 2,
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: (theme) =>
-                      alpha(theme.palette.primary.main, 0.2),
-                  },
-                }}
-              >
-                <MenuItem value="">Tất cả khách hàng</MenuItem>
-                {/* Add customer options here */}
-          {/* </Select>
-            </FormControl>
-          </Grid>  */}
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Box sx={{ display: "flex", gap: 1 }}>
               <Button
@@ -303,6 +309,38 @@ const OrdersByStatusList: React.FC = () => {
     </Collapse>
   );
 
+  // Render vehicle information for shipping orders
+  const renderVehicleInfo = (order: OrderWithDetailsDTO) => {
+    // Only show vehicle info for shipping orders
+    if (order.status !== OrderStatus.Shipping || !order.vehicleInfo) {
+      return null;
+    }
+
+    const vehicleInfo = order.vehicleInfo;
+
+    return (
+      <Tooltip
+        title={`${vehicleInfo?.vehicleName} - ${vehicleInfo?.licensePlate}`}
+      >
+        <Chip
+          icon={
+            vehicleInfo?.vehicleType
+              ? getVehicleIcon(vehicleInfo.vehicleType)
+              : undefined
+          }
+          label={getVehicleTypeName(vehicleInfo?.vehicleType)}
+          size="small"
+          color={
+            vehicleInfo?.vehicleType === VehicleType.Car
+              ? "primary"
+              : "secondary"
+          }
+          sx={{ ml: 1, fontWeight: 500 }}
+        />
+      </Tooltip>
+    );
+  };
+
   return (
     <OrdersListContainer>
       <StyledPaper>
@@ -314,14 +352,16 @@ const OrdersByStatusList: React.FC = () => {
           scrollButtons="auto"
           aria-label="order status tabs"
         >
-          <StyledTab label="Chờ xử lý" />
+          {/* <StyledTab label="Chờ xử lý" /> */}
           <StyledTab label="Đang xử lý" />
+          <StyledTab label="Đã xử lý" />
           <StyledTab label="Đang giao" />
           <StyledTab label="Đã giao" />
           <StyledTab label="Hoàn thành" />
           <StyledTab label="Đã hủy" />
           <StyledTab label="Đang trả" />
         </StyledTabs>
+
         {/* Search and filter toolbar */}
         <Box
           sx={{
@@ -411,8 +451,10 @@ const OrdersByStatusList: React.FC = () => {
             </Tooltip>
           </Box>
         </Box>
+
         {/* Filters section */}
         {renderFilters()}
+
         {/* Loading state */}
         {loading && orders.length === 0 ? (
           <LoadingContainer>
@@ -502,21 +544,32 @@ const OrdersByStatusList: React.FC = () => {
                       </StyledTableCell>
                       <StyledTableCell>
                         {order.shippingInfo ? (
-                          <Tooltip
-                            title={`Được giao bởi ${
-                              order.shippingInfo.staff?.name || "Không xác định"
-                            }`}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              flexWrap: "wrap",
+                              gap: 0.5,
+                            }}
                           >
-                            <ShippingStatusChip
-                              label={
-                                order.shippingInfo.isDelivered
-                                  ? "Đã giao"
-                                  : "Đang chờ"
-                              }
-                              size="small"
-                              delivered={order.shippingInfo.isDelivered}
-                            />
-                          </Tooltip>
+                            <Tooltip
+                              title={`Được giao bởi ${
+                                order.shippingInfo.staff?.name ||
+                                "Không xác định"
+                              }`}
+                            >
+                              <ShippingStatusChip
+                                label={
+                                  order.shippingInfo.isDelivered
+                                    ? "Đã giao"
+                                    : "Đang chờ"
+                                }
+                                size="small"
+                                delivered={order.shippingInfo.isDelivered}
+                              />
+                            </Tooltip>
+                            {renderVehicleInfo(order)}
+                          </Box>
                         ) : (
                           <UnallocatedChip
                             label="Chưa phân công"
@@ -598,15 +651,16 @@ const OrdersByStatusList: React.FC = () => {
 // Hàm trợ giúp để dịch trạng thái đơn hàng sang tiếng Việt
 const getVietnameseOrderStatusLabel = (status: OrderStatus): string => {
   const statusMap: Record<OrderStatus, string> = {
+    [OrderStatus.Cart]: "Trong giỏ hàng",
     [OrderStatus.Pending]: "Chờ xử lý",
     [OrderStatus.Processing]: "Đang xử lý",
+    [OrderStatus.Processed]: "Đã xử lý",
     [OrderStatus.Shipping]: "Đang giao",
     [OrderStatus.Delivered]: "Đã giao",
     [OrderStatus.Completed]: "Hoàn thành",
     [OrderStatus.Cancelled]: "Đã hủy",
     [OrderStatus.Returning]: "Đang trả",
   };
-
   return statusMap[status] || "Không xác định";
 };
 

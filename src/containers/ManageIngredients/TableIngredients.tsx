@@ -9,6 +9,7 @@ import AddIcon from "@mui/icons-material/Add";
 import config from "../../configs";
 import MenuActionTableIngredient from "../../components/menuAction/menuActionTableIngredient/menuActionTableIngredient";
 import useDebounce from "../../hooks/useDebounce";
+import UpdateQuantityModal from "./Modal/ModalUpdateQuantityIngredient";
 
 interface SearchToolProps {
   filter: { searchTerm: string };
@@ -38,6 +39,7 @@ const TableIngredients = () => {
   const [total, setTotal] = useState<number>(0);
   const [page, setPage] = useState<number>(0);
   const [dataIngredients, setDataIngredients] = useState<Ingredient[]>([]);
+  const [open, setOpen] = useState<boolean>(false);
 
   const [filter, setFilter] = useState({ searchTerm: "" });
   const debouncedFilter = useDebounce(filter, 1000);
@@ -93,13 +95,25 @@ const TableIngredients = () => {
 
   const EventAction = () => {
     return (
-      <Button
-        startIcon={<AddIcon />}
-        variant="contained"
-        onClick={() => navigate(config.adminRoutes.createIngredients)}
-      >
-        Thêm Nguyên Liệu
-      </Button>
+      <>
+        <Button
+          startIcon={<AddIcon />}
+          variant="contained"
+          onClick={() => navigate(config.adminRoutes.createIngredients)}
+          sx={{ mr: 1 }}
+        >
+          Thêm Nguyên Liệu
+        </Button>
+        <Button
+          startIcon={<AddIcon />}
+          variant="contained"
+          onClick={() => {
+            setOpen(!open);
+          }}
+        >
+          Cập nhật số lượng nguyên liệu
+        </Button>
+      </>
     );
   };
 
@@ -127,6 +141,16 @@ const TableIngredients = () => {
         handleChangePage={handleChangePage}
         handleChangeRowsPerPage={handleChangeRowsPerPage}
       />
+
+      {open && (
+        <>
+          <UpdateQuantityModal
+            handleClose={() => setOpen(!open)}
+            open={open}
+            onSave={onSave}
+          />
+        </>
+      )}
     </>
   );
 };

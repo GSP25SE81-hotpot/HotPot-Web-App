@@ -1,7 +1,7 @@
 // src/components/Chat/components/EmptyState/EmptyChatState.tsx
 import React from "react";
-import { Box, Button, Typography, alpha, useTheme } from "@mui/material";
-
+import { Box, Typography, alpha, useTheme } from "@mui/material";
+// Button
 const EmptyChatState: React.FC = () => {
   const theme = useTheme();
 
@@ -30,13 +30,13 @@ const EmptyChatState: React.FC = () => {
         Hãy chọn một cuộc hội thoại với khách hàng từ danh sách bên trái để xem
         tin nhắn và phản hồi.
       </Typography>
-      <Button
+      {/* <Button
         variant="contained"
         color="primary"
         sx={{ borderRadius: 20, textTransform: "none", px: 3 }}
       >
         Bắt đầu cuộc trò chuyện mới
-      </Button>
+      </Button> */}
     </Box>
   );
 };

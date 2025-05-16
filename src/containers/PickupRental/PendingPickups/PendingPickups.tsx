@@ -37,12 +37,14 @@ const PendingPickups: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const { data, loading, error, execute } = useApi(
-    rentalService.getPendingPickups
+    rentalService.getRentalListings
   );
 
   useEffect(() => {
-    execute(page + 1, rowsPerPage);
+    // Use the new getRentalListings method with 'pending' type
+    execute("pending", page + 1, rowsPerPage);
   }, [execute, page, rowsPerPage]);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -63,7 +65,7 @@ const PendingPickups: React.FC = () => {
   const handleRecordReturn = (rental: RentalListing) => {
     navigate("/rentals/record-return", {
       state: {
-        rentOrderDetailId: rental.rentOrderDetailId,
+        rentOrderId: rental.orderId,
         customerName: rental.customerName,
         equipmentName: rental.equipmentName,
         expectedReturnDate: rental.expectedReturnDate,
@@ -75,7 +77,8 @@ const PendingPickups: React.FC = () => {
     <Box>
       {loading && <LoadingSpinner />}
       {error && <ErrorAlert message={error} />}
-      {data && data.items.length === 0 ? (
+
+      {!loading && !error && data?.items?.length === 0 ? (
         <EmptyStateContainer>
           <Typography variant="h6" fontWeight={600}>
             Không tìm thấy lấy hàng đang chờ xử lý
@@ -100,7 +103,7 @@ const PendingPickups: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data?.items.map((rental) => (
+                {data?.items?.map((rental) => (
                   <TableRow key={rental.rentOrderDetailId}>
                     <TableCell>#{rental.orderId}</TableCell>
                     <TableCell>
@@ -155,6 +158,7 @@ const PendingPickups: React.FC = () => {
               </TableBody>
             </StyledTable>
           </StyledTableContainer>
+
           <StyledTablePagination
             rowsPerPageOptions={[5, 10, 25]}
             count={data?.totalCount || 0}

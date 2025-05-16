@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/types/notifications.ts
 
-// Base notification DTO
-export interface GeneralNotificationDto {
+// New simplified notification DTO
+export interface GenericNotificationDto {
   type: string;
   title: string;
   message: string;
   timestamp: Date;
+  data?: any;
 }
 
-// Equipment notifications
-export interface EquipmentAlertDto extends GeneralNotificationDto {
+// Legacy notification DTOs (kept for backward compatibility)
+export interface EquipmentAlertDto {
   conditionLogId: number;
   equipmentType: string;
   equipmentName: string;
@@ -19,7 +20,7 @@ export interface EquipmentAlertDto extends GeneralNotificationDto {
   scheduleType: string;
 }
 
-export interface EquipmentStatusDto extends GeneralNotificationDto {
+export interface EquipmentStatusDto {
   equipmentType: string;
   equipmentId: number;
   equipmentName: string;
@@ -27,117 +28,45 @@ export interface EquipmentStatusDto extends GeneralNotificationDto {
   reason: string;
 }
 
-export interface StockAlertDto extends GeneralNotificationDto {
+export interface StockAlertDto {
   equipmentType: string;
   equipmentName: string;
   currentQuantity: number;
   threshold: number;
 }
 
-export interface FeedbackResponseDto extends GeneralNotificationDto {
+export interface FeedbackResponseDto {
   feedbackId: number;
   responseMessage: string;
   responderName: string;
 }
 
-export interface ScheduleUpdateDto extends GeneralNotificationDto {
+export interface ScheduleUpdateDto {
   userId: number;
   shiftDate: Date;
 }
 
-export interface EquipmentStatusUpdateDto extends GeneralNotificationDto {
-  conditionLogId: number;
-  equipmentType?: string;
-  equipmentName?: string;
-  issueName?: string;
-  status: string;
-}
+export type NotificationPriority = "high" | "medium" | "low";
 
-// Rental notifications
-export interface RentalExtendedDto extends GeneralNotificationDto {
-  rentalId: number;
-  newReturnDate: Date;
-}
+export type NotificationGroup =
+  | "equipment"
+  | "feedback"
+  | "rental"
+  | "replacement"
+  | "schedule"
+  | "system";
 
-export interface RentalReturnedDto extends GeneralNotificationDto {
-  rentalId: number;
-}
-
-export interface StaffAssignmentDto extends GeneralNotificationDto {
-  assignmentId: number;
-  assignment: any;
-}
-
-export interface AssignmentCompletedDto extends GeneralNotificationDto {
-  assignmentId: number;
-}
-
-export interface ManagerPickupRequestDto extends GeneralNotificationDto {
-  rentalId: number;
-  customerName: string;
-}
-
-export interface ManagerAssignmentCompletedDto extends GeneralNotificationDto {
-  assignmentId: number;
-  staffId: number;
-  staffName: string;
-}
-
-export interface PendingPickupDto extends GeneralNotificationDto {
-  rentalId: number;
-  customerName: string;
-}
-
-// Replacement notifications
-export interface ReplacementRequestNotificationDto
-  extends GeneralNotificationDto {
-  replacementRequestId: number;
-  equipmentType: string;
-  equipmentName: string;
-  requestReason: string;
-  customerName: string;
-  status: string;
-  requestDate: Date;
-}
-
-export interface ReplacementStatusUpdateDto extends GeneralNotificationDto {
-  replacementRequestId: number;
-  equipmentType: string;
-  equipmentName: string;
-  status: string;
-  statusMessage: string;
-  reviewNotes?: string;
-  updateDate: Date;
-}
-
-export interface CustomerReplacementUpdateDto extends GeneralNotificationDto {
-  replacementRequestId: number;
-  equipmentName: string;
-  status: string;
-  notes: string;
-}
-
-export interface StaffReplacementAssignmentDto extends GeneralNotificationDto {
-  replacementRequestId: number;
-  equipmentName: string;
-  requestReason: string;
-  status: string;
-}
-
-export interface CustomerDirectNotificationDto extends GeneralNotificationDto {
-  conditionLogId: number;
-  estimatedResolutionTime: Date;
-}
-
-// Add the missing types below:
-
-// Frontend notification model
+// Updated frontend notification model
 export interface Notification {
   id: number;
   type: string;
+  title: string;
+  message: string;
   data: any;
   timestamp: Date;
   read: boolean;
+  priority: NotificationPriority;
+  group: NotificationGroup;
 }
 
 // Connection state type
@@ -146,16 +75,6 @@ export type ConnectionState =
   | "disconnected"
   | "reconnecting"
   | "error";
-
-// Toast notification type
-export interface ToastNotification {
-  id: number;
-  open: boolean;
-  severity: "success" | "info" | "warning" | "error";
-  title: string;
-  message: string;
-  autoHideDuration: number;
-}
 
 // Notification context type
 export interface NotificationContextType {
@@ -166,39 +85,30 @@ export interface NotificationContextType {
   clearNotification: (notificationId: number) => void;
   clearAllNotifications: () => void;
   sendNotification: (methodName: string, ...args: any[]) => Promise<boolean>;
+  getNotificationsByGroup: (group: NotificationGroup) => Notification[];
+  getNotificationsByPriority: (
+    priority: NotificationPriority
+  ) => Notification[];
 
-  // Specific notification methods
-  notifyConditionIssue: (alert: EquipmentAlertDto) => Promise<boolean>;
-  notifyStatusChange: (status: EquipmentStatusDto) => Promise<boolean>;
-  notifyLowStock: (alert: StockAlertDto) => Promise<boolean>;
-  notifyFeedbackResponse: (
+  // New simplified notification methods
+  notifyUser: (
     userId: number,
-    response: FeedbackResponseDto
+    type: string,
+    title: string,
+    message: string,
+    data?: any
   ) => Promise<boolean>;
-  notifyNewFeedback: (
-    feedbackId: number,
-    customerName: string,
-    feedbackTitle: string
+  notifyRole: (
+    role: string,
+    type: string,
+    title: string,
+    message: string,
+    data?: any
   ) => Promise<boolean>;
-  notifyFeedbackApproved: (
-    feedbackId: number,
-    adminName: string,
-    feedbackTitle: string
-  ) => Promise<boolean>;
-  notifyScheduleUpdate: (update: ScheduleUpdateDto) => Promise<boolean>;
-  notifyAllScheduleUpdates: () => Promise<boolean>;
-  sendResolutionUpdate: (
-    conditionLogId: number,
-    status: string,
-    estimatedResolutionTime: Date,
-    message: string
-  ) => Promise<boolean>;
-  sendCustomerUpdate: (
-    customerId: number,
-    conditionLogId: number,
-    equipmentName: string,
-    status: string,
-    estimatedResolutionTime: Date,
-    message: string
+  notifyBroadcast: (
+    type: string,
+    title: string,
+    message: string,
+    data?: any
   ) => Promise<boolean>;
 }

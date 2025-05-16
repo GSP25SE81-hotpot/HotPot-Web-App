@@ -26,6 +26,7 @@ import {
   StatusContainer,
   StyledTable,
   StyledTableContainer,
+  StyledTablePagination,
 } from "../../../components/StyledComponents";
 import { useApi } from "../../../hooks/useApi";
 import { StaffPickupAssignment } from "../../../types/rentalPickup";
@@ -34,16 +35,31 @@ import { formatDate } from "../../../utils/formatters";
 const MyAssignments: React.FC = () => {
   const navigate = useNavigate();
   const [pendingOnly, setPendingOnly] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const { data, loading, error, execute } = useApi(
     rentalService.getMyAssignments
   );
 
   useEffect(() => {
-    execute(pendingOnly);
-  }, [execute, pendingOnly]);
+    execute(pendingOnly, page + 1, rowsPerPage);
+  }, [execute, pendingOnly, page, rowsPerPage]);
 
   const handleTogglePending = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPendingOnly(event.target.checked);
+    setPage(0); // Reset to first page when filter changes
+  };
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   const handleViewDetail = (id: number) => {
@@ -54,17 +70,32 @@ const MyAssignments: React.FC = () => {
     navigate("/rentals/record-return", {
       state: {
         assignmentId: assignment.assignmentId,
-        rentOrderDetailId: assignment.rentOrderDetailId,
+        rentOrderId: assignment.orderId,
         customerName: assignment.customerName,
-        equipmentName: assignment.equipmentName,
+        equipmentName: assignment.equipmentSummary,
         expectedReturnDate: assignment.expectedReturnDate,
       },
     });
   };
 
-  // Kiểm tra xem data và data.data có tồn tại trước khi truy cập length
-  const assignments = data?.data || [];
+  // Check if data and data.data exist before accessing
+  const assignments = data?.data.items || [];
   const hasAssignments = assignments.length > 0;
+
+  useEffect(() => {
+    console.log("Fetching assignments with params:", {
+      pendingOnly,
+      page,
+      rowsPerPage,
+    });
+    execute(pendingOnly, page + 1, rowsPerPage)
+      .then((response) => {
+        console.log("API Response:", response);
+      })
+      .catch((error) => {
+        console.error("API Error:", error);
+      });
+  }, [execute, pendingOnly, page, rowsPerPage]);
 
   return (
     <Box>
@@ -105,88 +136,108 @@ const MyAssignments: React.FC = () => {
               </AnimatedButton>
             </EmptyStateContainer>
           ) : (
-            <StyledTableContainer>
-              <StyledTable>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Mã nhiệm vụ</TableCell>
-                    <TableCell>Khách hàng</TableCell>
-                    <TableCell>Thiết bị</TableCell>
-                    <TableCell>Ngày trả dự kiến</TableCell>
-                    <TableCell>Trạng thái</TableCell>
-                    <TableCell>Hành động</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {assignments.map((assignment) => (
-                    <TableRow key={assignment.assignmentId}>
-                      <TableCell>#{assignment.assignmentId}</TableCell>
-                      <TableCell>
-                        <CustomerCell>
-                          <CustomerName>{assignment.customerName}</CustomerName>
-                          <CustomerPhone>
-                            {assignment.customerPhone}
-                          </CustomerPhone>
-                        </CustomerCell>
-                      </TableCell>
-                      <TableCell>
-                        <Typography fontWeight={500}>
-                          {assignment.equipmentName}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Số lượng: {assignment.quantity}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography fontWeight={500}>
-                          {formatDate(assignment.expectedReturnDate)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <StatusContainer>
-                          <AssignmentChip
-                            label={
-                              assignment.completedDate
-                                ? "Hoàn thành"
-                                : "Đang chờ"
-                            }
-                            status={
-                              assignment.completedDate ? "completed" : "pending"
-                            }
-                            size="small"
-                          />
-                        </StatusContainer>
-                      </TableCell>
-                      <TableCell>
-                        <ActionButtonsContainer>
-                          <AnimatedButton
-                            variant="outlined"
-                            size="small"
-                            onClick={() =>
-                              handleViewDetail(assignment.rentOrderDetailId)
-                            }
-                            sx={{ minWidth: "80px" }}
-                          >
-                            Xem
-                          </AnimatedButton>
-                          {!assignment.completedDate && (
-                            <AnimatedButton
-                              variant="contained"
-                              size="small"
-                              color="primary"
-                              onClick={() => handleRecordReturn(assignment)}
-                              sx={{ minWidth: "120px" }}
-                            >
-                              Ghi nhận trả
-                            </AnimatedButton>
-                          )}
-                        </ActionButtonsContainer>
-                      </TableCell>
+            <>
+              <StyledTableContainer>
+                <StyledTable>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Mã nhiệm vụ</TableCell>
+                      <TableCell>Mã đơn hàng</TableCell>
+                      <TableCell>Khách hàng</TableCell>
+                      <TableCell>Thiết bị</TableCell>
+                      <TableCell>Ngày trả dự kiến</TableCell>
+                      <TableCell>Trạng thái</TableCell>
+                      <TableCell>Hành động</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </StyledTable>
-            </StyledTableContainer>
+                  </TableHead>
+                  <TableBody>
+                    {assignments.map((assignment) => (
+                      <TableRow key={assignment.assignmentId}>
+                        <TableCell>#{assignment.assignmentId}</TableCell>
+                        <TableCell>{assignment.orderCode}</TableCell>
+                        <TableCell>
+                          <CustomerCell>
+                            <CustomerName>
+                              {assignment.customerName}
+                            </CustomerName>
+                            <CustomerPhone>
+                              {assignment.customerPhone}
+                            </CustomerPhone>
+                          </CustomerCell>
+                        </TableCell>
+                        <TableCell>
+                          <Typography fontWeight={500}>
+                            {assignment.equipmentSummary}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography fontWeight={500}>
+                            {assignment.expectedReturnDate
+                              ? formatDate(assignment.expectedReturnDate)
+                              : "N/A"}{" "}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <StatusContainer>
+                            <AssignmentChip
+                              label={
+                                assignment.completedDate
+                                  ? "Hoàn thành"
+                                  : "Đang chờ"
+                              }
+                              status={
+                                assignment.completedDate
+                                  ? "completed"
+                                  : "pending"
+                              }
+                              size="small"
+                            />
+                          </StatusContainer>
+                        </TableCell>
+                        <TableCell>
+                          <ActionButtonsContainer>
+                            <AnimatedButton
+                              variant="outlined"
+                              size="small"
+                              onClick={() =>
+                                handleViewDetail(assignment.orderId)
+                              }
+                              sx={{ minWidth: "80px" }}
+                            >
+                              Xem
+                            </AnimatedButton>
+                            {!assignment.completedDate && (
+                              <AnimatedButton
+                                variant="contained"
+                                size="small"
+                                color="primary"
+                                onClick={() => handleRecordReturn(assignment)}
+                                sx={{ minWidth: "120px" }}
+                              >
+                                Ghi nhận trả
+                              </AnimatedButton>
+                            )}
+                          </ActionButtonsContainer>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </StyledTable>
+              </StyledTableContainer>
+
+              <StyledTablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                count={data?.data?.totalCount || 0}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Số hàng mỗi trang:"
+                labelDisplayedRows={({ from, to, count }) =>
+                  `${from}-${to} của ${count}`
+                }
+              />
+            </>
           )}
         </>
       )}
