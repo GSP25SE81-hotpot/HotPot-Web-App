@@ -32,13 +32,11 @@ import OrderDetail from "../containers/ManageOrder/SubPage/OrderDetail";
 import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
 import TableHotpotDetailPage from "../pages/Admin/TableHotpotDetail/TableHotpotDetailPage";
 import TableMaintenanceHotpotDetailPage from "../pages/Admin/TableMaintenanceHotpot/TableMaintenanceHopotPage";
-import NotificationsPage from "../pages/Global/Notification/NotificationsPage";
 import { EquipmentConditionDetailPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionDetailPage";
 import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
 import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/ManageEquipmentStockPage";
 import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
 import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
-import { EquipmentAvailabilityPage } from "../pages/Manager/ManageRental/EquipmentAvailabilityPage";
 import { CurrentAssignmentsPage } from "../pages/Manager/ManagerRentalReturnPage/CurrentAssignmentsPage";
 import { LateFeeCalculatorPage } from "../pages/Manager/ManagerRentalReturnPage/LateFeeCalculatorPage";
 import { ManagerRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManagerRentalReturnPage";
@@ -56,6 +54,9 @@ import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
 import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliveryPage";
 import ShippingListPage from "../pages/Staff/Shipping/ShippingListPage";
 import { ManageVehiclePage } from "../pages/Manager/ManageVehicle/ManageVehiclePage";
+import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock/EquipmentAvailabilityPage";
+import NotificationCenter from "../pages/Global/Notification/NotificationsPage";
+import { StaffAssignmentHistoryPage } from "../pages/Manager/StaffAssignmentHistory/StaffAssignmentHistoryPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -68,7 +69,7 @@ const AppRoute: React.FC = () => {
       <Route
         key={"Notification"}
         path={config.authRoutes.notification}
-        element={<NotificationsPage />}
+        element={<NotificationCenter />}
       />
       <Route key="layoutManager" element={<ManagerLayout />}>
         <Route
@@ -146,6 +147,10 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.manageVehicle}
           element={<ManageVehiclePage />}
+        />
+        <Route
+          path={config.managerRoutes.staffAssignmentHistory}
+          element={<StaffAssignmentHistoryPage />}
         />
       </Route>
 

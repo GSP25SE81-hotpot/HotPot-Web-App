@@ -2,6 +2,8 @@ import {
   Dashboard as DashboardIcon,
   Inventory as InventoryIcon,
   People as PeopleIcon,
+  TakeoutDining as TakeoutDiningIcon,
+  SetMeal as IngredientIcon,
 } from "@mui/icons-material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import EngineeringIcon from "@mui/icons-material/Engineering";
@@ -92,9 +94,14 @@ export const menuItems: MenuItemLayout[] = [
         path: "#",
         children: [
           {
-            label: "Tình trạng thiết bị trong kho",
-            icon: <InventoryIcon />,
-            path: managerRoutes.manageEquipmentStock,
+            label: "Quản lý nồi",
+            icon: <TakeoutDiningIcon />,
+            path: managerRoutes.equipmentAvailability,
+          },
+          {
+            label: "Quản lý nguyên liệu",
+            icon: <IngredientIcon />,
+            path: config.adminRoutes.manageIngredients,
           },
         ],
       },
@@ -174,35 +181,75 @@ export const menuItems: MenuItemLayout[] = [
           },
         ],
       },
+      {
+        label: "Lịch sử phân công nhân viên",
+        icon: <PaymentIcon />,
+        path: managerRoutes.staffAssignmentHistory,
+      },
     ],
   },
   {
     role: Role.Staff,
     menu: [
-      //Assign Order
+      // Order Management
       {
         icon: <ListAltIcon />,
         label: config.Vntext.SideBar.Ordes,
         path: staffRoutes.assignOrder,
       },
-      //Shipping List
+      // Shipping Management
       {
         label: config.Vntext.SideBar.shippingList,
         icon: <LocalShippingIcon />,
         path: staffRoutes.shippingOrder,
       },
-      //dashboard
+      // My Assignments
       {
-        icon: <DashboardIcon />,
+        icon: <AssignmentIcon />,
         label: "Công việc",
         path: config.staffRoutes.staffMyAssignment,
-        // role: AccessType.ADMIN_ACCESS,
       },
+      // Payment Management
       {
         label: "Quản lý thanh toán",
         icon: <PaymentIcon />,
         path: staffRoutes.paymentManagement,
       },
+      // Rental Management
+      {
+        label: "Lấy thiết bị thuê",
+        icon: <Iconify icon="mdi:package-variant-closed" />,
+        path: staffRoutes.pickupRental,
+        // children: [
+        //   {
+        //     label: "Lấy thiết bị thuê",
+        //     icon: <Iconify icon="mdi:package-variant-closed" />,
+        //     path: staffRoutes.pickupRental,
+        //   },
+        //   // {
+        //   //   label: "Ghi nhận trả thiết bị",
+        //   //   icon: <Iconify icon="mdi:keyboard-return" />,
+        //   //   path: staffRoutes.recordReturn,
+        //   // },
+        //   // {
+        //   //   label: "Kiểm tra thiết bị sau trả",
+        //   //   icon: <Iconify icon="mdi:clipboard-check-outline" />,
+        //   //   path: staffRoutes.checkDeviceAfterReturn,
+        //   // },
+        // ],
+      },
+      // Order History
+      {
+        label: "Lịch sử đơn hàng",
+        icon: <Iconify icon="mdi:history" />,
+        path: staffRoutes.orderHistory,
+      },
+      // Proof of Delivery
+      // {
+      //   label: "Bằng chứng giao hàng",
+      //   icon: <Iconify icon="mdi:file-document-outline" />,
+      //   path: staffRoutes.proofOfDelivery,
+      // },
     ],
   },
 ];

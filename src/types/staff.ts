@@ -29,6 +29,8 @@ export interface StaffAvailabilityDto {
   isEligible: boolean;
   assignmentCount: number;
   workDays?: WorkDays;
+  preparedThisOrder: boolean;
+  activeOrderIds?: number[];
 }
 
 // Add StaffType enum if not already defined
