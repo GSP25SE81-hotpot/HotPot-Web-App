@@ -424,13 +424,13 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
                                 </Box>
                               </TableCell>
                               <TableCell>
-                                {batch.initialQuantity} {batch.unit}
+                                {batch.initialQuantity} gói
                                 {batch.measurementValue
                                   ? ` (${batch.physicalQuantity} ${batch.unit})`
                                   : ""}
                               </TableCell>
                               <TableCell>
-                                {batch.remainingQuantity} {batch.unit}
+                                {batch.remainingQuantity} gói
                                 {batch.measurementValue
                                   ? ` (${
                                       batch.remainingQuantity *

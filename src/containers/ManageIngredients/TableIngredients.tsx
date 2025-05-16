@@ -74,7 +74,6 @@ const TableIngredients = () => {
       { id: "name", label: "Tên nguyên liệu", align: "center" },
       { id: "imageURL", label: "Hình ảnh", align: "center" },
       { id: "ingredientTypeName", label: "Loại nguyên liệu", align: "center" },
-      { id: "quantity", label: "Số lượng", align: "center", format: "number" },
     ];
 
     // Additional headers only for admin
