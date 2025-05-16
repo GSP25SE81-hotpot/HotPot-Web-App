@@ -20,6 +20,7 @@ export const managerRoutes = {
   orderDetail: "/orders/:orderId",
   staffAssignment: "staff-assignment",
   manageVehicle: "/manage-vehicle",
+  staffAssignmentHistory: "/staff-assignment-history",
 };
 
 export const authRoutes = {

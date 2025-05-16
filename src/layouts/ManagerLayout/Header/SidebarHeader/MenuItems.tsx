@@ -181,6 +181,11 @@ export const menuItems: MenuItemLayout[] = [
           },
         ],
       },
+      {
+        label: "Lịch sử phân công nhân viên",
+        icon: <PaymentIcon />,
+        path: managerRoutes.staffAssignmentHistory,
+      },
     ],
   },
   {
