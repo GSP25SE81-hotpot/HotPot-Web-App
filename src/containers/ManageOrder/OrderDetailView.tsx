@@ -60,7 +60,6 @@ const OrderDetailView: React.FC = () => {
           orderId
         );
         setOrder(orderData);
-
         // Initialize form states based on order data
         setNewStatus(orderData.status);
         if (orderData.shippingInfo) {

@@ -18,11 +18,18 @@ export interface IngredientAddSchema {
   name: string;
   description: string;
   imageURL: string | undefined;
-  quantity: number;
-  measurementUnit: string;
-  ingredientTypeID: string;
-  price: number;
+  unit: string;
+  measurementValue: number;
+  totalAmount: number;
   minStockLevel: number;
+  price: number;
+  ingredientTypeID: string;
+  bestBeforeDate: string;
+}
+
+export interface IngredientType {
+  id: string;
+  name: string;
 }
 
 export interface IngredientTypeSchema {

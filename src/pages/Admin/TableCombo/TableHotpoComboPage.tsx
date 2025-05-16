@@ -11,7 +11,10 @@ const TableHotpotComboPage: React.FC = () => {
         <HeaderBreadcrumbs
           heading="Combo Lẩu"
           links={[
-            { name: config.Vntext.Dashboard.dashboard },
+            {
+              name: config.Vntext.Dashboard.dashboard,
+              href: config.adminRoutes.dashboard,
+            },
             { name: "Quản lí Combo lẩu" },
           ]}
         />

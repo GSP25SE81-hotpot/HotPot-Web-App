@@ -10,3 +10,4 @@ export { default as RHFTextFieldNumber } from "./RHFTextFieldNumber";
 export { default as RHFRadioGroup } from "./RHFRadioGroup";
 export { default as RHFAutoComplete } from "./RHFAutoComplete";
 export { default as RHFAutoCompleteBroth } from "./RHFAutoCompleteBroth";
+export { default as RHFDatePicker } from "./RHFDatePicker";

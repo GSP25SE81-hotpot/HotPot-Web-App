@@ -12,15 +12,14 @@ import {
   Pie,
   PieChart,
   ResponsiveContainer,
-  LineChart,
-  Line,
+  ComposedChart,
 } from "recharts";
 import {
   Box,
   Card,
   CardContent,
   FormControl,
-  Grid,
+  Grid2,
   InputLabel,
   MenuItem,
   Select,
@@ -92,7 +91,10 @@ const Analytics: React.FC = () => {
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      const response: any = await adminDashboard.getDashboard();
+      const params = {
+        year: year,
+      };
+      const response: any = await adminDashboard.getDashboard(params);
       setDashboardData(response);
 
       // Prepare pie chart data
@@ -139,20 +141,43 @@ const Analytics: React.FC = () => {
   const hasData = dashboardData?.overallMetrics?.totalOrders > 0;
 
   if (!hasData) {
-    return <EmptyData title="Chưa có dữ liệu sẵn có" />;
+    return (
+      <>
+        <Typography variant="h4" sx={{ mb: 3 }}>
+          Thống kê cửa hàng
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+          }}
+        >
+          <FormControl sx={{ minWidth: 120 }} size="small">
+            <InputLabel>Năm</InputLabel>
+            <Select value={year} label="Năm" onChange={handleYearChange}>
+              <MenuItem value={2024}>2024</MenuItem>
+              <MenuItem value={2025}>2025</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+        <EmptyData title="Chưa có dữ liệu sẵn có" />
+      </>
+    );
   }
 
   // Format monthly data for charts
-  const monthlyData =
-    dashboardData.monthlyData?.filter((month: any) => month.year === year) ||
-    [];
-
-  const monthlyDatas = monthlyData.map((month: any) => {
+  const monthlyDatas = dashboardData.monthlyData.map((month: any) => {
     return {
       ...month,
       monthName: translateMonthToVietnamese(month?.monthName),
+      donHang: month.orderCount,
+      doanhThu: month.revenue,
     };
   });
+
+  console.log(monthlyDatas);
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
@@ -178,8 +203,8 @@ const Analytics: React.FC = () => {
       </Box>
 
       {/* Overview Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+      <Grid2 container spacing={3} sx={{ mb: 4 }}>
+        <Grid2 size={{ mobile: 12, tablet: 6, desktop: 3 }}>
           <Card elevation={3} sx={{ height: "100%" }}>
             <CardContent sx={{ textAlign: "center" }}>
               <ShoppingCart
@@ -191,9 +216,9 @@ const Analytics: React.FC = () => {
               </Typography>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid2 size={{ mobile: 12, tablet: 6, desktop: 3 }}>
           <Card elevation={3} sx={{ height: "100%" }}>
             <CardContent sx={{ textAlign: "center" }}>
               <MonetizationOn
@@ -205,9 +230,9 @@ const Analytics: React.FC = () => {
               </Typography>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid2 size={{ mobile: 12, tablet: 6, desktop: 3 }}>
           <Card elevation={3} sx={{ height: "100%" }}>
             <CardContent sx={{ textAlign: "center" }}>
               <People sx={{ fontSize: 40, color: "info.main", mb: 1 }} />
@@ -217,9 +242,9 @@ const Analytics: React.FC = () => {
               </Typography>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid2 size={{ mobile: 12, tablet: 6, desktop: 3 }}>
           <Card elevation={3} sx={{ height: "100%" }}>
             <CardContent sx={{ textAlign: "center" }}>
               <AttachMoney
@@ -231,8 +256,8 @@ const Analytics: React.FC = () => {
               </Typography>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
 
       {/* Charts Section */}
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
@@ -241,7 +266,7 @@ const Analytics: React.FC = () => {
         </Typography>
 
         <ResponsiveContainer width="100%" height={400}>
-          <LineChart
+          <ComposedChart
             data={monthlyDatas}
             margin={{ top: 15, right: 30, left: 30, bottom: 5 }}
           >
@@ -277,29 +302,25 @@ const Analytics: React.FC = () => {
             />
             <Tooltip
               formatter={(value, name) => {
-                if (name === "revenue")
+                if (name === "Doanh thu")
                   return [formatCurrency(value), "Doanh thu"];
                 return [value, "Số đơn hàng"];
               }}
             />
             <Legend />
-            <Line
+            <Bar
               yAxisId="left"
-              type="monotone"
-              dataKey="revenue"
-              stroke="#8884d8"
+              dataKey="doanhThu"
+              fill="#8884d8"
               name="Doanh thu"
-              strokeWidth={2}
             />
-            <Line
+            <Bar
               yAxisId="right"
-              type="monotone"
-              dataKey="orderCount"
-              stroke="#82ca9d"
+              dataKey="donHang"
+              fill="#82ca9d"
               name="Số đơn hàng"
-              strokeWidth={2}
             />
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </Paper>
 
@@ -309,8 +330,8 @@ const Analytics: React.FC = () => {
           Trạng thái đơn hàng
         </Typography>
 
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={5}>
+        <Grid2 container spacing={3}>
+          <Grid2 size={{ mobile: 12, desktop: 5 }}>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -340,9 +361,9 @@ const Analytics: React.FC = () => {
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
-          </Grid>
+          </Grid2>
 
-          <Grid item xs={12} md={7}>
+          <Grid2 size={{ mobile: 12, desktop: 7 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               Chi tiết trạng thái
             </Typography>
@@ -378,7 +399,7 @@ const Analytics: React.FC = () => {
                           mr: 1,
                         }}
                       />
-                      <Typography>{status.percentage}%</Typography>
+                      <Typography>{status.percentage.toFixed(2)}%</Typography>
                     </Box>
                   </Box>
 
@@ -399,8 +420,8 @@ const Analytics: React.FC = () => {
                 </Box>
               ))}
             </Box>
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
       </Paper>
 
       {/* Product Categories Section */}
@@ -419,15 +440,27 @@ const Analytics: React.FC = () => {
 
         {tabValue === 0 && (
           <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={[dashboardData.overallMetrics.revenueByType]}>
+            <BarChart
+              data={[dashboardData.overallMetrics.revenueByType]}
+              margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis
-                tickFormatter={(value) =>
-                  new Intl.NumberFormat("vi-VN").format(value)
-                }
+                tickFormatter={(value) => {
+                  if (value >= 1000000) {
+                    return `${(value / 1000000).toFixed(1)} Triệu`;
+                  } else if (value >= 1000) {
+                    return `${(value / 1000).toFixed(1)} Ngàn`;
+                  }
+                  return new Intl.NumberFormat("vi-VN").format(value);
+                }}
+                width={70}
               />
-              <Tooltip formatter={(value) => formatCurrency(value)} />
+              <Tooltip
+                formatter={(value) => [formatCurrency(value), "Doanh thu"]}
+                labelFormatter={() => "Doanh thu theo loại"}
+              />
               <Legend />
               <Bar name="Nguyên liệu" dataKey="ingredients" fill="#8884d8" />
               <Bar name="Combo" dataKey="combos" fill="#82ca9d" />
@@ -444,22 +477,26 @@ const Analytics: React.FC = () => {
           <ResponsiveContainer width="100%" height={400}>
             <BarChart
               data={dashboardData.productConsumption.topIngredients}
-              margin={{ top: 10, right: 15, left: 40, bottom: 30 }}
+              margin={{ top: 10, right: 30, left: 80, bottom: 30 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="itemName" />
               <YAxis
-                tickFormatter={(value) =>
-                  new Intl.NumberFormat("vi-VN").format(value)
-                }
+                tickFormatter={(value) => {
+                  if (value >= 1000000) {
+                    return `${(value / 1000000).toFixed(1)} Triệu`;
+                  } else if (value >= 1000) {
+                    return `${(value / 1000).toFixed(1)} Ngàn`;
+                  }
+                  return new Intl.NumberFormat("vi-VN").format(value);
+                }}
+                width={70}
               />
-              <Tooltip formatter={(value) => formatCurrency(value)} />
+              <Tooltip
+                formatter={(value) => [formatCurrency(value), "Doanh thu"]}
+              />
               <Legend />
-              <Bar
-                name="Sản phẩm tiêu thụ nhiều"
-                dataKey="quantitySold"
-                fill="#8884d8"
-              />
+              <Bar name="Số lượng bán" dataKey="quantitySold" fill="#8884d8" />
             </BarChart>
           </ResponsiveContainer>
         ) : (
@@ -475,16 +512,24 @@ const Analytics: React.FC = () => {
           <ResponsiveContainer width="100%" height={400}>
             <BarChart
               data={dashboardData.productConsumption.topCombos}
-              margin={{ top: 10, right: 15, left: 40, bottom: 30 }}
+              margin={{ top: 10, right: 30, left: 80, bottom: 30 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="itemName" />
               <YAxis
-                tickFormatter={(value) =>
-                  new Intl.NumberFormat("vi-VN").format(value)
-                }
+                tickFormatter={(value) => {
+                  if (value >= 1000000) {
+                    return `${(value / 1000000).toFixed(1)} Triệu`;
+                  } else if (value >= 1000) {
+                    return `${(value / 1000).toFixed(1)} Ngàn`;
+                  }
+                  return new Intl.NumberFormat("vi-VN").format(value);
+                }}
+                width={70}
               />
-              <Tooltip formatter={(value) => formatCurrency(value)} />
+              <Tooltip
+                formatter={(value) => [formatCurrency(value), "Doanh thu"]}
+              />
               <Legend />
               <Bar name="Doanh thu" dataKey="revenue" fill="#82ca9d" />
             </BarChart>
@@ -502,16 +547,24 @@ const Analytics: React.FC = () => {
           <ResponsiveContainer width="100%" height={400}>
             <BarChart
               data={dashboardData.productConsumption.topUtensils}
-              margin={{ top: 10, right: 15, left: 40, bottom: 30 }}
+              margin={{ top: 10, right: 30, left: 80, bottom: 30 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="itemName" />
               <YAxis
-                tickFormatter={(value) =>
-                  new Intl.NumberFormat("vi-VN").format(value)
-                }
+                tickFormatter={(value) => {
+                  if (value >= 1000000) {
+                    return `${(value / 1000000).toFixed(1)} Triệu`;
+                  } else if (value >= 1000) {
+                    return `${(value / 1000).toFixed(1)} Ngàn`;
+                  }
+                  return new Intl.NumberFormat("vi-VN").format(value);
+                }}
+                width={70}
               />
-              <Tooltip formatter={(value) => formatCurrency(value)} />
+              <Tooltip
+                formatter={(value) => [formatCurrency(value), "Doanh thu"]}
+              />
               <Legend />
               <Bar name="Doanh thu" dataKey="revenue" fill="#0088fe" />
             </BarChart>
@@ -529,16 +582,24 @@ const Analytics: React.FC = () => {
           <ResponsiveContainer width="100%" height={400}>
             <BarChart
               data={dashboardData.productConsumption.topHotpots}
-              margin={{ top: 10, right: 15, left: 40, bottom: 30 }}
+              margin={{ top: 10, right: 30, left: 80, bottom: 30 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="itemName" />
               <YAxis
-                tickFormatter={(value) =>
-                  new Intl.NumberFormat("vi-VN").format(value)
-                }
+                tickFormatter={(value) => {
+                  if (value >= 1000000) {
+                    return `${(value / 1000000).toFixed(1)} Triệu`;
+                  } else if (value >= 1000) {
+                    return `${(value / 1000).toFixed(1)} Ngàn`;
+                  }
+                  return new Intl.NumberFormat("vi-VN").format(value);
+                }}
+                width={70}
               />
-              <Tooltip formatter={(value) => formatCurrency(value)} />
+              <Tooltip
+                formatter={(value) => [formatCurrency(value), "Doanh thu"]}
+              />
               <Legend />
               <Bar name="Doanh thu" dataKey="revenue" fill="#ff8042" />
             </BarChart>
