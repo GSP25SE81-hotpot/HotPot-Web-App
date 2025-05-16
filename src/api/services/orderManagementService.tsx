@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  StaffAssignmentRequest,
-  StaffAssignmentResponse,
   ShippingOrderAllocationDTO,
   ApiResponse,
   AllocateOrderWithVehicleRequest,
   OrderSizeDTO,
-  StaffShippingOrderDTO,
   OrderStatus,
   OrderStatusUpdateDTO,
   OrderDetailDTO,
@@ -21,6 +18,8 @@ import {
   DeliveryTimeUpdateRequest,
   DeliveryTimeUpdateDTO,
   UnallocatedOrderDTO,
+  MultiStaffAssignmentRequest,
+  MultiStaffAssignmentResponse,
 } from "../../types/orderManagement";
 import axiosClient from "../axiosInstance";
 
@@ -28,13 +27,13 @@ const API_URL = "/manager/order-management";
 
 export const orderManagementService = {
   // Order allocation
-  assignStaffToOrder: async (
-    request: StaffAssignmentRequest
-  ): Promise<StaffAssignmentResponse> => {
+  assignMultipleStaffToOrder: async (
+    request: MultiStaffAssignmentRequest
+  ): Promise<MultiStaffAssignmentResponse> => {
     const response = await axiosClient.post<
       any,
-      ApiResponse<StaffAssignmentResponse>
-    >(`${API_URL}/assign-staff`, request);
+      ApiResponse<MultiStaffAssignmentResponse>
+    >(`${API_URL}/assign-multiple-staff`, request);
     return response.data;
   },
 
@@ -50,20 +49,10 @@ export const orderManagementService = {
   },
 
   // New method for estimating order size
-  estimateOrderSize: async (orderId: number): Promise<OrderSizeDTO> => {
+  estimateOrderSize: async (orderCode: string): Promise<OrderSizeDTO> => {
     const response = await axiosClient.get<any, ApiResponse<OrderSizeDTO>>(
-      `${API_URL}/estimate-size/${orderId}`
+      `${API_URL}/estimate-size/${orderCode}`
     );
-    return response.data;
-  },
-
-  getOrdersByStaff: async (
-    staffId: number
-  ): Promise<StaffShippingOrderDTO[]> => {
-    const response = await axiosClient.get<
-      any,
-      ApiResponse<StaffShippingOrderDTO[]>
-    >(`${API_URL}/staff/${staffId}`);
     return response.data;
   },
 

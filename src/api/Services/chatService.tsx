@@ -275,3 +275,4 @@ export class ChatService {
 // Create a singleton instance
 const chatService = new ChatService();
 export default chatService;
+

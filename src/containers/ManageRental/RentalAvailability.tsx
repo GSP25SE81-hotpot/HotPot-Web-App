@@ -89,7 +89,7 @@ const equipmentData: Equipment[] = [
   },
 ];
 
-const EquipmentAvailability: React.FC = () => {
+const RentalAvailability: React.FC = () => {
   const theme = useTheme();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [notification, setNotification] = useState<{
@@ -473,4 +473,4 @@ const EquipmentAvailability: React.FC = () => {
   );
 };
 
-export default EquipmentAvailability;
+export default RentalAvailability;
