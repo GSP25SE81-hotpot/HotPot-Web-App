@@ -141,16 +141,16 @@ const OrdersByStatusList: React.FC = () => {
     fetchOrders();
   }, [activeTab, pageNumber, pageSize, sortBy, sortDescending]);
 
-  useEffect(() => {
-    console.log(
-      "GroupedVehicleSelection re-rendered with selectedVehicleId:",
-      selectedVehicleId
-    );
-  }, [selectedVehicleId, vehicles]);
+  // useEffect(() => {
+  //   console.log(
+  //     "GroupedVehicleSelection re-rendered with selectedVehicleId:",
+  //     selectedVehicleId
+  //   );
+  // }, [selectedVehicleId, vehicles]);
 
   // In OrdersByStatusList.tsx
   useEffect(() => {
-    console.log("selectedVehicleId state changed to:", selectedVehicleId);
+    // console.log("selectedVehicleId state changed to:", selectedVehicleId);
   }, [selectedVehicleId]);
 
   // Function to fetch orders with current filters
@@ -417,20 +417,20 @@ const OrdersByStatusList: React.FC = () => {
 
   // Handle vehicle selection
   const handleVehicleChange = (event: SelectChangeEvent<string | number>) => {
-    console.log("OrdersByStatusList received vehicle change event");
-    console.log("Event target value:", event.target.value);
-    console.log("Event target value type:", typeof event.target.value);
+    // console.log("OrdersByStatusList received vehicle change event");
+    // console.log("Event target value:", event.target.value);
+    // console.log("Event target value type:", typeof event.target.value);
 
     // Convert to appropriate type
     const value = event.target.value === "" ? null : Number(event.target.value);
-    console.log("Converted value:", value);
+    // console.log("Converted value:", value);
 
     // Update state
     setSelectedVehicleId(value);
 
     // Force a re-render if needed
     setTimeout(() => {
-      console.log("After state update, selectedVehicleId:", selectedVehicleId);
+      // console.log("After state update, selectedVehicleId:", selectedVehicleId);
     }, 0);
   };
 

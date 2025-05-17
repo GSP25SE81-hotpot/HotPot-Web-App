@@ -11,7 +11,6 @@ import FeedbackIcon from "@mui/icons-material/Feedback";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import ReceiptIcon from "@mui/icons-material/Receipt";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
@@ -115,20 +114,8 @@ export const menuItems: MenuItemLayout[] = [
       //order
       {
         label: "Quản lý đơn hàng",
-        icon: <ReceiptIcon />,
-        path: "#",
-        children: [
-          {
-            label: "Quản lý đơn hàng",
-            icon: <InventoryIcon />,
-            path: managerRoutes.manageOrder,
-          },
-          // {
-          //   label: "Lịch sử đơn hàng",
-          //   icon: <AssignmentIcon />,
-          //   path: staffRoutes.orderHistory,
-          // },
-        ],
+        icon: <InventoryIcon />,
+        path: managerRoutes.manageOrder,
       },
       //maintenance
       {

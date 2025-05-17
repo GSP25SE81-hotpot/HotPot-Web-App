@@ -32,7 +32,7 @@ export const getItemTypeDisplay = (itemType: string) => {
     case "Utensil":
       return { label: "Dụng cụ", color: "info" };
     case "Hotpot":
-      return { label: "Lẩu", color: "warning" };
+      return { label: "Nồi lẩu", color: "warning" };
     default:
       return { label: itemType, color: "default" };
   }

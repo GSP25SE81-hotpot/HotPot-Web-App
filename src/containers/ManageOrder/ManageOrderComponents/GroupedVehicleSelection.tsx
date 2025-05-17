@@ -1,21 +1,25 @@
+// src/components/GroupedVehicleSelection.tsx
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Typography,
-  Chip,
-  Button,
-} from "@mui/material";
+import { SelectChangeEvent } from "@mui/material";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
 import { OrderSizeDTO, VehicleType } from "../../../types/orderManagement";
 import { VehicleDTO } from "../../../types/vehicle";
 import { getVietnameseOrderSizeLabel } from "./utils/orderHelpers";
+import {
+  VehicleSelectionContainer,
+  StyledFormControl,
+  StyledSelect,
+  StyledMenuItem,
+  VehicleItemContainer,
+  SectionTitle,
+  VehicleTypeHeader,
+  VehicleButtonsContainer,
+  VehicleButton,
+  OrderSizeContainer,
+  SuggestionChip,
+} from "./utils/GroupedVehicleSelectionStyles";
+import { InputLabel, Typography } from "@mui/material";
 
 interface GroupedVehicleSelectionProps {
   vehicles: VehicleDTO[];
@@ -46,15 +50,8 @@ const GroupedVehicleSelection: React.FC<GroupedVehicleSelectionProps> = ({
   const scooters = vehicles.filter((v) => v.type === VehicleType.Scooter);
   const cars = vehicles.filter((v) => v.type === VehicleType.Car);
 
-  // Find the selected vehicle for debugging
-  // const selectedVehicle = vehicles.find(
-  //   (v) => v.vehicleId === Number(localSelectedId)
-  // );
-
   // Handle direct selection
   const handleDirectSelection = (vehicleId: number) => {
-    console.log("Direct selection of vehicle ID:", vehicleId);
-
     // Create a synthetic event
     const syntheticEvent = {
       target: {
@@ -72,9 +69,6 @@ const GroupedVehicleSelection: React.FC<GroupedVehicleSelectionProps> = ({
 
   // Handle standard select change
   const handleSelectChange = (event: SelectChangeEvent<string | number>) => {
-    console.log("Select change event:", event);
-    console.log("Select change value:", event.target.value);
-
     // Update local state
     setLocalSelectedId(event.target.value);
 
@@ -83,23 +77,25 @@ const GroupedVehicleSelection: React.FC<GroupedVehicleSelectionProps> = ({
   };
 
   return (
-    <Box>
-      <FormControl fullWidth disabled={disabled} sx={{ mb: 2 }}>
+    <VehicleSelectionContainer>
+      <StyledFormControl fullWidth disabled={disabled}>
         <InputLabel id="vehicle-select-label">Phương tiện giao hàng</InputLabel>
-        <Select
+        <StyledSelect
           labelId="vehicle-select-label"
           id="vehicle-select"
           value={localSelectedId}
           label="Phương tiện giao hàng"
           onChange={handleSelectChange}
         >
-          <MenuItem value="">
+          <StyledMenuItem value="">
             <em>Chọn phương tiện giao hàng</em>
-          </MenuItem>
-
+          </StyledMenuItem>
           {vehicles.map((vehicle) => (
-            <MenuItem key={vehicle.vehicleId} value={String(vehicle.vehicleId)}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <StyledMenuItem
+              key={vehicle.vehicleId}
+              value={String(vehicle.vehicleId)}
+            >
+              <VehicleItemContainer>
                 {vehicle.type === VehicleType.Car ? (
                   <DirectionsCarIcon fontSize="small" color="action" />
                 ) : (
@@ -108,32 +104,27 @@ const GroupedVehicleSelection: React.FC<GroupedVehicleSelectionProps> = ({
                 <Typography variant="body2">
                   {vehicle.name} - {vehicle.licensePlate}
                 </Typography>
-              </Box>
-            </MenuItem>
+              </VehicleItemContainer>
+            </StyledMenuItem>
           ))}
-        </Select>
-      </FormControl>
+        </StyledSelect>
+      </StyledFormControl>
 
       {/* Alternative direct selection buttons */}
-      <Typography variant="subtitle2" sx={{ mb: 1 }}>
-        Hoặc chọn trực tiếp:
-      </Typography>
+      <SectionTitle variant="subtitle2">Hoặc chọn trực tiếp:</SectionTitle>
 
       {/* Scooters */}
       {scooters.length > 0 && (
-        <Box sx={{ mb: 2 }}>
-          <Typography
-            variant="body2"
-            fontWeight={600}
-            sx={{ mb: 1, display: "flex", alignItems: "center", gap: 0.5 }}
-          >
+        <VehicleButtonsContainer>
+          <VehicleTypeHeader variant="body2">
             <TwoWheelerIcon fontSize="small" />
             Xe máy
-          </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          </VehicleTypeHeader>
+          <VehicleButtonsContainer>
             {scooters.map((vehicle) => (
-              <Button
+              <VehicleButton
                 key={vehicle.vehicleId}
+                isSelected={Number(localSelectedId) === vehicle.vehicleId}
                 variant={
                   Number(localSelectedId) === vehicle.vehicleId
                     ? "contained"
@@ -142,30 +133,26 @@ const GroupedVehicleSelection: React.FC<GroupedVehicleSelectionProps> = ({
                 size="small"
                 onClick={() => handleDirectSelection(vehicle.vehicleId)}
                 startIcon={<TwoWheelerIcon />}
-                sx={{ borderRadius: 2 }}
                 disabled={disabled}
               >
                 {vehicle.name}
-              </Button>
+              </VehicleButton>
             ))}
-          </Box>
-        </Box>
+          </VehicleButtonsContainer>
+        </VehicleButtonsContainer>
       )}
 
       {/* Cars */}
       {cars.length > 0 && (
-        <Box sx={{ mb: 2 }}>
-          <Typography
-            variant="body2"
-            fontWeight={600}
-            sx={{ mb: 1, display: "flex", alignItems: "center", gap: 0.5 }}
-          >
+        <VehicleButtonsContainer>
+          <VehicleTypeHeader variant="body2">
             <DirectionsCarIcon fontSize="small" />Ô tô
-          </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          </VehicleTypeHeader>
+          <VehicleButtonsContainer>
             {cars.map((vehicle) => (
-              <Button
+              <VehicleButton
                 key={vehicle.vehicleId}
+                isSelected={Number(localSelectedId) === vehicle.vehicleId}
                 variant={
                   Number(localSelectedId) === vehicle.vehicleId
                     ? "contained"
@@ -174,85 +161,43 @@ const GroupedVehicleSelection: React.FC<GroupedVehicleSelectionProps> = ({
                 size="small"
                 onClick={() => handleDirectSelection(vehicle.vehicleId)}
                 startIcon={<DirectionsCarIcon />}
-                sx={{ borderRadius: 2 }}
                 disabled={disabled}
               >
                 {vehicle.name}
-              </Button>
+              </VehicleButton>
             ))}
-          </Box>
-        </Box>
+          </VehicleButtonsContainer>
+        </VehicleButtonsContainer>
       )}
-
-      {/* Debug info */}
-      {/* <Box
-        sx={{
-          mt: 2,
-          p: 1,
-          bgcolor: "background.paper",
-          borderRadius: 1,
-          border: "1px dashed grey.300",
-        }}
-      >
-        <Typography
-          variant="caption"
-          sx={{ display: "block", fontWeight: "bold" }}
-        >
-          Debug Information:
-        </Typography>
-        <Typography variant="caption" sx={{ display: "block" }}>
-          Local selected ID:{" "}
-          {localSelectedId === "" ? "empty string" : localSelectedId}
-        </Typography>
-        <Typography variant="caption" sx={{ display: "block" }}>
-          Prop selectedVehicleId:{" "}
-          {selectedVehicleId === null ? "null" : selectedVehicleId}
-        </Typography>
-        <Typography variant="caption" sx={{ display: "block" }}>
-          Selected vehicle:{" "}
-          {selectedVehicle
-            ? `${selectedVehicle.name} (${selectedVehicle.licensePlate})`
-            : "None"}
-        </Typography>
-        <Typography variant="caption" sx={{ display: "block" }}>
-          Vehicles count: {vehicles.length}
-        </Typography>
-        <Typography variant="caption" sx={{ display: "block" }}>
-          Component disabled: {disabled ? "Yes" : "No"}
-        </Typography>
-      </Box> */}
 
       {orderSize && (
-        <FormHelperText>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography variant="caption">
-              Kích thước đơn hàng:{" "}
-              <strong>{getVietnameseOrderSizeLabel(orderSize.size)}</strong>
-            </Typography>
-            {orderSize.suggestedVehicleType && (
-              <Chip
-                icon={
-                  orderSize.suggestedVehicleType === VehicleType.Car ? (
-                    <DirectionsCarIcon fontSize="small" />
-                  ) : (
-                    <TwoWheelerIcon fontSize="small" />
-                  )
-                }
-                label={`Đề xuất: ${
-                  orderSize.suggestedVehicleType === VehicleType.Car
-                    ? "Ô tô"
-                    : "Xe máy"
-                }`}
-                size="small"
-                color="success"
-                variant="outlined"
-                sx={{ height: 20, fontSize: "0.7rem" }}
-              />
-            )}
-          </Box>
-        </FormHelperText>
+        <OrderSizeContainer>
+          <Typography variant="caption">
+            Kích thước đơn hàng:{" "}
+            <strong>{getVietnameseOrderSizeLabel(orderSize.size)}</strong>
+          </Typography>
+          {orderSize.suggestedVehicleType && (
+            <SuggestionChip
+              icon={
+                orderSize.suggestedVehicleType === VehicleType.Car ? (
+                  <DirectionsCarIcon fontSize="small" />
+                ) : (
+                  <TwoWheelerIcon fontSize="small" />
+                )
+              }
+              label={`Đề xuất: ${
+                orderSize.suggestedVehicleType === VehicleType.Car
+                  ? "Ô tô"
+                  : "Xe máy"
+              }`}
+              size="small"
+              color="success"
+              variant="outlined"
+            />
+          )}
+        </OrderSizeContainer>
       )}
-    </Box>
+    </VehicleSelectionContainer>
   );
 };
 

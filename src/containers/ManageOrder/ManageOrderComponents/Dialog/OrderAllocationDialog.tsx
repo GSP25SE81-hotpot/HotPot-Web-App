@@ -87,8 +87,8 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
   allocating,
 }) => {
   // Debug logs
-  console.log("Dialog - selectedVehicleId:", selectedVehicleId);
-  console.log("Dialog - filteredVehicles:", filteredVehicles);
+  // console.log("Dialog - selectedVehicleId:", selectedVehicleId);
+  // console.log("Dialog - filteredVehicles:", filteredVehicles);
 
   return (
     <Dialog
@@ -550,7 +550,6 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
               </FormControl>
             </Box>
             {/* Vehicle Selection - Updated with Grouped Vehicles */}
-            // In OrderAllocationDialog.tsx
             <Box sx={{ mt: 2 }}>
               <Typography
                 variant="subtitle2"
@@ -563,7 +562,7 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
                 vehicles={filteredVehicles}
                 selectedVehicleId={selectedVehicleId}
                 onVehicleChange={(event) => {
-                  console.log("Vehicle change in dialog:", event.target.value);
+                  // console.log("Vehicle change in dialog:", event.target.value);
                   onVehicleChange(event as SelectChangeEvent<number>);
                 }}
                 orderSize={orderSize}
