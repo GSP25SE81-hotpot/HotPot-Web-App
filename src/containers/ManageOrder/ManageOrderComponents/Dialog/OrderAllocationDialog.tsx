@@ -1,42 +1,42 @@
-import React from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Box,
-  Typography,
-  Divider,
-  FormLabel,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
-  Alert,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  CircularProgress,
-  Chip,
-  alpha,
-  SelectChangeEvent,
-  ListSubheader,
-} from "@mui/material";
 import BuildIcon from "@mui/icons-material/Build";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
+import {
+  Alert,
+  alpha,
+  Box,
+  Checkbox,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  FormLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Typography,
+} from "@mui/material";
+import React from "react";
 import { DialogActionButton } from "../../../../components/manager/styles/UnallocatedOrdersListStyles";
 import {
+  OrderSize,
+  OrderSizeDTO,
   OrderWithDetailsDTO,
   StaffTaskType,
-  OrderSizeDTO,
-  OrderSize,
   VehicleType,
 } from "../../../../types/orderManagement";
 import { StaffAvailabilityDto } from "../../../../types/staff";
 import { VehicleDTO } from "../../../../types/vehicle";
 import { formatDate } from "../../../../utils/formatters";
+import GroupedVehicleSelection from "../GroupedVehicleSelection";
 import {
   getVehicleTypeName,
   getVietnameseOrderSizeLabel,
@@ -58,7 +58,7 @@ interface OrderAllocationDialogProps {
   vehicles: VehicleDTO[];
   filteredVehicles: VehicleDTO[];
   selectedVehicleId: number | null;
-  onVehicleChange: (event: SelectChangeEvent<number>) => void;
+  onVehicleChange: (event: SelectChangeEvent<string | number>) => void; // Updated type
   orderSize: OrderSizeDTO | null;
   estimatingSize: boolean;
   onAllocate: () => void;
@@ -86,14 +86,9 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
   onAllocate,
   allocating,
 }) => {
-  // Group vehicles by type
-  const scooters = filteredVehicles.filter(
-    (v) => v.type === VehicleType.Scooter
-  );
-  const cars = filteredVehicles.filter((v) => v.type === VehicleType.Car);
-
-  // Determine which vehicle type to show first based on order size
-  const showScootersFirst = !orderSize || orderSize.size === OrderSize.Small;
+  // Debug logs
+  console.log("Dialog - selectedVehicleId:", selectedVehicleId);
+  console.log("Dialog - filteredVehicles:", filteredVehicles);
 
   return (
     <Dialog
@@ -249,7 +244,6 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
             >
               Chọn nhân viên chuẩn bị
             </Typography>
-
             {/* Display selected staff with remove option */}
             {selectedPrepStaffIds.length > 0 && (
               <Box sx={{ mb: 2, display: "flex", flexWrap: "wrap", gap: 1 }}>
@@ -274,7 +268,6 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
                 })}
               </Box>
             )}
-
             {/* Staff selection dropdown */}
             <FormControl fullWidth>
               <InputLabel id="prep-staff-select-label">
@@ -364,7 +357,6 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
                   ))}
               </Select>
             </FormControl>
-
             {selectedPrepStaffIds.length === 0 && (
               <Typography
                 variant="body2"
@@ -376,7 +368,6 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
             )}
           </Box>
         )}
-
         {selectedTaskTypes.includes(StaffTaskType.Preparation) &&
           selectedTaskTypes.includes(StaffTaskType.Shipping) && (
             <Divider sx={{ my: 2 }} />
@@ -559,6 +550,7 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
               </FormControl>
             </Box>
             {/* Vehicle Selection - Updated with Grouped Vehicles */}
+            // In OrderAllocationDialog.tsx
             <Box sx={{ mt: 2 }}>
               <Typography
                 variant="subtitle2"
@@ -566,400 +558,17 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
               >
                 Chọn phương tiện vận chuyển
               </Typography>
-              <FormControl fullWidth>
-                <InputLabel id="vehicle-select-label">
-                  Chọn phương tiện
-                </InputLabel>
-                <Select
-                  labelId="vehicle-select-label"
-                  value={selectedVehicleId || 0}
-                  label="Chọn phương tiện"
-                  onChange={onVehicleChange}
-                  sx={{
-                    borderRadius: 2,
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: (theme) =>
-                        alpha(theme.palette.primary.main, 0.2),
-                    },
-                  }}
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        maxHeight: 300,
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value={0}>Không sử dụng phương tiện</MenuItem>
 
-                  {/* Show vehicles grouped by type, with order based on order size */}
-                  {showScootersFirst ? (
-                    <>
-                      {/* Scooters Group */}
-                      {scooters.length > 0 && (
-                        <>
-                          <ListSubheader
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                              backgroundColor: (theme) =>
-                                alpha(theme.palette.secondary.light, 0.1),
-                              borderRadius: 1,
-                              my: 0.5,
-                            }}
-                          >
-                            <TwoWheelerIcon
-                              fontSize="small"
-                              color="secondary"
-                            />
-                            <Typography variant="body2" fontWeight={600}>
-                              Xe máy
-                            </Typography>
-                            {orderSize?.suggestedVehicleType ===
-                              VehicleType.Scooter && (
-                              <Chip
-                                label="Đề xuất"
-                                size="small"
-                                color="success"
-                                variant="outlined"
-                                sx={{ height: 20, fontSize: "0.7rem" }}
-                              />
-                            )}
-                          </ListSubheader>
-                          {scooters.map((vehicle) => (
-                            <MenuItem
-                              key={vehicle.vehicleId}
-                              value={vehicle.vehicleId}
-                              sx={{
-                                borderRadius: 1,
-                                my: 0.5,
-                                ml: 2, // Indent to show grouping
-                                "&:hover": {
-                                  backgroundColor: (theme) =>
-                                    alpha(theme.palette.secondary.main, 0.08),
-                                },
-                                "&.Mui-selected": {
-                                  backgroundColor: (theme) =>
-                                    alpha(theme.palette.secondary.main, 0.12),
-                                  "&:hover": {
-                                    backgroundColor: (theme) =>
-                                      alpha(theme.palette.secondary.main, 0.16),
-                                  },
-                                },
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  width: "100%",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                  }}
-                                >
-                                  <TwoWheelerIcon
-                                    fontSize="small"
-                                    color="secondary"
-                                  />
-                                  <Typography>{vehicle.name}</Typography>
-                                </Box>
-                                <Typography
-                                  variant="caption"
-                                  sx={{ color: "text.secondary" }}
-                                >
-                                  {vehicle.licensePlate}
-                                </Typography>
-                              </Box>
-                            </MenuItem>
-                          ))}
-                        </>
-                      )}
-
-                      {/* Cars Group */}
-                      {cars.length > 0 && (
-                        <>
-                          <ListSubheader
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                              backgroundColor: (theme) =>
-                                alpha(theme.palette.primary.light, 0.1),
-                              borderRadius: 1,
-                              my: 0.5,
-                            }}
-                          >
-                            <DirectionsCarIcon
-                              fontSize="small"
-                              color="primary"
-                            />
-                            <Typography variant="body2" fontWeight={600}>
-                              Ô tô
-                            </Typography>
-                            {orderSize?.suggestedVehicleType ===
-                              VehicleType.Car && (
-                              <Chip
-                                label="Đề xuất"
-                                size="small"
-                                color="success"
-                                variant="outlined"
-                                sx={{ height: 20, fontSize: "0.7rem" }}
-                              />
-                            )}
-                          </ListSubheader>
-                          {cars.map((vehicle) => (
-                            <MenuItem
-                              key={vehicle.vehicleId}
-                              value={vehicle.vehicleId}
-                              sx={{
-                                borderRadius: 1,
-                                my: 0.5,
-                                ml: 2, // Indent to show grouping
-                                "&:hover": {
-                                  backgroundColor: (theme) =>
-                                    alpha(theme.palette.primary.main, 0.08),
-                                },
-                                "&.Mui-selected": {
-                                  backgroundColor: (theme) =>
-                                    alpha(theme.palette.primary.main, 0.12),
-                                  "&:hover": {
-                                    backgroundColor: (theme) =>
-                                      alpha(theme.palette.primary.main, 0.16),
-                                  },
-                                },
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  width: "100%",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                  }}
-                                >
-                                  <DirectionsCarIcon
-                                    fontSize="small"
-                                    color="primary"
-                                  />
-                                  <Typography>{vehicle.name}</Typography>
-                                </Box>
-                                <Typography
-                                  variant="caption"
-                                  sx={{ color: "text.secondary" }}
-                                >
-                                  {vehicle.licensePlate}
-                                </Typography>
-                              </Box>
-                            </MenuItem>
-                          ))}
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {/* Cars Group (shown first for large orders) */}
-                      {cars.length > 0 && (
-                        <>
-                          <ListSubheader
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                              backgroundColor: (theme) =>
-                                alpha(theme.palette.primary.light, 0.1),
-                              borderRadius: 1,
-                              my: 0.5,
-                            }}
-                          >
-                            <DirectionsCarIcon
-                              fontSize="small"
-                              color="primary"
-                            />
-                            <Typography variant="body2" fontWeight={600}>
-                              Ô tô
-                            </Typography>
-                            {orderSize?.suggestedVehicleType ===
-                              VehicleType.Car && (
-                              <Chip
-                                label="Đề xuất"
-                                size="small"
-                                color="success"
-                                variant="outlined"
-                                sx={{ height: 20, fontSize: "0.7rem" }}
-                              />
-                            )}
-                          </ListSubheader>
-                          {cars.map((vehicle) => (
-                            <MenuItem
-                              key={vehicle.vehicleId}
-                              value={vehicle.vehicleId}
-                              sx={{
-                                borderRadius: 1,
-                                my: 0.5,
-                                ml: 2, // Indent to show grouping
-                                "&:hover": {
-                                  backgroundColor: (theme) =>
-                                    alpha(theme.palette.primary.main, 0.08),
-                                },
-                                "&.Mui-selected": {
-                                  backgroundColor: (theme) =>
-                                    alpha(theme.palette.primary.main, 0.12),
-                                  "&:hover": {
-                                    backgroundColor: (theme) =>
-                                      alpha(theme.palette.primary.main, 0.16),
-                                  },
-                                },
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  width: "100%",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                  }}
-                                >
-                                  <DirectionsCarIcon
-                                    fontSize="small"
-                                    color="primary"
-                                  />
-                                  <Typography>{vehicle.name}</Typography>
-                                </Box>
-                                <Typography
-                                  variant="caption"
-                                  sx={{ color: "text.secondary" }}
-                                >
-                                  {vehicle.licensePlate}
-                                </Typography>
-                              </Box>
-                            </MenuItem>
-                          ))}
-                        </>
-                      )}
-
-                      {/* Scooters Group */}
-                      {scooters.length > 0 && (
-                        <>
-                          <ListSubheader
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                              backgroundColor: (theme) =>
-                                alpha(theme.palette.secondary.light, 0.1),
-                              borderRadius: 1,
-                              my: 0.5,
-                            }}
-                          >
-                            <TwoWheelerIcon
-                              fontSize="small"
-                              color="secondary"
-                            />
-                            <Typography variant="body2" fontWeight={600}>
-                              Xe máy
-                            </Typography>
-                            {orderSize?.suggestedVehicleType ===
-                              VehicleType.Scooter && (
-                              <Chip
-                                label="Đề xuất"
-                                size="small"
-                                color="success"
-                                variant="outlined"
-                                sx={{ height: 20, fontSize: "0.7rem" }}
-                              />
-                            )}
-                          </ListSubheader>
-                          {scooters.map((vehicle) => (
-                            <MenuItem
-                              key={vehicle.vehicleId}
-                              value={vehicle.vehicleId}
-                              sx={{
-                                borderRadius: 1,
-                                my: 0.5,
-                                ml: 2, // Indent to show grouping
-                                "&:hover": {
-                                  backgroundColor: (theme) =>
-                                    alpha(theme.palette.secondary.main, 0.08),
-                                },
-                                "&.Mui-selected": {
-                                  backgroundColor: (theme) =>
-                                    alpha(theme.palette.secondary.main, 0.12),
-                                  "&:hover": {
-                                    backgroundColor: (theme) =>
-                                      alpha(theme.palette.secondary.main, 0.16),
-                                  },
-                                },
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  width: "100%",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                  }}
-                                >
-                                  <TwoWheelerIcon
-                                    fontSize="small"
-                                    color="secondary"
-                                  />
-                                  <Typography>{vehicle.name}</Typography>
-                                </Box>
-                                <Typography
-                                  variant="caption"
-                                  sx={{ color: "text.secondary" }}
-                                >
-                                  {vehicle.licensePlate}
-                                </Typography>
-                              </Box>
-                            </MenuItem>
-                          ))}
-                        </>
-                      )}
-                    </>
-                  )}
-
-                  {filteredVehicles.length === 0 && (
-                    <MenuItem disabled>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        fontStyle="italic"
-                      >
-                        Không có phương tiện khả dụng
-                      </Typography>
-                    </MenuItem>
-                  )}
-                </Select>
-              </FormControl>
+              <GroupedVehicleSelection
+                vehicles={filteredVehicles}
+                selectedVehicleId={selectedVehicleId}
+                onVehicleChange={(event) => {
+                  console.log("Vehicle change in dialog:", event.target.value);
+                  onVehicleChange(event as SelectChangeEvent<number>);
+                }}
+                orderSize={orderSize}
+                disabled={!selectedShippingStaffId}
+              />
 
               {/* Warning for large orders with scooter selection */}
               {orderSize &&
@@ -972,33 +581,6 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
                     không đủ không gian.
                   </Alert>
                 )}
-
-              {/* Recommendation based on order size */}
-              {orderSize && !estimatingSize && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    mt: 1,
-                    color: "text.secondary",
-                    fontStyle: "italic",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                  }}
-                >
-                  {orderSize.size === OrderSize.Small ? (
-                    <>
-                      <TwoWheelerIcon fontSize="small" color="action" />
-                      Đơn hàng nhỏ, có thể sử dụng xe máy để tiết kiệm chi phí
-                    </>
-                  ) : (
-                    <>
-                      <DirectionsCarIcon fontSize="small" color="action" />
-                      Đơn hàng lớn, nên sử dụng ô tô để đảm bảo đủ không gian
-                    </>
-                  )}
-                </Typography>
-              )}
             </Box>
           </>
         )}
@@ -1022,9 +604,9 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
           disabled={
             allocating ||
             (selectedTaskTypes.includes(StaffTaskType.Preparation) &&
-              !selectedPrepStaffIds) ||
+              selectedPrepStaffIds.length === 0) ||
             (selectedTaskTypes.includes(StaffTaskType.Shipping) &&
-              (!selectedShippingStaffId || !selectedVehicleId))
+              !selectedShippingStaffId)
           }
           sx={{
             backgroundColor: (theme) => theme.palette.primary.main,
