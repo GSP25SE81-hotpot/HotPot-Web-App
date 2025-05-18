@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/components/NotificationCenter.tsx
 import React, { useEffect, useState } from "react";
 import {
@@ -29,7 +28,7 @@ import {
 // Import your existing date formatting utilities
 import { formatDetailDate } from "../../../utils/formatters"; // Adjust the import path as needed
 
-const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }) => {
+const NotificationCenter: React.FC<NotificationCenterProps> = () => {
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);

@@ -41,26 +41,36 @@ import {
 } from "../../../components/manager/styles/AssignmentStyles";
 
 const CurrentAssignments: React.FC = () => {
-  const [assignments, setAssignments] =
-    useState<PagedResult<StaffPickupAssignmentDto> | null>(null);
+  const [assignments, setAssignments] = useState<PagedResult<
+    StaffPickupAssignmentDto[]
+  > | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const rowsPerPageOptions = [6, 12, 24];
+  const rowsPerPageOptions = [5, 10, 25];
 
   const fetchAssignments = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getCurrentAssignments(page + 1, rowsPerPage);
-      setAssignments(data);
+      const response = await getCurrentAssignments(page + 1, rowsPerPage);
+      if (!response || !response.success || !response.data) {
+        // Handle the case where the API returns no data
+        setAssignments(null);
+        setError("No assignment data received from server");
+        return;
+      }
+      // Now TypeScript knows response.data is not undefined
+      setAssignments(response.data);
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
           : "An error occurred while fetching assignments"
       );
+      // Set assignments to null when there's an error
+      setAssignments(null);
     } finally {
       setLoading(false);
     }
@@ -119,107 +129,110 @@ const CurrentAssignments: React.FC = () => {
             ) : (
               <>
                 <Grid container spacing={3}>
-                  {assignments?.items.map((assignment) => (
-                    <Grid
-                      size={{ xs: 12, md: 6, lg: 4 }}
-                      key={assignment.assignmentId}
-                    >
-                      <AssignmentCard elevation={0}>
-                        <Box sx={{ p: 3 }}>
-                          <AssignmentHeader>
-                            <StatusChip
-                              label={
-                                assignment.completedDate
-                                  ? "Completed"
-                                  : "In Progress"
-                              }
-                              status={
-                                assignment.completedDate
-                                  ? "completed"
-                                  : "inProgress"
-                              }
-                              size="small"
-                            />
-                            <TimeAgo>
-                              Assigned{" "}
-                              {formatDistanceToNow(
-                                new Date(assignment.assignedDate),
-                                { addSuffix: true }
-                              )}
-                            </TimeAgo>
-                          </AssignmentHeader>
-
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              mb: 2,
-                            }}
-                          >
-                            <StaffAvatar>
-                              {assignment.staffName.charAt(0)}
-                            </StaffAvatar>
-                            <StaffInfo>
-                              <StaffName variant="h6">
-                                {assignment.staffName}
-                              </StaffName>
-                              <StaffId variant="body2">
-                                Staff ID: {assignment.staffId}
-                              </StaffId>
-                            </StaffInfo>
-                          </Box>
-
-                          <StyledDivider />
-
-                          <InfoItem>
-                            <InventoryIcon />
-                            <InfoText>{assignment.equipmentName}</InfoText>
-                          </InfoItem>
-
-                          <InfoItem>
-                            <PersonIcon />
-                            <InfoText>{assignment.customerName}</InfoText>
-                          </InfoItem>
-
-                          <InfoItem>
-                            <LocationOnIcon />
-                            <InfoText>
-                              {assignment.customerAddress ||
-                                "Address not provided"}
-                            </InfoText>
-                          </InfoItem>
-
-                          <InfoItem>
-                            <PhoneIcon />
-                            <InfoText>
-                              {assignment.customerPhone || "Phone not provided"}
-                            </InfoText>
-                          </InfoItem>
-
-                          <InfoItem>
-                            <EventIcon />
-                            <InfoText>
-                              Expected Return:{" "}
-                              {format(
-                                new Date(assignment.expectedReturnDate),
-                                "MMM dd, yyyy"
-                              )}
-                            </InfoText>
-                          </InfoItem>
-
-                          {assignment.notes && (
-                            <NotesContainer>
-                              <NoteIcon
-                                fontSize="small"
-                                sx={{ mt: 0.5, mr: 1.5 }}
+                  {assignments?.items.map((assignmentGroup) =>
+                    assignmentGroup.map((assignment) => (
+                      <Grid
+                        size={{ xs: 12, md: 6, lg: 4 }}
+                        key={assignment.assignmentId}
+                      >
+                        <AssignmentCard elevation={0}>
+                          <Box sx={{ p: 3 }}>
+                            <AssignmentHeader>
+                              <StatusChip
+                                label={
+                                  assignment.completedDate
+                                    ? "Completed"
+                                    : "In Progress"
+                                }
+                                status={
+                                  assignment.completedDate
+                                    ? "completed"
+                                    : "inProgress"
+                                }
+                                size="small"
                               />
-                              <InfoText>{assignment.notes}</InfoText>
-                            </NotesContainer>
-                          )}
-                        </Box>
-                      </AssignmentCard>
-                    </Grid>
-                  ))}
+                              <TimeAgo>
+                                Assigned{" "}
+                                {formatDistanceToNow(
+                                  new Date(assignment.assignedDate),
+                                  { addSuffix: true }
+                                )}
+                              </TimeAgo>
+                            </AssignmentHeader>
+
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                mb: 2,
+                              }}
+                            >
+                              <StaffAvatar>
+                                {assignment.staffName.charAt(0)}
+                              </StaffAvatar>
+                              <StaffInfo>
+                                <StaffName variant="h6">
+                                  {assignment.staffName}
+                                </StaffName>
+                                <StaffId variant="body2">
+                                  Staff ID: {assignment.staffId}
+                                </StaffId>
+                              </StaffInfo>
+                            </Box>
+
+                            <StyledDivider />
+
+                            <InfoItem>
+                              <InventoryIcon />
+                              <InfoText>{assignment.equipmentName}</InfoText>
+                            </InfoItem>
+
+                            <InfoItem>
+                              <PersonIcon />
+                              <InfoText>{assignment.customerName}</InfoText>
+                            </InfoItem>
+
+                            <InfoItem>
+                              <LocationOnIcon />
+                              <InfoText>
+                                {assignment.customerAddress ||
+                                  "Address not provided"}
+                              </InfoText>
+                            </InfoItem>
+
+                            <InfoItem>
+                              <PhoneIcon />
+                              <InfoText>
+                                {assignment.customerPhone ||
+                                  "Phone not provided"}
+                              </InfoText>
+                            </InfoItem>
+
+                            <InfoItem>
+                              <EventIcon />
+                              <InfoText>
+                                Expected Return:{" "}
+                                {format(
+                                  new Date(assignment.expectedReturnDate),
+                                  "MMM dd, yyyy"
+                                )}
+                              </InfoText>
+                            </InfoItem>
+
+                            {assignment.notes && (
+                              <NotesContainer>
+                                <NoteIcon
+                                  fontSize="small"
+                                  sx={{ mt: 0.5, mr: 1.5 }}
+                                />
+                                <InfoText>{assignment.notes}</InfoText>
+                              </NotesContainer>
+                            )}
+                          </Box>
+                        </AssignmentCard>
+                      </Grid>
+                    ))
+                  )}
                 </Grid>
 
                 <Box

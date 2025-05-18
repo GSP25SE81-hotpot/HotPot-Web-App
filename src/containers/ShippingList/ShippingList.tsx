@@ -19,8 +19,6 @@ import staffShippingListApi from "../../api/staffShippingListAPI";
 import { ShippingOrder } from "../../types/shippingOrder";
 import DoneIcon from "@mui/icons-material/Done";
 import DeliveryDiningIcon from "@mui/icons-material/DeliveryDining";
-import useAuth from "../../hooks/useAuth";
-import { OrderStatus } from "../../types/orderManagement";
 import staffGetOrderApi from "../../api/staffGetOrderAPI";
 import { toast } from "react-toastify";
 
@@ -28,8 +26,6 @@ const ShippingList = () => {
   //Declare
   const [shippingList, setShippingList] = React.useState<ShippingOrder[]>([]);
   const theme = useTheme();
-  const { auth } = useAuth();
-  const id = auth?.user?.id;
   //Call api
   const getShippingList = async () => {
     try {

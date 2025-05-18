@@ -51,7 +51,6 @@ import { ManageAssignmentStaffPage } from "../pages/Staff/ManageAssignemt/Manage
 import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
 import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
 import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
-import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliveryPage";
 import ShippingListPage from "../pages/Staff/Shipping/ShippingListPage";
 import { ManageVehiclePage } from "../pages/Manager/ManageVehicle/ManageVehiclePage";
 import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock/EquipmentAvailabilityPage";
@@ -271,10 +270,7 @@ const AppRoute: React.FC = () => {
           path={config.staffRoutes.orderHistory}
           element={<OrderHistoryPage />}
         />
-        <Route
-          path={config.staffRoutes.proofOfDelivery}
-          element={<ProofOfDeliveryPage />}
-        />
+
         <Route
           path={config.staffRoutes.rentalDetail}
           element={<RentalDetailPage />}

@@ -72,7 +72,7 @@ const UnassignedPickups: React.FC = () => {
     setError(null);
     try {
       const data = await getUnassignedPickups(page + 1, rowsPerPage);
-      setPickups(data);
+      setPickups(data.data as PagedResult<RentOrderDetail>);
     } catch (err) {
       setError(
         err instanceof Error
