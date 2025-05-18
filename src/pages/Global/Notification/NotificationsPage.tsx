@@ -65,7 +65,9 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
 
     // Set up SignalR connection
     const newConnection = new HubConnectionBuilder()
-      .withUrl("https://localhost:7163/notificationHub")
+      .withUrl("https://hpty.vinhuser.one/notificationHub")
+      // https://hpty.vinhuser.one
+      // https://localhost:7163
       .configureLogging(LogLevel.Information)
       .withAutomaticReconnect()
       .build();
