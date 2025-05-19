@@ -106,3 +106,22 @@ export interface NotificationHubEvents {
 export interface NotificationCenterProps {
   userId?: number;
 }
+
+export interface PaginatedNotificationsResponse {
+  notifications: Notification[];
+  currentPage: number;
+  pageSize: number;
+  hasPreviousPage: boolean;
+}
+
+export interface NotificationCountResponse {
+  unreadCount: number;
+  totalCount: number;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  errors: any;
+}
