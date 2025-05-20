@@ -38,10 +38,7 @@ import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/
 import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
 import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
 import { CurrentAssignmentsPage } from "../pages/Manager/ManagerRentalReturnPage/CurrentAssignmentsPage";
-import { LateFeeCalculatorPage } from "../pages/Manager/ManagerRentalReturnPage/LateFeeCalculatorPage";
-import { ManagerRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManagerRentalReturnPage";
-import { RentalHistoryPage } from "../pages/Manager/ManagerRentalReturnPage/RentalHistoryPage";
-import { ReturnDateAdjustmentPage } from "../pages/Manager/ManagerRentalReturnPage/ReturnDateAdjustmentPage";
+
 import { UnassignedPickupsPage } from "../pages/Manager/ManagerRentalReturnPage/UnassignedPickupsPage";
 import StaffAssignmentPage from "../pages/Manager/WorkAssignmentSchedule/StaffAssignmentPage";
 import WorkAssignmentSchedulePage from "../pages/Manager/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
@@ -111,10 +108,7 @@ const AppRoute: React.FC = () => {
           path={config.managerRoutes.manageReplacement}
           element={<ManageReplacementPage />}
         />
-        <Route
-          path={config.managerRoutes.rentalDashboard}
-          element={<ManagerRentalReturnPage />}
-        />
+
         <Route
           path={config.managerRoutes.unassignedPickups}
           element={<UnassignedPickupsPage />}
@@ -122,18 +116,6 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.currentAssignments}
           element={<CurrentAssignmentsPage />}
-        />
-        <Route
-          path={config.managerRoutes.rentalHistory}
-          element={<RentalHistoryPage />}
-        />
-        <Route
-          path={config.managerRoutes.calculateLateFee}
-          element={<LateFeeCalculatorPage />}
-        />
-        <Route
-          path={config.managerRoutes.adjustReturnDate}
-          element={<ReturnDateAdjustmentPage />}
         />
         <Route
           path={config.managerRoutes.orderDetail}

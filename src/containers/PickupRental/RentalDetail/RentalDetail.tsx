@@ -24,13 +24,16 @@ import {
 } from "../../../components/StyledComponents";
 import { useApi } from "../../../hooks/useApi";
 import { formatCurrency, formatDate } from "../../../utils/formatters";
+import { RentOrderDetail } from "../../../types/rentalPickup"; // Import the type
 
 const RentalDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // Updated to use getRentOrder instead of getRentalDetail
-  const { data, loading, error, execute } = useApi(rentalService.getRentOrder);
+  // Properly type the useApi hook
+  const { data, loading, error, execute } = useApi<RentOrderDetail, [number]>(
+    rentalService.getRentOrder
+  );
 
   useEffect(() => {
     if (id) {
@@ -97,20 +100,26 @@ const RentalDetail: React.FC = () => {
                         <ListItemText
                           primary="Tên"
                           secondary={data.customerName}
-                          primaryTypographyProps={{
-                            fontWeight: 600,
-                            color: "text.primary",
+                          slotProps={{
+                            primary: {
+                              fontWeight: 600,
+                              color: "text.primary",
+                            },
+                            secondary: {
+                              fontSize: "1rem",
+                            },
                           }}
-                          secondaryTypographyProps={{ fontSize: "1rem" }}
                         />
                       </ListItem>
                       <ListItem>
                         <ListItemText
                           primary="Địa chỉ"
                           secondary={data.customerAddress}
-                          primaryTypographyProps={{
-                            fontWeight: 600,
-                            color: "text.primary",
+                          slotProps={{
+                            primary: {
+                              fontWeight: 600,
+                              color: "text.primary",
+                            },
                           }}
                         />
                       </ListItem>
@@ -118,9 +127,11 @@ const RentalDetail: React.FC = () => {
                         <ListItemText
                           primary="Điện thoại"
                           secondary={data.customerPhone}
-                          primaryTypographyProps={{
-                            fontWeight: 600,
-                            color: "text.primary",
+                          slotProps={{
+                            primary: {
+                              fontWeight: 600,
+                              color: "text.primary",
+                            },
                           }}
                         />
                       </ListItem>
@@ -141,33 +152,45 @@ const RentalDetail: React.FC = () => {
                         <ListItemText
                           primary="Loại"
                           secondary={data.utensilId ? "Dụng cụ" : "Nồi lẩu"}
-                          primaryTypographyProps={{
-                            fontWeight: 600,
-                            color: "text.primary",
+                          slotProps={{
+                            primary: {
+                              fontWeight: 600,
+                              color: "text.primary",
+                            },
+                            secondary: {
+                              fontSize: "1rem",
+                            },
                           }}
-                          secondaryTypographyProps={{ fontSize: "1rem" }}
                         />
                       </ListItem>
                       <ListItem>
                         <ListItemText
                           primary="Tên"
                           secondary={data.utensilName || data.hotpotName}
-                          primaryTypographyProps={{
-                            fontWeight: 600,
-                            color: "text.primary",
+                          slotProps={{
+                            primary: {
+                              fontWeight: 600,
+                              color: "text.primary",
+                            },
+                            secondary: {
+                              fontSize: "1rem",
+                            },
                           }}
-                          secondaryTypographyProps={{ fontSize: "1rem" }}
                         />
                       </ListItem>
                       <ListItem>
                         <ListItemText
                           primary="Số lượng"
                           secondary={data.quantity}
-                          primaryTypographyProps={{
-                            fontWeight: 600,
-                            color: "text.primary",
+                          slotProps={{
+                            primary: {
+                              fontWeight: 600,
+                              color: "text.primary",
+                            },
+                            secondary: {
+                              fontSize: "1rem",
+                            },
                           }}
-                          secondaryTypographyProps={{ fontSize: "1rem" }}
                         />
                       </ListItem>
                     </List>
