@@ -22,16 +22,8 @@ export class ChatService {
   }
 
   // Register Socket.IO event handlers
-  public onNewChatRequest(callback: (data: any) => void): void {
-    socketService.on("onNewChatRequest", callback);
-  }
-
   public onChatAccepted(callback: (data: any) => void): void {
     socketService.on("onChatAccepted", callback);
-  }
-
-  public onChatTaken(callback: (data: any) => void): void {
-    socketService.on("onChatTaken", callback);
   }
 
   public onReceiveMessage(callback: (data: ChatMessageDto) => void): void {
@@ -89,10 +81,8 @@ export class ChatService {
         `/manager/chat/sessions/${sessionId}/assign`,
         request
       );
-
       // Notify via Socket.IO
       socketService.acceptChat(sessionId, managerId, managerName, customerId);
-
       return response;
     } catch (error) {
       console.error("Error assigning manager to session:", error);
@@ -163,10 +153,8 @@ export class ChatService {
         `/manager/chat/sessions/${sessionId}/end`,
         {}
       );
-
       // Notify via Socket.IO
       socketService.endChat(sessionId, customerId, managerId);
-
       return response!;
     } catch (error) {
       console.error("Error ending chat session:", error);
@@ -186,7 +174,6 @@ export class ChatService {
         "/manager/chat/messages",
         request
       );
-
       // Notify via Socket.IO
       socketService.sendMessage(
         response.data!.chatMessageId,
@@ -194,7 +181,6 @@ export class ChatService {
         receiverId,
         message
       );
-
       return response;
     } catch (error) {
       console.error("Error sending message:", error);
@@ -212,10 +198,8 @@ export class ChatService {
         `/manager/chat/messages/${messageId}/read`,
         {}
       );
-
       // Notify via Socket.IO
       socketService.markMessageAsRead(messageId, senderId);
-
       return response || false;
     } catch (error) {
       console.error("Error marking message as read:", error);
