@@ -6,7 +6,9 @@ class SocketIOService {
   private callbacks: Record<string, (...args: any[]) => void> = {};
 
   // Initialize and connect to Socket.IO server
-  public connect(serverUrl: string = "http://localhost:3000"): void {
+  public connect(
+    serverUrl: string = "https://chat-server-lc4m.onrender.com"
+  ): void {
     if (this.socket) {
       return; // Already connected
     }
