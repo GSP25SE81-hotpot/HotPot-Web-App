@@ -7,7 +7,7 @@ class SocketIOService {
 
   // Initialize and connect to Socket.IO server
   public connect(
-    serverUrl: string = "https://chat-server-4l1g.onrender.com"
+    serverUrl: string = "https://chat-server-production-9950.up.railway.app/"
   ): void {
     if (this.socket) {
       return; // Already connected
