@@ -40,11 +40,13 @@ const ChatWithCustomer: React.FC = () => {
         setLoading(true);
         // Connect to Socket.IO server
         socketService.connect();
+
         // Authenticate with Socket.IO
         if (user?.id) {
           socketService.authenticate(user.id, "Manager");
           setIsConnected(true);
         }
+
         // Load active chat sessions
         await refreshSessions();
         setLoading(false);
@@ -57,10 +59,11 @@ const ChatWithCustomer: React.FC = () => {
         setLoading(false);
       }
     };
+
     initializeSocketConnection();
 
     // Set up Socket.IO event listeners
-    socketService.on("onChatAccepted", handleChatAccepted); // Changed from onChatTaken
+    socketService.on("onChatAccepted", handleChatAccepted);
     socketService.on("onReceiveMessage", handleReceiveMessage);
     socketService.on("onMessageRead", handleMessageRead);
     socketService.on("onChatEnded", handleChatEnded);

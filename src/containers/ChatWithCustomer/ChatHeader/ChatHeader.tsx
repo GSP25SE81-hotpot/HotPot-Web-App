@@ -84,7 +84,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
         >
           Kết thúc trò chuyện
         </MenuItem>
-        <MenuItem onClick={handleMenuClose}>Xem hồ sơ khách hàng</MenuItem>
+        {/* <MenuItem onClick={handleMenuClose}>Xem hồ sơ khách hàng</MenuItem> */}
         {!selectedChat.managerId && (
           <MenuItem
             onClick={() => {
