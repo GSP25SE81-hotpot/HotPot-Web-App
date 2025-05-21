@@ -2,12 +2,11 @@
 import EventIcon from "@mui/icons-material/Event";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import NoteIcon from "@mui/icons-material/Note";
 import PersonIcon from "@mui/icons-material/Person";
 import PhoneIcon from "@mui/icons-material/Phone";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { Alert, Box, CircularProgress, TablePagination } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-
 import { format, formatDistanceToNow } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { getCurrentAssignments } from "../../../api/Services/rentalService";
@@ -15,13 +14,11 @@ import {
   PagedResult,
   StaffPickupAssignmentDto,
 } from "../../../types/rentalTypes";
-
 // Import styled components
 import {
   StyledPaper,
   StyledContainer,
 } from "../../../components/StyledComponents";
-
 // Import assignment-specific styled components
 import {
   AssignmentCard,
@@ -33,7 +30,6 @@ import {
   StaffId,
   InfoItem,
   InfoText,
-  NotesContainer,
   EmptyStateContainer,
   StyledDivider,
   TimeAgo,
@@ -41,9 +37,8 @@ import {
 } from "../../../components/manager/styles/AssignmentStyles";
 
 const CurrentAssignments: React.FC = () => {
-  const [assignments, setAssignments] = useState<PagedResult<
-    StaffPickupAssignmentDto[]
-  > | null>(null);
+  const [assignments, setAssignments] =
+    useState<PagedResult<StaffPickupAssignmentDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
@@ -95,13 +90,11 @@ const CurrentAssignments: React.FC = () => {
     <StyledContainer maxWidth="xl">
       <StyledPaper elevation={0} sx={{ p: 4 }}>
         <PageTitle variant="h4">Theo dõi nhiệm vụ</PageTitle>
-
         {error && (
           <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
             {error}
           </Alert>
         )}
-
         {loading && !assignments ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
             <CircularProgress />
@@ -119,7 +112,6 @@ const CurrentAssignments: React.FC = () => {
                       mb: 2,
                     }}
                   />
-                  {/* <PageTitle variant="h5">Không có công việc</PageTitle> */}
                   <InfoText>
                     Hiện tại không có nhân viên nào được phân công phụ trách thu
                     hồi thiết bị.
@@ -129,112 +121,102 @@ const CurrentAssignments: React.FC = () => {
             ) : (
               <>
                 <Grid container spacing={3}>
-                  {assignments?.items.map((assignmentGroup) =>
-                    assignmentGroup.map((assignment) => (
-                      <Grid
-                        size={{ xs: 12, md: 6, lg: 4 }}
-                        key={assignment.assignmentId}
-                      >
-                        <AssignmentCard elevation={0}>
-                          <Box sx={{ p: 3 }}>
-                            <AssignmentHeader>
-                              <StatusChip
-                                label={
-                                  assignment.completedDate
-                                    ? "Completed"
-                                    : "In Progress"
-                                }
-                                status={
-                                  assignment.completedDate
-                                    ? "completed"
-                                    : "inProgress"
-                                }
-                                size="small"
-                              />
-                              <TimeAgo>
-                                Assigned{" "}
-                                {formatDistanceToNow(
-                                  new Date(assignment.assignedDate),
-                                  { addSuffix: true }
-                                )}
-                              </TimeAgo>
-                            </AssignmentHeader>
-
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                mb: 2,
-                              }}
-                            >
-                              <StaffAvatar>
-                                {assignment.staffName.charAt(0)}
-                              </StaffAvatar>
-                              <StaffInfo>
-                                <StaffName variant="h6">
-                                  {assignment.staffName}
-                                </StaffName>
-                                <StaffId variant="body2">
-                                  Staff ID: {assignment.staffId}
-                                </StaffId>
-                              </StaffInfo>
-                            </Box>
-
-                            <StyledDivider />
-
-                            <InfoItem>
-                              <InventoryIcon />
-                              <InfoText>{assignment.equipmentName}</InfoText>
-                            </InfoItem>
-
-                            <InfoItem>
-                              <PersonIcon />
-                              <InfoText>{assignment.customerName}</InfoText>
-                            </InfoItem>
-
-                            <InfoItem>
-                              <LocationOnIcon />
-                              <InfoText>
-                                {assignment.customerAddress ||
-                                  "Address not provided"}
-                              </InfoText>
-                            </InfoItem>
-
-                            <InfoItem>
-                              <PhoneIcon />
-                              <InfoText>
-                                {assignment.customerPhone ||
-                                  "Phone not provided"}
-                              </InfoText>
-                            </InfoItem>
-
-                            <InfoItem>
-                              <EventIcon />
-                              <InfoText>
-                                Expected Return:{" "}
-                                {format(
-                                  new Date(assignment.expectedReturnDate),
-                                  "MMM dd, yyyy"
-                                )}
-                              </InfoText>
-                            </InfoItem>
-
-                            {assignment.notes && (
-                              <NotesContainer>
-                                <NoteIcon
-                                  fontSize="small"
-                                  sx={{ mt: 0.5, mr: 1.5 }}
-                                />
-                                <InfoText>{assignment.notes}</InfoText>
-                              </NotesContainer>
-                            )}
+                  {assignments?.items.map((assignment) => (
+                    <Grid
+                      size={{ xs: 12, md: 6, lg: 4 }}
+                      key={assignment.assignmentId}
+                    >
+                      <AssignmentCard elevation={0}>
+                        <Box sx={{ p: 3 }}>
+                          <AssignmentHeader>
+                            <StatusChip
+                              label={
+                                assignment.completedDate
+                                  ? "Completed"
+                                  : "In Progress"
+                              }
+                              status={
+                                assignment.completedDate
+                                  ? "completed"
+                                  : "inProgress"
+                              }
+                              size="small"
+                            />
+                            <TimeAgo>
+                              Assigned{" "}
+                              {formatDistanceToNow(
+                                new Date(assignment.assignedDate),
+                                { addSuffix: true }
+                              )}
+                            </TimeAgo>
+                          </AssignmentHeader>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              mb: 2,
+                            }}
+                          >
+                            <StaffAvatar>
+                              {assignment.staffName.charAt(0)}
+                            </StaffAvatar>
+                            <StaffInfo>
+                              <StaffName variant="h6">
+                                {assignment.staffName}
+                              </StaffName>
+                              <StaffId variant="body2">
+                                Staff ID: {assignment.staffId}
+                              </StaffId>
+                            </StaffInfo>
                           </Box>
-                        </AssignmentCard>
-                      </Grid>
-                    ))
-                  )}
+                          <StyledDivider />
+                          <InfoItem>
+                            <InventoryIcon />
+                            <InfoText>{assignment.equipmentSummary}</InfoText>
+                          </InfoItem>
+                          <InfoItem>
+                            <PersonIcon />
+                            <InfoText>{assignment.customerName}</InfoText>
+                          </InfoItem>
+                          <InfoItem>
+                            <LocationOnIcon />
+                            <InfoText>
+                              {assignment.customerAddress ||
+                                "Address not provided"}
+                            </InfoText>
+                          </InfoItem>
+                          <InfoItem>
+                            <PhoneIcon />
+                            <InfoText>
+                              {assignment.customerPhone || "Phone not provided"}
+                            </InfoText>
+                          </InfoItem>
+                          <InfoItem>
+                            <EventIcon />
+                            <InfoText>
+                              Expected Return:{" "}
+                              {format(
+                                new Date(
+                                  assignment.expectedReturnDate || new Date()
+                                ),
+                                "MMM dd, yyyy"
+                              )}
+                            </InfoText>
+                          </InfoItem>
+                          {assignment.vehicleId && (
+                            <InfoItem>
+                              <DirectionsCarIcon />
+                              <InfoText>
+                                {assignment.vehicleName} (
+                                {assignment.vehicleType})
+                              </InfoText>
+                            </InfoItem>
+                          )}
+                        </Box>
+                      </AssignmentCard>
+                    </Grid>
+                  ))}
                 </Grid>
-
                 <Box
                   sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}
                 >

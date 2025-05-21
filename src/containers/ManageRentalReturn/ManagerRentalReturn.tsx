@@ -65,32 +65,6 @@ const ManagerRentalDashboard: React.FC = () => {
                 </StyledCard>
               </Grid>
 
-              {/* <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-                <StyledCard sx={{ height: "100%" }}>
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                      <CardIcon>
-                        <PersonAddIcon />
-                      </CardIcon>
-                      <CardTitle>Phân công nhân viên</CardTitle>
-                    </Box>
-                    <CardDescription>
-                      Chỉ định trực tiếp nhân viên thực hiện việc thu hồi
-                    </CardDescription>
-                  </CardContent>
-                  <CardActions sx={{ p: 2, pt: 0 }}>
-                    <AnimatedButton
-                      variant="contained"
-                      color="primary"
-                      fullWidth
-                      onClick={() => navigateTo("/unassigned-pickups")}
-                    >
-                      Assign Staff
-                    </AnimatedButton>
-                  </CardActions>
-                </StyledCard>
-              </Grid> */}
-
               <Grid size={{ xs: 12, md: 12, lg: 6 }}>
                 <StyledCard sx={{ height: "100%" }}>
                   <CardContent sx={{ flexGrow: 1 }}>
@@ -119,100 +93,6 @@ const ManagerRentalDashboard: React.FC = () => {
               </Grid>
             </Grid>
           </SectionContainer>
-
-          {/* <SectionContainer>
-            <SectionHeading variant="h5">Rental History</SectionHeading>
-            <StyledDivider />
-
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-                <StyledCard sx={{ height: "100%" }}>
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                      <CardIcon>
-                        <HistoryIcon />
-                      </CardIcon>
-                      <CardTitle>Rental History</CardTitle>
-                    </Box>
-                    <CardDescription>
-                      Search and view rental history by equipment, customer, or
-                      hotpot inventory.
-                    </CardDescription>
-                  </CardContent>
-                  <CardActions sx={{ p: 2, pt: 0 }}>
-                    <AnimatedButton
-                      variant="contained"
-                      color="primary"
-                      fullWidth
-                      onClick={() => navigateTo("/rental-history")}
-                    >
-                      View Rental History
-                    </AnimatedButton>
-                  </CardActions>
-                </StyledCard>
-              </Grid>
-            </Grid>
-          </SectionContainer> */}
-
-          {/* <SectionContainer>
-            <SectionHeading variant="h5">Management Tools</SectionHeading>
-            <StyledDivider />
-
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-                <StyledCard sx={{ height: "100%" }}>
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                      <CardIcon>
-                        <CalculateIcon />
-                      </CardIcon>
-                      <CardTitle>Late Fee Calculator</CardTitle>
-                    </Box>
-                    <CardDescription>
-                      Calculate late fees for overdue rentals based on actual
-                      return date.
-                    </CardDescription>
-                  </CardContent>
-                  <CardActions sx={{ p: 2, pt: 0 }}>
-                    <AnimatedButton
-                      variant="contained"
-                      color="primary"
-                      fullWidth
-                      onClick={() => navigateTo("/calculate-late-fee")}
-                    >
-                      Calculate Late Fees
-                    </AnimatedButton>
-                  </CardActions>
-                </StyledCard>
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-                <StyledCard sx={{ height: "100%" }}>
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                      <CardIcon>
-                        <EventIcon />
-                      </CardIcon>
-                      <CardTitle>Adjust Return Date</CardTitle>
-                    </Box>
-                    <CardDescription>
-                      Adjust return dates for exceptional circumstances only.
-                    </CardDescription>
-                  </CardContent>
-                  <CardActions sx={{ p: 2, pt: 0 }}>
-                    <AnimatedButton
-                      variant="contained"
-                      color="primary"
-                      fullWidth
-                      onClick={() => navigateTo("/adjust-return-date")}
-                    >
-                      Adjust Return Date
-                    </AnimatedButton>
-                  </CardActions>
-                </StyledCard>
-              </Grid>
-            </Grid>
-          </SectionContainer> */}
         </DashboardContainer>
       </StyledPaper>
     </StyledContainer>

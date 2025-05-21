@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import CTable from "../../components/table/CTable";
@@ -74,8 +75,8 @@ const TableIngredients = () => {
       { id: "name", label: "Tên nguyên liệu", align: "center" },
       { id: "imageURL", label: "Hình ảnh", align: "center" },
       { id: "ingredientTypeName", label: "Loại nguyên liệu", align: "center" },
+      { id: "quantity", label: "Số lượng", align: "center" },
     ];
-
     // Additional headers only for admin
     const adminOnlyHeaders = [
       { id: "price", label: "Giá tiền", align: "center", format: "price" },

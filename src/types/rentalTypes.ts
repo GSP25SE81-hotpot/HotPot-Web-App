@@ -1,10 +1,14 @@
-// src/types/rental.types.ts
-export interface RentOrderDetail {
+// src/types/rentalTypes.ts
+
+export interface EquipmentItem {
+  detailId: number;
+  type: string;
   id: number;
+  name: string;
+}
+
+export interface RentOrderDetailResponse {
   orderId: number;
-  equipmentType: string;
-  equipmentId: number;
-  equipmentName: string;
   rentalStartDate: string;
   expectedReturnDate: string;
   actualReturnDate?: string;
@@ -13,31 +17,53 @@ export interface RentOrderDetail {
   customerAddress: string;
   customerPhone: string;
   notes?: string;
+  equipmentItems: EquipmentItem[];
+}
+
+export interface RentalEquipmentItem {
+  rentOrderDetailId: number;
+  equipmentType: string;
+  equipmentName: string;
+  quantity: number;
+  rentalPrice?: number;
+}
+
+export interface RentalListingDto {
+  orderId: number;
+  rentalStartDate: string;
+  expectedReturnDate: string;
+  actualReturnDate?: string;
+  customerName: string;
+  customerAddress: string;
+  customerPhone: string;
+  lateFee?: number;
+  damageFee?: number;
+  equipmentItems: RentalEquipmentItem[];
 }
 
 export interface StaffPickupAssignmentDto {
   assignmentId: number;
+  orderId: number;
+  orderCode: string;
   staffId: number;
   staffName: string;
-  rentOrderDetailId: number;
-  equipmentName: string;
+  assignedDate: string;
+  completedDate?: string;
   customerName: string;
   customerAddress: string;
   customerPhone: string;
-  assignedDate: string;
-  completedDate?: string;
-  expectedReturnDate: string;
-  notes?: string;
+  rentalStartDate?: string;
+  expectedReturnDate?: string;
+  equipmentSummary: string;
+  vehicleId?: number;
+  vehicleName?: string;
+  vehicleType?: string;
 }
 
 export interface PickupAssignmentRequestDto {
   staffId: number;
   rentOrderDetailId: number;
-  notes?: string;
-}
-
-export interface UpdateRentOrderDetailRequest {
-  expectedReturnDate?: string;
+  vehicleId?: number;
   notes?: string;
 }
 
@@ -62,15 +88,4 @@ export interface Staff {
   email: string;
   phone: string;
   isAvailable: boolean;
-}
-
-export interface RentalHistoryItem {
-  id: number;
-  orderId: number;
-  customerName: string;
-  equipmentName: string;
-  rentalStartDate: string;
-  expectedReturnDate: string;
-  actualReturnDate?: string;
-  status: string;
 }

@@ -53,6 +53,7 @@ import { ManageVehiclePage } from "../pages/Manager/ManageVehicle/ManageVehicleP
 import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock/EquipmentAvailabilityPage";
 import NotificationCenter from "../pages/Global/Notification/NotificationsPage";
 import { StaffAssignmentHistoryPage } from "../pages/Manager/StaffAssignmentHistory/StaffAssignmentHistoryPage";
+import { ManageRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManageRentalReturnPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -132,6 +133,10 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.staffAssignmentHistory}
           element={<StaffAssignmentHistoryPage />}
+        />
+        <Route
+          path={config.managerRoutes.rentalDashboard}
+          element={<ManageRentalReturnPage />}
         />
       </Route>
 
