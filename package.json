@@ -2,6 +2,7 @@
   "name": "hotpot-frontend",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://dtai-coding.github.io/HOTPOT-WEB-APP",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +11,9 @@
     "preview": "vite preview",
     "server:dev": "node --esm src/server.js",
     "server:build": "tsc -p tsconfig.server.json",
-    "server:start": "node dist-server/server.js"
+    "server:start": "node dist-server/server.js",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -72,6 +75,7 @@
     "eslint": "^9.17.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
+    "gh-pages": "^6.3.0",
     "globals": "^15.14.0",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.18.2",
