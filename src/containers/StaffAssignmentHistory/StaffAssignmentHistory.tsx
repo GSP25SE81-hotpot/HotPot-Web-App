@@ -47,7 +47,6 @@ import {
   StyledTableHead,
   StyledTableRow,
   StaffName,
-  AdditionalStaffChip,
   DateCell,
   StatusChip,
   TaskTypeChip,

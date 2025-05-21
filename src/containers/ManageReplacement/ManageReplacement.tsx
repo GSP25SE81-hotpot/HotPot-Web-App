@@ -69,8 +69,6 @@ import EquipmentInfo from "./replacement/EquipmentInfo";
 import MobileRequestCard from "./replacement/MobileRequestCard";
 import NotesInfo from "./replacement/NotesInfo";
 import ReviewRequest from "./replacement/ReviewRequest";
-// Import the notification context
-// import { useNotificationContext } from "../../context/NotificationContext";
 
 // Improved getStatusText function with better type handling
 const getStatusText = (
@@ -145,30 +143,6 @@ const ManageReplacement: React.FC = () => {
     (value) => typeof value === "number"
   ) as ReplacementRequestStatus[];
 
-  // Listen for equipment updates from the notification context
-  // useEffect(() => {
-  //   // When we receive equipment updates, refresh the data
-  //   if (equipmentUpdates.length > 0) {
-  //     fetchData();
-  //   }
-  // }, [equipmentUpdates]);
-
-  // // Listen for status alerts from the notification context
-  // useEffect(() => {
-  //   // When we receive status alerts, refresh the data
-  //   if (statusAlerts.length > 0) {
-  //     fetchData();
-  //   }
-  // }, [statusAlerts]);
-
-  // // Listen for equipment alerts from the notification context
-  // useEffect(() => {
-  //   // When we receive equipment alerts, refresh the data
-  //   if (equipmentAlerts.length > 0) {
-  //     fetchData();
-  //   }
-  // }, [equipmentAlerts]);
-
   // Lấy dữ liệu
   const fetchData = async () => {
     try {
@@ -231,8 +205,8 @@ const ManageReplacement: React.FC = () => {
       setSelectedRequest(detailedRequest);
       setReviewNotes(detailedRequest.reviewNotes || "");
       setIsApproved(
-        detailedRequest.status === ReplacementRequestStatus.Approved ||
-          detailedRequest.status === ReplacementRequestStatus.InProgress
+        Number(detailedRequest.status) === ReplacementRequestStatus.Approved ||
+          Number(detailedRequest.status) === ReplacementRequestStatus.InProgress
       );
       setSelectedStaffId(detailedRequest.assignedStaffId || null);
       setDetailDialogOpen(true);
@@ -274,7 +248,9 @@ const ManageReplacement: React.FC = () => {
           req.replacementRequestId === updatedRequest.replacementRequestId
             ? {
                 ...req,
-                status: updatedRequest.status,
+                status: Number(
+                  updatedRequest.status
+                ) as ReplacementRequestStatus,
                 reviewDate: updatedRequest.reviewDate,
               }
             : req
@@ -326,7 +302,9 @@ const ManageReplacement: React.FC = () => {
           req.replacementRequestId === updatedRequest.replacementRequestId
             ? {
                 ...req,
-                status: updatedRequest.status,
+                status: Number(
+                  updatedRequest.status
+                ) as ReplacementRequestStatus,
                 assignedStaffName: updatedRequest.assignedStaffName,
               }
             : req
@@ -626,7 +604,9 @@ const ManageReplacement: React.FC = () => {
                         <TableCell>
                           <StyledChip
                             label={getStatusText(request.status)}
-                            status={request.status}
+                            status={
+                              Number(request.status) as ReplacementRequestStatus
+                            }
                           />
                         </TableCell>
                         <TableCell>
@@ -717,7 +697,9 @@ const ManageReplacement: React.FC = () => {
                 {/* Ghi chú */}
                 <NotesInfo request={selectedRequest} />
                 {/* Hành động dựa trên trạng thái */}
-                {getAvailableActions(selectedRequest.status).canReview && (
+                {getAvailableActions(
+                  Number(selectedRequest.status) as ReplacementRequestStatus
+                ).canReview && (
                   <ReviewRequest
                     isApproved={isApproved}
                     setIsApproved={setIsApproved}
@@ -726,7 +708,9 @@ const ManageReplacement: React.FC = () => {
                     onReview={handleReviewRequest}
                   />
                 )}
-                {getAvailableActions(selectedRequest.status).canAssign && (
+                {getAvailableActions(
+                  Number(selectedRequest.status) as ReplacementRequestStatus
+                ).canAssign && (
                   <AssignStaff
                     selectedStaffId={selectedStaffId}
                     setSelectedStaffId={setSelectedStaffId}
@@ -736,9 +720,15 @@ const ManageReplacement: React.FC = () => {
                   />
                 )}
                 {/* Nếu không có hành động nào khả dụng */}
-                {!getAvailableActions(selectedRequest.status).canReview &&
-                  !getAvailableActions(selectedRequest.status).canAssign &&
-                  !getAvailableActions(selectedRequest.status).canComplete && (
+                {!getAvailableActions(
+                  Number(selectedRequest.status) as ReplacementRequestStatus
+                ).canReview &&
+                  !getAvailableActions(
+                    Number(selectedRequest.status) as ReplacementRequestStatus
+                  ).canAssign &&
+                  !getAvailableActions(
+                    Number(selectedRequest.status) as ReplacementRequestStatus
+                  ).canComplete && (
                     <NoActionsMessage variant="outlined">
                       <Typography
                         variant="body1"

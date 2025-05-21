@@ -2,12 +2,11 @@
 import EventIcon from "@mui/icons-material/Event";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import NoteIcon from "@mui/icons-material/Note";
 import PersonIcon from "@mui/icons-material/Person";
 import PhoneIcon from "@mui/icons-material/Phone";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { Alert, Box, CircularProgress, TablePagination } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-
 import { format, formatDistanceToNow } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { getCurrentAssignments } from "../../../api/Services/rentalService";
@@ -15,13 +14,11 @@ import {
   PagedResult,
   StaffPickupAssignmentDto,
 } from "../../../types/rentalTypes";
-
 // Import styled components
 import {
   StyledPaper,
   StyledContainer,
 } from "../../../components/StyledComponents";
-
 // Import assignment-specific styled components
 import {
   AssignmentCard,
@@ -33,7 +30,6 @@ import {
   StaffId,
   InfoItem,
   InfoText,
-  NotesContainer,
   EmptyStateContainer,
   StyledDivider,
   TimeAgo,
@@ -47,20 +43,29 @@ const CurrentAssignments: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const rowsPerPageOptions = [6, 12, 24];
+  const rowsPerPageOptions = [5, 10, 25];
 
   const fetchAssignments = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getCurrentAssignments(page + 1, rowsPerPage);
-      setAssignments(data);
+      const response = await getCurrentAssignments(page + 1, rowsPerPage);
+      if (!response || !response.success || !response.data) {
+        // Handle the case where the API returns no data
+        setAssignments(null);
+        setError("No assignment data received from server");
+        return;
+      }
+      // Now TypeScript knows response.data is not undefined
+      setAssignments(response.data);
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
           : "An error occurred while fetching assignments"
       );
+      // Set assignments to null when there's an error
+      setAssignments(null);
     } finally {
       setLoading(false);
     }
@@ -85,13 +90,11 @@ const CurrentAssignments: React.FC = () => {
     <StyledContainer maxWidth="xl">
       <StyledPaper elevation={0} sx={{ p: 4 }}>
         <PageTitle variant="h4">Theo dõi nhiệm vụ</PageTitle>
-
         {error && (
           <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
             {error}
           </Alert>
         )}
-
         {loading && !assignments ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
             <CircularProgress />
@@ -109,7 +112,6 @@ const CurrentAssignments: React.FC = () => {
                       mb: 2,
                     }}
                   />
-                  {/* <PageTitle variant="h5">Không có công việc</PageTitle> */}
                   <InfoText>
                     Hiện tại không có nhân viên nào được phân công phụ trách thu
                     hồi thiết bị.
@@ -148,7 +150,6 @@ const CurrentAssignments: React.FC = () => {
                               )}
                             </TimeAgo>
                           </AssignmentHeader>
-
                           <Box
                             sx={{
                               display: "flex",
@@ -168,19 +169,15 @@ const CurrentAssignments: React.FC = () => {
                               </StaffId>
                             </StaffInfo>
                           </Box>
-
                           <StyledDivider />
-
                           <InfoItem>
                             <InventoryIcon />
-                            <InfoText>{assignment.equipmentName}</InfoText>
+                            <InfoText>{assignment.equipmentSummary}</InfoText>
                           </InfoItem>
-
                           <InfoItem>
                             <PersonIcon />
                             <InfoText>{assignment.customerName}</InfoText>
                           </InfoItem>
-
                           <InfoItem>
                             <LocationOnIcon />
                             <InfoText>
@@ -188,40 +185,38 @@ const CurrentAssignments: React.FC = () => {
                                 "Address not provided"}
                             </InfoText>
                           </InfoItem>
-
                           <InfoItem>
                             <PhoneIcon />
                             <InfoText>
                               {assignment.customerPhone || "Phone not provided"}
                             </InfoText>
                           </InfoItem>
-
                           <InfoItem>
                             <EventIcon />
                             <InfoText>
                               Expected Return:{" "}
                               {format(
-                                new Date(assignment.expectedReturnDate),
+                                new Date(
+                                  assignment.expectedReturnDate || new Date()
+                                ),
                                 "MMM dd, yyyy"
                               )}
                             </InfoText>
                           </InfoItem>
-
-                          {assignment.notes && (
-                            <NotesContainer>
-                              <NoteIcon
-                                fontSize="small"
-                                sx={{ mt: 0.5, mr: 1.5 }}
-                              />
-                              <InfoText>{assignment.notes}</InfoText>
-                            </NotesContainer>
+                          {assignment.vehicleId && (
+                            <InfoItem>
+                              <DirectionsCarIcon />
+                              <InfoText>
+                                {assignment.vehicleName} (
+                                {assignment.vehicleType})
+                              </InfoText>
+                            </InfoItem>
                           )}
                         </Box>
                       </AssignmentCard>
                     </Grid>
                   ))}
                 </Grid>
-
                 <Box
                   sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}
                 >

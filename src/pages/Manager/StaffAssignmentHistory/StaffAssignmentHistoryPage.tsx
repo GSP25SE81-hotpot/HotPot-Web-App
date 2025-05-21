@@ -1,4 +1,3 @@
-import React from "react";
 import StaffAssignmentHistory from "../../../containers/StaffAssignmentHistory/StaffAssignmentHistory";
 import ErrorBoundary from "../../../components/ErrorBoundary";
 

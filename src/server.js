@@ -79,6 +79,7 @@ io.on("connection", (socket) => {
 });
 
 // Start server
+// Replace this with actual server URL in production and port in development
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Socket.IO server running at http://localhost:${PORT}/`);

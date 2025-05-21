@@ -1,5 +1,5 @@
 // src/components/Chat/components/ChatMessages/MessageList.tsx
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useMemo } from "react";
 import { Box, Typography } from "@mui/material";
 import { FixedSizeList as VirtualList } from "react-window";
 import MessageItem from "./MessageItem";
@@ -14,7 +14,21 @@ const MessageList: React.FC<MessageListProps> = ({ messages, loading }) => {
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Hiển thị tin nhắn dạng danh sách ảo
+  // Sort messages by creation time
+  const sortedMessages = useMemo(() => {
+    return [...messages].sort((a, b) => {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    });
+  }, [messages]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (messagesEndRef.current && !loading) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [sortedMessages.length, loading]);
+
+  // Render message in virtual list
   const renderMessage = ({
     index,
     style,
@@ -22,7 +36,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, loading }) => {
     index: number;
     style: React.CSSProperties;
   }) => {
-    const message = messages[index];
+    const message = sortedMessages[index];
     return (
       <div style={style}>
         <MessageItem message={message} />
@@ -33,12 +47,13 @@ const MessageList: React.FC<MessageListProps> = ({ messages, loading }) => {
   return (
     <Box
       ref={chatContainerRef}
+      className="messages-container"
       sx={{
         flex: 1,
         overflowY: "auto",
         p: 3,
         bgcolor: (theme) => theme.palette.background.default,
-        opacity: 0.6,
+        opacity: 0.9,
         display: "flex",
         flexDirection: "column",
       }}
@@ -54,23 +69,26 @@ const MessageList: React.FC<MessageListProps> = ({ messages, loading }) => {
         >
           <Typography>Đang tải tin nhắn...</Typography>
         </Box>
-      ) : messages.length > 10 ? (
-        <VirtualList
-          height={chatContainerRef.current?.clientHeight || 400}
-          width="100%"
-          itemCount={messages.length}
-          itemSize={80} // Chiều cao xấp xỉ mỗi tin nhắn
-        >
-          {renderMessage}
-        </VirtualList>
+      ) : sortedMessages.length > 10 ? (
+        <>
+          <VirtualList
+            height={chatContainerRef.current?.clientHeight || 400}
+            width="100%"
+            itemCount={sortedMessages.length}
+            itemSize={100}
+          >
+            {renderMessage}
+          </VirtualList>
+          <div ref={messagesEndRef} />
+        </>
       ) : (
         <>
-          {messages.map((msg) => (
+          {sortedMessages.map((msg) => (
             <MessageItem key={msg.chatMessageId} message={msg} />
           ))}
+          <div ref={messagesEndRef} />
         </>
       )}
-      <div ref={messagesEndRef} />
     </Box>
   );
 };

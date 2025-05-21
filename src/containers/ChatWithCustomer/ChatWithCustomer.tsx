@@ -38,7 +38,6 @@ const ChatWithCustomer: React.FC = () => {
     const initializeSocketConnection = async () => {
       try {
         setLoading(true);
-
         // Connect to Socket.IO server
         socketService.connect();
 
@@ -50,7 +49,6 @@ const ChatWithCustomer: React.FC = () => {
 
         // Load active chat sessions
         await refreshSessions();
-
         setLoading(false);
       } catch (err) {
         setError(
@@ -65,8 +63,7 @@ const ChatWithCustomer: React.FC = () => {
     initializeSocketConnection();
 
     // Set up Socket.IO event listeners
-    socketService.on("onNewChatRequest", handleNewChatRequest);
-    socketService.on("onChatTaken", handleChatTaken);
+    socketService.on("onChatAccepted", handleChatAccepted);
     socketService.on("onReceiveMessage", handleReceiveMessage);
     socketService.on("onMessageRead", handleMessageRead);
     socketService.on("onChatEnded", handleChatEnded);
@@ -77,33 +74,7 @@ const ChatWithCustomer: React.FC = () => {
     };
   }, [user?.id]);
 
-  // Socket.IO event handlers
-  const handleNewChatRequest = useCallback((data: any) => {
-    setChatSessions((prev) => {
-      // Check if we already have this session
-      if (
-        prev.some((session) => session.chatSessionId === data.chatSessionId)
-      ) {
-        return prev;
-      }
-
-      // Add new session
-      return [
-        ...prev,
-        {
-          chatSessionId: data.chatSessionId,
-          customerId: data.customerId,
-          customerName: data.customerName,
-          topic: data.topic,
-          isActive: true,
-          createdAt: new Date(data.createdAt),
-          updatedAt: new Date(data.createdAt),
-        },
-      ];
-    });
-  }, []);
-
-  const handleChatTaken = useCallback(
+  const handleChatAccepted = useCallback(
     (data: any) => {
       // If another manager took the chat, remove it from our list
       if (data.managerId !== user?.id) {
@@ -121,14 +92,11 @@ const ChatWithCustomer: React.FC = () => {
       setSessionMessages((prev) => {
         const sessionId = data.chatSessionId || selectedChatId;
         if (!sessionId) return prev;
-
         const messages = prev[sessionId] || [];
-
         // Check if we already have this message
         if (messages.some((msg) => msg.chatMessageId === data.messageId)) {
           return prev;
         }
-
         // Add new message
         const newMessages = [
           ...messages,
@@ -143,13 +111,11 @@ const ChatWithCustomer: React.FC = () => {
             createdAt: new Date(data.createdAt),
           },
         ];
-
         return {
           ...prev,
           [sessionId]: newMessages,
         };
       });
-
       // Mark message as read if it's for the selected chat
       if (selectedChatId && data.receiverId === user?.id) {
         markMessageAsRead(data.messageId);
@@ -162,7 +128,6 @@ const ChatWithCustomer: React.FC = () => {
     // Update message read status
     setSessionMessages((prev) => {
       const updated = { ...prev };
-
       // Find the message in all sessions
       Object.keys(updated).forEach((sessionIdStr) => {
         const sessionId = parseInt(sessionIdStr);
@@ -170,7 +135,6 @@ const ChatWithCustomer: React.FC = () => {
           msg.chatMessageId === messageId ? { ...msg, isRead: true } : msg
         );
       });
-
       return updated;
     });
   }, []);
@@ -185,7 +149,6 @@ const ChatWithCustomer: React.FC = () => {
             : session
         )
       );
-
       // If the ended chat is the selected one, clear selection
       if (selectedChatId === sessionId) {
         setSelectedChatId(null);

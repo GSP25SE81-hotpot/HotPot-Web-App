@@ -7,7 +7,6 @@ import {
   ChatMessageDto,
   ChatSessionDetailDto,
   ChatSessionDto,
-  CreateChatSessionRequest,
   SendMessageRequest,
 } from "../../types/chat";
 
@@ -23,16 +22,8 @@ export class ChatService {
   }
 
   // Register Socket.IO event handlers
-  public onNewChatRequest(callback: (data: any) => void): void {
-    socketService.on("onNewChatRequest", callback);
-  }
-
   public onChatAccepted(callback: (data: any) => void): void {
     socketService.on("onChatAccepted", callback);
-  }
-
-  public onChatTaken(callback: (data: any) => void): void {
-    socketService.on("onChatTaken", callback);
   }
 
   public onReceiveMessage(callback: (data: ChatMessageDto) => void): void {
@@ -90,10 +81,8 @@ export class ChatService {
         `/manager/chat/sessions/${sessionId}/assign`,
         request
       );
-
       // Notify via Socket.IO
       socketService.acceptChat(sessionId, managerId, managerName, customerId);
-
       return response;
     } catch (error) {
       console.error("Error assigning manager to session:", error);
@@ -164,10 +153,8 @@ export class ChatService {
         `/manager/chat/sessions/${sessionId}/end`,
         {}
       );
-
       // Notify via Socket.IO
       socketService.endChat(sessionId, customerId, managerId);
-
       return response!;
     } catch (error) {
       console.error("Error ending chat session:", error);
@@ -187,7 +174,6 @@ export class ChatService {
         "/manager/chat/messages",
         request
       );
-
       // Notify via Socket.IO
       socketService.sendMessage(
         response.data!.chatMessageId,
@@ -195,7 +181,6 @@ export class ChatService {
         receiverId,
         message
       );
-
       return response;
     } catch (error) {
       console.error("Error sending message:", error);
@@ -213,10 +198,8 @@ export class ChatService {
         `/manager/chat/messages/${messageId}/read`,
         {}
       );
-
       // Notify via Socket.IO
       socketService.markMessageAsRead(messageId, senderId);
-
       return response || false;
     } catch (error) {
       console.error("Error marking message as read:", error);
@@ -239,40 +222,8 @@ export class ChatService {
       throw error;
     }
   }
-
-  // Customer-specific methods
-  // Create a new chat session
-  public async createChatSession(
-    customerId: number,
-    customerName: string,
-    topic: string
-  ): Promise<ApiResponse<ChatSessionDto>> {
-    try {
-      const request: CreateChatSessionRequest = { customerId, topic };
-      const response = await axiosClient.post<any, ApiResponse<ChatSessionDto>>(
-        "/customer/chat/sessions",
-        request
-      );
-
-      // Notify via Socket.IO
-      if (response.data) {
-        socketService.sendNewChatRequest(
-          response.data.chatSessionId,
-          customerId,
-          customerName,
-          topic
-        );
-      }
-
-      return response;
-    } catch (error) {
-      console.error("Error creating chat session:", error);
-      throw error;
-    }
-  }
 }
 
 // Create a singleton instance
 const chatService = new ChatService();
 export default chatService;
-

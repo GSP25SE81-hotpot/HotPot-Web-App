@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import AddIcon from "@mui/icons-material/Add";
 import {
   Box,
@@ -87,7 +90,7 @@ const TableUsers = () => {
 
   const deBouceValue = useDebounce(filter, 1000);
   const [size, setSize] = useState<number>(10);
-  const [total, setTotal] = useState<number>(10);
+  const [total, _setTotal] = useState<number>(10);
   const [page, setPage] = useState<number>(0);
 
   const roleList = [

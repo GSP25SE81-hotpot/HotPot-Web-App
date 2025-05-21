@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { yupResolver } from "@hookform/resolvers/yup";
 import CloseIcon from "@mui/icons-material/Close";
 import { LoadingButton } from "@mui/lab";
@@ -76,8 +77,8 @@ const UpdatePopup: React.FC<updateModelProps> = ({
 
   const {
     handleSubmit,
-    watch,
-    setValue,
+    // watch,
+    // setValue,
     formState: { isSubmitting },
   } = methods;
 

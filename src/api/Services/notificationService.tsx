@@ -18,10 +18,44 @@ class NotificationService {
   ): Promise<Notification[]> {
     try {
       const { includeRead = false, page = 1, pageSize = 20 } = params;
-      const response = await axiosClient.get<Notification[]>("/notifications", {
+      const response = await axiosClient.get("/notifications", {
         params: { includeRead, page, pageSize },
       });
-      return response.data;
+
+      // Handle different response structures
+      if (response.data) {
+        // Case 1: If response.data is an array, return it directly
+        if (Array.isArray(response.data)) {
+          return response.data;
+        }
+
+        // Case 2: If response.data has a notifications property that is an array
+        if (
+          response.data.notifications &&
+          Array.isArray(response.data.notifications)
+        ) {
+          return response.data.notifications;
+        }
+
+        // Case 3: If response.data is an object with a data property that contains notifications
+        if (
+          response.data.data &&
+          Array.isArray(response.data.data.notifications)
+        ) {
+          return response.data.data.notifications;
+        }
+
+        // Case 4: If response.data.data is an array
+        if (response.data.data && Array.isArray(response.data.data)) {
+          return response.data.data;
+        }
+
+        // Log the actual response structure for debugging
+        console.log("Unexpected API response structure:", response.data);
+      }
+
+      // Default to empty array if we can't find notifications
+      return [];
     } catch (error) {
       console.error("Error fetching notifications:", error);
       throw error;
@@ -31,11 +65,40 @@ class NotificationService {
   // Fetch unread notification count
   async getUnreadCount(): Promise<number> {
     try {
-      const response = await axiosClient.get<number>("/notifications/count");
-      return response.data;
+      const response = await axiosClient.get("/notifications/count");
+
+      // Handle different response structures
+      if (response.data) {
+        // Direct number response
+        if (typeof response.data === "number") {
+          return response.data;
+        }
+
+        // Object with count property
+        if (response.data.count !== undefined) {
+          return response.data.count;
+        }
+
+        // Object with unreadCount property
+        if (response.data.unreadCount !== undefined) {
+          return response.data.unreadCount;
+        }
+
+        // Nested data object with unreadCount
+        if (
+          response.data.data &&
+          response.data.data.unreadCount !== undefined
+        ) {
+          return response.data.data.unreadCount;
+        }
+
+        console.log("Unexpected count response structure:", response.data);
+      }
+
+      return 0;
     } catch (error) {
       console.error("Error fetching unread count:", error);
-      throw error;
+      return 0;
     }
   }
 

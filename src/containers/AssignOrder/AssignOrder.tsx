@@ -16,9 +16,8 @@ import {
   useTheme,
 } from "@mui/material";
 import React, { useState } from "react";
-import { OrderStatus } from "../../types/orderManagement";
 import staffGetOrderApi from "../../api/staffGetOrderAPI";
-import useAuth from "../../hooks/useAuth";
+// import useAuth from "../../hooks/useAuth";
 import { AssignOrderType } from "../../types/assignOrder";
 import { toast } from "react-toastify";
 
@@ -45,8 +44,8 @@ const StatusChip = ({ status }: { status: string }) => {
 const AssignOrder: React.FC = () => {
   //Declare
   const theme = useTheme();
-  const { auth } = useAuth();
-  const id = auth?.user?.id;
+  // const { auth } = useAuth();
+  // const _id = auth?.user?.id;
   const [orders, setOrders] = useState<AssignOrderType[]>([]);
 
   //call api

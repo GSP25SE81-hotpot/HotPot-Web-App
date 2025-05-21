@@ -79,7 +79,7 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   //paginate
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 

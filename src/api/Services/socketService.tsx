@@ -6,25 +6,22 @@ class SocketIOService {
   private callbacks: Record<string, (...args: any[]) => void> = {};
 
   // Initialize and connect to Socket.IO server
-  public connect(serverUrl: string = "http://localhost:3000"): void {
+  public connect(
+    serverUrl: string = "https://chat-server-production-9950.up.railway.app/"
+  ): void {
     if (this.socket) {
       return; // Already connected
     }
-
     this.socket = io(serverUrl);
-
     this.socket.on("connect", () => {
       console.log("Connected to Socket.IO server");
     });
-
     this.socket.on("disconnect", () => {
       console.log("Disconnected from Socket.IO server");
     });
-
     this.socket.on("error", (error: any) => {
       console.error("Socket.IO error:", error);
     });
-
     // Set up event listeners
     this.setupEventListeners();
   }
@@ -35,7 +32,6 @@ class SocketIOService {
       console.error("Socket not connected. Call connect() first.");
       return;
     }
-
     this.socket.emit("authenticate", { userId, role });
   }
 
@@ -43,24 +39,10 @@ class SocketIOService {
   private setupEventListeners(): void {
     if (!this.socket) return;
 
-    // New chat request (for managers)
-    this.socket.on("newChatRequest", (data: any) => {
-      if (this.callbacks["onNewChatRequest"]) {
-        this.callbacks["onNewChatRequest"](data);
-      }
-    });
-
-    // Chat accepted (for customers)
+    // Chat accepted (for managers to know when another manager accepts a chat)
     this.socket.on("chatAccepted", (data: any) => {
       if (this.callbacks["onChatAccepted"]) {
         this.callbacks["onChatAccepted"](data);
-      }
-    });
-
-    // Chat taken (for managers)
-    this.socket.on("chatTaken", (data: any) => {
-      if (this.callbacks["onChatTaken"]) {
-        this.callbacks["onChatTaken"](data);
       }
     });
 
@@ -91,27 +73,6 @@ class SocketIOService {
     this.callbacks[event] = callback;
   }
 
-  // Send a new chat request (customer)
-  public sendNewChatRequest(
-    chatSessionId: number,
-    customerId: number,
-    customerName: string,
-    topic: string
-  ): void {
-    if (!this.socket) {
-      console.error("Socket not connected. Call connect() first.");
-      return;
-    }
-
-    this.socket.emit("newChatRequest", {
-      chatSessionId,
-      customerId,
-      customerName,
-      topic,
-      createdAt: new Date().toISOString(),
-    });
-  }
-
   // Accept a chat (manager)
   public acceptChat(
     sessionId: number,
@@ -123,7 +84,6 @@ class SocketIOService {
       console.error("Socket not connected. Call connect() first.");
       return;
     }
-
     this.socket.emit("acceptChat", {
       sessionId,
       managerId,
@@ -143,7 +103,6 @@ class SocketIOService {
       console.error("Socket not connected. Call connect() first.");
       return;
     }
-
     this.socket.emit("sendMessage", {
       messageId,
       senderId,
@@ -159,7 +118,6 @@ class SocketIOService {
       console.error("Socket not connected. Call connect() first.");
       return;
     }
-
     this.socket.emit("markMessageRead", {
       messageId,
       senderId,
@@ -176,7 +134,6 @@ class SocketIOService {
       console.error("Socket not connected. Call connect() first.");
       return;
     }
-
     this.socket.emit("endChat", {
       sessionId,
       customerId,

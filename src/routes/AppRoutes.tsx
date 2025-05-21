@@ -38,10 +38,7 @@ import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/
 import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
 import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
 import { CurrentAssignmentsPage } from "../pages/Manager/ManagerRentalReturnPage/CurrentAssignmentsPage";
-import { LateFeeCalculatorPage } from "../pages/Manager/ManagerRentalReturnPage/LateFeeCalculatorPage";
-import { ManagerRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManagerRentalReturnPage";
-import { RentalHistoryPage } from "../pages/Manager/ManagerRentalReturnPage/RentalHistoryPage";
-import { ReturnDateAdjustmentPage } from "../pages/Manager/ManagerRentalReturnPage/ReturnDateAdjustmentPage";
+
 import { UnassignedPickupsPage } from "../pages/Manager/ManagerRentalReturnPage/UnassignedPickupsPage";
 import StaffAssignmentPage from "../pages/Manager/WorkAssignmentSchedule/StaffAssignmentPage";
 import WorkAssignmentSchedulePage from "../pages/Manager/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
@@ -51,12 +48,12 @@ import { ManageAssignmentStaffPage } from "../pages/Staff/ManageAssignemt/Manage
 import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
 import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
 import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
-import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliveryPage";
 import ShippingListPage from "../pages/Staff/Shipping/ShippingListPage";
 import { ManageVehiclePage } from "../pages/Manager/ManageVehicle/ManageVehiclePage";
 import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock/EquipmentAvailabilityPage";
 import NotificationCenter from "../pages/Global/Notification/NotificationsPage";
 import { StaffAssignmentHistoryPage } from "../pages/Manager/StaffAssignmentHistory/StaffAssignmentHistoryPage";
+import { ManageRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManageRentalReturnPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -112,10 +109,7 @@ const AppRoute: React.FC = () => {
           path={config.managerRoutes.manageReplacement}
           element={<ManageReplacementPage />}
         />
-        <Route
-          path={config.managerRoutes.rentalDashboard}
-          element={<ManagerRentalReturnPage />}
-        />
+
         <Route
           path={config.managerRoutes.unassignedPickups}
           element={<UnassignedPickupsPage />}
@@ -123,18 +117,6 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.currentAssignments}
           element={<CurrentAssignmentsPage />}
-        />
-        <Route
-          path={config.managerRoutes.rentalHistory}
-          element={<RentalHistoryPage />}
-        />
-        <Route
-          path={config.managerRoutes.calculateLateFee}
-          element={<LateFeeCalculatorPage />}
-        />
-        <Route
-          path={config.managerRoutes.adjustReturnDate}
-          element={<ReturnDateAdjustmentPage />}
         />
         <Route
           path={config.managerRoutes.orderDetail}
@@ -151,6 +133,10 @@ const AppRoute: React.FC = () => {
         <Route
           path={config.managerRoutes.staffAssignmentHistory}
           element={<StaffAssignmentHistoryPage />}
+        />
+        <Route
+          path={config.managerRoutes.rentalDashboard}
+          element={<ManageRentalReturnPage />}
         />
       </Route>
 
@@ -271,10 +257,7 @@ const AppRoute: React.FC = () => {
           path={config.staffRoutes.orderHistory}
           element={<OrderHistoryPage />}
         />
-        <Route
-          path={config.staffRoutes.proofOfDelivery}
-          element={<ProofOfDeliveryPage />}
-        />
+
         <Route
           path={config.staffRoutes.rentalDetail}
           element={<RentalDetailPage />}

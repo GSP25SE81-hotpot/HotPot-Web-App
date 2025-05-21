@@ -55,7 +55,6 @@ export const staffRoutes = {
   orderHistory: "/order-history",
   assignOrder: "/assign-order",
   shippingOrder: "/shipping",
-  proofOfDelivery: "/proof-of-delivery",
   rentalDetail: "/staff/rentals/:id",
   recordReturn: "/staff/rentals/record-return",
   pickupRental: "/pickup-rental",

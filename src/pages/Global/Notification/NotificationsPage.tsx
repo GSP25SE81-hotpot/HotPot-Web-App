@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/components/NotificationCenter.tsx
 import React, { useEffect, useState } from "react";
 import {
@@ -28,8 +28,10 @@ import {
 } from "../../../types/notificationTypes";
 // Import your existing date formatting utilities
 import { formatDetailDate } from "../../../utils/formatters"; // Adjust the import path as needed
+import useAuth from "../../../hooks/useAuth"; // Adjust the path as needed
 
-const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }) => {
+const NotificationCenter: React.FC<NotificationCenterProps> = () => {
+  const { auth } = useAuth(); // Get auth context
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -59,14 +61,92 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }) => {
     }
   };
 
+  // Normalize casing from PascalCase (C#) to camelCase (JS)
+  const normalizeCasing = (notification: any): Notification => {
+    if (!notification) return notification;
+
+    const normalized: any = {};
+    Object.keys(notification).forEach((key) => {
+      const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
+      normalized[camelKey] = notification[key];
+    });
+
+    if (normalized.data) {
+      const normalizedData: Record<string, any> = {};
+      Object.keys(normalized.data).forEach((key) => {
+        const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
+        normalizedData[camelKey] = normalized.data[key];
+      });
+      normalized.data = normalizedData;
+    }
+
+    return normalized as Notification;
+  };
+
   useEffect(() => {
     // Load initial notifications
     fetchNotifications();
     fetchUnreadCount();
 
-    // Set up SignalR connection
+    // Check if we have a valid token
+    if (!auth.accessToken) {
+      console.warn("No access token available for SignalR connection");
+      setError("Authentication required for notifications");
+      return;
+    }
+
+    // Debug token claims
+    try {
+      const tokenParts = auth.accessToken.split(".");
+      if (tokenParts.length !== 3) {
+        console.error("Invalid JWT token format");
+        return;
+      }
+
+      // Decode the payload part (second part) of the JWT
+      const payload = tokenParts[1];
+      const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map(function (c) {
+            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+          })
+          .join("")
+      );
+
+      const tokenData = JSON.parse(jsonPayload);
+      console.log("Token claims:", tokenData);
+
+      // Check if id claim exists and is parseable as int
+      if (!tokenData.id) {
+        // console.warn("Token missing 'id' claim required for notifications");
+        setError(
+          "Your authentication token is missing required claims for notifications"
+        );
+      } else {
+        console.log("ID claim type:", typeof tokenData.id);
+        console.log("ID claim value:", tokenData.id);
+
+        // Check if it's a numeric string
+        if (typeof tokenData.id === "string" && /^\d+$/.test(tokenData.id)) {
+          console.log("ID is a numeric string, should be parseable as int");
+        } else {
+          console.warn("ID might not be parseable as int in C#");
+          setError(
+            "Your user ID format is not compatible with the notification system"
+          );
+        }
+      }
+    } catch (e) {
+      console.error("Error parsing token:", e);
+    }
+
+    // Set up SignalR connection with authentication token
     const newConnection = new HubConnectionBuilder()
-      .withUrl("https://localhost:7163/notificationHub")
+      .withUrl("https://hpty.vinhuser.one/notificationHub", {
+        accessTokenFactory: () => auth.accessToken,
+      })
       .configureLogging(LogLevel.Information)
       .withAutomaticReconnect()
       .build();
@@ -80,7 +160,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }) => {
           .catch((err) => console.error("Error stopping connection:", err));
       }
     };
-  }, []);
+  }, [auth.accessToken]);
 
   useEffect(() => {
     if (connection) {
@@ -88,36 +168,63 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }) => {
         .start()
         .then(() => {
           console.log("Connected to notification hub");
+
           // Register connection with the hub
-          connection
-            .invoke("RegisterConnection")
-            .catch((err: Error) =>
-              console.error("Error registering connection:", err)
-            );
+          connection.invoke("RegisterConnection").catch((err: Error) => {
+            console.error("Error registering connection:", err);
+            setError("Failed to register for notifications");
+          });
 
           // Set up notification handler
-          connection.on("ReceiveNotification", (notification: Notification) => {
-            // Validate notification before processing
+          connection.on("ReceiveNotification", (rawNotification: any) => {
+            console.log("Raw notification from server:", rawNotification);
+
+            // Normalize casing from PascalCase to camelCase
+            const notification = normalizeCasing(rawNotification);
+
+            // Handle system messages
+            if (notification.type === "ConnectionRegistered") {
+              console.log(
+                "SignalR connection registered successfully:",
+                notification.message
+              );
+              // Clear any previous errors
+              setError(null);
+              return;
+            }
+
+            if (notification.type === "Error") {
+              console.error("SignalR error:", notification.message);
+              setError(notification.message);
+              return;
+            }
+
+            // Only process actual notifications with valid IDs
             if (
               notification &&
               typeof notification === "object" &&
-              notification.id
+              notification.id &&
+              notification.id > 0
             ) {
               // Show a toast notification
               showNotificationToast(notification);
-
               // Update notifications list and count
               setNotifications((prev) => [notification, ...prev]);
               setUnreadCount((prev) => prev + 1);
             } else {
               console.warn(
-                "Received invalid notification from SignalR:",
+                "Received notification with invalid or missing ID:",
                 notification
               );
             }
           });
         })
-        .catch((err: Error) => console.error("Error connecting to hub:", err));
+        .catch((err: Error) => {
+          console.error("Error connecting to hub:", err);
+          setError(
+            "Failed to connect to notification service. Please try refreshing the page."
+          );
+        });
     }
   }, [connection]);
 
@@ -136,13 +243,11 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({ userId }) => {
             typeof notification === "object" &&
             notification.id !== undefined
         );
-
         setNotifications(validNotifications);
       } else {
         console.warn("Expected array of notifications but got:", response);
         setNotifications([]);
       }
-
       setLoading(false);
     } catch (error) {
       console.error("Error fetching notifications:", error);

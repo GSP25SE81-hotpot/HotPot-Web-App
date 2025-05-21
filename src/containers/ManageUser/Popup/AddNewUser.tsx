@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { yupResolver } from "@hookform/resolvers/yup";
 import CloseIcon from "@mui/icons-material/Close";
 import { LoadingButton } from "@mui/lab";
@@ -74,7 +75,7 @@ const AddNewUser: React.FC<addModelProps> = ({ onOpen, onClose }) => {
 
   const {
     handleSubmit,
-    watch,
+    // watch,
     setValue,
     formState: { isSubmitting },
   } = methods;
