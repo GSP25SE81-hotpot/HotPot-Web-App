@@ -1,17 +1,13 @@
-export interface AssignManagerRequest {
-  managerId: number;
-}
+// Types for chat functionality (manager-focused)
 
+// Request types
 export interface SendMessageRequest {
   senderId: number;
   receiverId: number;
   message: string;
 }
 
-export interface MarkAsReadRequest {
-  userId: number;
-}
-
+// Response types
 export interface ChatSessionDto {
   chatSessionId: number;
   customerId: number;
@@ -20,8 +16,7 @@ export interface ChatSessionDto {
   managerName?: string;
   isActive: boolean;
   topic: string;
-  createdAt: Date;
-  updatedAt?: Date;
+  createdAt: string; // ISO date string
 }
 
 export interface ChatMessageDto {
@@ -31,21 +26,46 @@ export interface ChatMessageDto {
   receiverUserId: number;
   receiverName: string;
   message: string;
-  isRead: boolean;
-  createdAt: Date;
+  createdAt: string; // ISO date string
 }
 
 export interface ChatSessionDetailDto extends ChatSessionDto {
   messages: ChatMessageDto[];
 }
 
-export interface UnreadMessageCountDto {
-  count: number;
-}
-
+// API response wrapper
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
   message: string;
   errors?: string[];
+}
+
+// Socket event data types
+export interface NewChatEvent {
+  sessionId: number;
+  customerId: number;
+  customerName: string;
+  topic: string;
+}
+
+export interface ChatAcceptedEvent {
+  sessionId: number;
+  managerId: number;
+  managerName: string;
+  customerId: number;
+}
+
+export interface NewMessageEvent {
+  messageId: number;
+  senderId: number;
+  receiverId: number;
+  content: string;
+  timestamp: string;
+}
+
+export interface ChatEndedEvent {
+  sessionId: number;
+  customerId: number;
+  managerId?: number;
 }

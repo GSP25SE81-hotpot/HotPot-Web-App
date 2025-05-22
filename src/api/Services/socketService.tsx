@@ -4,6 +4,8 @@ import { io, Socket } from "socket.io-client";
 class SocketIOService {
   private socket: Socket | null = null;
   private callbacks: Record<string, (...args: any[]) => void> = {};
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
 
   // Initialize and connect to Socket.IO server
   public connect(
@@ -12,58 +14,105 @@ class SocketIOService {
     if (this.socket) {
       return; // Already connected
     }
-    this.socket = io(serverUrl);
-    this.socket.on("connect", () => {
-      console.log("Connected to Socket.IO server");
+
+    console.log(`Attempting to connect to Socket.IO server at ${serverUrl}`);
+
+    // Configure Socket.IO with settings that match the server
+    this.socket = io(serverUrl, {
+      transports: ["websocket"], // Match server's transport setting
+      reconnection: true,
+      reconnectionAttempts: this.maxReconnectAttempts,
+      reconnectionDelay: 1000,
+      timeout: 10000,
+      withCredentials: true, // Enable credentials for CORS
     });
-    this.socket.on("disconnect", () => {
-      console.log("Disconnected from Socket.IO server");
+
+    // Listen for connection events
+    this.socket.on("connection", () => {
+      console.log("Connected to Socket.IO server with ID:", this.socket?.id);
+      this.reconnectAttempts = 0;
+
+      // Send heartbeat periodically
+      setInterval(() => {
+        if (this.socket?.connected) {
+          this.socket.emit("heartbeat");
+        }
+      }, 20000); // Every 20 seconds
     });
+
+    this.socket.on("disconnect", (reason) => {
+      console.log(`Disconnected from Socket.IO server: ${reason}`);
+    });
+
+    this.socket.on("connect_error", (error) => {
+      console.error("Socket.IO connection error:", error.message);
+      this.reconnectAttempts++;
+
+      if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+        console.error(
+          `Failed to connect after ${this.maxReconnectAttempts} attempts. Stopping reconnection.`
+        );
+        this.socket?.disconnect();
+      }
+    });
+
     this.socket.on("error", (error: any) => {
       console.error("Socket.IO error:", error);
     });
+
     // Set up event listeners
     this.setupEventListeners();
   }
 
-  // Authenticate user with Socket.IO server
+  // Authenticate user with Socket.IO server - call immediately after connection
   public authenticate(userId: number, role: string): void {
     if (!this.socket) {
       console.error("Socket not connected. Call connect() first.");
       return;
     }
-    this.socket.emit("authenticate", { userId, role });
+
+    console.log(`Authenticating user ${userId} with role ${role}`);
+
+    // Send authentication data
+    this.socket.emit("authenticate", {
+      userId: userId.toString(), // Convert to string to match server expectations
+      role,
+    });
   }
 
   // Set up event listeners for incoming Socket.IO events
   private setupEventListeners(): void {
     if (!this.socket) return;
 
-    // Chat accepted (for managers to know when another manager accepts a chat)
+    // New chat request from customer
+    this.socket.on("newChat", (data: any) => {
+      console.log("Received newChat event:", data);
+      if (this.callbacks["onNewChat"]) {
+        this.callbacks["onNewChat"](data);
+      }
+    });
+
+    // Chat accepted event
     this.socket.on("chatAccepted", (data: any) => {
+      console.log("Received chatAccepted event:", data);
       if (this.callbacks["onChatAccepted"]) {
         this.callbacks["onChatAccepted"](data);
       }
     });
 
-    // Receive message
-    this.socket.on("receiveMessage", (data: any) => {
-      if (this.callbacks["onReceiveMessage"]) {
-        this.callbacks["onReceiveMessage"](data);
-      }
-    });
-
-    // Message read
-    this.socket.on("messageRead", (messageId: number) => {
-      if (this.callbacks["onMessageRead"]) {
-        this.callbacks["onMessageRead"](messageId);
+    // New message received
+    this.socket.on("newMessage", (data: any) => {
+      console.log("Received newMessage event:", data);
+      if (this.callbacks["onNewMessage"]) {
+        this.callbacks["onNewMessage"](data);
       }
     });
 
     // Chat ended
-    this.socket.on("chatEnded", (sessionId: number) => {
+    this.socket.on("chatEnded", (data: any) => {
+      console.log("Received chatEnded event:", data);
       if (this.callbacks["onChatEnded"]) {
-        this.callbacks["onChatEnded"](sessionId);
+        this.callbacks["onChatEnded"](data);
       }
     });
   }
@@ -73,8 +122,13 @@ class SocketIOService {
     this.callbacks[event] = callback;
   }
 
-  // Accept a chat (manager)
-  public acceptChat(
+  // Check if socket is connected
+  public isConnected(): boolean {
+    return this.socket?.connected || false;
+  }
+
+  // Join a chat as manager
+  public joinChat(
     sessionId: number,
     managerId: number,
     managerName: string,
@@ -84,11 +138,13 @@ class SocketIOService {
       console.error("Socket not connected. Call connect() first.");
       return;
     }
-    this.socket.emit("acceptChat", {
+
+    console.log(`Joining chat ${sessionId} as manager ${managerId}`);
+    this.socket.emit("chatAccepted", {
       sessionId,
-      managerId,
+      managerId: managerId.toString(), // Convert to string to match server expectations
       managerName,
-      customerId,
+      customerId: customerId.toString(), // Convert to string to match server expectations
     });
   }
 
@@ -97,30 +153,22 @@ class SocketIOService {
     messageId: number,
     senderId: number,
     receiverId: number,
-    message: string
+    content: string
   ): void {
     if (!this.socket) {
       console.error("Socket not connected. Call connect() first.");
       return;
     }
-    this.socket.emit("sendMessage", {
-      messageId,
-      senderId,
-      receiverId,
-      message,
-      createdAt: new Date().toISOString(),
-    });
-  }
 
-  // Mark a message as read
-  public markMessageAsRead(messageId: number, senderId: number): void {
-    if (!this.socket) {
-      console.error("Socket not connected. Call connect() first.");
-      return;
-    }
-    this.socket.emit("markMessageRead", {
+    console.log(
+      `Sending message from ${senderId} to ${receiverId}: ${content}`
+    );
+    this.socket.emit("newMessage", {
       messageId,
-      senderId,
+      senderId: senderId.toString(), // Convert to string to match server expectations
+      receiverId: receiverId.toString(), // Convert to string to match server expectations
+      content,
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -128,17 +176,27 @@ class SocketIOService {
   public endChat(
     sessionId: number,
     customerId: number,
-    managerId?: number | null
+    managerId: number
   ): void {
     if (!this.socket) {
       console.error("Socket not connected. Call connect() first.");
       return;
     }
-    this.socket.emit("endChat", {
+
+    console.log(`Ending chat ${sessionId}`);
+    this.socket.emit("chatEnded", {
       sessionId,
-      customerId,
-      managerId,
+      customerId: customerId.toString(), // Convert to string to match server expectations
+      managerId: managerId.toString(), // Convert to string to match server expectations
     });
+  }
+
+  // Force reconnect
+  public reconnect(): void {
+    this.disconnect();
+    setTimeout(() => {
+      this.connect();
+    }, 1000);
   }
 
   // Disconnect from Socket.IO server
@@ -147,6 +205,7 @@ class SocketIOService {
       this.socket.disconnect();
       this.socket = null;
       this.callbacks = {};
+      this.reconnectAttempts = 0;
     }
   }
 }

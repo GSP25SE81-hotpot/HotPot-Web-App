@@ -1,4 +1,3 @@
-// src/components/Chat/components/ChatMessages/MessageList.tsx
 import React, { useRef, useEffect, useMemo } from "react";
 import { Box, Typography } from "@mui/material";
 import { FixedSizeList as VirtualList } from "react-window";
@@ -81,13 +80,24 @@ const MessageList: React.FC<MessageListProps> = ({ messages, loading }) => {
           </VirtualList>
           <div ref={messagesEndRef} />
         </>
-      ) : (
+      ) : sortedMessages.length > 0 ? (
         <>
           {sortedMessages.map((msg) => (
             <MessageItem key={msg.chatMessageId} message={msg} />
           ))}
           <div ref={messagesEndRef} />
         </>
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          <Typography color="text.secondary">Không có tin nhắn nào</Typography>
+        </Box>
       )}
     </Box>
   );

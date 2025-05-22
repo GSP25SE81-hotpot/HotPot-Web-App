@@ -3,7 +3,6 @@ import axiosClient from "../axiosInstance";
 import socketService from "./socketService";
 import {
   ApiResponse,
-  AssignManagerRequest,
   ChatMessageDto,
   ChatSessionDetailDto,
   ChatSessionDto,
@@ -22,19 +21,15 @@ export class ChatService {
   }
 
   // Register Socket.IO event handlers
-  public onChatAccepted(callback: (data: any) => void): void {
-    socketService.on("onChatAccepted", callback);
+  public onNewChat(callback: (data: any) => void): void {
+    socketService.on("onNewChat", callback);
   }
 
-  public onReceiveMessage(callback: (data: ChatMessageDto) => void): void {
-    socketService.on("onReceiveMessage", callback);
+  public onNewMessage(callback: (data: any) => void): void {
+    socketService.on("onNewMessage", callback);
   }
 
-  public onMessageRead(callback: (messageId: number) => void): void {
-    socketService.on("onMessageRead", callback);
-  }
-
-  public onChatEnded(callback: (sessionId: number) => void): void {
+  public onChatEnded(callback: (data: any) => void): void {
     socketService.on("onChatEnded", callback);
   }
 
@@ -44,53 +39,51 @@ export class ChatService {
       const response = await axiosClient.get<
         any,
         ApiResponse<ChatSessionDto[]>
-      >("/manager/chat/sessions/active");
-      return response || [];
+      >("/chat/manager/sessions/active");
+      return response || { success: true, data: [] };
     } catch (error) {
       console.error("Error fetching active sessions:", error);
       throw error;
     }
   }
 
-  // Get chat history for a specific manager
-  public async getManagerChatHistory(
-    managerId: number
-  ): Promise<ApiResponse<ChatSessionDto[]>> {
+  // Get chat history for the logged-in manager
+  public async getChatHistory(): Promise<ApiResponse<ChatSessionDto[]>> {
     try {
       const response = await axiosClient.get<
         any,
         ApiResponse<ChatSessionDto[]>
-      >(`/manager/chat/sessions/manager/${managerId}`);
-      return response || [];
+      >("/chat/manager/sessions/history");
+      return response || { success: true, data: [] };
     } catch (error) {
-      console.error("Error fetching manager chat history:", error);
+      console.error("Error fetching chat history:", error);
       throw error;
     }
   }
 
-  // Assign a manager to a chat session
-  public async assignManagerToSession(
+  // Join a chat session as manager
+  public async joinChatSession(
     sessionId: number,
     managerId: number,
     managerName: string,
     customerId: number
   ): Promise<ApiResponse<ChatSessionDto>> {
     try {
-      const request: AssignManagerRequest = { managerId };
-      const response = await axiosClient.put<any, ApiResponse<ChatSessionDto>>(
-        `/manager/chat/sessions/${sessionId}/assign`,
-        request
+      const response = await axiosClient.post<any, ApiResponse<ChatSessionDto>>(
+        `/chat/sessions/manager/${sessionId}/join`,
+        {}
       );
+
       // Notify via Socket.IO
-      socketService.acceptChat(sessionId, managerId, managerName, customerId);
+      socketService.joinChat(sessionId, managerId, managerName, customerId);
+
       return response;
     } catch (error) {
-      console.error("Error assigning manager to session:", error);
+      console.error("Error joining chat session:", error);
       throw error;
     }
   }
 
-  // Shared functionality methods
   // Get messages for a specific chat session
   public async getSessionMessages(
     sessionId: number,
@@ -102,42 +95,11 @@ export class ChatService {
         any,
         ApiResponse<ChatMessageDto[]>
       >(
-        `/manager/chat/messages/session/${sessionId}?pageNumber=${pageNumber}&pageSize=${pageSize}`
+        `/chat/messages/session/${sessionId}?pageNumber=${pageNumber}&pageSize=${pageSize}`
       );
-      return response || [];
+      return response || { success: true, data: [] };
     } catch (error) {
       console.error("Error fetching session messages:", error);
-      throw error;
-    }
-  }
-
-  // Get unread messages for a user
-  public async getUnreadMessages(
-    userId: number
-  ): Promise<ApiResponse<ChatMessageDto[]>> {
-    try {
-      const response = await axiosClient.get<
-        any,
-        ApiResponse<ChatMessageDto[]>
-      >(`/manager/chat/messages/unread/${userId}`);
-      return response || [];
-    } catch (error) {
-      console.error("Error fetching unread messages:", error);
-      throw error;
-    }
-  }
-
-  // Get count of unread messages for a user
-  public async getUnreadMessageCount(
-    userId: number
-  ): Promise<ApiResponse<number>> {
-    try {
-      const response = await axiosClient.get<any, ApiResponse<number>>(
-        `/manager/chat/messages/unread/count/${userId}`
-      );
-      return response || 0;
-    } catch (error) {
-      console.error("Error fetching unread message count:", error);
       throw error;
     }
   }
@@ -146,16 +108,18 @@ export class ChatService {
   public async endChatSession(
     sessionId: number,
     customerId: number,
-    managerId?: number
+    managerId: number
   ): Promise<ApiResponse<ChatSessionDto>> {
     try {
       const response = await axiosClient.put<any, ApiResponse<ChatSessionDto>>(
-        `/manager/chat/sessions/${sessionId}/end`,
+        `/chat/sessions/${sessionId}/end`,
         {}
       );
+
       // Notify via Socket.IO
       socketService.endChat(sessionId, customerId, managerId);
-      return response!;
+
+      return response;
     } catch (error) {
       console.error("Error ending chat session:", error);
       throw error;
@@ -171,38 +135,23 @@ export class ChatService {
     try {
       const request: SendMessageRequest = { senderId, receiverId, message };
       const response = await axiosClient.post<any, ApiResponse<ChatMessageDto>>(
-        "/manager/chat/messages",
+        "/chat/messages",
         request
       );
+
       // Notify via Socket.IO
-      socketService.sendMessage(
-        response.data!.chatMessageId,
-        senderId,
-        receiverId,
-        message
-      );
+      if (response.data) {
+        socketService.sendMessage(
+          response.data.chatMessageId,
+          senderId,
+          receiverId,
+          message
+        );
+      }
+
       return response;
     } catch (error) {
       console.error("Error sending message:", error);
-      throw error;
-    }
-  }
-
-  // Mark a message as read
-  public async markMessageAsRead(
-    messageId: number,
-    senderId: number
-  ): Promise<ApiResponse<boolean>> {
-    try {
-      const response = await axiosClient.put<any, ApiResponse<boolean>>(
-        `/manager/chat/messages/${messageId}/read`,
-        {}
-      );
-      // Notify via Socket.IO
-      socketService.markMessageAsRead(messageId, senderId);
-      return response || false;
-    } catch (error) {
-      console.error("Error marking message as read:", error);
       throw error;
     }
   }
@@ -215,7 +164,7 @@ export class ChatService {
       const response = await axiosClient.get<
         any,
         ApiResponse<ChatSessionDetailDto>
-      >(`/manager/chat/sessions/${sessionId}`);
+      >(`/chat/sessions/${sessionId}`);
       return response;
     } catch (error) {
       console.error("Error fetching chat session:", error);
