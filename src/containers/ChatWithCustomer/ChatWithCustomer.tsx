@@ -65,10 +65,10 @@ const ChatWithCustomer: React.FC = () => {
 
     initializeSocketConnection();
 
-    // Set up Socket.IO event listeners
-    socketService.on("onNewChat", handleNewChat);
-    socketService.on("onNewMessage", handleNewMessage);
-    socketService.on("onChatEnded", handleChatEnded);
+    // Set up Socket.IO event listeners with the CORRECT event names
+    chatService.onNewChat(handleNewChat);
+    chatService.onNewMessage(handleNewMessage);
+    chatService.onChatEnded(handleChatEnded);
 
     // Clean up on unmount
     return () => {
@@ -170,17 +170,23 @@ const ChatWithCustomer: React.FC = () => {
   // Handle chat ended
   const handleChatEnded = useCallback(
     (data: any) => {
+      console.log("Chat ended event received:", data);
+
       // Update chat session status
-      setChatSessions((prev) =>
-        prev.map((session) =>
-          session.chatSessionId === data.sessionId
-            ? { ...session, isActive: false }
-            : session
-        )
-      );
+      setChatSessions((prev) => {
+        console.log("Updating chat sessions after chat ended");
+        return prev.map((session) => {
+          if (session.chatSessionId === data.sessionId) {
+            console.log(`Marking session ${data.sessionId} as inactive`);
+            return { ...session, isActive: false };
+          }
+          return session;
+        });
+      });
 
       // If the ended chat is the selected one, clear selection
       if (selectedChatId === data.sessionId) {
+        console.log(`Clearing selected chat ${data.sessionId}`);
         setSelectedChatId(null);
       }
     },

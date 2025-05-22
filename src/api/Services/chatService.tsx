@@ -22,15 +22,15 @@ export class ChatService {
 
   // Register Socket.IO event handlers
   public onNewChat(callback: (data: any) => void): void {
-    socketService.on("onNewChat", callback);
+    socketService.on("newChat", callback);
   }
 
   public onNewMessage(callback: (data: any) => void): void {
-    socketService.on("onNewMessage", callback);
+    socketService.on("newMessage", callback);
   }
 
   public onChatEnded(callback: (data: any) => void): void {
-    socketService.on("onChatEnded", callback);
+    socketService.on("chatEnded", callback);
   }
 
   // Get active chat sessions

@@ -87,32 +87,32 @@ class SocketIOService {
     // New chat request from customer
     this.socket.on("newChat", (data: any) => {
       console.log("Received newChat event:", data);
-      if (this.callbacks["onNewChat"]) {
-        this.callbacks["onNewChat"](data);
+      if (this.callbacks["newChat"]) {
+        this.callbacks["newChat"](data);
       }
     });
 
     // Chat accepted event
     this.socket.on("chatAccepted", (data: any) => {
       console.log("Received chatAccepted event:", data);
-      if (this.callbacks["onChatAccepted"]) {
-        this.callbacks["onChatAccepted"](data);
+      if (this.callbacks["chatAccepted"]) {
+        this.callbacks["chatAccepted"](data);
       }
     });
 
     // New message received
     this.socket.on("newMessage", (data: any) => {
       console.log("Received newMessage event:", data);
-      if (this.callbacks["onNewMessage"]) {
-        this.callbacks["onNewMessage"](data);
+      if (this.callbacks["newMessage"]) {
+        this.callbacks["newMessage"](data);
       }
     });
 
     // Chat ended
     this.socket.on("chatEnded", (data: any) => {
       console.log("Received chatEnded event:", data);
-      if (this.callbacks["onChatEnded"]) {
-        this.callbacks["onChatEnded"](data);
+      if (this.callbacks["chatEnded"]) {
+        this.callbacks["chatEnded"](data);
       }
     });
   }
