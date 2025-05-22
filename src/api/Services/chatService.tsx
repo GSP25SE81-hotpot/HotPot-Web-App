@@ -10,19 +10,43 @@ import {
 } from "../../types/chat";
 
 export class ChatService {
+  private isInitialized = false;
+
   constructor() {
-    // Initialize Socket.IO connection
-    socketService.connect();
+    // Don't initialize in constructor - do it explicitly
+  }
+
+  // Initialize socket connection and authentication
+  public async initialize(userId?: number, role?: string): Promise<boolean> {
+    if (this.isInitialized) return true;
+    try {
+      // Connect to socket server
+      const connected = await socketService.connect();
+      // Authenticate if user info is provided
+      if (connected && userId && role) {
+        await socketService.authenticate(userId, role);
+      }
+      this.isInitialized = connected;
+      return connected;
+    } catch (error) {
+      console.error("Failed to initialize chat service:", error);
+      return false;
+    }
   }
 
   // Authenticate with Socket.IO
-  public authenticateSocket(userId: number, role: string): void {
-    socketService.authenticate(userId, role);
+  public async authenticateSocket(userId: number, role: string): Promise<void> {
+    await this.initialize();
+    await socketService.authenticate(userId, role);
   }
 
   // Register Socket.IO event handlers
   public onNewChat(callback: (data: any) => void): void {
     socketService.on("newChat", callback);
+  }
+
+  public onChatAccepted(callback: (data: any) => void): void {
+    socketService.on("chatAccepted", callback);
   }
 
   public onNewMessage(callback: (data: any) => void): void {
@@ -33,50 +57,48 @@ export class ChatService {
     socketService.on("chatEnded", callback);
   }
 
-  // Get active chat sessions
-  public async getActiveSessions(): Promise<ApiResponse<ChatSessionDto[]>> {
+  // Get user's chat sessions (works for both customers and managers)
+  public async getUserSessions(
+    activeOnly: boolean = false
+  ): Promise<ApiResponse<ChatSessionDto[]>> {
     try {
       const response = await axiosClient.get<
         any,
         ApiResponse<ChatSessionDto[]>
-      >("/chat/manager/sessions/active");
+      >(`/chat/sessions?activeOnly=${activeOnly}`);
       return response || { success: true, data: [] };
     } catch (error) {
-      console.error("Error fetching active sessions:", error);
+      console.error("Error fetching user sessions:", error);
       throw error;
     }
   }
 
-  // Get chat history for the logged-in manager
-  public async getChatHistory(): Promise<ApiResponse<ChatSessionDto[]>> {
+  // Get unassigned chat sessions (manager only)
+  public async getUnassignedSessions(): Promise<ApiResponse<ChatSessionDto[]>> {
     try {
       const response = await axiosClient.get<
         any,
         ApiResponse<ChatSessionDto[]>
-      >("/chat/manager/sessions/history");
+      >("/chat/manager/sessions/unassigned");
       return response || { success: true, data: [] };
     } catch (error) {
-      console.error("Error fetching chat history:", error);
+      console.error("Error fetching unassigned sessions:", error);
       throw error;
     }
   }
 
   // Join a chat session as manager
   public async joinChatSession(
-    sessionId: number,
-    managerId: number,
-    managerName: string,
-    customerId: number
+    sessionId: number
   ): Promise<ApiResponse<ChatSessionDto>> {
     try {
+      // Make the HTTP request
       const response = await axiosClient.post<any, ApiResponse<ChatSessionDto>>(
-        `/chat/sessions/manager/${sessionId}/join`,
+        `/chat/manager/sessions/${sessionId}/join`,
         {}
       );
 
-      // Notify via Socket.IO
-      socketService.joinChat(sessionId, managerId, managerName, customerId);
-
+      // No need to manually notify via Socket.IO - backend will handle it
       return response;
     } catch (error) {
       console.error("Error joining chat session:", error);
@@ -106,19 +128,14 @@ export class ChatService {
 
   // End a chat session
   public async endChatSession(
-    sessionId: number,
-    customerId: number,
-    managerId: number
+    sessionId: number
   ): Promise<ApiResponse<ChatSessionDto>> {
     try {
+      // Make the HTTP request - backend will handle socket notification
       const response = await axiosClient.put<any, ApiResponse<ChatSessionDto>>(
         `/chat/sessions/${sessionId}/end`,
         {}
       );
-
-      // Notify via Socket.IO
-      socketService.endChat(sessionId, customerId, managerId);
-
       return response;
     } catch (error) {
       console.error("Error ending chat session:", error);
@@ -128,26 +145,20 @@ export class ChatService {
 
   // Send a message
   public async sendMessage(
-    senderId: number,
-    receiverId: number,
+    chatSessionId: number,
     message: string
   ): Promise<ApiResponse<ChatMessageDto>> {
     try {
-      const request: SendMessageRequest = { senderId, receiverId, message };
+      const request: SendMessageRequest = {
+        chatSessionId,
+        message,
+      };
+
+      // Make the HTTP request - backend will handle socket notification
       const response = await axiosClient.post<any, ApiResponse<ChatMessageDto>>(
         "/chat/messages",
         request
       );
-
-      // Notify via Socket.IO
-      if (response.data) {
-        socketService.sendMessage(
-          response.data.chatMessageId,
-          senderId,
-          receiverId,
-          message
-        );
-      }
 
       return response;
     } catch (error) {
@@ -170,6 +181,17 @@ export class ChatService {
       console.error("Error fetching chat session:", error);
       throw error;
     }
+  }
+
+  // Check if socket is connected
+  public isSocketConnected(): boolean {
+    return socketService.isConnected();
+  }
+
+  // Disconnect socket
+  public disconnect(): void {
+    socketService.disconnect();
+    this.isInitialized = false;
   }
 }
 

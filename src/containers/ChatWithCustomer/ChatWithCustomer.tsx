@@ -5,15 +5,8 @@ import { Box, IconButton, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { StyledPaper } from "../../components/manager/styles/ChatStyles";
 import useAuth from "../../hooks/useAuth";
-import socketService from "../../api/Services/socketService";
 import chatService from "../../api/Services/chatService";
-import {
-  ChatMessageDto,
-  ChatSessionDto,
-  NewChatEvent,
-  NewMessageEvent,
-} from "../../types/chat";
-
+import { ChatMessageDto, ChatSessionDto } from "../../types/chat";
 // Import extracted components
 import ChatHeader from "./ChatHeader/ChatHeader";
 import ChatInput from "./ChatInput/ChatInput";
@@ -22,6 +15,29 @@ import MessageList from "./ChatMessage/MessageList";
 import ConnectionStatus from "./Services/ConnectionStatus";
 import DebugPanel from "./Services/DebugPanel";
 import EmptyChatState from "./Services/EmptyChatState";
+
+// Define event types for better type safety
+interface NewChatEvent {
+  sessionId: number;
+  customerId: number;
+  customerName: string;
+  topic: string;
+}
+
+interface NewMessageEvent {
+  messageId: number;
+  sessionId: number;
+  senderId: number;
+  receiverId: number;
+  content: string;
+  timestamp: string;
+}
+
+interface ChatEndedEvent {
+  sessionId: number;
+  customerId: number;
+  managerId: number;
+}
 
 const ChatWithCustomer: React.FC = () => {
   const { auth } = useAuth();
@@ -36,22 +52,25 @@ const ChatWithCustomer: React.FC = () => {
     Record<number, ChatMessageDto[]>
   >({});
 
-  // Initialize Socket.IO connection
+  // Initialize chat service and socket connection
   useEffect(() => {
-    const initializeSocketConnection = async () => {
+    const initializeChat = async () => {
       try {
         setLoading(true);
-        // Connect to Socket.IO server
-        socketService.connect();
 
-        // Authenticate with Socket.IO
+        // Initialize chat service with user authentication
         if (user?.id) {
-          socketService.authenticate(user.id, "Manager");
-          setIsConnected(true);
+          const connected = await chatService.initialize(user.id, "Manager");
+          setIsConnected(connected);
+
+          if (connected) {
+            // Load active chat sessions
+            await refreshSessions();
+          } else {
+            setError("Failed to connect to chat service");
+          }
         }
 
-        // Load active chat sessions
-        await refreshSessions();
         setLoading(false);
       } catch (err) {
         setError(
@@ -63,21 +82,24 @@ const ChatWithCustomer: React.FC = () => {
       }
     };
 
-    initializeSocketConnection();
+    initializeChat();
 
-    // Set up Socket.IO event listeners with the CORRECT event names
+    // Set up event listeners
     chatService.onNewChat(handleNewChat);
     chatService.onNewMessage(handleNewMessage);
     chatService.onChatEnded(handleChatEnded);
+    chatService.onChatAccepted(handleChatAccepted);
 
     // Clean up on unmount
     return () => {
-      socketService.disconnect();
+      chatService.disconnect();
     };
   }, [user?.id]);
 
   // Handle new chat request
   const handleNewChat = useCallback((data: NewChatEvent) => {
+    console.log("New chat event received:", data);
+
     // Add new chat to the list
     setChatSessions((prev) => {
       // Check if we already have this chat
@@ -100,28 +122,80 @@ const ChatWithCustomer: React.FC = () => {
     });
   }, []);
 
-  // Handle new message
+  // Handle chat accepted (when a manager joins a chat)
+  const handleChatAccepted = useCallback((data: any) => {
+    console.log("Chat accepted event received:", data);
+
+    // Update the chat session with manager info
+    setChatSessions((prev) =>
+      prev.map((session) => {
+        if (session.chatSessionId === data.sessionId) {
+          return {
+            ...session,
+            managerId: data.managerId,
+            managerName: data.managerName,
+          };
+        }
+        return session;
+      })
+    );
+  }, []);
+
+  const refreshSessions = useCallback(async () => {
+    try {
+      // Get user's active chat sessions
+      const response = await chatService.getUserSessions(true);
+
+      if (response.success && response.data) {
+        setChatSessions(response.data);
+
+        // Load messages for each session
+        response.data.forEach((session) => {
+          loadSessionMessages(session.chatSessionId);
+        });
+      }
+
+      // Also get unassigned sessions that this manager could join
+      const unassignedResponse = await chatService.getUnassignedSessions();
+
+      if (unassignedResponse.success && unassignedResponse.data) {
+        // Add unassigned sessions to the list
+        setChatSessions((prev) => {
+          const existingIds = new Set(prev.map((s) => s.chatSessionId));
+          const newSessions = unassignedResponse.data!.filter(
+            (s) => !existingIds.has(s.chatSessionId)
+          );
+          return [...prev, ...newSessions];
+        });
+      }
+
+      return true;
+    } catch (err) {
+      console.error("Failed to refresh sessions:", err);
+      setError("Failed to load chat sessions");
+      return false;
+    }
+  }, []);
+
   // Handle new message
   const handleNewMessage = useCallback(
     (data: NewMessageEvent) => {
-      // We need to determine which session this message belongs to
-      // Since we don't have sessionId in the event, we'll need to find it based on sender/receiver
+      console.log("New message event received:", data);
+
+      // Since we now have sessionId in the event, we can use it directly
+      const sessionId = data.sessionId;
 
       // Find the chat session this message belongs to
       const relevantSession = chatSessions.find(
-        (session) =>
-          (session.customerId === data.senderId ||
-            session.customerId === data.receiverId) &&
-          (session.managerId === data.senderId ||
-            session.managerId === data.receiverId)
+        (session) => session.chatSessionId === sessionId
       );
 
       if (!relevantSession) {
         console.warn("Received message for unknown session", data);
+        // Refresh sessions to get the latest data
+        refreshSessions();
         return;
       }
-
-      const sessionId = relevantSession.chatSessionId;
 
       // Add message to the appropriate chat session
       setSessionMessages((prev) => {
@@ -153,6 +227,7 @@ const ChatWithCustomer: React.FC = () => {
             senderName: senderName,
             receiverUserId: data.receiverId,
             receiverName: receiverName,
+            chatSessionId: sessionId,
             message: data.content,
             createdAt: data.timestamp || new Date().toISOString(),
           },
@@ -164,20 +239,18 @@ const ChatWithCustomer: React.FC = () => {
         };
       });
     },
-    [chatSessions]
+    [chatSessions, refreshSessions]
   );
 
   // Handle chat ended
   const handleChatEnded = useCallback(
-    (data: any) => {
+    (data: ChatEndedEvent) => {
       console.log("Chat ended event received:", data);
 
       // Update chat session status
       setChatSessions((prev) => {
-        console.log("Updating chat sessions after chat ended");
         return prev.map((session) => {
           if (session.chatSessionId === data.sessionId) {
-            console.log(`Marking session ${data.sessionId} as inactive`);
             return { ...session, isActive: false };
           }
           return session;
@@ -186,42 +259,23 @@ const ChatWithCustomer: React.FC = () => {
 
       // If the ended chat is the selected one, clear selection
       if (selectedChatId === data.sessionId) {
-        console.log(`Clearing selected chat ${data.sessionId}`);
         setSelectedChatId(null);
       }
     },
     [selectedChatId]
   );
 
-  // API functions
-  const refreshSessions = useCallback(async () => {
-    try {
-      const response = await chatService.getActiveSessions();
-      if (response.success && response.data) {
-        setChatSessions(response.data);
-
-        // Load messages for each session
-        response.data.forEach((session) => {
-          loadSessionMessages(session.chatSessionId);
-        });
-      }
-      return true;
-    } catch (err) {
-      console.error("Failed to refresh sessions:", err);
-      setError("Failed to load chat sessions");
-      return false;
-    }
-  }, []);
-
   const loadSessionMessages = useCallback(async (sessionId: number) => {
     try {
       const response = await chatService.getSessionMessages(sessionId);
+
       if (response.success && response.data) {
         setSessionMessages((prev) => ({
           ...prev,
           [sessionId]: response.data || [],
         }));
       }
+
       return true;
     } catch (err) {
       console.error(`Failed to load messages for session ${sessionId}:`, err);
@@ -230,14 +284,9 @@ const ChatWithCustomer: React.FC = () => {
   }, []);
 
   const sendMessage = useCallback(
-    async (senderId: number, receiverId: number, message: string) => {
+    async (chatSessionId: number, message: string) => {
       try {
-        const response = await chatService.sendMessage(
-          senderId,
-          receiverId,
-          message
-        );
-
+        const response = await chatService.sendMessage(chatSessionId, message);
         return response.success;
       } catch (err) {
         console.error("Failed to send message:", err);
@@ -250,14 +299,7 @@ const ChatWithCustomer: React.FC = () => {
   const endChatSession = useCallback(
     async (sessionId: number) => {
       try {
-        const session = chatSessions.find((s) => s.chatSessionId === sessionId);
-        if (!session) return false;
-
-        const response = await chatService.endChatSession(
-          sessionId,
-          session.customerId,
-          user?.id || 0
-        );
+        const response = await chatService.endChatSession(sessionId);
 
         if (response.success) {
           // Update local state
@@ -271,53 +313,38 @@ const ChatWithCustomer: React.FC = () => {
           if (selectedChatId === sessionId) {
             setSelectedChatId(null);
           }
+
           return true;
         }
+
         return false;
       } catch (err) {
         console.error("Failed to end chat session:", err);
         return false;
       }
     },
-    [chatSessions, selectedChatId, user?.id]
+    [selectedChatId]
   );
 
-  const joinChat = useCallback(
-    async (sessionId: number) => {
-      try {
-        const session = chatSessions.find((s) => s.chatSessionId === sessionId);
-        if (!session || !user?.id) return false;
+  const joinChat = useCallback(async (sessionId: number) => {
+    try {
+      const response = await chatService.joinChatSession(sessionId);
 
-        const response = await chatService.joinChatSession(
-          sessionId,
-          user.id,
-          user.name || "Manager",
-          session.customerId
+      if (response.success && response.data) {
+        // Update local state with the response data
+        setChatSessions((prev) =>
+          prev.map((s) => (s.chatSessionId === sessionId ? response.data! : s))
         );
 
-        if (response.success && response.data) {
-          // Update local state
-          setChatSessions((prev) =>
-            prev.map((s) =>
-              s.chatSessionId === sessionId
-                ? {
-                    ...s,
-                    managerId: user.id,
-                    managerName: user.name || "Manager",
-                  }
-                : s
-            )
-          );
-          return true;
-        }
-        return false;
-      } catch (err) {
-        console.error("Failed to join chat:", err);
-        return false;
+        return true;
       }
-    },
-    [chatSessions, user]
-  );
+
+      return false;
+    } catch (err) {
+      console.error("Failed to join chat:", err);
+      return false;
+    }
+  }, []);
 
   // Helper functions
   const getSessionMessages = useCallback(
@@ -330,14 +357,19 @@ const ChatWithCustomer: React.FC = () => {
   // Reconnect function
   const handleReconnect = useCallback(async () => {
     setError(null);
+
     try {
-      socketService.disconnect();
-      socketService.connect();
+      // Reinitialize chat service
       if (user?.id) {
-        socketService.authenticate(user.id, "Manager");
-        setIsConnected(true);
+        const connected = await chatService.initialize(user.id, "Manager");
+        setIsConnected(connected);
+
+        if (connected) {
+          await refreshSessions();
+        } else {
+          setError("Failed to reconnect to chat service");
+        }
       }
-      await refreshSessions();
     } catch (err) {
       setError(
         err instanceof Error
@@ -358,7 +390,7 @@ const ChatWithCustomer: React.FC = () => {
     [selectedChatId, getSessionMessages]
   );
 
-  // Sort chats by creation time (since updatedAt is removed)
+  // Sort chats by creation time
   const sortedChats = useMemo(
     () =>
       [...chatSessions].sort((a, b) => {
@@ -380,8 +412,8 @@ const ChatWithCustomer: React.FC = () => {
 
   const handleSendMessage = useCallback(
     (message: string) => {
-      if (selectedChatId && selectedChat && user?.id) {
-        sendMessage(user.id, selectedChat.customerId, message)
+      if (selectedChatId) {
+        sendMessage(selectedChatId, message)
           .then((success) => {
             if (!success) {
               setError("Failed to send message");
@@ -393,7 +425,7 @@ const ChatWithCustomer: React.FC = () => {
           });
       }
     },
-    [selectedChatId, selectedChat, sendMessage, user?.id]
+    [selectedChatId, sendMessage]
   );
 
   const handleEndChat = useCallback(() => {
@@ -495,7 +527,14 @@ const ChatWithCustomer: React.FC = () => {
               currentUserId={user?.id}
             />
             <MessageList messages={chatMessages} loading={loading} />
-            <ChatInput onSendMessage={handleSendMessage} />
+            <ChatInput
+              onSendMessage={handleSendMessage}
+              disabled={
+                !selectedChat.managerId ||
+                selectedChat.managerId !== user?.id ||
+                !selectedChat.isActive
+              }
+            />
           </>
         ) : (
           <EmptyChatState />

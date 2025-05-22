@@ -5,9 +5,10 @@ import { StyledInput } from "../../../components/manager/styles/ChatStyles";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
+  disabled?: boolean; // Add this line
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
   const [input, setInput] = useState("");
 
   const handleInputChange = (
@@ -17,8 +18,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
   };
 
   const handleSend = () => {
-    if (input.trim()) {
-      onSendMessage(input);
+    if (input.trim() && !disabled) {
+      onSendMessage(input.trim());
       setInput("");
     }
   };
