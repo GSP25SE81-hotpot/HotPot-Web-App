@@ -1,54 +1,26 @@
-// src/components/Chat/components/ChatInput/ChatInput.tsx
 import { Send } from "@mui/icons-material";
 import { Box, IconButton } from "@mui/material";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { StyledInput } from "../../../components/manager/styles/ChatStyles";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
-  onTyping?: () => void; // Make it optional if not always needed
+  disabled?: boolean; // Add this line
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onTyping }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
   const [input, setInput] = useState("");
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setInput(e.target.value);
-    // Notify parent component that user is typing
-    if (onTyping) {
-      // Clear previous timeout
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-      // Notify typing
-      onTyping();
-      // Set timeout to stop typing indication after 1 second of inactivity
-      typingTimeoutRef.current = setTimeout(() => {
-        // You might want to notify parent that typing stopped
-      }, 1000);
-    }
   };
 
-  useEffect(() => {
-    return () => {
-      // Cleanup timeout on unmount
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const handleSend = () => {
-    if (input.trim()) {
-      onSendMessage(input);
+    if (input.trim() && !disabled) {
+      onSendMessage(input.trim());
       setInput("");
-      // Clear typing indication when sending
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
     }
   };
 
@@ -72,7 +44,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onTyping }) => {
         backdropFilter: "blur(8px)",
       }}
     >
-      <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
+      <Box sx={{ display: "flex", gap: 1 }}>
         <StyledInput
           fullWidth
           multiline

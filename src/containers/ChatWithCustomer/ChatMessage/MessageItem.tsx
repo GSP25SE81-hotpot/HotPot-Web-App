@@ -1,4 +1,3 @@
-// src/components/Chat/components/ChatMessages/MessageItem.tsx
 import React from "react";
 import { Box, Typography, Avatar } from "@mui/material";
 import { ChatMessageDto } from "../../../types/chat";
@@ -20,7 +19,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
       sx={{
         display: "flex",
         justifyContent: isFromCurrentUser ? "flex-end" : "flex-start",
-        mb: 2.5, // Increased margin for better spacing
+        mb: 2.5,
         alignItems: "flex-end",
         width: "100%",
       }}
@@ -29,11 +28,11 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
       {!isFromCurrentUser && (
         <Avatar
           sx={{
-            width: 32, // Slightly larger
+            width: 32,
             height: 32,
             mr: 1,
             fontSize: "0.875rem",
-            bgcolor: "secondary.main", // More distinct color
+            bgcolor: "secondary.main",
             boxShadow: 1,
           }}
         >
@@ -44,19 +43,17 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
       <Box
         sx={{
           maxWidth: "70%",
-          padding: 2, // Increased padding
+          padding: 2,
           borderRadius: 2,
-          backgroundColor: isFromCurrentUser
-            ? "primary.dark" // Darker for better contrast
-            : "#f0f0f0", // Lighter but still visible
+          backgroundColor: isFromCurrentUser ? "primary.dark" : "#f0f0f0",
           color: isFromCurrentUser ? "white" : "text.primary",
           borderTopLeftRadius: isFromCurrentUser ? 2 : 0.5,
           borderTopRightRadius: isFromCurrentUser ? 0.5 : 2,
-          boxShadow: 2, // Increased shadow
-          position: "relative", // For potential hover effects
-          transition: "all 0.2s ease", // Smooth transitions
+          boxShadow: 2,
+          position: "relative",
+          transition: "all 0.2s ease",
           "&:hover": {
-            boxShadow: 3, // Enhanced shadow on hover
+            boxShadow: 3,
           },
         }}
       >
@@ -76,11 +73,11 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         )}
 
         <Typography
-          variant="body1" // Larger text
+          variant="body1"
           sx={{
             fontWeight: 400,
             lineHeight: 1.5,
-            wordBreak: "break-word", // Handle long words
+            wordBreak: "break-word",
           }}
         >
           {message.message}
@@ -92,16 +89,16 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
             alignItems: "center",
             justifyContent: "flex-end",
             mt: 0.5,
-            opacity: 0.8, // Slightly more visible
+            opacity: 0.8,
           }}
         >
           <Typography
             variant="caption"
             sx={{
               color: isFromCurrentUser
-                ? "rgba(255,255,255,0.9)" // More visible on dark background
+                ? "rgba(255,255,255,0.9)"
                 : "text.secondary",
-              fontWeight: 500, // Slightly bolder
+              fontWeight: 500,
             }}
           >
             {new Date(message.createdAt).toLocaleTimeString([], {
@@ -109,24 +106,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
               minute: "2-digit",
             })}
           </Typography>
-
-          {isFromCurrentUser && (
-            <Box
-              component="span"
-              sx={{
-                ml: 0.5,
-                display: "flex",
-                alignItems: "center",
-                fontSize: "0.8rem", // Consistent size
-              }}
-            >
-              {message.isRead ? (
-                <span style={{ color: "#4caf50" }}>✓✓</span> // Brighter green
-              ) : (
-                <span style={{ color: "rgba(255,255,255,0.7)" }}>✓</span> // More visible
-              )}
-            </Box>
-          )}
         </Box>
       </Box>
     </Box>

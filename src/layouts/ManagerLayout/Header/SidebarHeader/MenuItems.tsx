@@ -7,7 +7,7 @@ import {
 } from "@mui/icons-material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import EngineeringIcon from "@mui/icons-material/Engineering";
-import FeedbackIcon from "@mui/icons-material/Feedback";
+// import FeedbackIcon from "@mui/icons-material/Feedback";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -76,11 +76,11 @@ export const menuItems: MenuItemLayout[] = [
           },
         ],
       },
-      {
-        icon: <Iconify icon={"ri:feedback-line"} />,
-        label: config.Vntext.SideBar.Feedback,
-        path: config.adminRoutes.feedback,
-      },
+      // {
+      //   icon: <Iconify icon={"ri:feedback-line"} />,
+      //   label: config.Vntext.SideBar.Feedback,
+      //   path: config.adminRoutes.feedback,
+      // },
     ],
   },
   {
@@ -142,21 +142,24 @@ export const menuItems: MenuItemLayout[] = [
       },
       //report items
       {
-        label: "Báo cáo",
-        icon: <EngineeringIcon />,
-        path: "#",
-        children: [
-          {
-            label: "Xem phản hồi",
-            icon: <FeedbackIcon />,
-            path: managerRoutes.feedbackManagement,
-          },
-          {
-            label: "Lịch làm việc",
-            icon: <ScheduleIcon />,
-            path: managerRoutes.workAssignment,
-          },
-        ],
+        // label: "Báo cáo",
+        // icon: <EngineeringIcon />,
+        // path: "#",
+        label: "Lịch làm việc",
+        icon: <ScheduleIcon />,
+        path: managerRoutes.workAssignment,
+        // children: [
+        //   {
+        //     label: "Xem phản hồi",
+        //     icon: <FeedbackIcon />,
+        //     path: managerRoutes.feedbackManagement,
+        //   },
+        //   {
+        //     label: "Lịch làm việc",
+        //     icon: <ScheduleIcon />,
+        //     path: managerRoutes.workAssignment,
+        //   },
+        // ],
       },
       {
         label: "Dịch vụ khách hàng",
@@ -214,23 +217,6 @@ export const menuItems: MenuItemLayout[] = [
         label: "Lấy thiết bị thuê",
         icon: <Iconify icon="mdi:package-variant-closed" />,
         path: staffRoutes.pickupRental,
-        // children: [
-        //   {
-        //     label: "Lấy thiết bị thuê",
-        //     icon: <Iconify icon="mdi:package-variant-closed" />,
-        //     path: staffRoutes.pickupRental,
-        //   },
-        //   // {
-        //   //   label: "Ghi nhận trả thiết bị",
-        //   //   icon: <Iconify icon="mdi:keyboard-return" />,
-        //   //   path: staffRoutes.recordReturn,
-        //   // },
-        //   // {
-        //   //   label: "Kiểm tra thiết bị sau trả",
-        //   //   icon: <Iconify icon="mdi:clipboard-check-outline" />,
-        //   //   path: staffRoutes.checkDeviceAfterReturn,
-        //   // },
-        // ],
       },
       // Order History
       {
@@ -238,12 +224,6 @@ export const menuItems: MenuItemLayout[] = [
         icon: <Iconify icon="mdi:history" />,
         path: staffRoutes.orderHistory,
       },
-      // Proof of Delivery
-      // {
-      //   label: "Bằng chứng giao hàng",
-      //   icon: <Iconify icon="mdi:file-document-outline" />,
-      //   path: staffRoutes.proofOfDelivery,
-      // },
     ],
   },
 ];

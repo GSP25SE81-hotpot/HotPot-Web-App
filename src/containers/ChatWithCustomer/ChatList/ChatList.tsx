@@ -1,4 +1,3 @@
-// src/components/Chat/components/ChatList/ChatList.tsx
 import React from "react";
 import { Box, List, TextField, Typography } from "@mui/material";
 import ChatListItem from "./ChatListItem";
@@ -7,14 +6,12 @@ import { ChatSessionDto } from "../../../types/chat";
 interface ChatListProps {
   chatSessions: ChatSessionDto[];
   selectedChatId: number | null;
-  unreadCounts: Map<number, number>;
   onChatSelect: (chatId: number) => void;
 }
 
 const ChatList: React.FC<ChatListProps> = ({
   chatSessions,
   selectedChatId,
-  unreadCounts,
   onChatSelect,
 }) => {
   return (
@@ -57,15 +54,22 @@ const ChatList: React.FC<ChatListProps> = ({
         />
       </Box>
       <List sx={{ flex: 1, py: 0 }}>
-        {chatSessions.map((chat) => (
-          <ChatListItem
-            key={chat.chatSessionId}
-            chat={chat}
-            isSelected={selectedChatId === chat.chatSessionId}
-            onClick={() => onChatSelect(chat.chatSessionId)}
-            unreadCount={unreadCounts.get(chat.chatSessionId) || 0}
-          />
-        ))}
+        {chatSessions.length > 0 ? (
+          chatSessions.map((chat) => (
+            <ChatListItem
+              key={chat.chatSessionId}
+              chat={chat}
+              isSelected={selectedChatId === chat.chatSessionId}
+              onClick={() => onChatSelect(chat.chatSessionId)}
+            />
+          ))
+        ) : (
+          <Box sx={{ p: 2, textAlign: "center" }}>
+            <Typography variant="body2" color="text.secondary">
+              Không có cuộc trò chuyện nào
+            </Typography>
+          </Box>
+        )}
       </List>
     </Box>
   );

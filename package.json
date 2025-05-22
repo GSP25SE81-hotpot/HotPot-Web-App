@@ -8,12 +8,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "server:dev": "node --esm src/server.js",
-    "server:build": "tsc -p tsconfig.server.json",
-    "server:start": "node dist-server/server.js",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

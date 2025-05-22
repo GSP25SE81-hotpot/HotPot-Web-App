@@ -1,15 +1,14 @@
-export interface AssignManagerRequest {
-  managerId: number;
+// types/chat.ts
+export interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+  errors?: string[];
 }
 
 export interface SendMessageRequest {
-  senderId: number;
-  receiverId: number;
+  chatSessionId: number;
   message: string;
-}
-
-export interface MarkAsReadRequest {
-  userId: number;
 }
 
 export interface ChatSessionDto {
@@ -19,9 +18,13 @@ export interface ChatSessionDto {
   managerId?: number;
   managerName?: string;
   isActive: boolean;
-  topic: string;
-  createdAt: Date;
-  updatedAt?: Date;
+  topic?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface ChatSessionDetailDto extends ChatSessionDto {
+  messages: ChatMessageDto[];
 }
 
 export interface ChatMessageDto {
@@ -30,22 +33,7 @@ export interface ChatMessageDto {
   senderName: string;
   receiverUserId: number;
   receiverName: string;
+  chatSessionId: number;
   message: string;
-  isRead: boolean;
-  createdAt: Date;
-}
-
-export interface ChatSessionDetailDto extends ChatSessionDto {
-  messages: ChatMessageDto[];
-}
-
-export interface UnreadMessageCountDto {
-  count: number;
-}
-
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  message: string;
-  errors?: string[];
+  createdAt: string;
 }

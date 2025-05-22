@@ -1,4 +1,3 @@
-// src/components/Chat/components/ChatHeader/ChatHeader.tsx
 import React, { useState } from "react";
 import {
   Avatar,
@@ -13,26 +12,26 @@ import { StyledBadge } from "../../../components/manager/styles/ChatStyles";
 import { ChatSessionDto } from "../../../types/chat";
 
 interface ChatHeaderProps {
-  selectedChat: ChatSessionDto; // Phiên trò chuyện đang được chọn
-  onEndChat: () => void; // Hàm kết thúc trò chuyện
-  onAssignManager: (managerId: number) => void; // Gán người quản lý
-  currentUserId?: number; // ID người dùng hiện tại (tuỳ chọn)
+  selectedChat: ChatSessionDto;
+  onEndChat: () => void;
+  onJoinChat: (managerId: number) => void;
+  currentUserId?: number;
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({
   selectedChat,
   onEndChat,
-  onAssignManager,
+  onJoinChat,
   currentUserId,
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget); // Mở menu
+    setAnchorEl(event.currentTarget);
   };
 
   const handleMenuClose = () => {
-    setAnchorEl(null); // Đóng menu
+    setAnchorEl(null);
   };
 
   return (
@@ -64,13 +63,15 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             {selectedChat.customerName || "Khách hàng"}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Đang trực tuyến
+            {selectedChat.topic || "No topic"}
           </Typography>
         </Box>
       </Box>
+
       <IconButton onClick={handleMenuOpen} aria-label="chat options">
         <MoreVert />
       </IconButton>
+
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -84,29 +85,20 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
         >
           Kết thúc trò chuyện
         </MenuItem>
-        {/* <MenuItem onClick={handleMenuClose}>Xem hồ sơ khách hàng</MenuItem> */}
-        {!selectedChat.managerId && (
+
+        {!selectedChat.managerId && currentUserId && (
           <MenuItem
             onClick={() => {
-              onAssignManager(currentUserId || 0);
+              onJoinChat(currentUserId);
               handleMenuClose();
             }}
           >
-            Gán cho tôi
+            Tham gia trò chuyện
           </MenuItem>
         )}
+
         {selectedChat.managerId === currentUserId && (
-          <MenuItem onClick={handleMenuClose}>Đã được gán cho tôi</MenuItem>
-        )}
-        {selectedChat.managerId === currentUserId && (
-          <MenuItem
-            onClick={() => {
-              onAssignManager(0);
-              handleMenuClose();
-            }}
-          >
-            Bỏ gán khỏi tôi
-          </MenuItem>
+          <MenuItem onClick={handleMenuClose}>Đã tham gia trò chuyện</MenuItem>
         )}
       </Menu>
     </Box>
