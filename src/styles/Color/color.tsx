@@ -1,5 +1,3 @@
-import { se } from "date-fns/locale";
-
 export const colors = {
   primary: "#0089FF",
   secondary: "#E5F4FF",

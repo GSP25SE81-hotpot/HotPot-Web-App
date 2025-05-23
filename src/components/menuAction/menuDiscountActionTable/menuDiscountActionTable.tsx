@@ -5,8 +5,8 @@ import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import * as React from "react";
-import { useNavigate } from "react-router";
-import config from "../../../configs";
+// import { useNavigate } from "react-router";
+// import config from "../../../configs";
 import { Delete, Update } from "@mui/icons-material";
 
 interface MenuActionTableDiscountProps {
@@ -17,13 +17,9 @@ interface MenuActionTableDiscountProps {
   fetchData?: () => void;
 }
 
-const MenuActionTableDiscount: React.FC<MenuActionTableDiscountProps> = ({
-  discountData,
-  onOpenDetail,
-  fetchData,
-}) => {
+const MenuActionTableDiscount: React.FC<MenuActionTableDiscountProps> = () => {
   const [anchorEl, setAnchorEl] = React.useState<any>(null);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const open = Boolean(anchorEl);
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
@@ -31,12 +27,7 @@ const MenuActionTableDiscount: React.FC<MenuActionTableDiscountProps> = ({
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleDetail = () => {
-    onOpenDetail(discountData);
-    navigate(
-      config.adminRoutes.HotpotDetail.replace(":comboId", discountData.comboId)
-    );
-  };
+
   return (
     <div>
       <Button

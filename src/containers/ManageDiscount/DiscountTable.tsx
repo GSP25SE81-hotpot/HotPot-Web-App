@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { DiscountType } from "../../types/discountType";
 import CTable from "../../components/table/CTable";
