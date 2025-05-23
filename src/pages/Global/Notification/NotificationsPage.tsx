@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/NotificationCenter.tsx
 import React, { useEffect, useState } from "react";
 import {
@@ -17,21 +17,19 @@ import {
   Box,
   Snackbar,
   Alert,
-  ListItemText,
   CircularProgress,
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import notificationService from "../../../api/Services/notificationService";
+import notificationService from "../../../api/Services/notificationService"; // Assuming this service is now correctly returning the payload
 import {
   Notification,
   NotificationCenterProps,
 } from "../../../types/notificationTypes";
-// Import your existing date formatting utilities
-import { formatDetailDate } from "../../../utils/formatters"; // Adjust the import path as needed
-import useAuth from "../../../hooks/useAuth"; // Adjust the path as needed
+import { formatDetailDate } from "../../../utils/formatters";
+import useAuth from "../../../hooks/useAuth";
 
 const NotificationCenter: React.FC<NotificationCenterProps> = () => {
-  const { auth } = useAuth(); // Get auth context
+  const { auth } = useAuth();
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
@@ -48,12 +46,9 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
 
   const open = Boolean(anchorEl);
 
-  // Helper function to safely format dates using your existing utility
   const safeFormatDate = (timestamp: string | Date | undefined): string => {
     if (!timestamp) return "Unknown date";
-
     try {
-      // Use your existing formatDetailDate function
       return formatDetailDate(timestamp.toString());
     } catch (error) {
       console.error("Error formatting date:", error);
@@ -61,16 +56,13 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
     }
   };
 
-  // Normalize casing from PascalCase (C#) to camelCase (JS)
   const normalizeCasing = (notification: any): Notification => {
     if (!notification) return notification;
-
     const normalized: any = {};
     Object.keys(notification).forEach((key) => {
       const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
       normalized[camelKey] = notification[key];
     });
-
     if (normalized.data) {
       const normalizedData: Record<string, any> = {};
       Object.keys(normalized.data).forEach((key) => {
@@ -79,31 +71,25 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
       });
       normalized.data = normalizedData;
     }
-
     return normalized as Notification;
   };
 
   useEffect(() => {
-    // Load initial notifications
     fetchNotifications();
     fetchUnreadCount();
 
-    // Check if we have a valid token
     if (!auth.accessToken) {
       console.warn("No access token available for SignalR connection");
       setError("Authentication required for notifications");
       return;
     }
 
-    // Debug token claims
     try {
       const tokenParts = auth.accessToken.split(".");
       if (tokenParts.length !== 3) {
         console.error("Invalid JWT token format");
         return;
       }
-
-      // Decode the payload part (second part) of the JWT
       const payload = tokenParts[1];
       const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
       const jsonPayload = decodeURIComponent(
@@ -114,21 +100,15 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
           })
           .join("")
       );
-
       const tokenData = JSON.parse(jsonPayload);
       console.log("Token claims:", tokenData);
-
-      // Check if id claim exists and is parseable as int
       if (!tokenData.id) {
-        // console.warn("Token missing 'id' claim required for notifications");
         setError(
           "Your authentication token is missing required claims for notifications"
         );
       } else {
         console.log("ID claim type:", typeof tokenData.id);
         console.log("ID claim value:", tokenData.id);
-
-        // Check if it's a numeric string
         if (typeof tokenData.id === "string" && /^\d+$/.test(tokenData.id)) {
           console.log("ID is a numeric string, should be parseable as int");
         } else {
@@ -142,7 +122,6 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
       console.error("Error parsing token:", e);
     }
 
-    // Set up SignalR connection with authentication token
     const newConnection = new HubConnectionBuilder()
       .withUrl("https://hpty.vinhuser.one/notificationHub", {
         accessTokenFactory: () => auth.accessToken,
@@ -150,7 +129,6 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
       .configureLogging(LogLevel.Information)
       .withAutomaticReconnect()
       .build();
-
     setConnection(newConnection);
 
     return () => {
@@ -168,47 +146,33 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
         .start()
         .then(() => {
           console.log("Connected to notification hub");
-
-          // Register connection with the hub
           connection.invoke("RegisterConnection").catch((err: Error) => {
             console.error("Error registering connection:", err);
             setError("Failed to register for notifications");
           });
-
-          // Set up notification handler
           connection.on("ReceiveNotification", (rawNotification: any) => {
             console.log("Raw notification from server:", rawNotification);
-
-            // Normalize casing from PascalCase to camelCase
             const notification = normalizeCasing(rawNotification);
-
-            // Handle system messages
             if (notification.type === "ConnectionRegistered") {
               console.log(
                 "SignalR connection registered successfully:",
                 notification.message
               );
-              // Clear any previous errors
               setError(null);
               return;
             }
-
             if (notification.type === "Error") {
               console.error("SignalR error:", notification.message);
               setError(notification.message);
               return;
             }
-
-            // Only process actual notifications with valid IDs
             if (
               notification &&
               typeof notification === "object" &&
               notification.id &&
               notification.id > 0
             ) {
-              // Show a toast notification
               showNotificationToast(notification);
-              // Update notifications list and count
               setNotifications((prev) => [notification, ...prev]);
               setUnreadCount((prev) => prev + 1);
             } else {
@@ -226,32 +190,42 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
           );
         });
     }
-  }, [connection]);
+  }, [connection]); // `normalizeCasing` and `showNotificationToast` are stable if defined outside or memoized
 
+  // --- REVISED fetchNotifications FUNCTION ---
   const fetchNotifications = async (): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
-      const response = await notificationService.getNotifications();
 
-      // Ensure that 'response' is an array before setting the state
-      if (Array.isArray(response)) {
-        // Filter out notifications with invalid data
-        const validNotifications = response.filter(
-          (notification) =>
-            notification &&
-            typeof notification === "object" &&
-            notification.id !== undefined
+      const paginatedResponse = await notificationService.getNotifications({
+        includeRead: false,
+        page: 1,
+        pageSize: 20,
+      });
+
+      console.log("Paginated response from service:", paginatedResponse);
+
+      if (paginatedResponse && Array.isArray(paginatedResponse.notifications)) {
+        const itemsToProcess = paginatedResponse.notifications; // <--- CORRECTED TO LOWERCASE 'notifications'
+        const finalNotifications = itemsToProcess.map((notificationItem: any) =>
+          normalizeCasing(notificationItem)
         );
-        setNotifications(validNotifications);
+
+        console.log("Setting notifications:", finalNotifications);
+        setNotifications(finalNotifications);
       } else {
-        console.warn("Expected array of notifications but got:", response);
+        console.warn(
+          "Expected 'notifications' array (lowercase) in paginatedResponse, or paginatedResponse was null/undefined. Received:",
+          paginatedResponse
+        );
         setNotifications([]);
       }
+
       setLoading(false);
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-      setError("Failed to load notifications");
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+      setError("Không thể tải thông báo. Vui lòng thử lại."); // Updated error message to Vietnamese
       setNotifications([]);
       setLoading(false);
     }
@@ -259,21 +233,17 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
 
   const fetchUnreadCount = async (): Promise<void> => {
     try {
-      const response = await notificationService.getUnreadCount();
-      // Ensure response is a number and not NaN, default to 0 otherwise
-      setUnreadCount(
-        typeof response === "number" && !isNaN(response) ? response : 0
-      );
+      const count = await notificationService.getUnreadCount(); // Assuming getUnreadCount is also fixed
+      setUnreadCount(typeof count === "number" && !isNaN(count) ? count : 0);
     } catch (error) {
       console.error("Error fetching unread count:", error);
-      setUnreadCount(0); // Default to 0 on error
+      setUnreadCount(0);
     }
   };
 
   const markAsRead = async (id: number): Promise<void> => {
     try {
       await notificationService.markAsRead(id);
-      // Update local state
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
       );
@@ -286,7 +256,6 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
   const markAllAsRead = async (): Promise<void> => {
     try {
       await notificationService.markAllAsRead();
-      // Update local state
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (error) {
@@ -302,13 +271,19 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
   };
 
   const handleNotificationClick = (notification: Notification): void => {
-    markAsRead(notification.id);
+    if (!notification.isRead) {
+      // Only mark as read if it's not already read
+      markAsRead(notification.id);
+    }
     notificationService.handleNotificationClick(notification);
     handleClose();
   };
 
   const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
+    // Optionally, you could re-fetch notifications or unread count when menu is opened
+    fetchNotifications();
+    fetchUnreadCount();
   };
 
   const handleClose = (): void => {
@@ -324,7 +299,9 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
 
   const handleSnackbarClick = (): void => {
     if (snackbar.notification) {
-      markAsRead(snackbar.notification.id);
+      if (!snackbar.notification.isRead) {
+        markAsRead(snackbar.notification.id);
+      }
       notificationService.handleNotificationClick(snackbar.notification);
       handleSnackbarClose();
     }
@@ -361,24 +338,24 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
           },
         }}
       >
-        {/* <MenuItem disabled>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Thông báo
-          </Typography>
-        </MenuItem>
-        <Divider /> */}
-
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
             <CircularProgress size={24} />
           </Box>
         ) : error ? (
           <MenuItem disabled>
-            <Typography color="error">{error}</Typography>
+            <Typography
+              color="error"
+              sx={{ p: 1, textAlign: "center", whiteSpace: "normal" }}
+            >
+              {error}
+            </Typography>
           </MenuItem>
         ) : notifications.length === 0 ? (
           <MenuItem disabled>
-            <Typography>Không có thông báo mới</Typography>
+            <Typography sx={{ p: 1, textAlign: "center" }}>
+              Không có thông báo mới
+            </Typography>
           </MenuItem>
         ) : (
           <>
@@ -389,15 +366,30 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
                 sx={{
                   backgroundColor: notification.isRead
                     ? "transparent"
-                    : "rgba(25, 118, 210, 0.08)",
+                    : "rgba(25, 118, 210, 0.08)", // Example unread background
                   padding: "10px 15px",
+                  borderBottom: "1px solid #eee", // Separator for items
+                  "&:last-child": {
+                    borderBottom: "none",
+                  },
                 }}
               >
                 <Box sx={{ width: "100%" }}>
-                  <Typography variant="subtitle2" fontWeight="bold">
+                  <Typography variant="subtitle2" fontWeight="bold" noWrap>
                     {notification.title}
                   </Typography>
-                  <Typography variant="body2">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      whiteSpace: "normal",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      minHeight: "2.5em", // Ensure space for two lines
+                    }}
+                  >
                     {notification.message}
                   </Typography>
                   <Typography
@@ -411,33 +403,18 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
               </MenuItem>
             ))}
             <Divider />
-            <MenuItem onClick={markAllAsRead}>
-              <ListItemText
-                primary="Mark all as read"
-                slotProps={{
-                  primary: {
-                    align: "center",
-                  },
-                }}
-              />
+            <MenuItem onClick={markAllAsRead} sx={{ justifyContent: "center" }}>
+              Đánh dấu tất cả đã đọc
             </MenuItem>
-            <MenuItem onClick={handleClose}>
-              <ListItemText
-                primary={
-                  <a
-                    href="/notifications"
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    View all notifications
-                  </a>
-                }
-                slotProps={{
-                  primary: {
-                    align: "center",
-                  },
-                }}
-              />
-            </MenuItem>
+            {/* <MenuItem
+              onClick={() => {
+                window.location.href = "/notifications"; // Or use react-router navigation
+                handleClose();
+              }}
+              sx={{ justifyContent: "center" }}
+            >
+              Xem tất cả thông báo
+            </MenuItem> */}
           </>
         )}
       </Menu>
@@ -450,11 +427,11 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
         {snackbar.notification ? (
           <Alert
             onClose={handleSnackbarClose}
-            severity="info"
+            severity="info" // Or dynamic based on notification type
             sx={{ width: "100%", cursor: "pointer" }}
             onClick={handleSnackbarClick}
           >
-            <Typography variant="subtitle2">
+            <Typography variant="subtitle2" fontWeight="bold">
               {snackbar.notification.title}
             </Typography>
             <Typography variant="body2">
@@ -462,6 +439,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
             </Typography>
           </Alert>
         ) : undefined}
+        {/* Ensure undefined is returned if no notification for Snackbar content */}
       </Snackbar>
     </>
   );

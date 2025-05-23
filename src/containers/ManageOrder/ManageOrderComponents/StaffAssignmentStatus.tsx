@@ -3,7 +3,6 @@ import { Box, Chip, Typography, Tooltip } from "@mui/material";
 import BuildIcon from "@mui/icons-material/Build";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import PeopleIcon from "@mui/icons-material/People";
 import InfoIcon from "@mui/icons-material/Info";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
@@ -46,10 +45,21 @@ const StaffAssignmentStatus: React.FC<StaffAssignmentStatusProps> = ({
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
         <Chip
-          label="Đã phân công đầy đủ"
+          label="Đã phân công đủ"
           color="success"
           size="small"
-          icon={<CheckCircleIcon fontSize="small" />}
+          sx={{
+            px: 0.5, // reduce horizontal padding
+            fontSize: "0.75rem", // reduce font size
+            "& .MuiChip-label": {
+              paddingLeft: 0.5,
+              paddingRight: 0.5,
+            },
+            "& .MuiChip-icon": {
+              marginLeft: 0,
+            },
+          }}
+          icon={<CheckCircleIcon fontSize="inherit" />}
         />
 
         {/* Display multiple preparation staff with tooltip indicator */}
@@ -200,14 +210,7 @@ const StaffAssignmentStatus: React.FC<StaffAssignmentStatusProps> = ({
       </Box>
     );
   } else {
-    return (
-      <Chip
-        label="Chưa phân công"
-        color="default"
-        size="small"
-        icon={<ErrorOutlineIcon fontSize="small" />}
-      />
-    );
+    return <Chip label="Chưa phân công" color="default" size="small" />;
   }
 };
 

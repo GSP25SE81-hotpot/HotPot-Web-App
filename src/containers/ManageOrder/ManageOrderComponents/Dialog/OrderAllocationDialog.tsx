@@ -86,10 +86,6 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
   onAllocate,
   allocating,
 }) => {
-  // Debug logs
-  // console.log("Dialog - selectedVehicleId:", selectedVehicleId);
-  // console.log("Dialog - filteredVehicles:", filteredVehicles);
-
   return (
     <Dialog
       open={open}
