@@ -4,11 +4,11 @@ import {
   People as PeopleIcon,
   TakeoutDining as TakeoutDiningIcon,
   SetMeal as IngredientIcon,
+  ListAlt as ListAltIcon,
 } from "@mui/icons-material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import FeedbackIcon from "@mui/icons-material/Feedback";
-import ListAltIcon from "@mui/icons-material/ListAlt";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ScheduleIcon from "@mui/icons-material/Schedule";
@@ -114,7 +114,7 @@ export const menuItems: MenuItemLayout[] = [
       //order
       {
         label: "Quản lý đơn hàng",
-        icon: <InventoryIcon />,
+        icon: <ListAltIcon />,
         path: managerRoutes.manageOrder,
       },
       //maintenance

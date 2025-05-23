@@ -23,6 +23,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import InfoIcon from "@mui/icons-material/Info";
 import SearchIcon from "@mui/icons-material/Search";
+import AssignmentAddIcon from "@mui/icons-material/Assignment";
 import { SelectChangeEvent } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
@@ -69,6 +70,7 @@ import { StaffAvailabilityDto } from "../../../types/staff";
 import { VehicleDTO } from "../../../types/vehicle";
 import { formatCurrency } from "../../../utils/formatters";
 import { getVietnameseOrderStatusLabel } from "./utils/orderHelpers";
+import useDebounce from "../../../hooks/useDebounce";
 
 const OrdersByStatusList: React.FC = () => {
   // State for active tab
@@ -123,6 +125,7 @@ const OrdersByStatusList: React.FC = () => {
     message: "",
     severity: "success" as "success" | "error",
   });
+  const debouncedSearchTerm = useDebounce(searchTerm, 100);
 
   // Map tab index to order status
   const tabToStatus = [
@@ -139,14 +142,14 @@ const OrdersByStatusList: React.FC = () => {
   // Fetch orders when dependencies change
   useEffect(() => {
     fetchOrders();
-  }, [activeTab, pageNumber, pageSize, sortBy, sortDescending]);
-
-  // useEffect(() => {
-  //   console.log(
-  //     "GroupedVehicleSelection re-rendered with selectedVehicleId:",
-  //     selectedVehicleId
-  //   );
-  // }, [selectedVehicleId, vehicles]);
+  }, [
+    activeTab,
+    pageNumber,
+    pageSize,
+    sortBy,
+    sortDescending,
+    debouncedSearchTerm,
+  ]);
 
   // In OrdersByStatusList.tsx
   useEffect(() => {
@@ -781,26 +784,23 @@ const OrdersByStatusList: React.FC = () => {
                   sx: { borderRadius: 2 },
                 },
               }}
-              onKeyUp={(e) => {
-                if (e.key === "Enter") {
-                  applyFilters();
-                }
-              }}
             />
             <Tooltip title="Bộ lọc nâng cao">
-              <Button
-                variant={showFilters ? "contained" : "outlined"}
+              <IconButton
                 color="primary"
                 onClick={toggleFilters}
-                startIcon={<FilterListIcon />}
                 sx={{
                   borderRadius: 2,
-                  textTransform: "none",
-                  fontWeight: 600,
+                  bgcolor: showFilters ? "primary.main" : "transparent",
+                  border: showFilters ? "none" : "1px solid",
+                  borderColor: "primary.main",
+                  "&:hover": {
+                    bgcolor: showFilters ? "primary.dark" : "transparent",
+                  },
                 }}
               >
-                Bộ lọc
-              </Button>
+                <FilterListIcon />
+              </IconButton>
             </Tooltip>
           </Box>
         </Box>
@@ -861,12 +861,12 @@ const OrdersByStatusList: React.FC = () => {
                         direction={sortDescending ? "desc" : "asc"}
                         onClick={() => handleSortChange("totalprice")}
                       >
-                        Sản phẩm
+                        Loại đơn hàng
                       </TableSortLabel>
                     </StyledHeaderCell>
                     <StyledHeaderCell>Nhân viên</StyledHeaderCell>
                     <StyledHeaderCell>Trạng thái</StyledHeaderCell>
-                    <StyledHeaderCell>Thao tác</StyledHeaderCell>
+                    <StyledHeaderCell></StyledHeaderCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -938,22 +938,23 @@ const OrdersByStatusList: React.FC = () => {
                           {(order.status === OrderStatus.Pending ||
                             order.status === OrderStatus.Processing) && (
                             <Tooltip title="Phân công đơn hàng">
-                              <Button
-                                variant="contained"
+                              <IconButton
+                                color="primary"
                                 size="small"
                                 onClick={() => handleAllocateClick(order)}
                                 sx={{
                                   ml: 1,
                                   borderRadius: 2,
-                                  textTransform: "none",
-                                  fontWeight: 600,
+                                  // bgcolor: "primary.main",
+                                  // color: "white", // Ensuring text/icon is white for contrast
+                                  // padding: "5px", // Slightly larger clickable area
+                                  // "&:hover": {
+                                  //   bgcolor: "primary.dark",
+                                  // },
                                 }}
                               >
-                                {order.isPreparationStaffAssigned ||
-                                order.isShippingStaffAssigned
-                                  ? "Phân công lại"
-                                  : "Phân công"}
-                              </Button>
+                                <AssignmentAddIcon />
+                              </IconButton>
                             </Tooltip>
                           )}
                           {/* View Details Button */}
