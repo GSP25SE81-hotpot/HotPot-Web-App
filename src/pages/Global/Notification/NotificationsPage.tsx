@@ -124,7 +124,12 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
 
     const newConnection = new HubConnectionBuilder()
       .withUrl("https://hpty.vinhuser.one/notificationHub", {
-        accessTokenFactory: () => auth.accessToken,
+        accessTokenFactory: () => {
+          if (!auth.accessToken) {
+            throw new Error("No access token available");
+          }
+          return auth.accessToken;
+        },
       })
       .configureLogging(LogLevel.Information)
       .withAutomaticReconnect()

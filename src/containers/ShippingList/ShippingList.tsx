@@ -20,7 +20,7 @@ import {
 import React from "react";
 import { toast } from "react-toastify";
 import staffGetOrderApi from "../../api/staffGetOrderAPI";
-import useAuth from "../../hooks/useAuth";
+// import useAuth from "../../hooks/useAuth";
 import { ShippingOrderType } from "../../types/shippingOrder";
 import ConfirmationDialog from "./Popup/Confirm";
 
@@ -32,8 +32,8 @@ const ShippingList = () => {
   const [openConfirm, setOpenConfirm] = React.useState(false);
   const [itemToUpdateStatus, setItemToUpdateStatus] = React.useState<any>(null);
   const theme = useTheme();
-  const { auth } = useAuth();
-  const id = auth?.user?.id;
+  // const { auth } = useAuth();
+  // const id = auth?.user?.id;
 
   //Call api
   const getShippingList = async () => {

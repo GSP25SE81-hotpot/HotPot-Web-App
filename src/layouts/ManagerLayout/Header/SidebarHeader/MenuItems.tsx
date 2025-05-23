@@ -14,7 +14,7 @@ import FeedbackIcon from "@mui/icons-material/Feedback";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PaymentIcon from "@mui/icons-material/Payment";
-import ReceiptIcon from "@mui/icons-material/Receipt";
+// import ReceiptIcon from "@mui/icons-material/Receipt";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
@@ -110,7 +110,7 @@ export const menuItems: MenuItemLayout[] = [
         // role: AccessType.ADMIN_ACCESS,
       },
       //inventory
- {
+      {
         label: "Quản lý kho",
         icon: <InventoryIcon />,
         path: "#",
