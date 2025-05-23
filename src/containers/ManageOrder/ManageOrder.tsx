@@ -4,11 +4,43 @@ import {
   DashboardTitle,
   DashboardWrapper,
   ErrorContainer,
+  StyledTab,
+  StyledTabPanel,
+  StyledTabs,
+  StyledTabsContainer,
 } from "../../components/manager/styles/OrderManagementStyles";
 import OrdersByStatusList from "./ManageOrderComponents/OrdersByStatusList";
+import PendingDeliveriesList from "./ManageOrderComponents/PendingDeliveriesList";
+import UnallocatedOrdersList from "./ManageOrderComponents/UnallocatedOrdersList";
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+  return (
+    <StyledTabPanel
+      role="tabpanel"
+      hidden={value !== index}
+      id={`order-tabpanel-${index}`}
+      aria-labelledby={`order-tab-${index}`}
+      {...other}
+    >
+      {value === index && children}
+    </StyledTabPanel>
+  );
+}
 
 const ManageOrder: React.FC = () => {
+  const [activeTab, setActiveTab] = useState(0);
   const [error] = useState<string | null>(null);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
 
   return (
     <DashboardWrapper>
@@ -18,7 +50,29 @@ const ManageOrder: React.FC = () => {
           <Alert severity="error">{error}</Alert>
         </ErrorContainer>
       )}
-      <OrdersByStatusList />
+      <StyledTabsContainer>
+        <StyledTabs
+          value={activeTab}
+          onChange={handleTabChange}
+          indicatorColor="primary"
+          textColor="primary"
+          variant="fullWidth"
+        >
+          <StyledTab label="Đơn hàng đang chờ duyệt" />
+          <StyledTab label="Đơn hàng đã duyệt" />
+          <StyledTab label="Tất cả đơn hàng" />
+        </StyledTabs>
+
+        <TabPanel value={activeTab} index={0}>
+          <UnallocatedOrdersList />
+        </TabPanel>
+        <TabPanel value={activeTab} index={1}>
+          <PendingDeliveriesList />
+        </TabPanel>
+        <TabPanel value={activeTab} index={2}>
+          <OrdersByStatusList />
+        </TabPanel>
+      </StyledTabsContainer>
     </DashboardWrapper>
   );
 };

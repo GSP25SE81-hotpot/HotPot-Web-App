@@ -13,8 +13,13 @@ import {
   InputAdornment,
   CircularProgress,
   Fade,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  FormHelperText,
 } from "@mui/material";
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
@@ -22,6 +27,8 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import SaveIcon from "@mui/icons-material/Save";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
+import ScaleIcon from "@mui/icons-material/Scale";
+import StraightenIcon from "@mui/icons-material/Straighten";
 import { colors } from "../../../styles/Color/color";
 import adminIngredientsAPI from "../../../api/Services/adminIngredientsAPI";
 import { toast } from "react-toastify";
@@ -38,23 +45,25 @@ interface IngredientData {
   name: string;
   description: string;
   imageURL: string;
+  unit: string;
+  measurementValue: number;
   minStockLevel: number;
-  quantity: number;
   price: number;
+  ingredientTypeID: number;
 }
-
 interface FormFieldProps {
-  icon: ReactNode;
+  icon?: React.ReactNode;
   label: string;
-  name: keyof IngredientData;
+  name: string;
   value: string | number;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
   multiline?: boolean;
   rows?: number;
-  inputProps?: any;
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   error?: boolean;
   helperText?: string;
+  disabled?: boolean;
 }
 
 const UpdateIngredientModal: React.FC<UpdateIngredientModalProps> = ({
@@ -66,16 +75,20 @@ const UpdateIngredientModal: React.FC<UpdateIngredientModalProps> = ({
   // States
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
-  const [initialQuantity, setInitialQuantity] = useState<number>(0);
   const [ingredientData, setIngredientData] = useState<IngredientData>({
     name: "",
     description: "",
     imageURL: "",
+    unit: "",
+    measurementValue: 0.0001,
     minStockLevel: 0,
-    quantity: 0,
     price: 0,
+    ingredientTypeID: 0,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Common units for ingredients
+  const commonUnits = ["kg", "g", "l", "ml"];
 
   // Fetch ingredient data
   const fetchIngredientData = async () => {
@@ -86,17 +99,16 @@ const UpdateIngredientModal: React.FC<UpdateIngredientModalProps> = ({
       );
       const data = res?.data;
 
-      // Store the initial quantity for validation
-      setInitialQuantity(data?.quantity || 0);
-
       setIngredientData({
         ingredientId: data?.ingredientId,
         name: data?.name || "",
         description: data?.description || "",
         imageURL: data?.imageURL || "",
+        unit: data?.unit || "",
+        measurementValue: data?.measurementValue || 0.0001,
         minStockLevel: data?.minStockLevel || 0,
-        quantity: data?.quantity || 0,
         price: data?.price || 0,
+        ingredientTypeID: data?.ingredientTypeID || 0,
       });
     } catch (error) {
       console.error("Error fetching ingredient details:", error);
@@ -116,23 +128,34 @@ const UpdateIngredientModal: React.FC<UpdateIngredientModalProps> = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    if (name === "quantity") {
-      const numValue = value === "" ? initialQuantity : Number(value);
-      setIngredientData({
-        ...ingredientData,
-        [name]: Math.max(numValue, initialQuantity),
-      });
-    } else {
-      setIngredientData({
-        ...ingredientData,
-        [name]:
-          name === "name" || name === "description" || name === "imageURL"
-            ? value
-            : value === ""
-            ? 0
-            : Number(value),
+    setIngredientData({
+      ...ingredientData,
+      [name]:
+        name === "name" ||
+        name === "description" ||
+        name === "imageURL" ||
+        name === "unit"
+          ? value
+          : value === ""
+          ? 0
+          : Number(value),
+    });
+
+    // Clear error when field is edited
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: "",
       });
     }
+  };
+
+  // Handle select changes
+  const handleSelectChange = (name: keyof IngredientData, value: any) => {
+    setIngredientData({
+      ...ingredientData,
+      [name]: value,
+    });
 
     // Clear error when field is edited
     if (errors[name]) {
@@ -151,16 +174,26 @@ const UpdateIngredientModal: React.FC<UpdateIngredientModalProps> = ({
       newErrors.name = "Tên nguyên liệu không được để trống";
     }
 
+    if (!ingredientData.unit.trim()) {
+      newErrors.unit = "Đơn vị không được để trống";
+    }
+
+    if (ingredientData.measurementValue <= 0) {
+      newErrors.measurementValue = "Giá trị đo lường phải lớn hơn 0";
+    }
+
     if (ingredientData.minStockLevel < 0) {
       newErrors.minStockLevel = "Mức tối thiểu không được âm";
     }
-
-    if (ingredientData.quantity < initialQuantity) {
-      newErrors.quantity = `Số lượng không được nhỏ hơn ${initialQuantity}`;
-    }
-
     if (ingredientData.price < 0) {
       newErrors.price = "Giá không được âm";
+    }
+
+    if (
+      !ingredientData.ingredientTypeID ||
+      ingredientData.ingredientTypeID === 0
+    ) {
+      newErrors.ingredientTypeID = "Vui lòng chọn loại nguyên liệu";
     }
 
     setErrors(newErrors);
@@ -175,7 +208,19 @@ const UpdateIngredientModal: React.FC<UpdateIngredientModalProps> = ({
 
     setSubmitting(true);
     try {
-      await adminIngredientsAPI.updateIngredients(ingredientId, ingredientData);
+      // Create payload according to API model (exclude quantity from update)
+      const updatePayload = {
+        name: ingredientData.name,
+        description: ingredientData.description,
+        imageURL: ingredientData.imageURL,
+        unit: ingredientData.unit,
+        measurementValue: ingredientData.measurementValue,
+        minStockLevel: ingredientData.minStockLevel,
+        price: ingredientData.price,
+        ingredientTypeID: ingredientData.ingredientTypeID,
+      };
+
+      await adminIngredientsAPI.updateIngredients(ingredientId, updatePayload);
 
       if (onUpdateSuccess) {
         onUpdateSuccess();
@@ -319,16 +364,44 @@ const UpdateIngredientModal: React.FC<UpdateIngredientModalProps> = ({
                     </Grid>
 
                     <Grid item xs={12} sm={6}>
+                      <FormControl fullWidth error={!!errors.unit}>
+                        <InputLabel>Đơn vị</InputLabel>
+                        <Select
+                          value={ingredientData.unit}
+                          label="Đơn vị"
+                          onChange={(e) =>
+                            handleSelectChange("unit", e.target.value)
+                          }
+                          startAdornment={
+                            <InputAdornment position="start">
+                              <StraightenIcon color="primary" />
+                            </InputAdornment>
+                          }
+                        >
+                          {commonUnits.map((unit) => (
+                            <MenuItem key={unit} value={unit}>
+                              {unit}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {errors.unit && (
+                          <FormHelperText>{errors.unit}</FormHelperText>
+                        )}
+                      </FormControl>
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
                       <FormField
-                        icon={<InventoryIcon color="primary" />}
-                        label={`Số lượng (Tối thiểu: ${initialQuantity})`}
-                        name="quantity"
-                        value={ingredientData.quantity}
+                        icon={<ScaleIcon color="primary" />}
+                        label="Khối lượng mỗi gói"
+                        name="measurementValue"
+                        value={ingredientData.measurementValue}
                         onChange={handleChange}
                         type="number"
-                        inputProps={{ min: initialQuantity }}
-                        error={!!errors.quantity}
-                        helperText={errors.quantity}
+                        inputProps={{ min: 0.0001, step: 0.0001 }}
+                        error={!!errors.measurementValue}
+                        helperText={errors.measurementValue}
+                        disabled={true}
                       />
                     </Grid>
 
@@ -346,7 +419,7 @@ const UpdateIngredientModal: React.FC<UpdateIngredientModalProps> = ({
                       />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid item xs={12} sm={6}>
                       <FormField
                         icon={<MonetizationOnIcon color="primary" />}
                         label="Giá"
@@ -394,7 +467,7 @@ const UpdateIngredientModal: React.FC<UpdateIngredientModalProps> = ({
   );
 };
 
-const FormField = ({
+const FormField: React.FC<FormFieldProps> = ({
   icon,
   label,
   name,
@@ -406,7 +479,8 @@ const FormField = ({
   inputProps = {},
   error = false,
   helperText = "",
-}: FormFieldProps) => (
+  disabled = false,
+}) => (
   <TextField
     fullWidth
     label={label}
@@ -419,9 +493,16 @@ const FormField = ({
     multiline={multiline}
     rows={rows}
     error={error}
+    disabled={disabled}
     helperText={helperText}
     InputProps={{
-      startAdornment: <InputAdornment position="start">{icon}</InputAdornment>,
+      ...(icon && {
+        startAdornment: (
+          <InputAdornment position="start">{icon}</InputAdornment>
+        ),
+      }),
+    }}
+    inputProps={{
       ...inputProps,
     }}
     sx={{

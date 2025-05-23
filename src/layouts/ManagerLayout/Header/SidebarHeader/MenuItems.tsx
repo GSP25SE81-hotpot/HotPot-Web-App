@@ -1,9 +1,9 @@
 import {
   Dashboard as DashboardIcon,
+  Discount,
+  Feedback,
   Inventory as InventoryIcon,
   People as PeopleIcon,
-  TakeoutDining as TakeoutDiningIcon,
-  SetMeal as IngredientIcon,
 } from "@mui/icons-material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import EngineeringIcon from "@mui/icons-material/Engineering";
@@ -11,16 +11,16 @@ import FeedbackIcon from "@mui/icons-material/Feedback";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import PaymentIcon from "@mui/icons-material/Payment";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-import PaymentIcon from "@mui/icons-material/Payment";
-import Iconify from "../../../../components/Iconify";
 import config from "../../../../configs";
 import { managerRoutes, staffRoutes } from "../../../../configs/routes";
 import { Role } from "../../../../routes/Roles";
 import { MenuItemLayout } from "../../../../types/menu";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 
 // const AccessType = {
 //   MANAGER_SALE: [RoleTypes.MANAGER, RoleTypes.SALE],
@@ -78,7 +78,19 @@ export const menuItems: MenuItemLayout[] = [
         ],
       },
       {
-        icon: <Iconify icon={"ri:feedback-line"} />,
+        icon: <AssessmentIcon />,
+        label: "Nhập hàng",
+        path: config.adminRoutes.importProduct,
+        // role: AccessType.ADMIN_ACCESS,
+      },
+      {
+        icon: <Discount />,
+        label: config.Vntext.SideBar.discount,
+        path: config.adminRoutes.discountManagement,
+      },
+
+      {
+        icon: <Feedback />,
         label: config.Vntext.SideBar.Feedback,
         path: config.adminRoutes.feedback,
       },
@@ -101,14 +113,9 @@ export const menuItems: MenuItemLayout[] = [
         path: "#",
         children: [
           {
-            label: "Quản lý nồi",
-            icon: <TakeoutDiningIcon />,
-            path: managerRoutes.equipmentAvailability,
-          },
-          {
-            label: "Quản lý nguyên liệu",
-            icon: <IngredientIcon />,
-            path: config.adminRoutes.manageIngredients,
+            label: "Tình trạng thiết bị trong kho",
+            icon: <InventoryIcon />,
+            path: managerRoutes.manageEquipmentStock,
           },
         ],
       },
@@ -188,75 +195,35 @@ export const menuItems: MenuItemLayout[] = [
           },
         ],
       },
-      {
-        label: "Lịch sử phân công nhân viên",
-        icon: <PaymentIcon />,
-        path: managerRoutes.staffAssignmentHistory,
-      },
     ],
   },
   {
     role: Role.Staff,
     menu: [
-      // Order Management
+      //Assign Order
       {
         icon: <ListAltIcon />,
         label: config.Vntext.SideBar.Ordes,
         path: staffRoutes.assignOrder,
       },
-      // Shipping Management
+      //Shipping List
       {
         label: config.Vntext.SideBar.shippingList,
         icon: <LocalShippingIcon />,
         path: staffRoutes.shippingOrder,
       },
-      // My Assignments
+      //dashboard
       {
-        icon: <AssignmentIcon />,
+        icon: <DashboardIcon />,
         label: "Công việc",
         path: config.staffRoutes.staffMyAssignment,
+        // role: AccessType.ADMIN_ACCESS,
       },
-      // Payment Management
       {
         label: "Quản lý thanh toán",
         icon: <PaymentIcon />,
         path: staffRoutes.paymentManagement,
       },
-      // Rental Management
-      {
-        label: "Lấy thiết bị thuê",
-        icon: <Iconify icon="mdi:package-variant-closed" />,
-        path: staffRoutes.pickupRental,
-        // children: [
-        //   {
-        //     label: "Lấy thiết bị thuê",
-        //     icon: <Iconify icon="mdi:package-variant-closed" />,
-        //     path: staffRoutes.pickupRental,
-        //   },
-        //   // {
-        //   //   label: "Ghi nhận trả thiết bị",
-        //   //   icon: <Iconify icon="mdi:keyboard-return" />,
-        //   //   path: staffRoutes.recordReturn,
-        //   // },
-        //   // {
-        //   //   label: "Kiểm tra thiết bị sau trả",
-        //   //   icon: <Iconify icon="mdi:clipboard-check-outline" />,
-        //   //   path: staffRoutes.checkDeviceAfterReturn,
-        //   // },
-        // ],
-      },
-      // Order History
-      {
-        label: "Lịch sử đơn hàng",
-        icon: <Iconify icon="mdi:history" />,
-        path: staffRoutes.orderHistory,
-      },
-      // Proof of Delivery
-      // {
-      //   label: "Bằng chứng giao hàng",
-      //   icon: <Iconify icon="mdi:file-document-outline" />,
-      //   path: staffRoutes.proofOfDelivery,
-      // },
     ],
   },
 ];

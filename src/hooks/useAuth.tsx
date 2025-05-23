@@ -1,22 +1,16 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// useAuth.tsx
 import { useContext } from "react";
 import AuthContext from "../context/AuthContext";
 
-interface User {
-  role?: string;
-  [key: string]: any;
-}
-
 interface AuthContextType {
   auth: {
-    user: User;
-    accessToken: string;
+    user?: { [key: string]: any };
+    accessToken?: string;
   };
   setAuth: React.Dispatch<
-    React.SetStateAction<{ user: User; accessToken: string }>
+    React.SetStateAction<{ user: any; accessToken: any } | {} | null>
   >;
-  isManager: () => boolean;
 }
 
 const useAuth = () => {

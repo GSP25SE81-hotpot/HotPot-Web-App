@@ -2,9 +2,14 @@
 import axiosClient from "./axiosInstance";
 
 const staffGetOrderApi = {
-  getAssignOrderByStaffId: () => {
+  getAssignOrderByStaffId: (params?: any) => {
     const url = `/staff/orders/assigned`;
-    return axiosClient.get(url);
+    return axiosClient.get(url, {
+      params,
+      paramsSerializer: {
+        indexes: null, // by default: false
+      },
+    });
   },
   shippingStatus: (id?: any, body?: any) => {
     const url = `/staff/shipping/${id}/status`;

@@ -16,11 +16,10 @@ import {
   useTheme,
 } from "@mui/material";
 import React, { useState } from "react";
-import { OrderStatus } from "../../types/orderManagement";
+import { toast } from "react-toastify";
 import staffGetOrderApi from "../../api/staffGetOrderAPI";
 import useAuth from "../../hooks/useAuth";
 import { AssignOrderType } from "../../types/assignOrder";
-import { toast } from "react-toastify";
 
 const StatusChip = ({ status }: { status: string }) => {
   const theme = useTheme();
@@ -65,15 +64,15 @@ const AssignOrder: React.FC = () => {
 
   //Header arr
   const headerArr = [
+    "Mã đơn hàng",
     "Tên khách hàng",
-    "Lẩu & Thêm vào",
     "Ghi chú đặc biệt",
     "Trạng thái",
     "Thao tác",
   ];
 
   const body = {
-    status: "Shipping",
+    status: "Processed",
   };
 
   //handle
@@ -113,8 +112,8 @@ const AssignOrder: React.FC = () => {
           <TableBody>
             {orders.map((order) => (
               <TableRow key={order.orderId}>
-                <TableCell>{order.userName}</TableCell>
-                <TableCell></TableCell>
+                <TableCell>{order.orderCode}</TableCell>
+                <TableCell>{order.customerName}</TableCell>
                 <TableCell>
                   <TextField
                     multiline

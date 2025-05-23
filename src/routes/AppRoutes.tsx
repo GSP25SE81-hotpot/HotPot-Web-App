@@ -32,11 +32,13 @@ import OrderDetail from "../containers/ManageOrder/SubPage/OrderDetail";
 import ManagerLayout from "../layouts/ManagerLayout/ManagerLayout";
 import TableHotpotDetailPage from "../pages/Admin/TableHotpotDetail/TableHotpotDetailPage";
 import TableMaintenanceHotpotDetailPage from "../pages/Admin/TableMaintenanceHotpot/TableMaintenanceHopotPage";
+import NotificationsPage from "../pages/Global/Notification/NotificationsPage";
 import { EquipmentConditionDetailPage } from "../pages/Manager/EquipmentConditionLog/EquipmentConditionDetailPage";
 import { LowStockUtensilsPage } from "../pages/Manager/ManageEquipmentStock/LowStockUtensilsPage";
 import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/ManageEquipmentStockPage";
 import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
 import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
+import { EquipmentAvailabilityPage } from "../pages/Manager/ManageRental/EquipmentAvailabilityPage";
 import { CurrentAssignmentsPage } from "../pages/Manager/ManagerRentalReturnPage/CurrentAssignmentsPage";
 import { LateFeeCalculatorPage } from "../pages/Manager/ManagerRentalReturnPage/LateFeeCalculatorPage";
 import { ManagerRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManagerRentalReturnPage";
@@ -54,9 +56,9 @@ import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
 import { ProofOfDeliveryPage } from "../pages/Staff/ProofOfDelivery/ProofOfDeliveryPage";
 import ShippingListPage from "../pages/Staff/Shipping/ShippingListPage";
 import { ManageVehiclePage } from "../pages/Manager/ManageVehicle/ManageVehiclePage";
-import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock/EquipmentAvailabilityPage";
-import NotificationCenter from "../pages/Global/Notification/NotificationsPage";
-import { StaffAssignmentHistoryPage } from "../pages/Manager/StaffAssignmentHistory/StaffAssignmentHistoryPage";
+import DiscountPage from "../pages/Admin/Discount/DiscountPage";
+import CreateGroupComboPage from "../pages/Admin/Combohotpot/CreateGroupComboPage";
+import ImportProductPage from "../pages/Admin/ImportProduct/ImportProductPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -69,7 +71,7 @@ const AppRoute: React.FC = () => {
       <Route
         key={"Notification"}
         path={config.authRoutes.notification}
-        element={<NotificationCenter />}
+        element={<NotificationsPage />}
       />
       <Route key="layoutManager" element={<ManagerLayout />}>
         <Route
@@ -148,10 +150,6 @@ const AppRoute: React.FC = () => {
           path={config.managerRoutes.manageVehicle}
           element={<ManageVehiclePage />}
         />
-        <Route
-          path={config.managerRoutes.staffAssignmentHistory}
-          element={<StaffAssignmentHistoryPage />}
-        />
       </Route>
 
       <Route
@@ -163,6 +161,11 @@ const AppRoute: React.FC = () => {
           key="dashboard"
           path={config.adminRoutes.dashboard}
           element={<DashboardPage />}
+        />
+        <Route
+          key="discount"
+          path={config.adminRoutes.discountManagement}
+          element={<DiscountPage />}
         />
         <Route
           key="order"
@@ -193,6 +196,11 @@ const AppRoute: React.FC = () => {
           key="createCombo"
           path={config.adminRoutes.createHotPotCombo}
           element={<CreateComboPage />}
+        />
+        <Route
+          key="createGroupCombo"
+          path={config.adminRoutes.createGroupCombo}
+          element={<CreateGroupComboPage />}
         />
         <Route
           key="createIngredients"
@@ -247,6 +255,12 @@ const AppRoute: React.FC = () => {
           key="hotpotTypeDetail"
           path={config.adminRoutes.DetailHotpotType}
           element={<TableHotpotDetailPage />}
+        />
+
+        <Route
+          key="importProducts"
+          path={config.adminRoutes.importProduct}
+          element={<ImportProductPage />}
         />
       </Route>
 

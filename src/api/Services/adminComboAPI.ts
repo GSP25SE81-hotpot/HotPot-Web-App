@@ -20,6 +20,15 @@ const adminComboAPI = {
     });
   },
 
+  CreateAdminComboCustom: (params?: any) => {
+    const url = "/admin/combo/customizable";
+    return axiosClient.post(url, params, {
+      paramsSerializer: {
+        indexes: null, // by default: false
+      },
+    });
+  },
+
   GetAdminComboDetail: (id?: any) => {
     const url = "/admin/combo/:comboId";
     return axiosClient.get(url.replace(":comboId", id), {

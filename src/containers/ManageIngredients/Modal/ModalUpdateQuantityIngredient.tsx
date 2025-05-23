@@ -34,7 +34,7 @@ import {
 } from "@mui/icons-material";
 import adminIngredientsAPI from "../../../api/Services/adminIngredientsAPI";
 import { Ingredient } from "../../../types/ingredients";
-import BatchPagination from "./BatchPagination";
+import BatchPagination from "../../ManageImportProduct/BatchPagination";
 import adminBatchAPI from "../../../api/Services/adminBatch";
 import { toast } from "react-toastify";
 import useDebounce from "../../../hooks/useDebounce";

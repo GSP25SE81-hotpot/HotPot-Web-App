@@ -12,6 +12,7 @@ export const Vntext = {
     Settings: "Cài đặt",
     Feedback: "Đánh giá",
     shippingList: "Danh sách giao hàng",
+    discount: "Khuyến mãi",
   },
   CreateCombo: {
     hotpotName: "Tên món lẩu",

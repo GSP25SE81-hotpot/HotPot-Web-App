@@ -1,5 +1,4 @@
 import moment from "moment";
-import { AddressDetail } from "../models/order";
 
 export function formatMoney(number: number | undefined) {
   return number?.toLocaleString("it-IT", {
@@ -53,10 +52,3 @@ export function navigateId(
   }
   return route.replace(suffix, "");
 }
-
-export const formatAddress = (address: AddressDetail | undefined) => {
-  if (!address) {
-    return "Địa chỉ không xác định";
-  }
-  return ` ${address?.note}, ${address?.ward?.name}, ${address?.district?.name}, ${address?.city?.name}`;
-};
