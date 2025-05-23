@@ -110,15 +110,20 @@ export const menuItems: MenuItemLayout[] = [
         // role: AccessType.ADMIN_ACCESS,
       },
       //inventory
-      {
+ {
         label: "Quản lý kho",
         icon: <InventoryIcon />,
         path: "#",
         children: [
           {
-            label: "Tình trạng thiết bị trong kho",
-            icon: <InventoryIcon />,
-            path: managerRoutes.manageEquipmentStock,
+            label: "Quản lý nồi",
+            icon: <TakeoutDiningIcon />,
+            path: managerRoutes.equipmentAvailability,
+          },
+          {
+            label: "Quản lý nguyên liệu",
+            icon: <IngredientIcon />,
+            path: config.adminRoutes.manageIngredients,
           },
         ],
       },
@@ -193,6 +198,11 @@ export const menuItems: MenuItemLayout[] = [
             path: managerRoutes.customerChat,
           },
         ],
+      },
+      {
+        label: "Lịch sử phân công nhân viên",
+        icon: <PaymentIcon />,
+        path: managerRoutes.staffAssignmentHistory,
       },
     ],
   },

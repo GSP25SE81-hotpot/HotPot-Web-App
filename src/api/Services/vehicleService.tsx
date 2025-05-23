@@ -41,10 +41,10 @@ const vehicleService = {
         queryParams.append("status", params.status.toString());
 
       const url = `${API_URL}?${queryParams.toString()}`;
-      const response = await axiosClient.get<any, any>(url);
+      const response = await axiosClient.get<any, any>(url); // response is the full server JSON
 
-      // Extract the data from the nested structure
-      const pagedResult = response.data?.value || response.data?.data?.value;
+      // Corrected data extraction:
+      const pagedResult = response.data; // response.data is the object { items: [...], totalCount: ... }
 
       return {
         items: pagedResult?.items || [],
