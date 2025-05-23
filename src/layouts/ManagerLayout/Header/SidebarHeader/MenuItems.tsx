@@ -1,5 +1,7 @@
 import {
   Dashboard as DashboardIcon,
+  Discount,
+  Feedback,
   Inventory as InventoryIcon,
   People as PeopleIcon,
   TakeoutDining as TakeoutDiningIcon,
@@ -11,15 +13,17 @@ import EngineeringIcon from "@mui/icons-material/Engineering";
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import PaymentIcon from "@mui/icons-material/Payment";
+import ReceiptIcon from "@mui/icons-material/Receipt";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-import PaymentIcon from "@mui/icons-material/Payment";
-import Iconify from "../../../../components/Iconify";
 import config from "../../../../configs";
 import { managerRoutes, staffRoutes } from "../../../../configs/routes";
 import { Role } from "../../../../routes/Roles";
 import { MenuItemLayout } from "../../../../types/menu";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import Iconify from "../../../../components/Iconify";
 
 // const AccessType = {
 //   MANAGER_SALE: [RoleTypes.MANAGER, RoleTypes.SALE],
@@ -76,11 +80,23 @@ export const menuItems: MenuItemLayout[] = [
           },
         ],
       },
-      // {
-      //   icon: <Iconify icon={"ri:feedback-line"} />,
-      //   label: config.Vntext.SideBar.Feedback,
-      //   path: config.adminRoutes.feedback,
-      // },
+      {
+        icon: <AssessmentIcon />,
+        label: "Nhập hàng",
+        path: config.adminRoutes.importProduct,
+        // role: AccessType.ADMIN_ACCESS,
+      },
+      {
+        icon: <Discount />,
+        label: config.Vntext.SideBar.discount,
+        path: config.adminRoutes.discountManagement,
+      },
+
+      {
+        icon: <Feedback />,
+        label: config.Vntext.SideBar.Feedback,
+        path: config.adminRoutes.feedback,
+      },
     ],
   },
   {
@@ -94,7 +110,7 @@ export const menuItems: MenuItemLayout[] = [
         // role: AccessType.ADMIN_ACCESS,
       },
       //inventory
-      {
+ {
         label: "Quản lý kho",
         icon: <InventoryIcon />,
         path: "#",
@@ -193,25 +209,25 @@ export const menuItems: MenuItemLayout[] = [
   {
     role: Role.Staff,
     menu: [
-      // Order Management
+      //Assign Order
       {
         icon: <ListAltIcon />,
         label: config.Vntext.SideBar.Ordes,
         path: staffRoutes.assignOrder,
       },
-      // Shipping Management
+      //Shipping List
       {
         label: config.Vntext.SideBar.shippingList,
         icon: <LocalShippingIcon />,
         path: staffRoutes.shippingOrder,
       },
-      // My Assignments
+      //dashboard
       {
-        icon: <AssignmentIcon />,
+        icon: <DashboardIcon />,
         label: "Công việc",
         path: config.staffRoutes.staffMyAssignment,
+        // role: AccessType.ADMIN_ACCESS,
       },
-      // Payment Management
       {
         label: "Quản lý thanh toán",
         icon: <PaymentIcon />,

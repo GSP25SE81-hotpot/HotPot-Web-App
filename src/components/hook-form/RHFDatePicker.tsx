@@ -19,6 +19,7 @@ export default function RHFDatePicker({
   helperText,
   minDate,
   disabled,
+  ...other
 }: RHFDatePickerProps) {
   const { control } = useFormContext();
 
@@ -34,6 +35,7 @@ export default function RHFDatePicker({
             onChange={(newValue) => {
               field.onChange(newValue ? newValue.toISOString() : null);
             }}
+            {...other}
             slotProps={{
               textField: {
                 fullWidth: true,

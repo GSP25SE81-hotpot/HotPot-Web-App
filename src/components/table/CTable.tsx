@@ -122,7 +122,41 @@ const CTable: React.FC<CTbaleProps> = ({
       }
     }
 
-    //status hotpot
+    //status discount
+    if (column.format && column.format == "statusDiscount") {
+      switch (value) {
+        case false:
+          return (
+            <Chip
+              label="Kết thúc"
+              color="warning"
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: "90px" }}
+            />
+          );
+        case true:
+          return (
+            <Chip
+              label="Hoạt động"
+              color="success"
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: "90px" }}
+            />
+          );
+        default:
+          return (
+            <Chip
+              label="-"
+              color="default"
+              variant="outlined"
+              size="small"
+              sx={{ minWidth: "90px" }}
+            />
+          );
+      }
+    }
     //status hotpot
     if (column.format && column.format == "statusHotpot") {
       switch (value) {

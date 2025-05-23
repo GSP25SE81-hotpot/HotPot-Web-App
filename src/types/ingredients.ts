@@ -19,12 +19,10 @@ export interface IngredientAddSchema {
   description: string;
   imageURL: string | undefined;
   unit: string;
-  measurementValue: number;
-  totalAmount: number;
   minStockLevel: number;
   price: number;
-  ingredientTypeID: string;
-  bestBeforeDate: string;
+  ingredientTypeID: number;
+  measurementValue: number;
 }
 
 export interface IngredientType {

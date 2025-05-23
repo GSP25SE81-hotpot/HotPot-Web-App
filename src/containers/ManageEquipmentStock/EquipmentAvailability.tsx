@@ -312,6 +312,25 @@ const EquipmentAvailability: React.FC = () => {
     }
   };
 
+  // Function to open report dialog
+  // const openReportDialog = (equipment: Equipment) => {
+  //   setSelectedEquipment(equipment);
+  //   const statusText =
+  //     typeof equipment.status === "boolean"
+  //       ? equipment.status
+  //         ? "có sẵn"
+  //         : "không có sẵn"
+  //       : equipment.status.toLowerCase();
+  //   setReportMessage(
+  //     `${equipment.name} hiện đang ${statusText}${
+  //       equipment.condition
+  //         ? ` và trong tình trạng ${equipment.condition.toLowerCase()}`
+  //         : ""
+  //     }.`
+  //   );
+  //   setReportDialogOpen(true);
+  // };
+
   // Function to open condition update dialog
   const openConditionDialog = (equipment: Equipment) => {
     setSelectedEquipment(equipment);
@@ -414,6 +433,74 @@ const EquipmentAvailability: React.FC = () => {
   const handleNotificationClose = () => {
     setNotification({ ...notification, open: false });
   };
+
+  // Function to send overall status report to admin
+  //   const sendOverallStatusReport = async () => {
+  //     try {
+  //       setLoading(true);
+  //       // Lấy tóm tắt trạng thái thiết bị
+  //       const summaryResponse = await stockService.getEquipmentStatusSummary();
+  //       if (
+  //         summaryResponse &&
+  //         Array.isArray(summaryResponse) &&
+  //         summaryResponse.length > 0
+  //       ) {
+  //         const summary = summaryResponse;
+  //         // Tạo tin nhắn báo cáo
+  //         const availableHotpots =
+  //           summary.find((s: EquipmentStatusDto) => s.equipmentType === "HotPot")
+  //             ?.availableCount || 0;
+  //         const totalHotpots =
+  //           summary.find((s: EquipmentStatusDto) => s.equipmentType === "HotPot")
+  //             ?.totalCount || 0;
+  //         const availableUtensils =
+  //           summary.find((s: EquipmentStatusDto) => s.equipmentType === "Utensil")
+  //             ?.availableCount || 0;
+  //         const totalUtensils =
+  //           summary.find((s: EquipmentStatusDto) => s.equipmentType === "Utensil")
+  //             ?.totalCount || 0;
+  //         const lowStockCount =
+  //           summary.find((s: EquipmentStatusDto) => s.equipmentType === "Utensil")
+  //             ?.lowStockCount || 0;
+  //         const reportMessage = `Báo cáo trạng thái thiết bị:
+  // - Nồi lẩu: ${availableHotpots}/${totalHotpots} có sẵn
+  // - Dụng cụ: ${availableUtensils}/${totalUtensils} có sẵn
+  // - Các mặt hàng sắp hết: ${lowStockCount}`;
+  //         // Gửi thông báo cho quản trị viên
+  //         const request: NotifyAdminStockRequest = {
+  //           notificationType: "StatusChange",
+  //           equipmentType: "Summary",
+  //           equipmentId: 0,
+  //           equipmentName: "Tóm tắt trạng thái thiết bị",
+  //           reason: reportMessage,
+  //         };
+  //         await stockService.notifyAdminDirectly(request);
+  //         // Hiển thị thông báo
+  //         setNotification({
+  //           open: true,
+  //           message:
+  //             "Đã gửi báo cáo trạng thái thiết bị tổng thể cho quản trị viên",
+  //           severity: "info",
+  //         });
+  //       } else {
+  //         throw new Error("Không thể lấy tóm tắt trạng thái thiết bị");
+  //       }
+  //     } catch (error) {
+  //       console.error("Lỗi khi gửi báo cáo trạng thái tổng thể:", error);
+  //       setNotification({
+  //         open: true,
+  //         message: "Không thể gửi báo cáo trạng thái tổng thể",
+  //         severity: "error",
+  //       });
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   // Toggle notifications drawer
+  //   const toggleNotificationsDrawer = () => {
+  //     setNotificationsDrawerOpen(!notificationsDrawerOpen);
+  //   };
 
   // Check if equipment is available
   const isEquipmentAvailable = (status: string | boolean): boolean => {
@@ -631,6 +718,19 @@ const EquipmentAvailability: React.FC = () => {
                               )}
                           </EquipmentDetailsStack>
                         </Stack>
+                        {/* <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => openReportDialog(equipment)}
+                          startIcon={<SendIcon />}
+                          sx={{
+                            borderRadius: (theme) =>
+                              theme.shape.borderRadius * 2,
+                            textTransform: "none",
+                          }}
+                        >
+                          Báo cáo
+                        </Button> */}
                       </Stack>
                       {hoveredId === equipment.id && (
                         <HoverInfoContainer>
@@ -905,6 +1005,134 @@ const EquipmentAvailability: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Notifications Drawer */}
+      {/* <Drawer
+        anchor="right"
+        open={notificationsDrawerOpen}
+        onClose={() => setNotificationsDrawerOpen(false)}
+        PaperProps={{
+          sx: {
+            width: 320,
+            borderTopLeftRadius: (theme) => theme.shape.borderRadius * 2,
+            borderBottomLeftRadius: (theme) => theme.shape.borderRadius * 2,
+          },
+        }}
+      >
+        <Box sx={{ width: 320, p: 2 }}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ mb: 2 }}
+          >
+            <Typography variant="h6" fontWeight={600}>
+              Thông báo
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              <IconButton
+                size="small"
+                onClick={markAllAsRead}
+                disabled={notifications.length === 0}
+                sx={{
+                  bgcolor: (theme) => theme.palette.action.hover,
+                  borderRadius: "50%",
+                }}
+              >
+                <MarkEmailReadIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={clearNotifications}
+                disabled={notifications.length === 0}
+                sx={{
+                  bgcolor: (theme) => theme.palette.action.hover,
+                  borderRadius: "50%",
+                }}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Stack>
+          </Stack>
+          <Divider sx={{ mb: 2 }} />
+          {notifications.length === 0 ? (
+            <Box sx={{ textAlign: "center", py: 4 }}>
+              <InfoIcon
+                color="disabled"
+                sx={{ fontSize: 40, mb: 1, opacity: 0.5 }}
+              />
+              <Typography color="text.secondary">Không có thông báo</Typography>
+            </Box>
+          ) : (
+            <List sx={{ width: "100%" }}>
+              {notifications.map((notification) => (
+                <ListItem
+                  key={notification.id}
+                  alignItems="flex-start"
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      onClick={() => markAsRead(notification.id)}
+                      sx={{
+                        color: notification.isRead
+                          ? theme.palette.text.disabled
+                          : theme.palette.primary.main,
+                      }}
+                    >
+                      <MarkEmailReadIcon fontSize="small" />
+                    </IconButton>
+                  }
+                  sx={{
+                    bgcolor: notification.isRead
+                      ? "transparent"
+                      : theme.palette.action.hover,
+                    borderRadius: (theme) => theme.shape.borderRadius,
+                    mb: 1,
+                    transition: "background-color 0.3s",
+                    "&:hover": {
+                      bgcolor: theme.palette.action.selected,
+                    },
+                  }}
+                >
+                  <ListItemIcon>
+                    {notification.type === "LowStock" ? (
+                      <WarningIcon color="warning" />
+                    ) : (
+                      <InfoIcon color="info" />
+                    )}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Typography variant="subtitle2" fontWeight={600}>
+                        {notification.equipmentName}
+                      </Typography>
+                    }
+                    secondary={
+                      <>
+                        <Typography
+                          component="span"
+                          variant="body2"
+                          color="text.primary"
+                          sx={{ display: "block", mb: 0.5 }}
+                        >
+                          {notification.message}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          display="block"
+                          color="text.secondary"
+                        >
+                          {new Date(notification.timestamp).toLocaleString()}
+                        </Typography>
+                      </>
+                    }
+                  />
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Box>
+      </Drawer> */}
 
       {/* Notification Snackbar */}
       <Snackbar

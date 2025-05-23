@@ -38,7 +38,6 @@ import { ManageEquipmentStockPage } from "../pages/Manager/ManageEquipmentStock/
 import { ManageOrderPage } from "../pages/Manager/ManageOrder/ManageOrderPage";
 import { OrderDetailViewPage } from "../pages/Manager/ManageOrder/OrderDetailViewPage";
 import { CurrentAssignmentsPage } from "../pages/Manager/ManagerRentalReturnPage/CurrentAssignmentsPage";
-
 import { UnassignedPickupsPage } from "../pages/Manager/ManagerRentalReturnPage/UnassignedPickupsPage";
 import StaffAssignmentPage from "../pages/Manager/WorkAssignmentSchedule/StaffAssignmentPage";
 import WorkAssignmentSchedulePage from "../pages/Manager/WorkAssignmentSchedule/WorkAssignmentSchedulePage";
@@ -50,6 +49,9 @@ import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
 import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
 import ShippingListPage from "../pages/Staff/Shipping/ShippingListPage";
 import { ManageVehiclePage } from "../pages/Manager/ManageVehicle/ManageVehiclePage";
+import DiscountPage from "../pages/Admin/Discount/DiscountPage";
+import CreateGroupComboPage from "../pages/Admin/Combohotpot/CreateGroupComboPage";
+import ImportProductPage from "../pages/Admin/ImportProduct/ImportProductPage";
 import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock/EquipmentAvailabilityPage";
 import NotificationCenter from "../pages/Global/Notification/NotificationsPage";
 import { StaffAssignmentHistoryPage } from "../pages/Manager/StaffAssignmentHistory/StaffAssignmentHistoryPage";
@@ -151,6 +153,11 @@ const AppRoute: React.FC = () => {
           element={<DashboardPage />}
         />
         <Route
+          key="discount"
+          path={config.adminRoutes.discountManagement}
+          element={<DiscountPage />}
+        />
+        <Route
           key="order"
           path={config.adminRoutes.orders}
           element={<OrderPage />}
@@ -179,6 +186,11 @@ const AppRoute: React.FC = () => {
           key="createCombo"
           path={config.adminRoutes.createHotPotCombo}
           element={<CreateComboPage />}
+        />
+        <Route
+          key="createGroupCombo"
+          path={config.adminRoutes.createGroupCombo}
+          element={<CreateGroupComboPage />}
         />
         <Route
           key="createIngredients"
@@ -233,6 +245,12 @@ const AppRoute: React.FC = () => {
           key="hotpotTypeDetail"
           path={config.adminRoutes.DetailHotpotType}
           element={<TableHotpotDetailPage />}
+        />
+
+        <Route
+          key="importProducts"
+          path={config.adminRoutes.importProduct}
+          element={<ImportProductPage />}
         />
       </Route>
 

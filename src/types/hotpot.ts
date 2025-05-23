@@ -40,3 +40,20 @@ export const SizeData = [
     name: "size L",
   },
 ];
+
+export interface CreateHotPotCustomFormSchema {
+  name: string;
+  groupIdentifier?: string;
+  imageURLs: (string | undefined)[] | undefined;
+  size: number;
+  tutorialVideo: {
+    name: string;
+    description: string;
+  };
+  ingredients: IngredientTypeProps[] | undefined;
+}
+
+export interface IngredientTypeProps {
+  ingredientTypeId: number;
+  minQuantity: number;
+}

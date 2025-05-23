@@ -4,7 +4,7 @@ import {
   CheckCircleOutline as CheckCircleOutlineIcon,
   Edit as EditIcon,
   ErrorOutline as ErrorOutlineIcon,
-  // Notifications as NotificationsIcon,
+  Notifications as NotificationsIcon,
   Refresh as RefreshIcon,
   Search as SearchIcon,
   Warning as WarningIcon,
@@ -44,7 +44,7 @@ import {
   StyledTableHead,
   StyledTableRow,
 } from "../../components/manager/styles/LowStockUtensilStyles";
-import { UtensilDto } from "../../types/stock";
+import { NotifyAdminStockRequest, UtensilDto } from "../../types/stock";
 
 // Types
 type Order = "asc" | "desc";
@@ -77,14 +77,14 @@ const LowStockUtensils: React.FC = () => {
 
   // Dialog states
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  // const [openNotifyDialog, setOpenNotifyDialog] = useState(false);
+  const [openNotifyDialog, setOpenNotifyDialog] = useState(false);
   const [selectedUtensil, setSelectedUtensil] = useState<UtensilDto | null>(
     null
   );
   const [newQuantity, setNewQuantity] = useState(0);
-  // const [notifyReason, setNotifyReason] = useState("");
+  const [notifyReason, setNotifyReason] = useState("");
   const [updateSuccess, setUpdateSuccess] = useState(false);
-  // const [notifySuccess, setNotifySuccess] = useState(false);
+  const [notifySuccess, setNotifySuccess] = useState(false);
 
   // Fetch data
   const fetchLowStockUtensils = async () => {
@@ -213,36 +213,36 @@ const LowStockUtensils: React.FC = () => {
   };
 
   // Handle notify admin
-  // const handleNotifyAdmin = async () => {
-  //   if (!selectedUtensil || !notifyReason) return;
+  const handleNotifyAdmin = async () => {
+    if (!selectedUtensil || !notifyReason) return;
 
-  //   try {
-  //     setLoading(true);
-  //     const request: NotifyAdminStockRequest = {
-  //       notificationType: "LowStock",
-  //       equipmentType: "Utensil",
-  //       equipmentId: selectedUtensil.utensilId,
-  //       equipmentName: selectedUtensil.name,
-  //       currentQuantity: selectedUtensil.quantity,
-  //       threshold: threshold,
-  //       reason: notifyReason,
-  //     };
+    try {
+      setLoading(true);
+      const request: NotifyAdminStockRequest = {
+        notificationType: "LowStock",
+        equipmentType: "Utensil",
+        equipmentId: selectedUtensil.utensilId,
+        equipmentName: selectedUtensil.name,
+        currentQuantity: selectedUtensil.quantity,
+        threshold: threshold,
+        reason: notifyReason,
+      };
 
-  //     await stockService.notifyAdminDirectly(request);
-  //     setNotifySuccess(true);
+      await stockService.notifyAdminDirectly(request);
+      setNotifySuccess(true);
 
-  //     setTimeout(() => {
-  //       setNotifySuccess(false);
-  //       setOpenNotifyDialog(false);
-  //       setNotifyReason("");
-  //     }, 1500);
-  //   } catch (err) {
-  //     console.error("Error notifying admin:", err);
-  //     setError("Không thể gửi thông báo. Vui lòng thử lại sau.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+      setTimeout(() => {
+        setNotifySuccess(false);
+        setOpenNotifyDialog(false);
+        setNotifyReason("");
+      }, 1500);
+    } catch (err) {
+      console.error("Error notifying admin:", err);
+      setError("Không thể gửi thông báo. Vui lòng thử lại sau.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Get status chip color
   const getStatusChip = (utensil: UtensilDto) => {
@@ -314,6 +314,88 @@ const LowStockUtensils: React.FC = () => {
           Làm mới
         </Button>
       </Stack>
+
+      {/* Stats Cards */}
+      {/* <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card sx={{ borderRadius: 2, boxShadow: theme.shadows[2] }}>
+            <CardContent>
+              <Typography color="text.secondary" gutterBottom>
+                Tổng số dụng cụ
+              </Typography>
+              <Typography variant="h4" fontWeight="bold">
+                {stats.totalItems}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Dụng cụ có số lượng thấp
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card
+            sx={{
+              borderRadius: 2,
+              boxShadow: theme.shadows[2],
+              bgcolor: alpha(theme.palette.error.main, 0.05),
+            }}
+          >
+            <CardContent>
+              <Typography color="error.main" gutterBottom>
+                Cực kỳ thấp
+              </Typography>
+              <Typography variant="h4" fontWeight="bold" color="error.main">
+                {stats.criticalItems}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Số lượng ≤ 2
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card
+            sx={{
+              borderRadius: 2,
+              boxShadow: theme.shadows[2],
+              bgcolor: alpha(theme.palette.warning.main, 0.05),
+            }}
+          >
+            <CardContent>
+              <Typography color="warning.main" gutterBottom>
+                Sắp hết
+              </Typography>
+              <Typography variant="h4" fontWeight="bold" color="warning.main">
+                {stats.lowItems}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Số lượng 3-5
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card
+            sx={{
+              borderRadius: 2,
+              boxShadow: theme.shadows[2],
+              bgcolor: alpha(theme.palette.info.main, 0.05),
+            }}
+          >
+            <CardContent>
+              <Typography color="info.main" gutterBottom>
+                Không sẵn sàng
+              </Typography>
+              <Typography variant="h4" fontWeight="bold" color="info.main">
+                {stats.unavailableItems}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Dụng cụ không khả dụng
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid> */}
 
       {/* Filters and Search */}
       <Stack
@@ -459,7 +541,7 @@ const LowStockUtensils: React.FC = () => {
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      {/* <Tooltip title="Thông báo cho quản trị viên">
+                      <Tooltip title="Thông báo cho quản trị viên">
                         <IconButton
                           size="small"
                           color="warning"
@@ -470,7 +552,7 @@ const LowStockUtensils: React.FC = () => {
                         >
                           <NotificationsIcon fontSize="small" />
                         </IconButton>
-                      </Tooltip> */}
+                      </Tooltip>
                     </Stack>
                   </TableCell>
                 </StyledTableRow>
@@ -500,6 +582,63 @@ const LowStockUtensils: React.FC = () => {
           </TableBody>
         </Table>
       </StyledTableContainer>
+
+      {/* Summary Section */}
+      {/* <Paper
+        sx={{
+          p: 3,
+          borderRadius: 2,
+          bgcolor: alpha(theme.palette.primary.main, 0.03),
+          border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+        }}
+      >
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={3}
+          alignItems="center"
+        >
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h6" gutterBottom>
+              Tóm tắt tình trạng
+            </Typography>
+            <Typography variant="body2" color="text.secondary" paragraph>
+              Hiện có {stats.totalItems} dụng cụ có số lượng thấp, trong đó{" "}
+              {stats.criticalItems} dụng cụ ở mức cực kỳ thấp cần bổ sung gấp.
+            </Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              <Chip
+                label={`${stats.criticalItems} cực kỳ thấp`}
+                size="small"
+                color="error"
+                variant="outlined"
+                icon={<WarningIcon />}
+                sx={{ mb: 1 }}
+              />
+              <Chip
+                label={`${stats.lowItems} sắp hết`}
+                size="small"
+                color="warning"
+                variant="outlined"
+                icon={<WarningIcon />}
+                sx={{ mb: 1 }}
+              />
+              <Chip
+                label={`${stats.unavailableItems} không sẵn sàng`}
+                size="small"
+                color="info"
+                variant="outlined"
+                icon={<ErrorOutlineIcon />}
+                sx={{ mb: 1 }}
+              />
+            </Stack>
+          </Box>
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ display: { xs: "none", md: "block" } }}
+          />
+        </Stack>
+      </Paper> */}
 
       {/* Update Quantity Dialog */}
       <Dialog
@@ -579,7 +718,7 @@ const LowStockUtensils: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Notify Admin Dialog
+      {/* Notify Admin Dialog */}
       <Dialog
         open={openNotifyDialog}
         onClose={() => !loading && setOpenNotifyDialog(false)}
@@ -638,7 +777,7 @@ const LowStockUtensils: React.FC = () => {
             Gửi thông báo
           </Button>
         </DialogActions>
-      </Dialog> */}
+      </Dialog>
     </Box>
   );
 };

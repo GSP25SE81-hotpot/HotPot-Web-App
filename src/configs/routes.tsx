@@ -20,7 +20,7 @@ export const managerRoutes = {
   orderDetail: "/orders/:orderId",
   staffAssignment: "staff-assignment",
   manageVehicle: "/manage-vehicle",
-  staffAssignmentHistory: "/staff-assignment-history",
+staffAssignmentHistory: "/staff-assignment-history",
 };
 
 export const authRoutes = {
@@ -46,6 +46,9 @@ export const adminRoutes = {
   ingredientType: "/dashboard/ingredientType",
   DetailHotpotType: "/dashboard/hotpotType/detail/:hotpotId",
   MaintenanceHotpot: "/dashboard/hotpotMaintenance",
+  discountManagement: "/dashboard/discount",
+  createGroupCombo: "/dashboard/CreateGroupCombo",
+  importProduct: "/dashboard/ImportProduct",
 };
 
 export const staffRoutes = {
