@@ -96,7 +96,7 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
   const [priceRowsPerPage, setPriceRowsPerPage] = React.useState(5);
 
   // Batch pagination
-  const handleChangeBatchPage = (event: unknown, newPage: number) => {
+  const handleChangeBatchPage = (_event: unknown, newPage: number) => {
     setBatchPage(newPage);
   };
 

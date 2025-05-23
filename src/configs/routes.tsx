@@ -20,6 +20,7 @@ export const managerRoutes = {
   orderDetail: "/orders/:orderId",
   staffAssignment: "staff-assignment",
   manageVehicle: "/manage-vehicle",
+staffAssignmentHistory: "/staff-assignment-history",
 };
 
 export const authRoutes = {
@@ -57,7 +58,6 @@ export const staffRoutes = {
   orderHistory: "/order-history",
   assignOrder: "/assign-order",
   shippingOrder: "/shipping",
-  proofOfDelivery: "/proof-of-delivery",
   rentalDetail: "/staff/rentals/:id",
   recordReturn: "/staff/rentals/record-return",
   pickupRental: "/pickup-rental",

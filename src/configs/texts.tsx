@@ -1,6 +1,6 @@
 export const Vntext = {
   SideBar: {
-    Dashboard: "Bảng thông kê",
+    Dashboard: "Bảng thống kê",
     Hotpot: {
       hotpotSidebar: "Lẩu",
       hotpotIngredients: "Nguyên liệu lẩu",

@@ -1,5 +1,6 @@
-import BlockIcon from "@mui/icons-material/Block";
-import EditIcon from "@mui/icons-material/Edit";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// import BlockIcon from "@mui/icons-material/Block";
+// import EditIcon from "@mui/icons-material/Edit";
 import InfoIcon from "@mui/icons-material/Info";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Button from "@mui/material/Button";
@@ -18,9 +19,9 @@ interface MenuActionTableOrderProps {
 
 const MenuActionTableOrder: React.FC<MenuActionTableOrderProps> = ({
   orderData,
-  onOpenUpdate,
+  // onOpenUpdate,
 
-  onOpenDelete,
+  // onOpenDelete,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<any>(null);
   const nav = useNavigate();
@@ -31,20 +32,20 @@ const MenuActionTableOrder: React.FC<MenuActionTableOrderProps> = ({
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleUpdate = () => {
-    onOpenUpdate(orderData);
-    setAnchorEl(null);
-  };
+  // const handleUpdate = () => {
+  //   onOpenUpdate(orderData);
+  //   setAnchorEl(null);
+  // };
   const handleDetail = () => {
     // onOpenDetail(orderData);
     nav(`/dashboard/order/${orderData?.orderId}`);
     setAnchorEl(null);
   };
 
-  const handleDelete = () => {
-    onOpenDelete(orderData);
-    setAnchorEl(null);
-  };
+  // const handleDelete = () => {
+  //   onOpenDelete(orderData);
+  //   setAnchorEl(null);
+  // };
 
   return (
     <div>

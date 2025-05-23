@@ -1,24 +1,21 @@
 import {
   Alert,
-  Button,
   CardContent,
   Chip,
   CircularProgress,
-  Divider,
   Pagination,
   Snackbar,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
 import feedbackService, {
+  FeedbackFilterRequest,
+  FeedbackListDto,
   FeedbackStats,
-  ManagerFeedbackListDto,
 } from "../../api/Services/feedbackService";
 import { toast } from "react-toastify";
 import {
-  DateText,
   EmptyStateMessage,
   FeedbackContainer,
   FeedbackList,
@@ -27,24 +24,15 @@ import {
   LoadingContainer,
   OrderInfoText,
   PaginationContainer,
-  ResponseActionsContainer,
-  ResponseButton,
-  ResponseInputContainer,
-  ResponseSection,
   SectionHeading,
   StatItem,
   StatsContainer,
   StyledCard,
-  StyledChip,
-  SubmitButton,
 } from "../../components/StyledComponents";
 
 const FeedbackManagement: React.FC = () => {
   // State for feedback data
-  const [feedbacks, setFeedbacks] = useState<ManagerFeedbackListDto[]>([]);
-  const [responseText, setResponseText] = useState<string>("");
-  const [activeFeedbackId, setActiveFeedbackId] = useState<number | null>(null);
-  const [filter, setFilter] = useState<"all" | "pending">("all");
+  const [feedbacks, setFeedbacks] = useState<FeedbackListDto[]>([]);
 
   // State for UI
   const [loading, setLoading] = useState<boolean>(false);
@@ -56,41 +44,44 @@ const FeedbackManagement: React.FC = () => {
   const [pageSize] = useState<number>(10);
   const [totalCount, setTotalCount] = useState<number>(0);
 
+  // State for filtering
+  const [filterType, setFilterType] = useState<"all" | "recent">("all");
+
   // State for statistics
   const [stats, setStats] = useState<FeedbackStats>({
     totalFeedbackCount: 0,
-    pendingFeedbackCount: 0,
-    approvedFeedbackCount: 0,
-    rejectedFeedbackCount: 0,
-    unrespondedFeedbackCount: 0,
-    respondedFeedbackCount: 0,
-    responseRate: 0,
   });
-
-  // Get manager ID from localStorage
-  const managerId = parseInt(localStorage.getItem("uid") || "1");
 
   // Fetch feedback based on current filter
   const fetchFeedback = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      console.log(`Fetching feedback with filter: ${filter}`);
-      let response;
-      if (filter === "pending") {
-        response = await feedbackService.getUnrespondedFeedback(
-          pageNumber,
-          pageSize
-        );
-      } else {
-        response = await feedbackService.getAllFeedback(pageNumber, pageSize);
+      console.log(`Fetching feedback with filter: ${filterType}`);
+
+      // Create filter request based on current filter type
+      const filterRequest: FeedbackFilterRequest = {
+        pageNumber,
+        pageSize,
+        // If filter is "recent", sort by creation date descending
+        sortBy: "CreatedAt",
+        ascending: false,
+      };
+
+      // Add any additional filter parameters based on filter type
+      if (filterType === "recent") {
+        // For example, get feedback from the last 7 days
+        const fromDate = new Date();
+        fromDate.setDate(fromDate.getDate() - 7);
+        filterRequest.fromDate = fromDate;
       }
+
+      const response = await feedbackService.getFilteredFeedback(filterRequest);
+
       if (response?.data?.items) {
         setFeedbacks(response.data.items);
         setTotalCount(response.data.totalCount);
-      }
-      // Neither structure matches
-      else {
+      } else {
         console.error("Malformed data received:", response);
         throw new Error("Invalid feedback data structure");
       }
@@ -103,7 +94,7 @@ const FeedbackManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [filter, pageNumber, pageSize]);
+  }, [filterType, pageNumber, pageSize]);
 
   // Fetch feedback statistics
   const fetchStats = useCallback(async () => {
@@ -121,11 +112,11 @@ const FeedbackManagement: React.FC = () => {
   useEffect(() => {
     fetchFeedback();
     fetchStats();
-  }, [filter, pageNumber, fetchFeedback, fetchStats]);
+  }, [filterType, pageNumber, fetchFeedback, fetchStats]);
 
   // Handle filter change
-  const handleFilterChange = (newFilter: "all" | "pending") => {
-    setFilter(newFilter);
+  const handleFilterChange = (newFilter: "all" | "recent") => {
+    setFilterType(newFilter);
     setPageNumber(1); // Reset to first page when filter changes
   };
 
@@ -137,65 +128,10 @@ const FeedbackManagement: React.FC = () => {
     setPageNumber(value);
   };
 
-  // Submit response to feedback
-  const handleSubmitResponse = async (feedbackId: number) => {
-    if (!responseText.trim()) {
-      setError("Response cannot be empty");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await feedbackService.respondToFeedback(feedbackId, {
-        managerId,
-        response: responseText,
-      });
-
-      if (response && response.data) {
-        // Update the feedback in the list
-        setFeedbacks(
-          feedbacks.map((fb) =>
-            fb.feedbackId === feedbackId
-              ? {
-                  ...fb,
-                  response: responseText,
-                  responseDate: new Date(),
-                  hasResponse: true,
-                }
-              : fb
-          )
-        );
-
-        setSuccess("Response submitted successfully");
-        setResponseText("");
-        setActiveFeedbackId(null);
-
-        // Refresh stats
-        fetchStats();
-      } else {
-        setError(response.message || "Failed to submit response");
-      }
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "An error occurred while submitting response";
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Close alert messages
   const handleCloseAlert = () => {
     setError(null);
     setSuccess(null);
-  };
-
-  // Set active feedback for response
-  const handleSetActiveFeedback = (feedbackId: number) => {
-    setActiveFeedbackId(feedbackId === activeFeedbackId ? null : feedbackId);
-    setResponseText("");
   };
 
   return (
@@ -212,28 +148,7 @@ const FeedbackManagement: React.FC = () => {
             </Typography>
             <Typography variant="h5">{stats.totalFeedbackCount}</Typography>
           </StatItem>
-          <StatItem>
-            <Typography variant="subtitle2" color="text.secondary">
-              Đã phản hồi
-            </Typography>
-            <Typography variant="h5">{stats.respondedFeedbackCount}</Typography>
-          </StatItem>
-          <StatItem>
-            <Typography variant="subtitle2" color="text.secondary">
-              Chưa phản hồi
-            </Typography>
-            <Typography variant="h5">
-              {stats.unrespondedFeedbackCount}
-            </Typography>
-          </StatItem>
-          <StatItem>
-            <Typography variant="subtitle2" color="text.secondary">
-              Tỷ lệ phản hồi
-            </Typography>
-            <Typography variant="h5">
-              {stats.responseRate.toFixed(1)}%
-            </Typography>
-          </StatItem>
+          {/* Add other stats if they become available in the backend */}
         </Stack>
       </StatsContainer>
 
@@ -242,13 +157,13 @@ const FeedbackManagement: React.FC = () => {
         <Chip
           label="Tất cả"
           onClick={() => handleFilterChange("all")}
-          color={filter === "all" ? "primary" : "default"}
+          color={filterType === "all" ? "primary" : "default"}
           sx={{ px: 2, borderRadius: "10px" }}
         />
         <Chip
-          label="Chờ xử lý"
-          onClick={() => handleFilterChange("pending")}
-          color={filter === "pending" ? "primary" : "default"}
+          label="Gần đây"
+          onClick={() => handleFilterChange("recent")}
+          color={filterType === "recent" ? "primary" : "default"}
           sx={{ px: 2, borderRadius: "10px" }}
         />
       </FilterContainer>
@@ -307,103 +222,15 @@ const FeedbackManagement: React.FC = () => {
                     alignItems="center"
                   >
                     <Typography variant="h6">
-                      {feedback.user ? feedback.user.name : "Khách hàng"}
+                      {feedback.userName || "Khách hàng"}
                     </Typography>
-                    <StyledChip
-                      label={feedback.hasResponse ? "Đã phản hồi" : "Chờ xử lý"}
-                      status={feedback.hasResponse ? "Completed" : "Pending"}
-                      size="small"
-                    />
                   </Stack>
 
-                  {/* Feedback Title */}
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    {feedback.title}
-                  </Typography>
-
-                  {/* Feedback Content */}
-                  <Typography variant="body1" sx={{ fontStyle: "italic" }}>
-                    "{feedback.comment}"
-                  </Typography>
-
                   {/* Order Information */}
-                  {feedback.order && (
-                    <OrderInfoText>
-                      Đơn hàng: #{feedback.order.orderId} -
-                      {new Date(feedback.createdAt).toLocaleDateString("vi-VN")}
-                    </OrderInfoText>
-                  )}
-
-                  {/* Response Section */}
-                  {feedback.hasResponse && feedback.responseDate && (
-                    <>
-                      <Divider />
-                      <ResponseSection>
-                        <Typography variant="subtitle2" color="primary">
-                          Phản hồi của quản lý:
-                        </Typography>
-                        <Typography variant="body2">
-                          {/* This would be populated from the detailed feedback */}
-                          {/* For now, we'll show a placeholder */}
-                          Phản hồi đã được gửi
-                        </Typography>
-                        <DateText>
-                          Phản hồi lúc:{" "}
-                          {new Date(feedback.responseDate).toLocaleString(
-                            "vi-VN"
-                          )}
-                        </DateText>
-                      </ResponseSection>
-                    </>
-                  )}
-
-                  {/* Response Input */}
-                  {!feedback.hasResponse && (
-                    <>
-                      <Divider />
-                      {activeFeedbackId === feedback.feedbackId ? (
-                        <ResponseInputContainer>
-                          <TextField
-                            multiline
-                            rows={3}
-                            variant="outlined"
-                            label="Viết phản hồi"
-                            value={responseText}
-                            onChange={(e) => setResponseText(e.target.value)}
-                          />
-                          <ResponseActionsContainer>
-                            <Button
-                              variant="outlined"
-                              onClick={() =>
-                                handleSetActiveFeedback(feedback.feedbackId)
-                              }
-                            >
-                              Hủy
-                            </Button>
-                            <SubmitButton
-                              variant="contained"
-                              onClick={() =>
-                                handleSubmitResponse(feedback.feedbackId)
-                              }
-                              disabled={loading}
-                            >
-                              Gửi phản hồi
-                            </SubmitButton>
-                          </ResponseActionsContainer>
-                        </ResponseInputContainer>
-                      ) : (
-                        <ResponseButton
-                          variant="outlined"
-                          color="primary"
-                          onClick={() =>
-                            handleSetActiveFeedback(feedback.feedbackId)
-                          }
-                        >
-                          Viết phản hồi
-                        </ResponseButton>
-                      )}
-                    </>
-                  )}
+                  <OrderInfoText>
+                    Đơn hàng: #{feedback.orderId} -
+                    {new Date(feedback.createdAt).toLocaleDateString("vi-VN")}
+                  </OrderInfoText>
                 </Stack>
               </CardContent>
             </StyledCard>

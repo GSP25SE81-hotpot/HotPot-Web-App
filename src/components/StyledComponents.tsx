@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   Chip,
-  ChipProps,
   Paper,
   Select,
   SelectProps,
@@ -23,7 +22,6 @@ import {
 } from "@mui/material";
 import { ReplacementRequestStatus } from "../types/replacement";
 import { alpha, styled } from "@mui/material/styles";
-import { OrderStatus } from "../types/orderManagement";
 
 export const StyledPaper = styled(Paper)(({ theme }) => ({
   background: `linear-gradient(135deg, ${alpha(
@@ -99,45 +97,6 @@ export const StyledStepper = styled(Stepper)(({ theme }) => ({
     fontSize: "0.8rem",
   },
 }));
-
-interface StatusChipProps extends ChipProps {
-  status: OrderStatus;
-}
-
-export const StatusChip = styled(Chip)<StatusChipProps>(({ theme, status }) => {
-  const getStatusColor = () => {
-    switch (status) {
-      case "PENDING_ASSIGNMENT":
-        return theme.palette.info.main;
-      case "ASSIGNED":
-        return theme.palette.primary.main;
-      case "SCHEDULED":
-        return theme.palette.secondary.main;
-      case "IN_PREPARATION":
-        return theme.palette.warning.main;
-      case "READY_FOR_PICKUP":
-        return theme.palette.success.light;
-      case "IN_TRANSIT":
-        return theme.palette.warning.dark;
-      case "DELIVERED":
-        return theme.palette.success.main;
-      case "CANCELLED":
-        return theme.palette.error.main;
-      default:
-        return theme.palette.grey[500];
-    }
-  };
-  return {
-    backgroundColor: alpha(getStatusColor(), 0.1),
-    color: getStatusColor(),
-    borderRadius: 12,
-    fontWeight: 600,
-    border: `1px solid ${alpha(getStatusColor(), 0.3)}`,
-    "& .MuiChip-icon": {
-      color: getStatusColor(),
-    },
-  };
-});
 
 export const StyledAvatar = styled(Avatar)(({ theme }) => ({
   bgcolor: theme.palette.primary.main,

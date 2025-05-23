@@ -16,20 +16,27 @@ import {
   CircularProgress,
   Alert,
   SelectChangeEvent,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemButton,
 } from "@mui/material";
 import {
-  RentOrderDetail,
+  RentOrderDetailResponse,
   Staff,
   PickupAssignmentRequestDto,
 } from "../../../types/rentalTypes";
+import { VehicleDTO } from "../../../types/vehicle";
 import { allocateStaffForPickup } from "../../../api/Services/rentalService";
 import staffService from "../../../api/Services/staffService";
+import vehicleService from "../../../api/Services/vehicleService";
 import { format } from "date-fns";
 
 interface AssignStaffDialogProps {
   open: boolean;
   onClose: () => void;
-  pickup: RentOrderDetail;
+  pickup: RentOrderDetailResponse;
   onSuccess: () => void;
 }
 
@@ -40,37 +47,61 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
   onSuccess,
 }) => {
   const [staff, setStaff] = useState<Staff[]>([]);
+  const [vehicles, setVehicles] = useState<VehicleDTO[]>([]);
   const [selectedStaffId, setSelectedStaffId] = useState<number | "">("");
+  const [selectedVehicleId, setSelectedVehicleId] = useState<number | "">("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [staffLoading, setStaffLoading] = useState(true);
+  const [vehiclesLoading, setVehiclesLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDetailId, setSelectedDetailId] = useState<number | null>(null);
 
   useEffect(() => {
-    const fetchStaff = async () => {
+    const fetchData = async () => {
       setStaffLoading(true);
+      setVehiclesLoading(true);
+
       try {
+        // Fetch available staff
         const availableStaff = await staffService.getAvailableStaff();
         setStaff(availableStaff);
+
+        // Fetch available vehicles
+        const availableVehicles = await vehicleService.getAvailableVehicles();
+        setVehicles(availableVehicles);
+
+        // Set the first equipment item's detail ID as selected by default
+        if (pickup.equipmentItems && pickup.equipmentItems.length > 0) {
+          setSelectedDetailId(pickup.equipmentItems[0].detailId);
+        }
       } catch (error) {
-        setError("Failed to load available staff");
+        setError("Failed to load available resources");
       } finally {
         setStaffLoading(false);
+        setVehiclesLoading(false);
       }
     };
 
     if (open) {
-      fetchStaff();
+      fetchData();
     }
-  }, [open]);
+  }, [open, pickup]);
 
-  // src/components/manager/AssignStaffDialog.tsx (continued)
   const handleStaffChange = (event: SelectChangeEvent<number | "">) => {
     setSelectedStaffId(event.target.value as number);
   };
 
+  const handleVehicleChange = (event: SelectChangeEvent<number | "">) => {
+    setSelectedVehicleId(event.target.value as number);
+  };
+
   const handleNotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNotes(event.target.value);
+  };
+
+  const handleDetailSelect = (detailId: number) => {
+    setSelectedDetailId(detailId);
   };
 
   const handleSubmit = async () => {
@@ -79,14 +110,26 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
       return;
     }
 
+    if (!selectedDetailId) {
+      setError("No equipment item selected");
+      return;
+    }
+
     setLoading(true);
     setError(null);
+
     try {
       const request: PickupAssignmentRequestDto = {
         staffId: selectedStaffId as number,
-        rentOrderDetailId: pickup.id,
+        rentOrderDetailId: selectedDetailId,
         notes: notes || undefined,
       };
+
+      // Add vehicle ID if selected
+      if (selectedVehicleId !== "") {
+        request.vehicleId = selectedVehicleId as number;
+      }
+
       await allocateStaffForPickup(request);
       onSuccess();
     } catch (err) {
@@ -106,9 +149,11 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
               {error}
             </Alert>
           )}
+
           <Typography variant="subtitle1" gutterBottom>
             Chi tiết lấy hàng
           </Typography>
+
           <Box
             sx={{ mb: 3, p: 2, bgcolor: "background.default", borderRadius: 1 }}
           >
@@ -116,10 +161,11 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
               <strong>Khách hàng:</strong> {pickup.customerName}
             </Typography>
             <Typography variant="body2">
-              <strong>Thiết bị:</strong> {pickup.equipmentName}
+              <strong>Ngày bắt đầu thuê:</strong>{" "}
+              {format(new Date(pickup.rentalStartDate), "MMM dd, yyyy")}
             </Typography>
             <Typography variant="body2">
-              <strong>Ngày trả:</strong>{" "}
+              <strong>Ngày trả dự kiến:</strong>{" "}
               {format(new Date(pickup.expectedReturnDate), "MMM dd, yyyy")}
             </Typography>
             <Typography variant="body2">
@@ -131,6 +177,39 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
               {pickup.customerPhone || "Không cung cấp"}
             </Typography>
           </Box>
+
+          <Typography variant="subtitle1" gutterBottom>
+            Thiết bị cần lấy
+          </Typography>
+
+          <List sx={{ mb: 3, bgcolor: "background.default", borderRadius: 1 }}>
+            {pickup.equipmentItems.map((item) => (
+              <ListItem
+                key={item.detailId}
+                disablePadding // Good practice when ListItemButton is a direct child
+                sx={{
+                  // Your border styling can remain on the ListItem
+                  borderLeft:
+                    selectedDetailId === item.detailId
+                      ? "4px solid #1976d2"
+                      : "4px solid transparent",
+                }}
+              >
+                <ListItemButton
+                  selected={selectedDetailId === item.detailId}
+                  onClick={() => handleDetailSelect(item.detailId)}
+                >
+                  <ListItemText
+                    primary={item.name}
+                    secondary={`Loại: ${item.type} | ID: ${item.id}`}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+
+          <Divider sx={{ my: 2 }} />
+
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel id="staff-select-label">Phân công nhân viên</InputLabel>
             <Select
@@ -157,6 +236,38 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
               )}
             </Select>
           </FormControl>
+
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel id="vehicle-select-label">
+              Phương tiện (tùy chọn)
+            </InputLabel>
+            <Select
+              labelId="vehicle-select-label"
+              value={selectedVehicleId}
+              onChange={handleVehicleChange}
+              label="Phương tiện (tùy chọn)"
+              disabled={vehiclesLoading}
+            >
+              <MenuItem value="">
+                <em>Không sử dụng phương tiện</em>
+              </MenuItem>
+              {vehiclesLoading ? (
+                <MenuItem value="" disabled>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    Đang tải danh sách phương tiện...
+                  </Box>
+                </MenuItem>
+              ) : (
+                vehicles.map((vehicle) => (
+                  <MenuItem key={vehicle.vehicleId} value={vehicle.vehicleId}>
+                    {vehicle.name} ({vehicle.type})
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+
           <TextField
             label="Ghi chú cho nhân viên"
             multiline
@@ -174,7 +285,7 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
           onClick={handleSubmit}
           variant="contained"
           color="primary"
-          disabled={loading || selectedStaffId === ""}
+          disabled={loading || selectedStaffId === "" || !selectedDetailId}
         >
           {loading ? <CircularProgress size={24} /> : "Phân công nhân viên"}
         </Button>

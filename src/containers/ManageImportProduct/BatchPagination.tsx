@@ -37,7 +37,7 @@ export default function BatchPagination({
 
   // Handle page change
   const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
+    _event: React.ChangeEvent<unknown>,
     page: number
   ) => {
     onPageChange(page);

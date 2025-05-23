@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import CTable from "../../components/table/CTable";
@@ -10,6 +11,7 @@ import config from "../../configs";
 import MenuActionTableIngredient from "../../components/menuAction/menuActionTableIngredient/menuActionTableIngredient";
 import useDebounce from "../../hooks/useDebounce";
 import UpdateQuantityModal from "./Modal/ModalUpdateQuantityIngredient";
+import useAuth from "../../hooks/useAuth";
 
 interface SearchToolProps {
   filter: { searchTerm: string };
@@ -34,6 +36,12 @@ const SearchTool: React.FC<SearchToolProps> = ({ filter, setFilter }) => {
 };
 
 const TableIngredients = () => {
+
+    const { auth } = useAuth(); // Get auth context
+  const userRole = auth.user?.role?.toLowerCase() || "";
+  const isAdmin = userRole === "admin";
+  const isManager = userRole === "manager";
+
   const [selectedData, setSelectedData] = useState<Ingredient | null>(null);
   const [size, setSize] = useState<number>(10);
   const [total, setTotal] = useState<number>(0);
@@ -62,13 +70,25 @@ const TableIngredients = () => {
     setSelectedData(row);
   };
 
-  const tableHeader = [
-    { id: "name", label: "Tên nguyên liệu", align: "center" },
-    { id: "imageURL", label: "Hình ảnh", align: "center" },
-    { id: "ingredientTypeName", label: "Loại nguyên liệu", align: "center" },
-    { id: "price", label: "Giá tiền", align: "center", format: "price" },
-    { id: "createdAt", label: "Ngày tạo", align: "center", format: "date" },
-  ];
+  // Define table headers based on user role
+  const getTableHeaders = () => {
+    // Base headers that both admin and manager can see
+    const baseHeaders = [
+      { id: "name", label: "Tên nguyên liệu", align: "center" },
+      { id: "imageURL", label: "Hình ảnh", align: "center" },
+      { id: "ingredientTypeName", label: "Loại nguyên liệu", align: "center" },
+      { id: "quantity", label: "Số lượng", align: "center" },
+    ];
+    // Additional headers only for admin
+    const adminOnlyHeaders = [
+      { id: "price", label: "Giá tiền", align: "center", format: "price" },
+      { id: "createdAt", label: "Ngày tạo", align: "center", format: "date" },
+    ];
+
+    return isAdmin ? [...baseHeaders, ...adminOnlyHeaders] : baseHeaders;
+  };
+
+  const tableHeader = getTableHeaders();
 
   // Fetch ingredient data
 

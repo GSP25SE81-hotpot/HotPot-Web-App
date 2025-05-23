@@ -1,5 +1,4 @@
 import moment from "moment";
-
 export function formatMoney(number: number | undefined) {
   return number?.toLocaleString("it-IT", {
     style: "currency",

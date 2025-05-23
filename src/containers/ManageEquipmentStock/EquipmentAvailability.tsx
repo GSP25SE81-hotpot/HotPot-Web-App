@@ -1,15 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/components/EquipmentAvailability.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import BuildIcon from "@mui/icons-material/Build";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import InfoIcon from "@mui/icons-material/Info";
 import LocalDiningIcon from "@mui/icons-material/LocalDining";
 import SendIcon from "@mui/icons-material/Send";
-import SortIcon from "@mui/icons-material/Sort";
 import {
   Alert,
   Box,
@@ -33,7 +31,6 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
 import React, { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -52,8 +49,6 @@ import {
   PageTitle,
   PaginationContainer,
   QuantityDisplay,
-  SortButtonsContainer,
-  SortingPaper,
   StatusChip,
   StyledCardContent,
 } from "../../components/manager/styles/EquipmentAvailabilityStyles";
@@ -94,13 +89,12 @@ const EquipmentAvailability: React.FC = () => {
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
   const [conditionDialogOpen, setConditionDialogOpen] = useState(false);
   const [selectedCondition, setSelectedCondition] = useState("");
-  // const [notificationsDrawerOpen, setNotificationsDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [sortBy, setSortBy] = useState<keyof Equipment | "">("");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [sortBy, _setSortBy] = useState<keyof Equipment | "">("");
+  const [sortDirection, _setSortDirection] = useState<"asc" | "desc">("asc");
   const [filterType, setFilterType] = useState<"All" | "HotPot" | "Utensil">(
     "All"
   );
@@ -119,12 +113,6 @@ const EquipmentAvailability: React.FC = () => {
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
-
-  const handleSort = (property: keyof Equipment) => {
-    const isAsc = sortBy === property && sortDirection === "asc";
-    setSortDirection(isAsc ? "desc" : "asc");
-    setSortBy(property);
   };
 
   const handleFilterTypeChange = (
@@ -247,7 +235,7 @@ const EquipmentAvailability: React.FC = () => {
 
         if (!hasHotpotData && !hasUtensilData) {
           console.error("No equipment data available from either source");
-          setError("No equipment data available");
+          setError("Không có dữ liệu thiết bị");
           return;
         }
 
@@ -255,7 +243,7 @@ const EquipmentAvailability: React.FC = () => {
         const hotpots: Equipment[] = hasHotpotData
           ? hotpotsResponse.data.map((hotpot: HotPotInventoryDto) => ({
               id: hotpot.hotPotInventoryId,
-              name: hotpot.hotpotName || `HotPot #${hotpot.seriesNumber}`,
+              name: hotpot.hotpotName || `Nồi #${hotpot.seriesNumber}`,
               status: hotpot.status,
               type: "HotPot" as const,
               condition:
@@ -280,7 +268,7 @@ const EquipmentAvailability: React.FC = () => {
         setEquipmentList(combinedEquipment);
       } catch (error) {
         console.error("Error fetching equipment:", error);
-        setError("An error occurred while fetching equipment data");
+        setError("Đã xảy ra lỗi khi tải dữ liệu thiết bị");
       } finally {
         setLoading(false);
       }
@@ -296,6 +284,7 @@ const EquipmentAvailability: React.FC = () => {
           ? "Available"
           : "Unavailable"
         : status;
+
     switch (statusStr) {
       case "Available":
         return <CheckCircleIcon color="success" />;
@@ -363,14 +352,14 @@ const EquipmentAvailability: React.FC = () => {
           await stockService.updateHotPotInventoryStatus(
             selectedEquipment.id,
             newStatus,
-            `Condition changed to ${selectedCondition}`
+            `Tình trạng đã thay đổi thành ${selectedCondition}`
           );
         } else {
           // Update utensil status
           await stockService.updateUtensilStatus(
             selectedEquipment.id,
             selectedCondition === "Good",
-            `Condition changed to ${selectedCondition}`
+            `Tình trạng đã thay đổi thành ${selectedCondition}`
           );
         }
         // Update local state
@@ -385,7 +374,7 @@ const EquipmentAvailability: React.FC = () => {
         // Show notification
         setNotification({
           open: true,
-          message: `${selectedEquipment.name} condition updated to ${selectedCondition}`,
+          message: `Tình trạng của ${selectedEquipment.name} đã cập nhật thành ${selectedCondition}`,
           severity: "success",
         });
         setConditionDialogOpen(false);
@@ -393,7 +382,7 @@ const EquipmentAvailability: React.FC = () => {
         console.error("Error updating equipment condition:", error);
         setNotification({
           open: true,
-          message: "Failed to update equipment condition",
+          message: "Không thể cập nhật tình trạng thiết bị",
           severity: "error",
         });
       } finally {
@@ -423,7 +412,7 @@ const EquipmentAvailability: React.FC = () => {
         // Show success notification
         setNotification({
           open: true,
-          message: "Equipment status report sent to admin successfully",
+          message: "Báo cáo trạng thái thiết bị đã được gửi thành công",
           severity: "success",
         });
         setReportDialogOpen(false);
@@ -431,7 +420,7 @@ const EquipmentAvailability: React.FC = () => {
         console.error("Error sending report:", error);
         setNotification({
           open: true,
-          message: "Failed to send report to admin",
+          message: "Không thể gửi báo cáo đến quản trị viên",
           severity: "error",
         });
       } finally {
@@ -521,13 +510,50 @@ const EquipmentAvailability: React.FC = () => {
     );
   };
 
+  // Translate status to Vietnamese
+  const translateStatus = (status: string | boolean): string => {
+    const statusStr =
+      typeof status === "boolean"
+        ? status
+          ? "Available"
+          : "Unavailable"
+        : status;
+
+    switch (statusStr) {
+      case "Available":
+        return "Có sẵn";
+      case "Rented":
+        return "Đang cho thuê";
+      case "Damaged":
+        return "Hư hỏng";
+      case "Unavailable":
+        return "Không có sẵn";
+      default:
+        return statusStr;
+    }
+  };
+
+  // Translate condition to Vietnamese
+  const translateCondition = (condition: string): string => {
+    switch (condition) {
+      case "Good":
+        return "Tốt";
+      case "Needs Maintenance":
+        return "Cần bảo trì";
+      case "Damaged":
+        return "Hư hỏng";
+      default:
+        return condition;
+    }
+  };
+
   return (
     <EquipmentContainer>
       <ToastContainer position="top-right" autoClose={5000} />
       <Stack spacing={4}>
         <HeaderContainer>
           <PageTitle variant="h4" component="h1">
-            Dụng cụ thuê
+            Quản lý thiết bị
           </PageTitle>
           <Stack
             direction={{ xs: "column", sm: "row" }}
@@ -542,180 +568,31 @@ const EquipmentAvailability: React.FC = () => {
                   isEquipmentAvailable(e.status)
                 ).length
               }{" "}
-              of {getFilteredAndSortedEquipment().length} mặt hàng có sẵn để cho
-              thuê
+              trong số {getFilteredAndSortedEquipment().length} mặt hàng có sẵn
+              để cho thuê
             </Typography>
-            <Stack direction="row" spacing={2}>
-              <Button
-                variant="outlined"
-                startIcon={<FilterListIcon />}
-                onClick={() => setFilterDialogOpen(true)}
-                sx={{
-                  borderRadius: (theme) => theme.shape.borderRadius * 2,
-                  px: 2,
-                }}
-              >
-                Lọc
-              </Button>
-              {/* <Button
-                variant="contained"
-                startIcon={<NotificationsIcon />}
-                onClick={sendOverallStatusReport}
-                disabled={loading}
-                sx={{
-                  borderRadius: (theme) => theme.shape.borderRadius * 2,
-                  px: 2,
-                }}
-              >
-                Báo cáo trạng thái thiết bị
-              </Button> */}
-              {/* <IconButton
-                color="primary"
-                onClick={toggleNotificationsDrawer}
-                sx={{
-                  bgcolor: (theme) => theme.palette.action.hover,
-                  borderRadius: "50%",
-                }}
-              ></IconButton> */}
-            </Stack>
+            <Button
+              variant="outlined"
+              startIcon={<FilterListIcon />}
+              onClick={() => setFilterDialogOpen(true)}
+              sx={{
+                borderRadius: (theme) => theme.shape.borderRadius * 2,
+                px: 2,
+              }}
+            >
+              Lọc
+            </Button>
           </Stack>
-          {/* Sorting controls */}
-          <SortingPaper>
-            <Grid container spacing={2} alignItems="center">
-              <Grid>
-                <Typography variant="subtitle1">
-                  <SortIcon
-                    fontSize="small"
-                    sx={{ verticalAlign: "middle", mr: 1 }}
-                  />
-                  Sắp xếp theo:
-                </Typography>
-              </Grid>
-              <Grid>
-                <SortButtonsContainer>
-                  <Button
-                    onClick={() => handleSort("name")}
-                    color={sortBy === "name" ? "primary" : "inherit"}
-                    endIcon={
-                      sortBy === "name" ? (
-                        sortDirection === "asc" ? (
-                          <ArrowUpwardIcon />
-                        ) : (
-                          <ArrowDownwardIcon />
-                        )
-                      ) : null
-                    }
-                    sx={{
-                      borderRadius: (theme) => theme.shape.borderRadius * 2,
-                      ...(sortBy === "name" && {
-                        bgcolor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.primary.dark
-                            : theme.palette.primary.light,
-                        color: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.primary.contrastText
-                            : theme.palette.primary.main,
-                      }),
-                    }}
-                  >
-                    Tên
-                  </Button>
-                  <Button
-                    onClick={() => handleSort("type")}
-                    color={sortBy === "type" ? "primary" : "inherit"}
-                    endIcon={
-                      sortBy === "type" ? (
-                        sortDirection === "asc" ? (
-                          <ArrowUpwardIcon />
-                        ) : (
-                          <ArrowDownwardIcon />
-                        )
-                      ) : null
-                    }
-                    sx={{
-                      borderRadius: (theme) => theme.shape.borderRadius * 2,
-                      ...(sortBy === "type" && {
-                        bgcolor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.primary.dark
-                            : theme.palette.primary.light,
-                        color: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.primary.contrastText
-                            : theme.palette.primary.main,
-                      }),
-                    }}
-                  >
-                    Loại
-                  </Button>
-                  <Button
-                    onClick={() => handleSort("status")}
-                    color={sortBy === "status" ? "primary" : "inherit"}
-                    endIcon={
-                      sortBy === "status" ? (
-                        sortDirection === "asc" ? (
-                          <ArrowUpwardIcon />
-                        ) : (
-                          <ArrowDownwardIcon />
-                        )
-                      ) : null
-                    }
-                    sx={{
-                      borderRadius: (theme) => theme.shape.borderRadius * 2,
-                      ...(sortBy === "status" && {
-                        bgcolor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.primary.dark
-                            : theme.palette.primary.light,
-                        color: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.primary.contrastText
-                            : theme.palette.primary.main,
-                      }),
-                    }}
-                  >
-                    Trạng thái
-                  </Button>
-                  <Button
-                    onClick={() => handleSort("condition")}
-                    color={sortBy === "condition" ? "primary" : "inherit"}
-                    endIcon={
-                      sortBy === "condition" ? (
-                        sortDirection === "asc" ? (
-                          <ArrowUpwardIcon />
-                        ) : (
-                          <ArrowDownwardIcon />
-                        )
-                      ) : null
-                    }
-                    sx={{
-                      borderRadius: (theme) => theme.shape.borderRadius * 2,
-                      ...(sortBy === "condition" && {
-                        bgcolor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.primary.dark
-                            : theme.palette.primary.light,
-                        color: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? theme.palette.primary.contrastText
-                            : theme.palette.primary.main,
-                      }),
-                    }}
-                  >
-                    Tình trạng
-                  </Button>
-                </SortButtonsContainer>
-              </Grid>
-            </Grid>
-          </SortingPaper>
+
           {/* Filter chips */}
           {(filterType !== "All" || filterStatus !== "All") && (
             <FilterChipsContainer>
               <Stack direction="row" spacing={1}>
                 {filterType !== "All" && (
                   <FilterChip
-                    label={`Loại: ${filterType}`}
+                    label={`Loại: ${
+                      filterType === "HotPot" ? "Nồi lẩu" : "Dụng cụ"
+                    }`}
                     onDelete={() => setFilterType("All")}
                     color="primary"
                     variant="outlined"
@@ -754,11 +631,13 @@ const EquipmentAvailability: React.FC = () => {
             <CircularProgress />
           </Box>
         )}
+
         {error && (
           <Alert severity="error" sx={{ my: 2 }}>
             {error}
           </Alert>
         )}
+
         {!loading && !error && getCurrentPageEquipment().length === 0 && (
           <EmptyStateContainer>
             <InfoIcon
@@ -783,6 +662,7 @@ const EquipmentAvailability: React.FC = () => {
             </Button>
           </EmptyStateContainer>
         )}
+
         {!loading && !error && getCurrentPageEquipment().length > 0 && (
           <>
             <Stack spacing={2}>
@@ -807,13 +687,7 @@ const EquipmentAvailability: React.FC = () => {
                           <EquipmentDetailsStack>
                             <StatusChip
                               icon={getStatusIcon(equipment.status)}
-                              label={
-                                typeof equipment.status === "boolean"
-                                  ? equipment.status
-                                    ? "Available"
-                                    : "Unavailable"
-                                  : equipment.status
-                              }
+                              label={translateStatus(equipment.status)}
                               size="small"
                               variant="outlined"
                               isAvailable={isEquipmentAvailable(
@@ -823,7 +697,7 @@ const EquipmentAvailability: React.FC = () => {
                             {equipment.condition && (
                               <ConditionChip
                                 icon={getConditionIcon(equipment.condition)}
-                                label={equipment.condition}
+                                label={translateCondition(equipment.condition)}
                                 size="small"
                                 variant="outlined"
                                 condition={equipment.condition}
@@ -866,7 +740,7 @@ const EquipmentAvailability: React.FC = () => {
                               spacing={2}
                               alignItems="center"
                             >
-                              <Tooltip title="Equipment Type">
+                              <Tooltip title="Loại thiết bị">
                                 <Stack
                                   direction="row"
                                   spacing={1}
@@ -896,6 +770,7 @@ const EquipmentAvailability: React.FC = () => {
                 </EquipmentCard>
               ))}
             </Stack>
+
             {/* Pagination controls */}
             <PaginationContainer>
               <TablePagination
@@ -916,7 +791,7 @@ const EquipmentAvailability: React.FC = () => {
         )}
       </Stack>
 
-      {/* Report Dialog */}
+      {/* Simplified Report Dialog */}
       <Dialog
         open={reportDialogOpen}
         onClose={() => setReportDialogOpen(false)}
@@ -975,7 +850,7 @@ const EquipmentAvailability: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Condition Update Dialog */}
+      {/* Simplified Condition Update Dialog */}
       <Dialog
         open={conditionDialogOpen}
         onClose={() => setConditionDialogOpen(false)}
@@ -1032,7 +907,7 @@ const EquipmentAvailability: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Filter Dialog */}
+      {/* Simplified Filter Dialog */}
       <Dialog
         open={filterDialogOpen}
         onClose={() => setFilterDialogOpen(false)}
@@ -1046,13 +921,20 @@ const EquipmentAvailability: React.FC = () => {
         <DialogTitle>Lọc thiết bị</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1, minWidth: 300 }}>
-            <FormControl component="fieldset">
-              <Typography variant="subtitle1">Loại thiết bị</Typography>
-              <RadioGroup value={filterType} onChange={handleFilterTypeChange}>
+            {/* Simplified Type Filter */}
+            <Box>
+              <Typography variant="subtitle1" gutterBottom>
+                Loại thiết bị
+              </Typography>
+              <RadioGroup
+                value={filterType}
+                onChange={handleFilterTypeChange}
+                row
+              >
                 <FormControlLabel
                   value="All"
                   control={<Radio />}
-                  label="Tất cả loại"
+                  label="Tất cả"
                 />
                 <FormControlLabel
                   value="HotPot"
@@ -1065,17 +947,22 @@ const EquipmentAvailability: React.FC = () => {
                   label="Dụng cụ"
                 />
               </RadioGroup>
-            </FormControl>
-            <FormControl component="fieldset">
-              <Typography variant="subtitle1">Trạng thái</Typography>
+            </Box>
+
+            {/* Simplified Status Filter */}
+            <Box>
+              <Typography variant="subtitle1" gutterBottom>
+                Trạng thái
+              </Typography>
               <RadioGroup
                 value={filterStatus}
                 onChange={handleFilterStatusChange}
+                row
               >
                 <FormControlLabel
                   value="All"
                   control={<Radio />}
-                  label="Tất cả trạng thái"
+                  label="Tất cả"
                 />
                 <FormControlLabel
                   value="Available"
@@ -1088,18 +975,33 @@ const EquipmentAvailability: React.FC = () => {
                   label="Không có sẵn"
                 />
               </RadioGroup>
-            </FormControl>
+            </Box>
           </Stack>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button
+            onClick={() => {
+              setFilterType("All");
+              setFilterStatus("All");
+              setFilterDialogOpen(false);
+            }}
+            sx={{
+              borderRadius: (theme) => theme.shape.borderRadius * 2,
+              textTransform: "none",
+            }}
+          >
+            Đặt lại
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() => setFilterDialogOpen(false)}
             sx={{
               borderRadius: (theme) => theme.shape.borderRadius * 2,
               textTransform: "none",
             }}
           >
-            Đóng
+            Áp dụng
           </Button>
         </DialogActions>
       </Dialog>
