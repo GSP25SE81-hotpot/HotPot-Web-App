@@ -128,11 +128,11 @@ export const menuItems: MenuItemLayout[] = [
             icon: <AssignmentIcon />,
             path: managerRoutes.equipmentConditionLog,
           },
-          {
-            label: "Quản lý thay thế thiết bị",
-            icon: <SwapHorizIcon />,
-            path: managerRoutes.manageReplacement,
-          },
+          // {
+          //   label: "Quản lý thay thế thiết bị",
+          //   icon: <SwapHorizIcon />,
+          //   path: managerRoutes.manageReplacement,
+          // },
           {
             label: "Quản lý xe",
             icon: <SwapHorizIcon />,

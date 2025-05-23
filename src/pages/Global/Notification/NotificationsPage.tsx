@@ -231,8 +231,6 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
     }
   };
 
-  // --- END OF REVISED fetchNotifications FUNCTION ---
-
   const fetchUnreadCount = async (): Promise<void> => {
     try {
       const count = await notificationService.getUnreadCount(); // Assuming getUnreadCount is also fixed
@@ -284,8 +282,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
   const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
     // Optionally, you could re-fetch notifications or unread count when menu is opened
-    // fetchNotifications();
-    // fetchUnreadCount();
+    fetchNotifications();
+    fetchUnreadCount();
   };
 
   const handleClose = (): void => {

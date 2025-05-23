@@ -125,7 +125,7 @@ const OrdersByStatusList: React.FC = () => {
     message: "",
     severity: "success" as "success" | "error",
   });
-  const debouncedSearchTerm = useDebounce(searchTerm, 100);
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Map tab index to order status
   const tabToStatus = [
