@@ -34,6 +34,22 @@ import NotificationCenter from "../../../../pages/Global/Notification/Notificati
 
 export const drawerWidth = 280;
 
+type RoleTranslations = {
+  [key: string]: string;
+};
+
+// Role translation mapping
+const roleTranslations: RoleTranslations = {
+  Staff: "Nhân viên",
+  Manager: "Quản lý",
+  Admin: "Quản trị viên",
+};
+
+const translateRole = (role: string | undefined): string => {
+  if (!role) return "";
+  return roleTranslations[role] || role;
+};
+
 interface SidebarDrawerProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -97,6 +113,9 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
   const currentRoleMenuItems =
     menuItems.find((item) => item.role == role)?.menu || [];
 
+  // Translate the role for display
+  const translatedRole = translateRole(userData?.role);
+
   return (
     <>
       <AppBar
@@ -127,12 +146,10 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
             <LogoContainer />
           </Box>
           <Box sx={{ flexGrow: 1 }} />
-
           {/* Notification Center Component */}
           <Box sx={{ mr: 2 }}>
             <NotificationCenter userId={userData?.id} />
           </Box>
-
           {/* User profile section */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Chip
@@ -209,7 +226,7 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
             Xin chào, {userData?.name}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {userData?.role}
+            {translatedRole}
           </Typography>
         </Box>
         <Divider sx={{ my: 2 }} />

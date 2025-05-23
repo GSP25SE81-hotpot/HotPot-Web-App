@@ -408,7 +408,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
             <MenuItem onClick={markAllAsRead} sx={{ justifyContent: "center" }}>
               Đánh dấu tất cả đã đọc
             </MenuItem>
-            <MenuItem
+            {/* <MenuItem
               onClick={() => {
                 window.location.href = "/notifications"; // Or use react-router navigation
                 handleClose();
@@ -416,7 +416,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
               sx={{ justifyContent: "center" }}
             >
               Xem tất cả thông báo
-            </MenuItem>
+            </MenuItem> */}
           </>
         )}
       </Menu>
