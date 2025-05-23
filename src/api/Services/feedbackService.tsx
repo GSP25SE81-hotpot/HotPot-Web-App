@@ -3,18 +3,6 @@ import axiosClient from "../axiosInstance";
 // import { feedbackHubService } from "./hubServices";
 const API_URL = "manager/feedback";
 
-// Updated to match backend UserInfoDto
-export interface UserInfoDto {
-  userId: number;
-  name: string;
-  email: string;
-}
-
-// Updated to match backend OrderInfoDto
-export interface OrderInfoDto {
-  orderId: number;
-}
-
 // Updated to match backend ApiResponse
 export interface ApiResponse<T> {
   success: boolean;
@@ -22,56 +10,18 @@ export interface ApiResponse<T> {
   data: T | null;
 }
 
-export enum FeedbackApprovalStatus {
-  Pending = "Pending",
-  Approved = "Approved",
-  Rejected = "Rejected",
-  Unknown = "string", // handle the placeholder case
-}
-
-// Updated to match backend ManagerFeedbackListDto
-export interface ManagerFeedbackListDto {
+// Updated to match backend FeedbackListDto
+export interface FeedbackListDto {
   feedbackId: number;
-  title: string;
-  comment: string;
+  userName: string;
+  orderId: number;
   createdAt: Date;
-  approvalStatus: FeedbackApprovalStatus;
-  hasResponse: boolean;
-  responseDate?: Date;
-  user: UserInfoDto;
-  order: OrderInfoDto;
-}
-
-// Updated to match backend ManagerFeedbackDetailDto
-export interface ManagerFeedbackDetailDto {
-  feedbackId: number;
-  title: string;
-  comment: string;
-  imageURLs: string[];
-  createdAt: Date;
-  approvalStatus: FeedbackApprovalStatus;
-  response: string;
-  responseDate?: Date;
-  user: UserInfoDto;
-  manager?: UserInfoDto;
-  order: OrderInfoDto;
-}
-
-// Updated to match backend RespondToFeedbackRequest
-export interface RespondToFeedbackRequest {
-  managerId: number;
-  response: string;
 }
 
 // Updated to match backend FeedbackStats
 export interface FeedbackStats {
   totalFeedbackCount: number;
-  pendingFeedbackCount: number;
-  approvedFeedbackCount: number;
-  rejectedFeedbackCount: number;
-  unrespondedFeedbackCount: number;
-  respondedFeedbackCount: number;
-  responseRate: number;
+  // Add other stats properties as needed
 }
 
 // Updated to match backend PagedResult
@@ -82,95 +32,59 @@ export interface PagedResult<T> {
   pageSize: number;
 }
 
+// New interface to match backend FeedbackFilterRequest
+export interface FeedbackFilterRequest {
+  pageNumber?: number;
+  pageSize?: number;
+  userId?: number;
+  orderId?: number;
+  fromDate?: Date;
+  toDate?: Date;
+  sortBy?: string;
+  ascending?: boolean;
+  searchTerm?: string;
+}
+
 const feedbackService = {
-  // Get all approved feedback
-  getAllFeedback: async (
-    pageNumber: number = 1,
-    pageSize: number = 10
-  ): Promise<ApiResponse<PagedResult<ManagerFeedbackListDto>>> => {
+  // Get filtered feedback with various options
+  getFilteredFeedback: async (
+    filterRequest: FeedbackFilterRequest = {}
+  ): Promise<ApiResponse<PagedResult<FeedbackListDto>>> => {
     try {
+      // Set default values if not provided
+      const pageNumber = filterRequest.pageNumber || 1;
+      const pageSize = filterRequest.pageSize || 10;
+
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      queryParams.append("pageNumber", pageNumber.toString());
+      queryParams.append("pageSize", pageSize.toString());
+
+      // Add optional filter parameters
+      if (filterRequest.userId)
+        queryParams.append("userId", filterRequest.userId.toString());
+      if (filterRequest.orderId)
+        queryParams.append("orderId", filterRequest.orderId.toString());
+      if (filterRequest.fromDate)
+        queryParams.append("fromDate", filterRequest.fromDate.toISOString());
+      if (filterRequest.toDate)
+        queryParams.append("toDate", filterRequest.toDate.toISOString());
+      if (filterRequest.sortBy)
+        queryParams.append("sortBy", filterRequest.sortBy);
+      if (filterRequest.ascending !== undefined)
+        queryParams.append("ascending", filterRequest.ascending.toString());
+      if (filterRequest.searchTerm)
+        queryParams.append("searchTerm", filterRequest.searchTerm);
+
       // Explicitly type the axios call to match our expected return type
       const response = await axiosClient.get<
         any,
-        ApiResponse<PagedResult<ManagerFeedbackListDto>>
-      >(`${API_URL}?pageNumber=${pageNumber}&pageSize=${pageSize}`);
+        ApiResponse<PagedResult<FeedbackListDto>>
+      >(`${API_URL}?${queryParams.toString()}`);
 
-      // Now TypeScript knows that response is already of type ApiResponse<PagedResult<ManagerFeedbackListDto>>
       return response;
     } catch (error) {
-      console.error("Error fetching all feedback:", error);
-      throw error;
-    }
-  },
-
-  // Get unresponded feedback
-  getUnrespondedFeedback: async (
-    pageNumber: number = 1,
-    pageSize: number = 10
-  ): Promise<ApiResponse<PagedResult<ManagerFeedbackListDto>>> => {
-    try {
-      // Use the correct type for the axios response
-      const response = await axiosClient.get<
-        any,
-        ApiResponse<PagedResult<ManagerFeedbackListDto>>
-      >(`${API_URL}/unresponded?pageNumber=${pageNumber}&pageSize=${pageSize}`);
-
-      // Return the data property which should match our expected type
-      return response;
-    } catch (error) {
-      console.error("Error fetching unresponded feedback:", error);
-      throw new Error("Failed to fetch unresponded feedback");
-    }
-  },
-
-  // Get feedback by user ID
-  getFeedbackByUserId: async (
-    userId: number,
-    pageNumber: number = 1,
-    pageSize: number = 10
-  ): Promise<ApiResponse<PagedResult<ManagerFeedbackListDto>>> => {
-    try {
-      const response = await axiosClient.get<
-        any,
-        ApiResponse<PagedResult<ManagerFeedbackListDto>>
-      >(
-        `${API_URL}/user/${userId}?pageNumber=${pageNumber}&pageSize=${pageSize}`
-      );
-      return response;
-    } catch (error) {
-      console.error(`Error fetching feedback for user ${userId}:`, error);
-      throw error;
-    }
-  },
-
-  // Get feedback by order ID
-  getFeedbackByOrderId: async (
-    orderId: number
-  ): Promise<ApiResponse<ManagerFeedbackListDto[]>> => {
-    try {
-      const response = await axiosClient.get<
-        any,
-        ApiResponse<ManagerFeedbackListDto[]>
-      >(`${API_URL}/order/${orderId}`);
-      return response;
-    } catch (error) {
-      console.error(`Error fetching feedback for order ${orderId}:`, error);
-      throw error;
-    }
-  },
-
-  // Get feedback by ID
-  getFeedbackById: async (
-    feedbackId: number
-  ): Promise<ApiResponse<ManagerFeedbackDetailDto>> => {
-    try {
-      const response = await axiosClient.get<
-        any,
-        ApiResponse<ManagerFeedbackDetailDto>
-      >(`${API_URL}/${feedbackId}`);
-      return response;
-    } catch (error) {
-      console.error(`Error fetching feedback ${feedbackId}:`, error);
+      console.error("Error fetching filtered feedback:", error);
       throw error;
     }
   },
@@ -184,35 +98,6 @@ const feedbackService = {
       return response;
     } catch (error) {
       console.error("Error fetching feedback stats:", error);
-      throw error;
-    }
-  },
-
-  // Respond to feedback
-  respondToFeedback: async (
-    feedbackId: number,
-    request: RespondToFeedbackRequest
-    // userInfo: { userId: number; name: string }
-  ): Promise<ApiResponse<ManagerFeedbackDetailDto>> => {
-    try {
-      const response = await axiosClient.post(
-        `${API_URL}/${feedbackId}/respond`,
-        request
-      );
-
-      // If the response is successful and we have the customer's user ID
-      // if (response.data.success && response.data.data?.user?.userId) {
-      //   // Send a real-time notification to the customer using the imported feedbackHubService
-      //   await feedbackHubService.notifyFeedbackResponse(
-      //     response.data.data.user.userId,
-      //     feedbackId,
-      //     request.response,
-      //     userInfo.name
-      //   );
-      // }
-      return response.data;
-    } catch (error) {
-      console.error(`Error responding to feedback ${feedbackId}:`, error);
       throw error;
     }
   },

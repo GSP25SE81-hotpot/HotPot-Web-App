@@ -9,56 +9,58 @@ import {
   FeedbackNotificationData,
   ReplacementRequestNotificationData,
   RentalNotificationData,
+  PaginatedNotificationsResponse,
 } from "../../types/notificationTypes";
 
 class NotificationService {
   // Fetch all notifications with optional filtering
   async getNotifications(
     params: GetNotificationsParams = {}
-  ): Promise<Notification[]> {
+  ): Promise<PaginatedNotificationsResponse> {
     try {
       const { includeRead = false, page = 1, pageSize = 20 } = params;
-      const response = await axiosClient.get("/notifications", {
-        params: { includeRead, page, pageSize },
+
+      console.log("Requesting notifications with params:", {
+        includeRead,
+        page,
+        pageSize,
       });
 
-      // Handle different response structures
-      if (response.data) {
-        // Case 1: If response.data is an array, return it directly
-        if (Array.isArray(response.data)) {
-          return response.data;
-        }
+      const config = {
+        params: { includeRead, page, pageSize },
+        timeout: 10000,
+        headers: {
+          Accept: "application/json",
+        },
+      };
 
-        // Case 2: If response.data has a notifications property that is an array
-        if (
-          response.data.notifications &&
-          Array.isArray(response.data.notifications)
-        ) {
-          return response.data.notifications;
-        }
+      console.log("Making request to:", "/notifications", config);
 
-        // Case 3: If response.data is an object with a data property that contains notifications
-        if (
-          response.data.data &&
-          Array.isArray(response.data.data.notifications)
-        ) {
-          return response.data.data.notifications;
-        }
+      // Since axiosClient.interceptors.response.use() returns response.data directly,
+      // the 'apiData' here is already the data part, not the full axios response
+      const apiData = await axiosClient.get<
+        any,
+        PaginatedNotificationsResponse,
+        any
+      >("/notifications", config);
 
-        // Case 4: If response.data.data is an array
-        if (response.data.data && Array.isArray(response.data.data)) {
-          return response.data.data;
-        }
+      console.log("API data received for notifications:", apiData); // Updated log message for clarity
 
-        // Log the actual response structure for debugging
-        console.log("Unexpected API response structure:", response.data);
-      }
-
-      // Default to empty array if we can't find notifications
-      return [];
+      // Return the apiData directly since it's already the PaginatedNotificationsResponse we need
+      return apiData; // <--- CORRECTED LINE
     } catch (error) {
       console.error("Error fetching notifications:", error);
-      throw error;
+
+      return {
+        notifications: [],
+        currentPage: params.page || 1,
+        pageSize: params.pageSize || 20,
+        hasPreviousPage: (params.page || 1) > 1,
+        // Consider adding other default fields from PaginatedNotificationsResponse if necessary
+        // totalPages: 0,
+        // totalCount: 0,
+        // hasNextPage: false,
+      };
     }
   }
 
@@ -154,7 +156,7 @@ class NotificationService {
       case NotificationType.FeedbackResponse:
         if (hasFeedbackData(notification.data)) {
           // Navigate to feedback details
-          window.location.href = `/feedback/${notification.data.feedbackId}`;
+          window.location.href = `/feedback`;
         }
         break;
 

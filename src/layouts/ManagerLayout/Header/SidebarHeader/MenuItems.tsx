@@ -7,7 +7,7 @@ import {
 } from "@mui/icons-material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import EngineeringIcon from "@mui/icons-material/Engineering";
-// import FeedbackIcon from "@mui/icons-material/Feedback";
+import FeedbackIcon from "@mui/icons-material/Feedback";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -160,6 +160,11 @@ export const menuItems: MenuItemLayout[] = [
         //     path: managerRoutes.workAssignment,
         //   },
         // ],
+      },
+      {
+        label: "Xem phản hồi",
+        icon: <FeedbackIcon />,
+        path: managerRoutes.feedbackManagement,
       },
       {
         label: "Dịch vụ khách hàng",
