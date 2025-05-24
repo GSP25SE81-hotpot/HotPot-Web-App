@@ -17,7 +17,7 @@ class SignalRService {
       this.connection = new HubConnectionBuilder()
         // https://localhost:7163
         // https://hpty.vinhuser.one
-        .withUrl("https://localhost:7163/chatHub") // Sử dụng endpoint đã cấu hình trong backend
+        .withUrl("https://hpty.vinhuser.one/chatHub") // Sử dụng endpoint đã cấu hình trong backend
         .configureLogging(LogLevel.Information)
         .withAutomaticReconnect([0, 2000, 5000, 10000, 30000]) // Thử kết nối lại với thời gian chờ tăng dần
         .build();
