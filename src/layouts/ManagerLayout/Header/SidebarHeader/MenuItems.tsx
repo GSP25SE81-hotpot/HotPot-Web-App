@@ -222,12 +222,12 @@ export const menuItems: MenuItemLayout[] = [
         path: staffRoutes.shippingOrder,
       },
       //dashboard
-      {
-        icon: <DashboardIcon />,
-        label: "Công việc",
-        path: config.staffRoutes.staffMyAssignment,
-        // role: AccessType.ADMIN_ACCESS,
-      },
+      // {
+      //   icon: <DashboardIcon />,
+      //   label: "Công việc",
+      //   path: config.staffRoutes.staffMyAssignment,
+      //   // role: AccessType.ADMIN_ACCESS,
+      // },
       {
         label: "Quản lý thanh toán",
         icon: <PaymentIcon />,
@@ -240,11 +240,11 @@ export const menuItems: MenuItemLayout[] = [
         path: staffRoutes.pickupRental,
       },
       // Order History
-      {
-        label: "Lịch sử đơn hàng",
-        icon: <Iconify icon="mdi:history" />,
-        path: staffRoutes.orderHistory,
-      },
+      // {
+      //   label: "Lịch sử đơn hàng",
+      //   icon: <Iconify icon="mdi:history" />,
+      //   path: staffRoutes.orderHistory,
+      // },
     ],
   },
 ];

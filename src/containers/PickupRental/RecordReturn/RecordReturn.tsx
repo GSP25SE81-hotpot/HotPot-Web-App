@@ -31,10 +31,11 @@ import {
 } from "../../../components/StyledComponents";
 import { useApi } from "../../../hooks/useApi";
 import { formatDate } from "../../../utils/formatters";
+import { UnifiedReturnRequest } from "../../../types/rentalPickup";
 
 interface LocationState {
   assignmentId?: number;
-  rentOrderDetailId?: number;
+  rentOrderId?: number;
   customerName: string;
   equipmentName: string;
   expectedReturnDate: string;
@@ -60,9 +61,10 @@ const RecordReturn: React.FC = () => {
     message: "",
     severity: "success" as "success" | "error",
   });
-  const { loading, error } = useApi(rentalService.recordReturn);
 
-  if (!state || (!state.assignmentId && !state.rentOrderDetailId)) {
+  const { loading, error, execute } = useApi(rentalService.recordReturn);
+
+  if (!state || (!state.assignmentId && !state.rentOrderId)) {
     return (
       <StyledContainer maxWidth="md">
         <Box sx={{ mt: 4, mb: 4 }}>
@@ -113,15 +115,37 @@ const RecordReturn: React.FC = () => {
     }
 
     try {
-      setSnackbar({
-        open: true,
-        message: "Đã ghi nhận trả thành công",
-        severity: "success",
-      });
-      // Điều hướng trở lại sau một khoảng thời gian ngắn
-      setTimeout(() => {
-        navigate(-1);
-      }, 2000);
+      // Create the return request object
+      const returnRequest: UnifiedReturnRequest = {
+        assignmentId: state.assignmentId,
+        rentOrderId: state.rentOrderId,
+        completedDate: returnDate,
+        returnCondition: returnCondition,
+        damageFee: damageFee ? parseFloat(damageFee) : undefined,
+        notes: notes,
+      };
+
+      // Call the API
+      const response = await execute(returnRequest);
+
+      if (response && response.success) {
+        setSnackbar({
+          open: true,
+          message: response.message || "Đã ghi nhận trả thành công",
+          severity: "success",
+        });
+
+        // Navigate back after a short delay
+        setTimeout(() => {
+          navigate(-1);
+        }, 2000);
+      } else {
+        setSnackbar({
+          open: true,
+          message: response?.message || "Không thể ghi nhận trả",
+          severity: "error",
+        });
+      }
     } catch (err) {
       setSnackbar({
         open: true,
@@ -146,7 +170,6 @@ const RecordReturn: React.FC = () => {
             Ghi nhận trả thiết bị
           </SectionHeading>
         </Box>
-
         <StyledCard elevation={2} sx={{ mb: 4 }}>
           <Box sx={{ p: 3 }}>
             <CardTitle variant="h6" gutterBottom>
@@ -201,13 +224,12 @@ const RecordReturn: React.FC = () => {
                 <Typography variant="body1" fontWeight={600}>
                   {state.assignmentId
                     ? `Nhiệm vụ #${state.assignmentId}`
-                    : `Thuê #${state.rentOrderDetailId}`}
+                    : `Thuê #${state.rentOrderId}`}
                 </Typography>
               </Grid>
             </Grid>
           </Box>
         </StyledCard>
-
         <StyledPaper elevation={2}>
           <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
             <CardTitle variant="h6" gutterBottom>
@@ -224,7 +246,11 @@ const RecordReturn: React.FC = () => {
                   onChange={(e) => setReturnDate(e.target.value)}
                   error={!!errors.returnDate}
                   helperText={errors.returnDate}
-                  InputLabelProps={{ shrink: true }}
+                  slotProps={{
+                    inputLabel: {
+                      shrink: true,
+                    },
+                  }}
                   required
                 />
               </Grid>
@@ -311,7 +337,6 @@ const RecordReturn: React.FC = () => {
           </Box>
         </StyledPaper>
       </Box>
-
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

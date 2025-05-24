@@ -108,7 +108,7 @@ const EquipmentConditionLog: React.FC = () => {
   // Định nghĩa các cột có thể sắp xếp
   const columns: ColumnConfig[] = [
     { field: "damageDeviceId", label: "ID", sortable: true },
-    { field: "name", label: "Tên", sortable: false },
+    { field: "name", label: "Vấn đề", sortable: false },
     { field: "equipmentName", label: "Tên thiết bị", sortable: false },
     { field: "loggedDate", label: "Ngày ghi nhận", sortable: true },
     { field: "status", label: "Trạng thái", sortable: true },
@@ -292,43 +292,43 @@ const EquipmentConditionLog: React.FC = () => {
   };
 
   // Xử lý cập nhật trạng thái
-  const handleStatusUpdate = async (
-    id: number,
-    newStatus: MaintenanceStatus
-  ) => {
-    try {
-      setLoading(true);
-      const response = await equipmentConditionService.updateConditionStatus(
-        id,
-        newStatus
-      );
-      if (response.success) {
-        // Cập nhật trạng thái cục bộ để phản ánh sự thay đổi
-        setConditionLogs((prev) =>
-          prev.map((log) =>
-            log.damageDeviceId === id ? { ...log, status: newStatus } : log
-          )
-        );
-        // Hiển thị thông báo thành công
-        setSuccessMessage(
-          `Trạng thái đã được cập nhật thành công thành ${getStatusText(
-            newStatus
-          )}`
-        );
-        // Xóa thông báo thành công sau 5 giây
-        setTimeout(() => {
-          setSuccessMessage(null);
-        }, 5000);
-      } else {
-        setError(response.message || "Không thể cập nhật trạng thái");
-      }
-    } catch (err) {
-      setError("Đã xảy ra lỗi khi cập nhật trạng thái");
-      console.error("Lỗi khi cập nhật trạng thái:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleStatusUpdate = async (
+  //   id: number,
+  //   newStatus: MaintenanceStatus
+  // ) => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await equipmentConditionService.updateConditionStatus(
+  //       id,
+  //       newStatus
+  //     );
+  //     if (response.success) {
+  //       // Cập nhật trạng thái cục bộ để phản ánh sự thay đổi
+  //       setConditionLogs((prev) =>
+  //         prev.map((log) =>
+  //           log.damageDeviceId === id ? { ...log, status: newStatus } : log
+  //         )
+  //       );
+  //       // Hiển thị thông báo thành công
+  //       setSuccessMessage(
+  //         `Trạng thái đã được cập nhật thành công thành ${getStatusText(
+  //           newStatus
+  //         )}`
+  //       );
+  //       // Xóa thông báo thành công sau 5 giây
+  //       setTimeout(() => {
+  //         setSuccessMessage(null);
+  //       }, 5000);
+  //     } else {
+  //       setError(response.message || "Không thể cập nhật trạng thái");
+  //     }
+  //   } catch (err) {
+  //     setError("Đã xảy ra lỗi khi cập nhật trạng thái");
+  //     console.error("Lỗi khi cập nhật trạng thái:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleNotificationSubmit = async (description: string) => {
     if (!currentNotificationLog) return;
@@ -560,7 +560,7 @@ const EquipmentConditionLog: React.FC = () => {
                             >
                               Xem chi tiết
                             </StyledButton>
-                            {log.status !== MaintenanceStatus.Cancelled &&
+                            {/* {log.status !== MaintenanceStatus.Cancelled &&
                               log.status !== MaintenanceStatus.Completed && (
                                 <StyledButton
                                   size="small"
@@ -575,7 +575,7 @@ const EquipmentConditionLog: React.FC = () => {
                                 >
                                   Đánh dấu hoàn thành
                                 </StyledButton>
-                              )}
+                              )} */}
                           </Box>
                         </TableCell>
                       </TableRow>
