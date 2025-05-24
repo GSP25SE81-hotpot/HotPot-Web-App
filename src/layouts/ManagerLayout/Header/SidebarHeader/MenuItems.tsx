@@ -140,7 +140,19 @@ export const menuItems: MenuItemLayout[] = [
       {
         label: "Quản lý đơn hàng",
         icon: <ListAltIcon />,
-        path: managerRoutes.manageOrder,
+        path: "#",
+        children: [
+          {
+            label: "Quản lý giao hàng",
+            icon: <ListAltIcon />,
+            path: managerRoutes.manageOrder,
+          },
+          {
+            label: "Quản lý trả hàng",
+            icon: <InventoryIcon />,
+            path: managerRoutes.rentalDashboard,
+          },
+        ],
       },
       //maintenance
       {
@@ -192,21 +204,9 @@ export const menuItems: MenuItemLayout[] = [
         path: managerRoutes.feedbackManagement,
       },
       {
-        label: "Dịch vụ khách hàng",
+        label: "Trò chuyện với khách hàng",
         icon: <SupportAgentIcon />,
-        path: "#",
-        children: [
-          {
-            label: "Quản lý trả thiết bị thuê",
-            icon: <InventoryIcon />,
-            path: managerRoutes.rentalDashboard,
-          },
-          {
-            label: "Trò chuyện với khách hàng",
-            icon: <SupportAgentIcon />,
-            path: managerRoutes.customerChat,
-          },
-        ],
+        path: managerRoutes.customerChat,
       },
       {
         label: "Lịch sử phân công nhân viên",
