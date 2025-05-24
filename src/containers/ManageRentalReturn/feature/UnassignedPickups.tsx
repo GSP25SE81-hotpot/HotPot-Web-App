@@ -174,7 +174,7 @@ const UnassignedPickups: React.FC = () => {
                     ) : (
                       pickups?.items.map((pickup) => (
                         <StyledTableRow key={pickup.orderId}>
-                          <BodyTableCell>{pickup.orderId}</BodyTableCell>
+                          <BodyTableCell>{pickup.orderCode}</BodyTableCell>
                           <BodyTableCell>
                             <CustomerName variant="body2">
                               {pickup.customerName}
