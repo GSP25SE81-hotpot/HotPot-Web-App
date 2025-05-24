@@ -110,28 +110,27 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
       setError("Please select a staff member");
       return;
     }
-
     if (!selectedDetailId) {
       setError("No equipment item selected");
       return;
     }
-
     setLoading(true);
     setError(null);
-
     try {
       const request: PickupAssignmentRequestDto = {
         staffId: selectedStaffId as number,
         rentOrderDetailId: selectedDetailId,
         notes: notes || undefined,
       };
-
       // Add vehicle ID if selected
       if (selectedVehicleId !== "") {
         request.vehicleId = selectedVehicleId as number;
       }
 
+      // Wait for the API call to complete
       await allocateStaffForPickup(request);
+
+      // Call onSuccess only after the API call is successful
       onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to assign staff");

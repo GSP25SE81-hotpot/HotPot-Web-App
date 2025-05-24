@@ -7,9 +7,11 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { Alert, Box, CircularProgress, TablePagination } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { getCurrentAssignments } from "../../../api/Services/rentalService";
+import { vi } from "date-fns/locale"; // Import Vietnamese locale
+
 import {
   PagedResult,
   StaffPickupAssignmentDto,
@@ -35,6 +37,7 @@ import {
   TimeAgo,
   PageTitle,
 } from "../../../components/manager/styles/AssignmentStyles";
+import { formatDate } from "../../../utils/formatters";
 
 const CurrentAssignments: React.FC = () => {
   const [assignments, setAssignments] =
@@ -155,10 +158,13 @@ const CurrentAssignments: React.FC = () => {
                               size="small"
                             />
                             <TimeAgo>
-                              Assigned{" "}
+                              Được phân{" "}
                               {formatDistanceToNow(
                                 new Date(assignment.assignedDate),
-                                { addSuffix: true }
+                                {
+                                  addSuffix: true,
+                                  locale: vi, // Use Vietnamese locale
+                                }
                               )}
                             </TimeAgo>
                           </AssignmentHeader>
@@ -208,10 +214,7 @@ const CurrentAssignments: React.FC = () => {
                             <InfoText>
                               Ngày trả hàng dự kiến:{" "}
                               {assignment.expectedReturnDate
-                                ? format(
-                                    new Date(assignment.expectedReturnDate),
-                                    "MMM dd, yyyy"
-                                  )
+                                ? formatDate(assignment.expectedReturnDate)
                                 : "Not specified"}
                             </InfoText>
                           </InfoItem>
