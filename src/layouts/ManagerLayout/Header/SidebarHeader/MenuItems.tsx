@@ -74,17 +74,26 @@ export const menuItems: MenuItemLayout[] = [
             label: config.Vntext.SideBar.Hotpot.hotpot,
             path: config.adminRoutes.hotpotType,
           },
-          {
-            label: "Loại nguyên liệu",
-            path: config.adminRoutes.ingredientType,
-          },
+          // {
+          //   label: "Loại nguyên liệu",
+          //   path: config.adminRoutes.ingredientType,
+          // },
         ],
       },
       {
         icon: <AssessmentIcon />,
-        label: "Nhập hàng",
-        path: config.adminRoutes.importProduct,
-        // role: AccessType.ADMIN_ACCESS,
+        label: "Quản lí nhập hàng",
+        path: "#",
+        children: [
+          {
+            label: "Quản lí lô hàng",
+            path: config.adminRoutes.manageBatch,
+          },
+          {
+            label: "Nhập hàng",
+            path: config.adminRoutes.importProduct,
+          },
+        ],
       },
       {
         icon: <Discount />,
