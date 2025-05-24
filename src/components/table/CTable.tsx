@@ -13,6 +13,8 @@ import {
   TableRow,
   Typography,
   useTheme,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import TablePagination from "@mui/material/TablePagination";
 import { alpha, styled } from "@mui/material/styles";
@@ -37,6 +39,11 @@ interface CTbaleProps {
   total: number;
   size: number;
   page: number;
+  loading?: boolean;
+  emptyMessage?: string;
+  sx?: any;
+  onRowClick?: (row: any) => void;
+  selectedRow?: any;
 }
 
 // Styled Components
@@ -60,6 +67,25 @@ const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
       backgroundColor: alpha(theme.palette.primary.main, 0.05),
       transform: "translateY(-2px)",
     },
+    // Support for custom row styling based on data attributes
+    '&[data-expired="true"]': {
+      backgroundColor: alpha(theme.palette.error.main, 0.05),
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.error.main, 0.1),
+      },
+    },
+    '&[data-expiring-soon="true"]': {
+      backgroundColor: alpha(theme.palette.warning.main, 0.05),
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.warning.main, 0.1),
+      },
+    },
+  },
+  "& .MuiTableHead-root": {
+    "& .MuiTableCell-head": {
+      fontWeight: "bold",
+      fontSize: "0.875rem",
+    },
   },
 }));
 
@@ -76,6 +102,11 @@ const CTable: React.FC<CTbaleProps> = ({
   page,
   size,
   total,
+  loading = false,
+  emptyMessage = "Không có dữ liệu",
+  sx,
+  onRowClick,
+  selectedRow,
 }) => {
   //Declare
   const theme = useTheme();
@@ -87,7 +118,12 @@ const CTable: React.FC<CTbaleProps> = ({
       .reduce((acc: any, part: any) => acc && acc[part], obj);
   }
 
-  function formatValue(value: any, column: any) {
+  function formatValue(value: any, column: any, row?: any) {
+    // Check if column has custom render function
+    if (column.render && typeof column.render === "function") {
+      return column.render(value, row);
+    }
+
     //date time
     if (column.format && column.format == "date") {
       if (value) {
@@ -95,6 +131,36 @@ const CTable: React.FC<CTbaleProps> = ({
       }
       return "-";
     }
+
+    //datetime
+    if (column.format && column.format == "datetime") {
+      if (value) {
+        return moment(value).format("DD/MM/YYYY HH:mm");
+      }
+      return "-";
+    }
+
+    //number
+    if (column.format && column.format == "number") {
+      if (value !== undefined && value !== null) {
+        return value.toLocaleString("vi-VN");
+      }
+      return "-";
+    }
+
+    //boolean
+    if (column.format && column.format == "boolean") {
+      return value ? "Có" : "Không";
+    }
+
+    //array
+    if (column.format && column.format == "array") {
+      if (Array.isArray(value)) {
+        return value.join(", ");
+      }
+      return value || "-";
+    }
+
     //role
     if (column.format && column.format == "role") {
       switch (value) {
@@ -268,7 +334,7 @@ const CTable: React.FC<CTbaleProps> = ({
   }
 
   return (
-    <Box sx={{ minWidth: "600px", mx: "auto", p: 2 }}>
+    <Box sx={{ minWidth: "600px", mx: "auto", p: 2, ...sx }}>
       <StyledCard>
         <Box
           sx={{
@@ -277,102 +343,173 @@ const CTable: React.FC<CTbaleProps> = ({
             alignItems: "center",
           }}
         >
-          <CardHeader
-            title={
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 700,
-                  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                {title}
-              </Typography>
-            }
-          />
+          {title && (
+            <CardHeader
+              title={
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 700,
+                    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  {title}
+                </Typography>
+              }
+            />
+          )}
           <Box sx={{ pr: 2 }}>{eventAction}</Box>
         </Box>
         <Box>{searchTool}</Box>
         <CardContent>
-          <StyledTableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>#</TableCell>
-                  {tableHeaderTitle?.map((column: any) => (
-                    <TableCell
-                      sx={{ fontWeight: "bold" }}
-                      key={column.id}
-                      align={column.align || "left"}
-                    >
-                      {column.label}
-                    </TableCell>
-                  ))}
-                  <TableCell></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {data?.map((row: any, index: number) => (
-                  <TableRow key={index}>
-                    <TableCell>{page * size + index + 1}</TableCell>
-                    {tableHeaderTitle.map((column: any) => (
-                      <TableCell key={column.id} align={column.align || "left"}>
-                        {column.id == "imageURL" ? (
-                          <img
-                            src={getNestedValue(row, column.id)}
-                            alt="Thumbnail"
-                            style={{
-                              width: 50,
-                              height: 50,
-                              borderRadius: "8px",
-                              objectFit: "cover",
-                            }}
-                          />
-                        ) : column.id == "imageURLs" ? (
-                          <img
-                            src={getNestedValue(row, column.id)?.[0]}
-                            alt="Thumbnail"
-                            style={{
-                              width: 50,
-                              height: 50,
-                              borderRadius: "8px",
-                              objectFit: "cover",
-                            }}
-                          />
-                        ) : getNestedValue(row, column.id) ? (
-                          formatValue(getNestedValue(row, column.id), column)
-                        ) : (
-                          "-"
-                        )}
+          <Box sx={{ position: "relative" }}>
+            {loading && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  bgcolor: "rgba(255, 255, 255, 0.8)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 1,
+                  backdropFilter: "blur(2px)",
+                }}
+              >
+                <CircularProgress size={40} />
+              </Box>
+            )}
+
+            <StyledTableContainer sx={sx}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: "bold" }}>#</TableCell>
+                    {tableHeaderTitle?.map((column: any) => (
+                      <TableCell
+                        sx={{
+                          fontWeight: "bold",
+                          minWidth: column.minWidth || "auto",
+                        }}
+                        key={column.id}
+                        align={column.align || "left"}
+                      >
+                        {column.label}
                       </TableCell>
                     ))}
-                    <TableCell
-                      onClick={() => selectedData && selectedData(row)}
-                    >
-                      {menuAction}
-                    </TableCell>
+                    {menuAction && (
+                      <TableCell sx={{ fontWeight: "bold" }}></TableCell>
+                    )}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <TablePagination
-              rowsPerPageOptions={[10, 25, 50]}
-              component="div"
-              count={total ?? 0}
-              rowsPerPage={size ?? 10}
-              page={page ?? 0}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              labelRowsPerPage="Số hàng trên trang"
-              labelDisplayedRows={({ from, to, count }) => {
-                return `${from}–${to} trên ${
-                  count !== -1 ? count : `nhiều hơn ${to}`
-                }`;
-              }}
-            />
-          </StyledTableContainer>
+                </TableHead>
+                <TableBody>
+                  {!data || data.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={
+                          (tableHeaderTitle?.length || 0) + (menuAction ? 2 : 1)
+                        }
+                        align="center"
+                        sx={{ py: 4 }}
+                      >
+                        <Alert
+                          severity="info"
+                          sx={{ border: "none", bgcolor: "transparent" }}
+                        >
+                          {emptyMessage}
+                        </Alert>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    data?.map((row: any, index: number) => (
+                      <TableRow
+                        key={index}
+                        data-expired={row["data-expired"]}
+                        data-expiring-soon={row["data-expiring-soon"]}
+                        onClick={() => {
+                          if (onRowClick) onRowClick(row);
+                          if (selectedData) selectedData(row);
+                        }}
+                        sx={{
+                          cursor:
+                            onRowClick || selectedData ? "pointer" : "default",
+                          bgcolor:
+                            selectedRow === row
+                              ? alpha(theme.palette.primary.main, 0.1)
+                              : "transparent",
+                        }}
+                      >
+                        <TableCell sx={{ fontWeight: "medium" }}>
+                          {page * size + index + 1}
+                        </TableCell>
+                        {tableHeaderTitle.map((column: any) => (
+                          <TableCell
+                            key={column.id}
+                            align={column.align || "left"}
+                            sx={{ minWidth: column.minWidth || "auto" }}
+                          >
+                            {column.id == "imageURL" ? (
+                              <img
+                                src={getNestedValue(row, column.id)}
+                                alt="Thumbnail"
+                                style={{
+                                  width: 50,
+                                  height: 50,
+                                  borderRadius: "8px",
+                                  objectFit: "cover",
+                                }}
+                              />
+                            ) : column.id == "imageURLs" ? (
+                              <img
+                                src={getNestedValue(row, column.id)?.[0]}
+                                alt="Thumbnail"
+                                style={{
+                                  width: 50,
+                                  height: 50,
+                                  borderRadius: "8px",
+                                  objectFit: "cover",
+                                }}
+                              />
+                            ) : getNestedValue(row, column.id) !== undefined &&
+                              getNestedValue(row, column.id) !== null ? (
+                              formatValue(
+                                getNestedValue(row, column.id),
+                                column,
+                                row
+                              )
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                        ))}
+                        {menuAction && <TableCell>{menuAction}</TableCell>}
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+              <TablePagination
+                rowsPerPageOptions={[10, 25, 50]}
+                component="div"
+                count={total ?? 0}
+                rowsPerPage={size ?? 10}
+                page={page ?? 0}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Số hàng trên trang"
+                labelDisplayedRows={({ from, to, count }) => {
+                  return `${from}–${to} trên ${
+                    count !== -1 ? count : `nhiều hơn ${to}`
+                  }`;
+                }}
+              />
+            </StyledTableContainer>
+          </Box>
         </CardContent>
       </StyledCard>
     </Box>

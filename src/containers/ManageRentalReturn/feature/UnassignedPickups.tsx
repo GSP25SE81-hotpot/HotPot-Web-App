@@ -75,12 +75,14 @@ const UnassignedPickups: React.FC = () => {
     try {
       const data = await getUnassignedPickups(page + 1, rowsPerPage);
       setPickups(data.data as PagedResult<RentOrderDetailResponse>);
+      return data; // Return the data for promise chaining
     } catch (err) {
-      setError(
+      const errorMessage =
         err instanceof Error
           ? err.message
-          : "An error occurred while fetching pickups"
-      );
+          : "An error occurred while fetching pickups";
+      setError(errorMessage);
+      throw err; // Rethrow to allow catching in the calling function
     } finally {
       setLoading(false);
     }
@@ -106,10 +108,21 @@ const UnassignedPickups: React.FC = () => {
     setAssignDialogOpen(true);
   };
 
-  const handleAssignSuccess = () => {
-    fetchPickups();
-    setAssignDialogOpen(false);
-    setSelectedPickup(null);
+  const handleAssignSuccess = async () => {
+    try {
+      // First close the dialog and reset the selected pickup
+      setAssignDialogOpen(false);
+      setSelectedPickup(null);
+
+      // Then fetch the updated data
+      await fetchPickups();
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "An error occurred while refreshing pickup data"
+      );
+    }
   };
 
   return (
