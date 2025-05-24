@@ -1,32 +1,27 @@
-import { Send } from "@mui/icons-material";
-import { Box, IconButton } from "@mui/material";
+// src/components/Chat/ChatInput.tsx
 import React, { useState } from "react";
-import { StyledInput } from "../../../components/manager/styles/ChatStyles";
+import { Box, TextField, IconButton } from "@mui/material";
+import { Send } from "@mui/icons-material";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
-  disabled?: boolean; // Add this line
+  disabled?: boolean;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
-  const [input, setInput] = useState("");
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setInput(e.target.value);
-  };
+const ChatInput: React.FC<ChatInputProps> = ({
+  onSendMessage,
+  disabled = false,
+}) => {
+  const [message, setMessage] = useState("");
 
   const handleSend = () => {
-    if (input.trim() && !disabled) {
-      onSendMessage(input.trim());
-      setInput("");
+    if (message.trim() && !disabled) {
+      onSendMessage(message.trim());
+      setMessage("");
     }
   };
 
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLDivElement | HTMLTextAreaElement>
-  ) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -37,43 +32,44 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled }) => {
     <Box
       sx={{
         p: 2,
-        borderTop: "1px solid",
-        borderColor: "divider",
-        bgcolor: (theme) => theme.palette.background.paper,
-        opacity: 0.8,
-        backdropFilter: "blur(8px)",
+        borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
       }}
     >
-      <Box sx={{ display: "flex", gap: 1 }}>
-        <StyledInput
-          fullWidth
-          multiline
-          maxRows={4}
-          size="small"
-          placeholder="Nhập tin nhắn..."
-          value={input}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          aria-label="Ô nhập tin nhắn"
-        />
-        <IconButton
-          color="primary"
-          onClick={handleSend}
-          disabled={!input.trim()}
-          sx={{
-            bgcolor: "primary.main",
-            color: "white",
-            "&:hover": { bgcolor: "primary.dark" },
-            "&.Mui-disabled": {
-              bgcolor: "action.disabledBackground",
-              color: "action.disabled",
-            },
-          }}
-          aria-label="Gửi tin nhắn"
-        >
-          <Send />
-        </IconButton>
-      </Box>
+      <TextField
+        fullWidth
+        multiline
+        maxRows={4}
+        placeholder="Nhập tin nhắn..."
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        onKeyDown={handleKeyDown}
+        disabled={disabled}
+        size="small"
+        sx={{
+          "& .MuiOutlinedInput-root": {
+            borderRadius: 2,
+          },
+        }}
+      />
+      <IconButton
+        color="primary"
+        onClick={handleSend}
+        disabled={!message.trim() || disabled}
+        sx={{
+          bgcolor: "primary.main",
+          color: "white",
+          "&:hover": { bgcolor: "primary.dark" },
+          "&.Mui-disabled": {
+            bgcolor: "action.disabledBackground",
+            color: "action.disabled",
+          },
+        }}
+      >
+        <Send />
+      </IconButton>
     </Box>
   );
 };

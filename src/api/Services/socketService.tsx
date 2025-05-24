@@ -17,7 +17,6 @@ class SocketIOService {
     if (this.isConnecting && this.connectionPromise) {
       return this.connectionPromise;
     }
-
     // Return true if already connected
     if (this.socket?.connected) {
       return Promise.resolve(true);
@@ -43,17 +42,14 @@ class SocketIOService {
         console.log("Connected to Socket.IO server with ID:", this.socket?.id);
         this.reconnectAttempts = 0;
         this.isConnecting = false;
-
         // Set up event listeners after successful connection
         this.setupEventListeners();
-
         // Send heartbeat periodically
         setInterval(() => {
           if (this.socket?.connected) {
             this.socket.emit("heartbeat");
           }
         }, 20000); // Every 20 seconds
-
         resolve(true);
       });
 
@@ -64,7 +60,6 @@ class SocketIOService {
       this.socket.on("connect_error", (error) => {
         console.error("Socket.IO connection error:", error.message);
         this.reconnectAttempts++;
-
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
           console.error(
             `Failed to connect after ${this.maxReconnectAttempts} attempts. Stopping reconnection.`
@@ -103,7 +98,6 @@ class SocketIOService {
     }
 
     console.log(`Authenticating user ${userId} with role ${role}`);
-
     // Send authentication data
     this.socket?.emit("authenticate", {
       userId: userId.toString(), // Convert to string to match server expectations
@@ -111,15 +105,21 @@ class SocketIOService {
     });
   }
 
-  // Set up event listeners for incoming Socket.IO events
+  // In SocketIOService.ts, update the setupEventListeners method:
   private setupEventListeners(): void {
     if (!this.socket) return;
+
+    // Log all incoming events for debugging
+    this.socket.onAny((event, ...args) => {
+      console.log(`[DEBUG] Received socket event: ${event}`, args);
+    });
 
     // Clear any existing listeners to prevent duplicates
     this.socket.off("newChat");
     this.socket.off("chatAccepted");
     this.socket.off("newMessage");
     this.socket.off("chatEnded");
+    this.socket.off("newBroadcastMessage");
 
     // New chat request from customer
     this.socket.on("newChat", (data: any) => {
@@ -152,12 +152,19 @@ class SocketIOService {
         this.callbacks["chatEnded"](data);
       }
     });
+
+    // New broadcast message (customer message without a manager)
+    this.socket.on("newBroadcastMessage", (data: any) => {
+      console.log("Received newBroadcastMessage event:", data);
+      if (this.callbacks["newBroadcastMessage"]) {
+        this.callbacks["newBroadcastMessage"](data);
+      }
+    });
   }
 
   // Register callback for Socket.IO events
   public on(event: string, callback: (...args: any[]) => void): void {
     this.callbacks[event] = callback;
-
     // If we're already connected, make sure the listener is set up
     if (this.socket?.connected) {
       // Re-setup event listeners to ensure this new callback is registered
