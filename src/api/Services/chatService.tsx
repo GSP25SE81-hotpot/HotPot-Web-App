@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosClient from "../axiosInstance";
-import socketService from "./socketService";
+import signalRService from "./chatSignalRService";
 import {
   ApiResponse,
   ChatMessageDto,
@@ -9,6 +9,8 @@ import {
   SendMessageRequest,
 } from "../../types/chat";
 
+const API_URL = "/chat";
+
 export class ChatService {
   private isInitialized = false;
 
@@ -16,15 +18,15 @@ export class ChatService {
     // Don't initialize in constructor - do it explicitly
   }
 
-  // Initialize socket connection and authentication
+  // Initialize SignalR connection and authentication
   public async initialize(userId?: number, role?: string): Promise<boolean> {
     if (this.isInitialized) return true;
     try {
-      // Connect to socket server
-      const connected = await socketService.connect();
+      // Connect to SignalR hub
+      const connected = await signalRService.connect();
       // Authenticate if user info is provided
       if (connected && userId && role) {
-        await socketService.authenticate(userId, role);
+        await signalRService.authenticate(userId, role);
       }
       this.isInitialized = connected;
       return connected;
@@ -34,27 +36,40 @@ export class ChatService {
     }
   }
 
-  // Authenticate with Socket.IO
-  public async authenticateSocket(userId: number, role: string): Promise<void> {
+  // Authenticate with SignalR
+  public async authenticateSignalR(
+    userId: number,
+    role: string
+  ): Promise<void> {
     await this.initialize();
-    await socketService.authenticate(userId, role);
+    await signalRService.authenticate(userId, role);
   }
 
-  // Register Socket.IO event handlers
+  // Register SignalR event handlers
   public onNewChat(callback: (data: any) => void): void {
-    socketService.on("newChat", callback);
+    signalRService.on("newChatSession", callback);
   }
 
   public onChatAccepted(callback: (data: any) => void): void {
-    socketService.on("chatAccepted", callback);
+    signalRService.on("chatAccepted", callback);
   }
 
   public onNewMessage(callback: (data: any) => void): void {
-    socketService.on("newMessage", callback);
+    signalRService.on("newMessage", callback);
   }
 
   public onChatEnded(callback: (data: any) => void): void {
-    socketService.on("chatEnded", callback);
+    signalRService.on("chatEnded", callback);
+  }
+
+  // Add this new method for broadcast messages
+  public onNewBroadcastMessage(callback: (data: any) => void): void {
+    signalRService.on("newBroadcastMessage", callback);
+  }
+
+  // Add the missing off method to unsubscribe from events
+  public off(eventName: string, callback?: (data: any) => void): void {
+    signalRService.off(eventName, callback);
   }
 
   // Get user's chat sessions (works for both customers and managers)
@@ -65,7 +80,7 @@ export class ChatService {
       const response = await axiosClient.get<
         any,
         ApiResponse<ChatSessionDto[]>
-      >(`/chat/sessions?activeOnly=${activeOnly}`);
+      >(`${API_URL}/sessions?activeOnly=${activeOnly}`);
       return response || { success: true, data: [] };
     } catch (error) {
       console.error("Error fetching user sessions:", error);
@@ -79,7 +94,7 @@ export class ChatService {
       const response = await axiosClient.get<
         any,
         ApiResponse<ChatSessionDto[]>
-      >("/chat/manager/sessions/unassigned");
+      >(`${API_URL}/manager/sessions/unassigned`);
       return response || { success: true, data: [] };
     } catch (error) {
       console.error("Error fetching unassigned sessions:", error);
@@ -94,11 +109,13 @@ export class ChatService {
     try {
       // Make the HTTP request
       const response = await axiosClient.post<any, ApiResponse<ChatSessionDto>>(
-        `/chat/manager/sessions/${sessionId}/join`,
+        `${API_URL}/manager/sessions/${sessionId}/join`,
         {}
       );
-
-      // No need to manually notify via Socket.IO - backend will handle it
+      // Join the SignalR group for this chat session
+      if (signalRService.isConnected()) {
+        await signalRService.connection?.invoke("JoinChatSession", sessionId);
+      }
       return response;
     } catch (error) {
       console.error("Error joining chat session:", error);
@@ -117,7 +134,7 @@ export class ChatService {
         any,
         ApiResponse<ChatMessageDto[]>
       >(
-        `/chat/messages/session/${sessionId}?pageNumber=${pageNumber}&pageSize=${pageSize}`
+        `${API_URL}/messages/session/${sessionId}?pageNumber=${pageNumber}&pageSize=${pageSize}`
       );
       return response || { success: true, data: [] };
     } catch (error) {
@@ -131,11 +148,15 @@ export class ChatService {
     sessionId: number
   ): Promise<ApiResponse<ChatSessionDto>> {
     try {
-      // Make the HTTP request - backend will handle socket notification
+      // Make the HTTP request - backend will handle SignalR notification
       const response = await axiosClient.put<any, ApiResponse<ChatSessionDto>>(
-        `/chat/sessions/${sessionId}/end`,
+        `${API_URL}/sessions/${sessionId}/end`,
         {}
       );
+      // Leave the SignalR group for this chat session
+      if (signalRService.isConnected()) {
+        await signalRService.connection?.invoke("LeaveChatSession", sessionId);
+      }
       return response;
     } catch (error) {
       console.error("Error ending chat session:", error);
@@ -153,13 +174,11 @@ export class ChatService {
         chatSessionId,
         message,
       };
-
-      // Make the HTTP request - backend will handle socket notification
+      // Make the HTTP request - backend will handle SignalR notification
       const response = await axiosClient.post<any, ApiResponse<ChatMessageDto>>(
-        "/chat/messages",
+        `${API_URL}/messages`,
         request
       );
-
       return response;
     } catch (error) {
       console.error("Error sending message:", error);
@@ -175,7 +194,11 @@ export class ChatService {
       const response = await axiosClient.get<
         any,
         ApiResponse<ChatSessionDetailDto>
-      >(`/chat/sessions/${sessionId}`);
+      >(`${API_URL}/sessions/${sessionId}`);
+      // Join the SignalR group for this chat session if not already joined
+      if (signalRService.isConnected()) {
+        await signalRService.connection?.invoke("JoinChatSession", sessionId);
+      }
       return response;
     } catch (error) {
       console.error("Error fetching chat session:", error);
@@ -183,14 +206,14 @@ export class ChatService {
     }
   }
 
-  // Check if socket is connected
+  // Check if SignalR is connected
   public isSocketConnected(): boolean {
-    return socketService.isConnected();
+    return signalRService.isConnected();
   }
 
-  // Disconnect socket
+  // Disconnect SignalR
   public disconnect(): void {
-    socketService.disconnect();
+    signalRService.disconnect();
     this.isInitialized = false;
   }
 }

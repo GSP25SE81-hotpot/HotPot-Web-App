@@ -13,7 +13,6 @@ import {
   Chip,
   Stack,
 } from "@mui/material";
-import { format } from "date-fns";
 import { getUnassignedPickups } from "../../../api/Services/rentalService";
 import {
   PagedResult,
@@ -39,6 +38,7 @@ import {
   EmptyMessage,
   LoadingContainer,
 } from "../../../components/manager/styles/UnassignedPickupsStyles";
+import { formatDate } from "../../../utils/formatters";
 
 const translateStatus = (status: string): string => {
   switch (status.toLowerCase()) {
@@ -204,10 +204,7 @@ const UnassignedPickups: React.FC = () => {
                             </Stack>
                           </BodyTableCell>
                           <BodyTableCell>
-                            {format(
-                              new Date(pickup.expectedReturnDate),
-                              "MMM dd, yyyy"
-                            )}
+                            {formatDate(pickup.expectedReturnDate)}
                           </BodyTableCell>
                           <BodyTableCell>
                             <StatusChip
