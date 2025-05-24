@@ -195,8 +195,6 @@ const EquipmentAvailability: React.FC = () => {
             id: hotpot.hotPotInventoryId,
             name: hotpot.hotpotName || `Nồi #${hotpot.seriesNumber}`,
             status: hotpot.status,
-            condition:
-              hotpot.status === "Available" ? "Good" : "Needs Maintenance",
             seriesNumber: hotpot.seriesNumber || "N/A",
           })
         );
