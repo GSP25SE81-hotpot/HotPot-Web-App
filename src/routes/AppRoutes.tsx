@@ -55,6 +55,8 @@ import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock
 import NotificationCenter from "../pages/Global/Notification/NotificationsPage";
 import { StaffAssignmentHistoryPage } from "../pages/Manager/StaffAssignmentHistory/StaffAssignmentHistoryPage";
 import { ManageRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManageRentalReturnPage";
+import TableBatchPage from "../pages/Admin/TableBatch/TableBatchPage";
+import TableBatchDetailPage from "../pages/Admin/TableBatchDetail/TableBatchDetailPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -245,11 +247,20 @@ const AppRoute: React.FC = () => {
           path={config.adminRoutes.DetailHotpotType}
           element={<TableHotpotDetailPage />}
         />
-
         <Route
           key="importProducts"
           path={config.adminRoutes.importProduct}
           element={<ImportProductPage />}
+        />
+        <Route
+          key="manageBatch"
+          path={config.adminRoutes.manageBatch}
+          element={<TableBatchPage />}
+        />
+        <Route
+          key="manageBatchDetail"
+          path={config.adminRoutes.manageBatchDetail}
+          element={<TableBatchDetailPage />}
         />
       </Route>
 
