@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ExpandLess from "@mui/icons-material/ExpandLess";
@@ -141,9 +142,6 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
   const userMenuOpen = Boolean(anchorEl);
   const drawerVariant = isMobile ? "temporary" : "persistent";
 
-
-
-
   // Handle navigation
   const handleNavigation = (route: string) => {
     navigate(route);
@@ -207,9 +205,9 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
             <LogoContainer />
           </Box>
           <Box sx={{ flexGrow: 1 }} />
-      <Box sx={{ mr: 2 }}>
-        <NotificationCenter userId={userData?.id} />
-      </Box>
+          <Box sx={{ mr: 2 }}>
+            <NotificationCenter userId={userData?.id} />
+          </Box>
           {/* User profile section */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Chip
