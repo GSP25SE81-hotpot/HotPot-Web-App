@@ -193,7 +193,7 @@ export const menuItems: MenuItemLayout[] = [
         path: staffRoutes.shippingOrder,
       },
       {
-        label: "Quản lý thanh toán",
+        label: "In hóa đơn",
         icon: <PaymentIcon />,
         path: staffRoutes.paymentManagement,
       },

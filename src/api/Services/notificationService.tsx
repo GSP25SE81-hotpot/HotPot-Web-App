@@ -2,15 +2,10 @@
 // notificationService.ts
 import axiosClient from "../axiosInstance";
 import {
-  Notification,
   GetNotificationsParams,
   NotificationType,
-  OrderNotificationData,
-  FeedbackNotificationData,
-  RentalNotificationData,
   PaginatedNotificationsResponse,
 } from "../../types/notificationTypes";
-import { getNavigateFunction } from "../../utils/navigationUtils";
 
 class NotificationService {
   // Fetch all notifications with optional filtering
@@ -103,70 +98,6 @@ class NotificationService {
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
       throw error;
-    }
-  }
-
-  // Handle notification click based on type with proper type checking
-  handleNotificationClick(notification: Notification): void {
-    const navigate = getNavigateFunction();
-    if (!navigate) {
-      console.error("Navigation function not available");
-      return;
-    }
-
-    // Type guard function to check if data matches a specific interface
-    const hasOrderData = (data: any): data is OrderNotificationData =>
-      data && typeof data.orderId === "number";
-    const hasFeedbackData = (data: any): data is FeedbackNotificationData =>
-      data && typeof data.feedbackId === "number";
-    const hasRentalData = (data: any): data is RentalNotificationData =>
-      data && typeof data.rentalId === "number";
-
-    // Navigate or perform actions based on notification type
-    switch (notification.type as NotificationType) {
-      case NotificationType.Order:
-        if (hasOrderData(notification.data)) {
-          navigate(`/manage-order`);
-        }
-        break;
-      case NotificationType.Feedback:
-        if (hasFeedbackData(notification.data)) {
-          navigate("/feedback");
-        }
-        break;
-      case NotificationType.RentOrder:
-        if (hasRentalData(notification.data)) {
-          navigate(`/pickup-rental`);
-        }
-        break;
-      case NotificationType.PrepOrder:
-        if (hasOrderData(notification.data)) {
-          navigate(`/assign-order`);
-        }
-        break;
-      case NotificationType.ShipOrder:
-        if (hasOrderData(notification.data)) {
-          navigate(`/shipping`);
-        }
-        break;
-      case NotificationType.Ingredient:
-        navigate("/dashboard/listIngredients");
-        break;
-      case NotificationType.EquipmentCondition:
-        navigate("/dashboard/hotpotMaintenance");
-        break;
-      case NotificationType.EquipmentStock:
-        navigate("/dashboard/hotpot");
-        break;
-      case NotificationType.Schedule:
-        navigate("/work-assignment");
-        break;
-      default:
-        console.log(
-          "No specific action for notification type:",
-          notification.type
-        );
-        break;
     }
   }
 

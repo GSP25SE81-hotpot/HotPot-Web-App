@@ -4,10 +4,12 @@ import { Chip, ChipProps } from "@mui/material";
 
 interface PaymentStatusChipProps extends Omit<ChipProps, "color"> {
   status: string;
+  translatedLabel?: string; // Add this optional prop for the translated status
 }
 
 const PaymentStatusChip: React.FC<PaymentStatusChipProps> = ({
   status,
+  translatedLabel,
   ...props
 }) => {
   const getStatusColor = (): ChipProps["color"] => {
@@ -25,8 +27,16 @@ const PaymentStatusChip: React.FC<PaymentStatusChipProps> = ({
     }
   };
 
+  // Use the translatedLabel if provided, otherwise use the original status
+  const displayLabel = translatedLabel || status;
+
   return (
-    <Chip label={status} color={getStatusColor()} size="small" {...props} />
+    <Chip
+      label={displayLabel}
+      color={getStatusColor()}
+      size="small"
+      {...props}
+    />
   );
 };
 
