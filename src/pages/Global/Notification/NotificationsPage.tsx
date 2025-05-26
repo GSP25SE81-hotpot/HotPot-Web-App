@@ -27,8 +27,10 @@ import {
 } from "../../../types/notificationTypes";
 import { formatDetailDate } from "../../../utils/formatters";
 import useAuth from "../../../hooks/useAuth";
+import { useAppNavigate } from "../../../utils/navigationUtils";
 
 const NotificationCenter: React.FC<NotificationCenterProps> = () => {
+  const navigate = useAppNavigate(); // Use the context-based navigation
   const { auth } = useAuth();
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -277,10 +279,56 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
 
   const handleNotificationClick = (notification: Notification): void => {
     if (!notification.isRead) {
-      // Only mark as read if it's not already read
       markAsRead(notification.id);
     }
-    notificationService.handleNotificationClick(notification);
+
+    // Instead of using the service's handleNotificationClick, implement it here
+    switch (notification.type) {
+      case "Schedule":
+        navigate("/work-assignment");
+        break;
+      case "Order":
+        if (notification.data && notification.data.orderId) {
+          navigate(`/manage-order`);
+        }
+        break;
+      case "Feedback":
+        if (notification.data && notification.data.feedbackId) {
+          navigate("/feedback");
+        }
+        break;
+      case "RentOrder":
+        if (notification.data && notification.data.rentalId) {
+          navigate(`/pickup-rental`);
+        }
+        break;
+      case "PrepOrder":
+        if (notification.data && notification.data.orderId) {
+          navigate(`/assign-order`);
+        }
+        break;
+      case "ShipOrder":
+        if (notification.data && notification.data.orderId) {
+          navigate(`/shipping`);
+        }
+        break;
+      case "Ingredient":
+        navigate("/dashboard/listIngredients");
+        break;
+      case "EquipmentCondition":
+        navigate("/dashboard/hotpotMaintenance");
+        break;
+      case "EquipmentStock":
+        navigate("/dashboard/hotpot");
+        break;
+      default:
+        console.log(
+          "No specific action for notification type:",
+          notification.type
+        );
+        break;
+    }
+
     handleClose();
   };
 
