@@ -210,7 +210,6 @@ export const menuItems: MenuItemLayout[] = [
         icon: <LocalShippingIcon />,
         path: staffRoutes.shippingOrder,
       },
-
       {
         label: "Quản lý thanh toán",
         icon: <PaymentIcon />,
