@@ -51,6 +51,7 @@ interface OrderHistoryListProps {
   filter: OrderHistoryFilterRequest;
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void; // Add this new prop
+  viewMode?: "list" | "grid"; // Add this new prop with optional marker
 }
 
 const OrderHistoryList: React.FC<OrderHistoryListProps> = ({
@@ -245,7 +246,7 @@ const OrderHistoryList: React.FC<OrderHistoryListProps> = ({
                         {order.hasShipping && (
                           <FeatureChip
                             icon={<LocalShippingIcon />}
-                            label="Bao gồm vận chuyển"
+                            label="Đã giao hàng"
                             size="small"
                             sx={{
                               px: 2,
