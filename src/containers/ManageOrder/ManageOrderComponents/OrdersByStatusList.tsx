@@ -137,9 +137,9 @@ const OrdersByStatusList: React.FC = () => {
     OrderStatus.Processed,
     OrderStatus.Shipping,
     OrderStatus.Delivered,
-    OrderStatus.Completed,
-    OrderStatus.Cancelled,
     OrderStatus.Returning,
+    OrderStatus.Cancelled,
+    OrderStatus.Completed,
   ];
 
   // Fetch orders when dependencies change
@@ -717,9 +717,9 @@ const OrdersByStatusList: React.FC = () => {
           <StyledTab label="Đã xử lý" />
           <StyledTab label="Đang giao" />
           <StyledTab label="Đã giao" />
-          <StyledTab label="Hoàn thành" />
-          <StyledTab label="Đã hủy" />
           <StyledTab label="Đang trả" />
+          <StyledTab label="Đã hủy" />
+          <StyledTab label="Hoàn thành" />
         </StyledTabs>
         {/* Search and filter toolbar */}
         <Box
