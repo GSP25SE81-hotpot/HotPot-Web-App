@@ -271,11 +271,8 @@ const RecordReturn: React.FC = () => {
                       setReturnCondition(e.target.value as string)
                     }
                   >
-                    <MenuItem value="Excellent">Xuất sắc</MenuItem>
                     <MenuItem value="Good">Tốt</MenuItem>
-                    <MenuItem value="Fair">Khá</MenuItem>
-                    <MenuItem value="Poor">Kém</MenuItem>
-                    <MenuItem value="Damaged">Hư hỏng</MenuItem>
+                    <MenuItem value="Damage">Hư</MenuItem>
                   </StyledSelect>
                   {errors.returnCondition && (
                     <FormHelperText>{errors.returnCondition}</FormHelperText>
