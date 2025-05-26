@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AddIcon from "@mui/icons-material/Add";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import VisibilityIcon from "@mui/icons-material/Visibility"; // Thêm import này
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Alert,
   Box,
@@ -31,13 +30,11 @@ import Grid from "@mui/material/Grid2";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Thêm import này
+import { useNavigate } from "react-router-dom";
 import equipmentConditionService, {
   CreateEquipmentConditionRequest,
   EquipmentConditionFilterDto,
-  MaintenanceScheduleType,
   MaintenanceStatus,
-  NotifyAdminRequest,
 } from "../../api/Services/equipmentConditionService";
 import {
   StatusChip,
@@ -49,9 +46,8 @@ import {
   StyledTextField,
   getStatusText,
 } from "../../components/manager/styles/EquipmentConditionLogStyles";
-import NotificationDescriptionDialog from "./NotificationDescriptionDialog";
 import stockService from "../../api/Services/stockService";
-import { HotPotInventoryDto, UtensilDto } from "../../types/stock";
+import { HotPotInventoryDto } from "../../types/stock";
 
 // Định nghĩa cấu hình cột cho việc sắp xếp
 interface ColumnConfig {
@@ -62,10 +58,10 @@ interface ColumnConfig {
 
 const EquipmentConditionLog: React.FC = () => {
   const theme = useTheme();
-  const navigate = useNavigate(); // Thêm hook này
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null); // Thêm trạng thái thông báo thành công
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [conditionLogs, setConditionLogs] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
@@ -91,16 +87,9 @@ const EquipmentConditionLog: React.FC = () => {
     name: false,
     equipmentId: false,
   });
-  const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
-  const [currentNotificationLog, _setCurrentNotificationLog] =
-    useState<any>(null);
-  const [notificationScheduleType, _setNotificationScheduleType] =
-    useState<MaintenanceScheduleType>(MaintenanceScheduleType.Regular);
-
   const [hotPotInventoryList, setHotPotInventoryList] = useState<
     HotPotInventoryDto[]
   >([]);
-  const [_utensilList, setUtensilList] = useState<UtensilDto[]>([]);
   const [loadingEquipment, setLoadingEquipment] = useState(false);
   const [selectedEquipmentType, setSelectedEquipmentType] =
     useState<string>("");
@@ -121,12 +110,10 @@ const EquipmentConditionLog: React.FC = () => {
       setNewCondition({
         ...newCondition,
         hotPotInventoryId: undefined,
-        utensilId: undefined,
       });
     } else {
       setNewCondition({
         ...newCondition,
-        utensilId: undefined,
         hotPotInventoryId: undefined,
       });
     }
@@ -137,7 +124,11 @@ const EquipmentConditionLog: React.FC = () => {
       setLoadingEquipment(true);
       const response = await stockService.getAllHotPotInventory();
       if (response.success) {
-        setHotPotInventoryList(response.data);
+        // Only set damaged hot pots
+        const damagedHotPots = response.data.filter(
+          (item) => item.status === "Damaged"
+        );
+        setHotPotInventoryList(damagedHotPots);
       } else {
         setError(response.message || "Failed to load hot pot inventory");
       }
@@ -149,26 +140,8 @@ const EquipmentConditionLog: React.FC = () => {
     }
   };
 
-  const fetchUtensils = async () => {
-    try {
-      setLoadingEquipment(true);
-      const response = await stockService.getAllUtensils();
-      if (response.success) {
-        setUtensilList(response.data);
-      } else {
-        setError(response.message || "Failed to load utensils");
-      }
-    } catch (err) {
-      setError("Error fetching utensils");
-      console.error("Error fetching utensils:", err);
-    } finally {
-      setLoadingEquipment(false);
-    }
-  };
-
   useEffect(() => {
     fetchHotPotInventory();
-    fetchUtensils();
   }, []);
 
   // Lấy danh sách nhật ký điều kiện
@@ -260,8 +233,13 @@ const EquipmentConditionLog: React.FC = () => {
     }
     try {
       setLoading(true);
+      // Always set status to Pending
+      const conditionToSubmit = {
+        ...newCondition,
+        status: MaintenanceStatus.Pending,
+      };
       const response = await equipmentConditionService.createConditionLog(
-        newCondition
+        conditionToSubmit
       );
       if (response.success) {
         setOpenDialog(false);
@@ -286,97 +264,6 @@ const EquipmentConditionLog: React.FC = () => {
     } catch (err) {
       setError("Đã xảy ra lỗi khi tạo nhật ký điều kiện");
       console.error("Lỗi khi tạo nhật ký điều kiện:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Xử lý cập nhật trạng thái
-  // const handleStatusUpdate = async (
-  //   id: number,
-  //   newStatus: MaintenanceStatus
-  // ) => {
-  //   try {
-  //     setLoading(true);
-  //     const response = await equipmentConditionService.updateConditionStatus(
-  //       id,
-  //       newStatus
-  //     );
-  //     if (response.success) {
-  //       // Cập nhật trạng thái cục bộ để phản ánh sự thay đổi
-  //       setConditionLogs((prev) =>
-  //         prev.map((log) =>
-  //           log.damageDeviceId === id ? { ...log, status: newStatus } : log
-  //         )
-  //       );
-  //       // Hiển thị thông báo thành công
-  //       setSuccessMessage(
-  //         `Trạng thái đã được cập nhật thành công thành ${getStatusText(
-  //           newStatus
-  //         )}`
-  //       );
-  //       // Xóa thông báo thành công sau 5 giây
-  //       setTimeout(() => {
-  //         setSuccessMessage(null);
-  //       }, 5000);
-  //     } else {
-  //       setError(response.message || "Không thể cập nhật trạng thái");
-  //     }
-  //   } catch (err) {
-  //     setError("Đã xảy ra lỗi khi cập nhật trạng thái");
-  //     console.error("Lỗi khi cập nhật trạng thái:", err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  const handleNotificationSubmit = async (description: string) => {
-    if (!currentNotificationLog) return;
-    try {
-      setLoading(true);
-      // Tạo yêu cầu thông báo với mô tả được cung cấp
-      const notifyRequest: NotifyAdminRequest = {
-        conditionLogId: currentNotificationLog.damageDeviceId,
-        equipmentName: currentNotificationLog.equipmentName,
-        issueName: currentNotificationLog.name,
-        description: description, // Sử dụng mô tả từ hộp thoại
-        scheduleType: notificationScheduleType,
-      };
-      // Gửi thông báo qua API
-      const response = await equipmentConditionService.notifyAdministrators(
-        notifyRequest
-      );
-      if (response.success) {
-        // Hiển thị thông báo thành công
-        setSuccessMessage(
-          notificationScheduleType === MaintenanceScheduleType.Emergency
-            ? "Thông báo khẩn cấp đã được gửi đến quản trị viên"
-            : "Quản trị viên đã được thông báo"
-        );
-        // Xóa thông báo thành công sau 5 giây
-        setTimeout(() => {
-          setSuccessMessage(null);
-        }, 5000);
-        // Đóng hộp thoại
-        setNotificationDialogOpen(false);
-      } else {
-        setError(response.message || "Không thể thông báo cho quản trị viên");
-      }
-    } catch (err: any) {
-      // Xử lý lỗi xác thực cụ thể
-      if (err.response && err.response.status === 400) {
-        const errorData = err.response.data;
-        if (errorData.errors && errorData.errors.Description) {
-          setError(`Lỗi xác thực: ${errorData.errors.Description[0]}`);
-        } else {
-          setError(
-            "Yêu cầu không hợp lệ: Vui lòng kiểm tra tất cả các trường bắt buộc"
-          );
-        }
-      } else {
-        setError("Đã xảy ra lỗi khi thông báo cho quản trị viên");
-      }
-      console.error("Lỗi khi thông báo cho quản trị viên:", err);
     } finally {
       setLoading(false);
     }
@@ -434,7 +321,6 @@ const EquipmentConditionLog: React.FC = () => {
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}></Grid>
-
             <Grid
               size={{ xs: 12, md: 6 }}
               container
@@ -560,22 +446,6 @@ const EquipmentConditionLog: React.FC = () => {
                             >
                               Xem chi tiết
                             </StyledButton>
-                            {/* {log.status !== MaintenanceStatus.Cancelled &&
-                              log.status !== MaintenanceStatus.Completed && (
-                                <StyledButton
-                                  size="small"
-                                  variant="contained"
-                                  color="success"
-                                  onClick={() =>
-                                    handleStatusUpdate(
-                                      log.damageDeviceId,
-                                      MaintenanceStatus.Completed
-                                    )
-                                  }
-                                >
-                                  Đánh dấu hoàn thành
-                                </StyledButton>
-                              )} */}
                           </Box>
                         </TableCell>
                       </TableRow>
@@ -686,7 +556,6 @@ const EquipmentConditionLog: React.FC = () => {
                   }
                 />
               </Grid>
-
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth error={formErrors.equipmentId}>
                   <InputLabel>Loại thiết bị</InputLabel>
@@ -704,7 +573,6 @@ const EquipmentConditionLog: React.FC = () => {
                   )}
                 </FormControl>
               </Grid>
-
               <Grid size={{ xs: 12, sm: 6 }}>
                 {loadingEquipment ? (
                   <Box display="flex" justifyContent="center">
@@ -739,29 +607,6 @@ const EquipmentConditionLog: React.FC = () => {
                   </FormControl>
                 ) : null}
               </Grid>
-
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth>
-                  <InputLabel>Trạng thái</InputLabel>
-                  <Select
-                    value={newCondition.status}
-                    label="Trạng thái"
-                    onChange={(e) =>
-                      handleInputChange("status", e.target.value)
-                    }
-                  >
-                    <MenuItem value={MaintenanceStatus.Pending}>
-                      Đang chờ
-                    </MenuItem>
-                    <MenuItem value={MaintenanceStatus.InProgress}>
-                      Đang tiến hành
-                    </MenuItem>
-                    <MenuItem value={MaintenanceStatus.Completed}>
-                      Hoàn thành
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
             </Grid>
           </DialogContent>
           <Box sx={{ px: 3, pb: 1 }}>
@@ -794,14 +639,6 @@ const EquipmentConditionLog: React.FC = () => {
             </StyledButton>
           </DialogActions>
         </StyledDialog>
-        <NotificationDescriptionDialog
-          open={notificationDialogOpen}
-          onClose={() => setNotificationDialogOpen(false)}
-          onSubmit={handleNotificationSubmit}
-          issueName={currentNotificationLog?.name || ""}
-          equipmentName={currentNotificationLog?.equipmentName || ""}
-          scheduleType={notificationScheduleType}
-        />
       </StyledBox>
     </LocalizationProvider>
   );

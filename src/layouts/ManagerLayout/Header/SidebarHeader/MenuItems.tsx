@@ -165,11 +165,6 @@ export const menuItems: MenuItemLayout[] = [
             icon: <AssignmentIcon />,
             path: managerRoutes.equipmentConditionLog,
           },
-          // {
-          //   label: "Quản lý thay thế thiết bị",
-          //   icon: <SwapHorizIcon />,
-          //   path: managerRoutes.manageReplacement,
-          // },
           {
             label: "Quản lý xe",
             icon: <SwapHorizIcon />,
@@ -179,24 +174,9 @@ export const menuItems: MenuItemLayout[] = [
       },
       //report items
       {
-        // label: "Báo cáo",
-        // icon: <EngineeringIcon />,
-        // path: "#",
         label: "Lịch làm việc",
         icon: <ScheduleIcon />,
         path: managerRoutes.workAssignment,
-        // children: [
-        //   {
-        //     label: "Xem phản hồi",
-        //     icon: <FeedbackIcon />,
-        //     path: managerRoutes.feedbackManagement,
-        //   },
-        //   {
-        //     label: "Lịch làm việc",
-        //     icon: <ScheduleIcon />,
-        //     path: managerRoutes.workAssignment,
-        //   },
-        // ],
       },
       {
         label: "Xem phản hồi",
@@ -230,13 +210,7 @@ export const menuItems: MenuItemLayout[] = [
         icon: <LocalShippingIcon />,
         path: staffRoutes.shippingOrder,
       },
-      //dashboard
-      // {
-      //   icon: <DashboardIcon />,
-      //   label: "Công việc",
-      //   path: config.staffRoutes.staffMyAssignment,
-      //   // role: AccessType.ADMIN_ACCESS,
-      // },
+
       {
         label: "Quản lý thanh toán",
         icon: <PaymentIcon />,
@@ -248,12 +222,11 @@ export const menuItems: MenuItemLayout[] = [
         icon: <Iconify icon="mdi:package-variant-closed" />,
         path: staffRoutes.pickupRental,
       },
-      // Order History
-      // {
-      //   label: "Lịch sử đơn hàng",
-      //   icon: <Iconify icon="mdi:history" />,
-      //   path: staffRoutes.orderHistory,
-      // },
+      {
+        label: "Lịch làm việc",
+        icon: <ScheduleIcon />,
+        path: managerRoutes.workAssignment,
+      },
     ],
   },
 ];
