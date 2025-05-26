@@ -177,6 +177,11 @@ export const menuItems: MenuItemLayout[] = [
         icon: <AssignmentIcon />,
         path: managerRoutes.staffAssignmentHistory,
       },
+      {
+        label: "Lịch sử đơn hàng",
+        icon: <AssignmentIcon />,
+        path: staffRoutes.orderHistory,
+      },
     ],
   },
   {
