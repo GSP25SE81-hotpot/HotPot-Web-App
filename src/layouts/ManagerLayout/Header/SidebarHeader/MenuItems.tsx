@@ -177,6 +177,11 @@ export const menuItems: MenuItemLayout[] = [
         icon: <AssignmentIcon />,
         path: managerRoutes.staffAssignmentHistory,
       },
+      {
+        label: "Lịch sử đơn hàng",
+        icon: <AssignmentIcon />,
+        path: staffRoutes.orderHistory,
+      },
     ],
   },
   {
@@ -193,7 +198,7 @@ export const menuItems: MenuItemLayout[] = [
         path: staffRoutes.shippingOrder,
       },
       {
-        label: "Quản lý thanh toán",
+        label: "In hóa đơn",
         icon: <PaymentIcon />,
         path: staffRoutes.paymentManagement,
       },

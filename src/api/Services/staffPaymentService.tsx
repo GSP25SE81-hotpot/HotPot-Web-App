@@ -3,9 +3,6 @@
 import axiosClient from "../axiosInstance";
 import {
   PaymentFilterRequest,
-  ConfirmDepositRequest,
-  ProcessPaymentRequest,
-  PaymentDetailDto,
   PaymentListItemDto,
   PaymentReceiptDto,
   PagedResult,
@@ -25,7 +22,6 @@ export const staffPaymentService = {
     try {
       // Convert filter to query params
       const params = new URLSearchParams();
-
       if (filter.status !== undefined)
         params.append("Status", filter.status.toString());
       if (filter.fromDate) params.append("FromDate", filter.fromDate);
@@ -33,7 +29,6 @@ export const staffPaymentService = {
       if (filter.sortBy) params.append("SortBy", filter.sortBy);
       if (filter.sortDescending !== undefined)
         params.append("SortDescending", filter.sortDescending.toString());
-
       params.append("pageNumber", pageNumber.toString());
       params.append("pageSize", pageSize.toString());
 
@@ -41,48 +36,9 @@ export const staffPaymentService = {
         any,
         PagedResult<PaymentListItemDto>
       >(`${STAFF_PAYMENT_API}?${params.toString()}`);
-
       return response;
     } catch (error) {
       console.error("Error fetching payments:", error);
-      throw error;
-    }
-  },
-
-  /**
-   * Confirm a deposit payment
-   */
-  confirmDeposit: async (
-    request: ConfirmDepositRequest
-  ): Promise<PaymentDetailDto> => {
-    try {
-      const response = await axiosClient.post<any, PaymentDetailDto>(
-        `${STAFF_PAYMENT_API}/confirm-deposit`,
-        request
-      );
-
-      return response;
-    } catch (error) {
-      console.error("Error confirming deposit:", error);
-      throw error;
-    }
-  },
-
-  /**
-   * Process a payment (update status)
-   */
-  processPayment: async (
-    request: ProcessPaymentRequest
-  ): Promise<PaymentReceiptDto> => {
-    try {
-      const response = await axiosClient.post<any, PaymentReceiptDto>(
-        `${STAFF_PAYMENT_API}/process`,
-        request
-      );
-
-      return response;
-    } catch (error) {
-      console.error("Error processing payment:", error);
       throw error;
     }
   },
@@ -95,10 +51,24 @@ export const staffPaymentService = {
       const response = await axiosClient.get<any, PaymentReceiptDto>(
         `${STAFF_PAYMENT_API}/receipt/${paymentId}`
       );
-
       return response;
     } catch (error) {
       console.error("Error generating receipt:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get payments for a specific order
+   */
+  getOrderPayments: async (orderId: number): Promise<any> => {
+    try {
+      const response = await axiosClient.get<any, any>(
+        `${STAFF_PAYMENT_API}/orders/${orderId}/payments`
+      );
+      return response;
+    } catch (error) {
+      console.error("Error fetching order payments:", error);
       throw error;
     }
   },

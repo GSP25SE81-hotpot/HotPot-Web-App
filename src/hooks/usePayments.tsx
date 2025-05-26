@@ -24,7 +24,6 @@ export const usePayments = (
   const fetchPayments = useCallback(async () => {
     setLoading(true);
     setError(null);
-
     try {
       const result = await staffPaymentService.getPayments(
         filter,
@@ -38,7 +37,7 @@ export const usePayments = (
       setError(
         err instanceof Error ? err : new Error("An unknown error occurred")
       );
-      toast.error("Failed to load payments");
+      toast.error("Không tải được đơn hàng thanh toán");
     } finally {
       setLoading(false);
     }

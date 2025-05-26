@@ -27,8 +27,10 @@ import {
 } from "../../../types/notificationTypes";
 import { formatDetailDate } from "../../../utils/formatters";
 import useAuth from "../../../hooks/useAuth";
+import { useAppNavigate } from "../../../utils/navigationUtils";
 
 const NotificationCenter: React.FC<NotificationCenterProps> = () => {
+  const navigate = useAppNavigate(); // Use the context-based navigation
   const { auth } = useAuth();
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -197,7 +199,6 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
     }
   }, [connection]); // `normalizeCasing` and `showNotificationToast` are stable if defined outside or memoized
 
-  // --- REVISED fetchNotifications FUNCTION ---
   const fetchNotifications = async (): Promise<void> => {
     try {
       setLoading(true);
@@ -277,10 +278,56 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
 
   const handleNotificationClick = (notification: Notification): void => {
     if (!notification.isRead) {
-      // Only mark as read if it's not already read
       markAsRead(notification.id);
     }
-    notificationService.handleNotificationClick(notification);
+
+    // Instead of using the service's handleNotificationClick, implement it here
+    switch (notification.type) {
+      case "Schedule":
+        navigate("/work-assignment");
+        break;
+      case "Order":
+        if (notification.data && notification.data.orderId) {
+          navigate(`/manage-order`);
+        }
+        break;
+      case "Feedback":
+        if (notification.data && notification.data.feedbackId) {
+          navigate("/feedback");
+        }
+        break;
+      case "RentOrder":
+        if (notification.data && notification.data.rentalId) {
+          navigate(`/pickup-rental`);
+        }
+        break;
+      case "PrepOrder":
+        if (notification.data && notification.data.orderId) {
+          navigate(`/assign-order`);
+        }
+        break;
+      case "ShipOrder":
+        if (notification.data && notification.data.orderId) {
+          navigate(`/shipping`);
+        }
+        break;
+      case "Ingredient":
+        navigate("/dashboard/listIngredients");
+        break;
+      case "EquipmentCondition":
+        navigate("/dashboard/hotpotMaintenance");
+        break;
+      case "EquipmentStock":
+        navigate("/dashboard/hotpot");
+        break;
+      default:
+        console.log(
+          "No specific action for notification type:",
+          notification.type
+        );
+        break;
+    }
+
     handleClose();
   };
 
@@ -307,7 +354,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
       if (!snackbar.notification.isRead) {
         markAsRead(snackbar.notification.id);
       }
-      notificationService.handleNotificationClick(snackbar.notification);
+      handleNotificationClick(snackbar.notification);
       handleSnackbarClose();
     }
   };
@@ -411,15 +458,6 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
             <MenuItem onClick={markAllAsRead} sx={{ justifyContent: "center" }}>
               Đánh dấu tất cả đã đọc
             </MenuItem>
-            {/* <MenuItem
-              onClick={() => {
-                window.location.href = "/notifications"; // Or use react-router navigation
-                handleClose();
-              }}
-              sx={{ justifyContent: "center" }}
-            >
-              Xem tất cả thông báo
-            </MenuItem> */}
           </>
         )}
       </Menu>

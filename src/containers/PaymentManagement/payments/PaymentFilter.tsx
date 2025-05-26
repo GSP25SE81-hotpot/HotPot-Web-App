@@ -18,10 +18,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { format } from "date-fns";
 import Grid from "@mui/material/Grid2";
-import {
-  PaymentStatus,
-  PaymentFilterRequest,
-} from "../../../types/staffPayment";
+import { PaymentFilterRequest } from "../../../types/staffPayment";
 import {
   FilterContainer,
   FilterGrid,
@@ -30,6 +27,14 @@ import {
   SearchButton,
   ResetButton,
 } from "../../../components/staff/styles/paymentFilterStyles";
+
+// Define payment status enum to match backend
+enum PaymentStatus {
+  Pending = 1,
+  Success = 2,
+  Cancelled = 3,
+  Refunded = 4,
+}
 
 interface PaymentFilterProps {
   onFilterChange: (filter: PaymentFilterRequest) => void;
@@ -96,7 +101,6 @@ const PaymentFilter: React.FC<PaymentFilterProps> = ({
               </Select>
             </FilterFormControl>
           </Grid>
-
           <Grid size={{ xs: 12, sm: 3 }}>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
@@ -107,7 +111,6 @@ const PaymentFilter: React.FC<PaymentFilterProps> = ({
               />
             </LocalizationProvider>
           </Grid>
-
           <Grid size={{ xs: 12, sm: 3 }}>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
@@ -118,7 +121,6 @@ const PaymentFilter: React.FC<PaymentFilterProps> = ({
               />
             </LocalizationProvider>
           </Grid>
-
           <Grid size={{ xs: 12, sm: 3 }}>
             <ButtonsContainer>
               <SearchButton
@@ -128,7 +130,6 @@ const PaymentFilter: React.FC<PaymentFilterProps> = ({
               >
                 Tìm kiếm
               </SearchButton>
-
               <ResetButton
                 variant="outlined"
                 onClick={handleFilterReset}
@@ -136,7 +137,6 @@ const PaymentFilter: React.FC<PaymentFilterProps> = ({
               >
                 Đặt lại
               </ResetButton>
-
               <Tooltip title="Làm mới">
                 <IconButton onClick={onRefresh} color="primary">
                   <RefreshIcon />
