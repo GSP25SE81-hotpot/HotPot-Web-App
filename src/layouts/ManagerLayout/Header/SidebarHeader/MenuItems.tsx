@@ -6,32 +6,29 @@ import {
   People as PeopleIcon,
   TakeoutDining as TakeoutDiningIcon,
   SetMeal as IngredientIcon,
-  ListAlt as ListAltIcon,
+  // ListAlt as ListAltIcon,
+  ShoppingCart as OrderIcon,
+  Restaurant as HotpotIcon,
+  LocalShipping as ShippingIcon,
+  EventNote as ScheduleIcon,
+  Chat as ChatIcon,
+  Assignment as AssignmentIcon,
+  DirectionsCar as VehicleIcon,
+  Engineering as MaintenanceIcon,
+  Build as EquipmentIcon,
+  Payment as PaymentIcon,
+  // Notifications as NotificationIcon,
+  // Assessment as ReportIcon,
+  ReceiptLong as BatchIcon,
+  // AddShoppingCart as ImportIcon,
+  EventAvailable as RentalIcon,
+  LocalMall as PickupIcon,
 } from "@mui/icons-material";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import EngineeringIcon from "@mui/icons-material/Engineering";
-import FeedbackIcon from "@mui/icons-material/Feedback";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import PaymentIcon from "@mui/icons-material/Payment";
-// import ReceiptIcon from "@mui/icons-material/Receipt";
-import ScheduleIcon from "@mui/icons-material/Schedule";
-import SupportAgentIcon from "@mui/icons-material/SupportAgent";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+// import Iconify from "../../../../components/Iconify";
 import config from "../../../../configs";
 import { managerRoutes, staffRoutes } from "../../../../configs/routes";
 import { Role } from "../../../../routes/Roles";
 import { MenuItemLayout } from "../../../../types/menu";
-import AssessmentIcon from "@mui/icons-material/Assessment";
-import Iconify from "../../../../components/Iconify";
-
-// const AccessType = {
-//   MANAGER_SALE: [RoleTypes.MANAGER, RoleTypes.SALE],
-//   ALL_ACCESS: [RoleTypes.MANAGER, RoleTypes.ADMIN, RoleTypes.SALE],
-//   ADMIN_MANAGER_ACCESS: [RoleTypes.MANAGER, RoleTypes.ADMIN],
-//   ADMIN_ACCESS: [RoleTypes.ADMIN],
-//   MANGER_ACCESS: [RoleTypes.MANAGER],
-// };
 
 export const menuItems: MenuItemLayout[] = [
   {
@@ -41,10 +38,9 @@ export const menuItems: MenuItemLayout[] = [
         icon: <DashboardIcon />,
         label: config.Vntext.SideBar.Dashboard,
         path: config.adminRoutes.dashboard,
-        // role: AccessType.ADMIN_ACCESS,
       },
       {
-        icon: <MenuBookIcon />,
+        icon: <OrderIcon />,
         label: config.Vntext.SideBar.Ordes,
         path: config.adminRoutes.orders,
       },
@@ -54,11 +50,10 @@ export const menuItems: MenuItemLayout[] = [
         path: "#",
         children: [
           { label: "Danh sách", path: config.adminRoutes.manageUsers },
-          // { label: "Vị trí", path: "/users/roles" },
         ],
       },
       {
-        icon: <InventoryIcon />,
+        icon: <HotpotIcon />,
         label: config.Vntext.SideBar.Hotpot.hotpotSidebar,
         path: "#",
         children: [
@@ -74,14 +69,10 @@ export const menuItems: MenuItemLayout[] = [
             label: config.Vntext.SideBar.Hotpot.hotpot,
             path: config.adminRoutes.hotpotType,
           },
-          // {
-          //   label: "Loại nguyên liệu",
-          //   path: config.adminRoutes.ingredientType,
-          // },
         ],
       },
       {
-        icon: <AssessmentIcon />,
+        icon: <BatchIcon />,
         label: "Quản lí nhập hàng",
         path: "#",
         children: [
@@ -100,7 +91,6 @@ export const menuItems: MenuItemLayout[] = [
         label: config.Vntext.SideBar.discount,
         path: config.adminRoutes.discountManagement,
       },
-
       {
         icon: <Feedback />,
         label: config.Vntext.SideBar.Feedback,
@@ -111,14 +101,11 @@ export const menuItems: MenuItemLayout[] = [
   {
     role: "Manager",
     menu: [
-      //dashboard
       {
         icon: <DashboardIcon />,
         label: config.Vntext.SideBar.Dashboard,
         path: config.adminRoutes.dashboard,
-        // role: AccessType.ADMIN_ACCESS,
       },
-      //inventory
       {
         label: "Quản lý kho",
         icon: <InventoryIcon />,
@@ -136,43 +123,40 @@ export const menuItems: MenuItemLayout[] = [
           },
         ],
       },
-      //order
       {
         label: "Quản lý đơn hàng",
-        icon: <ListAltIcon />,
+        icon: <OrderIcon />,
         path: "#",
         children: [
           {
             label: "Quản lý giao hàng",
-            icon: <ListAltIcon />,
+            icon: <ShippingIcon />,
             path: managerRoutes.manageOrder,
           },
           {
             label: "Quản lý trả hàng",
-            icon: <InventoryIcon />,
+            icon: <RentalIcon />,
             path: managerRoutes.rentalDashboard,
           },
         ],
       },
-      //maintenance
       {
         label: "Bảo trì",
-        icon: <EngineeringIcon />,
+        icon: <MaintenanceIcon />,
         path: "#",
         children: [
           {
             label: "Danh sách bảo trì thiết bị",
-            icon: <AssignmentIcon />,
+            icon: <EquipmentIcon />,
             path: managerRoutes.equipmentConditionLog,
           },
           {
             label: "Quản lý xe",
-            icon: <SwapHorizIcon />,
+            icon: <VehicleIcon />,
             path: managerRoutes.manageVehicle,
           },
         ],
       },
-      //report items
       {
         label: "Lịch làm việc",
         icon: <ScheduleIcon />,
@@ -180,17 +164,17 @@ export const menuItems: MenuItemLayout[] = [
       },
       {
         label: "Xem phản hồi",
-        icon: <FeedbackIcon />,
+        icon: <Feedback />,
         path: managerRoutes.feedbackManagement,
       },
       {
         label: "Trò chuyện với khách hàng",
-        icon: <SupportAgentIcon />,
+        icon: <ChatIcon />,
         path: managerRoutes.customerChat,
       },
       {
         label: "Lịch sử phân công nhân viên",
-        icon: <PaymentIcon />,
+        icon: <AssignmentIcon />,
         path: managerRoutes.staffAssignmentHistory,
       },
     ],
@@ -198,16 +182,14 @@ export const menuItems: MenuItemLayout[] = [
   {
     role: Role.Staff,
     menu: [
-      //Assign Order
       {
-        icon: <ListAltIcon />,
+        icon: <AssignmentIcon />,
         label: config.Vntext.SideBar.Ordes,
         path: staffRoutes.assignOrder,
       },
-      //Shipping List
       {
         label: config.Vntext.SideBar.shippingList,
-        icon: <LocalShippingIcon />,
+        icon: <ShippingIcon />,
         path: staffRoutes.shippingOrder,
       },
       {
@@ -215,10 +197,9 @@ export const menuItems: MenuItemLayout[] = [
         icon: <PaymentIcon />,
         path: staffRoutes.paymentManagement,
       },
-      // Rental Management
       {
         label: "Lấy thiết bị thuê",
-        icon: <Iconify icon="mdi:package-variant-closed" />,
+        icon: <PickupIcon />,
         path: staffRoutes.pickupRental,
       },
       {
