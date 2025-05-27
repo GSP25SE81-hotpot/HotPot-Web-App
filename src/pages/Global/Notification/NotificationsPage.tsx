@@ -320,6 +320,9 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
       case "EquipmentStock":
         navigate("/dashboard/hotpot");
         break;
+      case "HotPotDamage":
+        navigate("/equipment-condition-log");
+        break;
       default:
         console.log(
           "No specific action for notification type:",
@@ -482,7 +485,6 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
             </Typography>
           </Alert>
         ) : undefined}
-        {/* Ensure undefined is returned if no notification for Snackbar content */}
       </Snackbar>
     </>
   );

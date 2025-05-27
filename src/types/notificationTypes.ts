@@ -38,6 +38,7 @@ export enum NotificationType {
   PrepOrder = "PrepOrder",
   ShipOrder = "ShipOrder",
   Ingredient = "Ingredient",
+  HotPotDamage = "HotPotDamage",
 }
 
 // Type definitions for specific notification data
