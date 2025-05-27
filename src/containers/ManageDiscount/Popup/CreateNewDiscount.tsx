@@ -70,7 +70,6 @@ const CreateNewDiscount: React.FC<CreateNewDiscountProps> = ({
   const {
     handleSubmit,
     watch,
-    setValue,
     formState: { isSubmitting },
   } = methods;
 

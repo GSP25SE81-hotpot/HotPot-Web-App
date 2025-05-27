@@ -1,75 +1,20 @@
-// src/types/payment.types.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/types/staffPayment.ts
 
-export enum PaymentStatus {
-  Pending = 1,
-  Success = 2,
-  Cancelled = 3,
-  Refunded = 4,
-}
-
-export enum OrderStatus {
-  Pending = 1,
-  Processing = 2,
-  Shipping = 3,
-  Delivered = 4,
-  Cancelled = 5,
-  Returning = 6,
-  Completed = 7,
+export interface PagedResult<T> {
+  items: T[];
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
 }
 
 export interface PaymentFilterRequest {
-  status?: PaymentStatus;
+  status?: number;
   fromDate?: string;
   toDate?: string;
   sortBy?: string;
   sortDescending?: boolean;
-}
-
-export interface ConfirmDepositRequest {
-  orderId: number;
-  paymentId: number;
-}
-
-export interface ProcessPaymentRequest {
-  orderId: number;
-  paymentId: number;
-  newStatus: PaymentStatus;
-  generateReceipt?: boolean;
-}
-
-export interface OrderInfoDto {
-  orderId: number;
-  status: string;
-  totalPrice: number;
-  address: string;
-  notes?: string;
-}
-
-export interface UserInfoDto {
-  userId: number;
-  name: string;
-  email: string;
-  phoneNumber: string;
-}
-
-export interface ReceiptInfoDto {
-  receiptId: number;
-  receiptNumber: string;
-  generatedAt: string;
-}
-
-export interface PaymentDetailDto {
-  paymentId: number;
-  transactionCode: number;
-  paymentType: string;
-  status: string;
-  price: number;
-  createdAt: string;
-  updatedAt?: string;
-  notes?: string;
-  order?: OrderInfoDto;
-  user: UserInfoDto;
-  receipt?: ReceiptInfoDto;
 }
 
 export interface PaymentListItemDto {
@@ -80,16 +25,39 @@ export interface PaymentListItemDto {
   price: number;
   createdAt: string;
   updatedAt?: string;
+
+  // Minimal order information
+  orderCode?: string;
   orderId?: number;
   orderStatus: string;
+
+  // Minimal user information
   userId: number;
   customerName: string;
   customerPhone: string;
 }
 
+export interface ReceiptItemDto {
+  itemType: string;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
+export interface ReceiptRentalItemDto {
+  name: string;
+  quantity: number;
+  rentalPrice: number;
+  rentalStartDate: string;
+  expectedReturnDate: string;
+  actualReturnDate?: string;
+}
+
 export interface PaymentReceiptDto {
   receiptId: number;
   orderId: number;
+  orderCode: string;
   paymentId: number;
   transactionCode: string;
   amount: number;
@@ -97,12 +65,22 @@ export interface PaymentReceiptDto {
   customerName: string;
   customerPhone: string;
   paymentMethod: string;
-}
 
-export interface PagedResult<T> {
-  items: T[];
-  totalCount: number;
-  pageNumber: number;
-  pageSize: number;
-  totalPages: number;
+  // Order details
+  orderStatus: string;
+  deliveryAddress: string;
+
+  // Order items
+  soldItems: ReceiptItemDto[];
+  rentedItems: ReceiptRentalItemDto[];
+
+  // Pricing summary
+  totalAmount: number;
+
+  // Additional fees if applicable
+  lateFee?: number;
+  damageFee?: number;
+
+  // Notes
+  notes: string;
 }

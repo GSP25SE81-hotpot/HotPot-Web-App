@@ -308,7 +308,7 @@ const OrderDetailView: React.FC = () => {
       setUpdating(true);
       // Use the new API method that supports vehicle allocation
       const request: AllocateOrderWithVehicleRequest = {
-        orderId: Number(order.orderId),
+        orderCode: order.orderCode,
         staffId: selectedStaffId,
         taskType: selectedTaskType,
         vehicleId: selectedVehicleId || undefined,

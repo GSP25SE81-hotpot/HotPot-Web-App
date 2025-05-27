@@ -36,11 +36,9 @@ const SearchTool: React.FC<SearchToolProps> = ({ filter, setFilter }) => {
 };
 
 const TableIngredients = () => {
-
-    const { auth } = useAuth(); // Get auth context
+  const { auth } = useAuth(); // Get auth context
   const userRole = auth.user?.role?.toLowerCase() || "";
   const isAdmin = userRole === "admin";
-  const isManager = userRole === "manager";
 
   const [selectedData, setSelectedData] = useState<Ingredient | null>(null);
   const [size, setSize] = useState<number>(10);
@@ -116,14 +114,16 @@ const TableIngredients = () => {
   const EventAction = () => {
     return (
       <>
-        <Button
-          startIcon={<AddIcon />}
-          variant="contained"
-          onClick={() => navigate(config.adminRoutes.createIngredients)}
-          sx={{ mr: 1 }}
-        >
-          Thêm Nguyên Liệu
-        </Button>
+        {isAdmin && (
+          <Button
+            startIcon={<AddIcon />}
+            variant="contained"
+            onClick={() => navigate(config.adminRoutes.createIngredients)}
+            sx={{ mr: 1 }}
+          >
+            Thêm Nguyên Liệu
+          </Button>
+        )}
       </>
     );
   };
@@ -135,13 +135,15 @@ const TableIngredients = () => {
         tableHeaderTitle={tableHeader}
         title="Bảng nguyên liệu"
         menuAction={
-          <MenuActionTableIngredient
-            IngredientData={selectedData}
-            onOpenDetail={selectData}
-            onOpenDelete={selectData}
-            onOpenUpdate={selectData}
-            onFetch={onSave}
-          />
+          isAdmin ? (
+            <MenuActionTableIngredient
+              IngredientData={selectedData}
+              onOpenDetail={selectData}
+              onOpenDelete={selectData}
+              onOpenUpdate={selectData}
+              onFetch={onSave}
+            />
+          ) : null
         }
         eventAction={<EventAction />}
         searchTool={<SearchTool filter={filter} setFilter={setFilter} />}

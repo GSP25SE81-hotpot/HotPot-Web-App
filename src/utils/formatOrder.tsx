@@ -1,3 +1,5 @@
+import { OrderStatus } from "../types/orderManagement";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const getColorForStatus = (status: any) => {
   switch (status) {
@@ -70,5 +72,47 @@ export const translateMonthToVietnamese = (month: any) => {
       return "Tháng 4";
     default:
       return month;
+  }
+};
+
+export const translateOrderStatus = (status: OrderStatus | string): string => {
+  if (typeof status === "string") {
+    return status;
+  }
+
+  switch (status) {
+    case OrderStatus.Cart:
+      return "Giỏ hàng";
+    case OrderStatus.Pending:
+      return "Chờ xử lý";
+    case OrderStatus.Processing:
+      return "Đang xử lý";
+    case OrderStatus.Processed:
+      return "Đã xử lý";
+    case OrderStatus.Shipping:
+      return "Đang giao";
+    case OrderStatus.Delivered:
+      return "Đã giao";
+    case OrderStatus.Cancelled:
+      return "Đã hủy";
+    case OrderStatus.Returning:
+      return "Đang trả";
+    case OrderStatus.Completed:
+      return "Hoàn thành";
+    default:
+      return "Không xác định";
+  }
+};
+
+export const translateItemType = (type: string): string => {
+  switch (type) {
+    case "Combo":
+      return "Combo";
+    case "Ingredient":
+      return "Nguyên Liệu";
+    case "Hotpot":
+      return "Lẩu";
+    default:
+      return type;
   }
 };

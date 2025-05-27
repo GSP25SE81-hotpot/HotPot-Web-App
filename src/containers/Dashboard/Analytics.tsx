@@ -29,12 +29,7 @@ import {
   Tabs,
   Tab,
 } from "@mui/material";
-import {
-  AttachMoney,
-  MonetizationOn,
-  ShoppingCart,
-  People,
-} from "@mui/icons-material";
+import { AttachMoney, MonetizationOn, People } from "@mui/icons-material";
 import EmptyData from "../../components/EmptyData";
 import adminDashboard from "../../api/Services/adminDashboard";
 import {
@@ -42,6 +37,7 @@ import {
   translateMonthToVietnamese,
   translateStatusToVietnamese,
 } from "../../utils/formatOrder";
+import AutoAwesomeMosaicIcon from "@mui/icons-material/AutoAwesomeMosaic";
 
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({
@@ -207,7 +203,7 @@ const Analytics: React.FC = () => {
         <Grid2 size={{ mobile: 12, tablet: 6, desktop: 3 }}>
           <Card elevation={3} sx={{ height: "100%" }}>
             <CardContent sx={{ textAlign: "center" }}>
-              <ShoppingCart
+              <AutoAwesomeMosaicIcon
                 sx={{ fontSize: 40, color: "primary.main", mb: 1 }}
               />
               <Typography variant="h6">Tổng số đơn hàng</Typography>

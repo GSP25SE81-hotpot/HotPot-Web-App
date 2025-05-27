@@ -1,4 +1,3 @@
-// src/pages/payments/PaymentTable.tsx
 import React from "react";
 import {
   CircularProgress,
@@ -30,6 +29,20 @@ import {
   PageSizeControl,
 } from "../../../components/staff/styles/paymentTableStyles";
 
+// Status translation function
+const translatePaymentStatus = (status: string): string => {
+  switch (status) {
+    case "Success":
+      return "Thành công";
+    case "Cancelled":
+      return "Đã hủy";
+    case "Refunded":
+      return "Hoàn tiền";
+    default:
+      return status;
+  }
+};
+
 interface PaymentTableProps {
   payments: PaymentListItemDto[];
   loading: boolean;
@@ -40,9 +53,8 @@ interface PaymentTableProps {
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   onRowClick: (payment: PaymentListItemDto) => void;
-  onConfirmDeposit: (paymentId: number, orderId: number) => void;
   onGenerateReceipt: (paymentId: number) => void;
-  onProcessPayment: (payment: PaymentListItemDto) => void;
+  onViewOrderPayments?: (orderId: number) => void;
 }
 
 const PaymentTable: React.FC<PaymentTableProps> = ({
@@ -55,9 +67,7 @@ const PaymentTable: React.FC<PaymentTableProps> = ({
   onPageChange,
   onPageSizeChange,
   onRowClick,
-  onConfirmDeposit,
   onGenerateReceipt,
-  onProcessPayment,
 }) => {
   return (
     <TableWrapper>
@@ -72,10 +82,9 @@ const PaymentTable: React.FC<PaymentTableProps> = ({
               <HeaderCell>Trạng thái</HeaderCell>
               <HeaderCell>Mã đơn hàng</HeaderCell>
               <HeaderCell>Ngày tạo</HeaderCell>
-              <HeaderCell align="center">Thao tác</HeaderCell>
+              <HeaderCell align="center"></HeaderCell>
             </TableRow>
           </TableHeader>
-
           <TableBody>
             {loading ? (
               <TableRow>
@@ -101,18 +110,19 @@ const PaymentTable: React.FC<PaymentTableProps> = ({
                     {formatCurrency(payment.price)}
                   </TableCell>
                   <TableCell>
-                    <PaymentStatusChip status={payment.status} />
+                    <PaymentStatusChip
+                      status={payment.status}
+                      translatedLabel={translatePaymentStatus(payment.status)}
+                    />
                   </TableCell>
-                  <TableCell>{payment.orderId || "-"}</TableCell>
+                  <TableCell>{payment.orderCode || "N/A"}</TableCell>
                   <TableCell>{formatDate(payment.createdAt)}</TableCell>
                   <TableCell align="center">
                     <PaymentActions
                       status={payment.status}
                       paymentId={payment.paymentId}
                       orderId={payment.orderId}
-                      onConfirmDeposit={onConfirmDeposit}
                       onGenerateReceipt={onGenerateReceipt}
-                      onProcessPayment={() => onProcessPayment(payment)}
                     />
                   </TableCell>
                 </ClickableRow>
@@ -121,7 +131,6 @@ const PaymentTable: React.FC<PaymentTableProps> = ({
           </TableBody>
         </Table>
       </StyledTableContainer>
-
       {/* Phân trang */}
       <PaginationContainer>
         <PaginationInfo variant="body2">
@@ -129,11 +138,9 @@ const PaymentTable: React.FC<PaymentTableProps> = ({
           {Math.min(page * pageSize, totalCount)} trong tổng số {totalCount}{" "}
           thanh toán
         </PaginationInfo>
-
         <PaginationControls>
           <PageSizeSelector>
             <PageSizeLabel variant="body2">Số dòng mỗi trang:</PageSizeLabel>
-
             <PageSizeControl variant="outlined" size="small">
               <Select
                 value={pageSize}
@@ -147,7 +154,6 @@ const PaymentTable: React.FC<PaymentTableProps> = ({
               </Select>
             </PageSizeControl>
           </PageSizeSelector>
-
           <Pagination
             count={totalPages}
             page={page}

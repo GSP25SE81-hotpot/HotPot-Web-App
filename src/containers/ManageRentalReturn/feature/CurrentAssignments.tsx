@@ -7,9 +7,11 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { Alert, Box, CircularProgress, TablePagination } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { getCurrentAssignments } from "../../../api/Services/rentalService";
+import { vi } from "date-fns/locale"; // Import Vietnamese locale
+
 import {
   PagedResult,
   StaffPickupAssignmentDto,
@@ -35,6 +37,7 @@ import {
   TimeAgo,
   PageTitle,
 } from "../../../components/manager/styles/AssignmentStyles";
+import { formatDate } from "../../../utils/formatters";
 
 const CurrentAssignments: React.FC = () => {
   const [assignments, setAssignments] =
@@ -50,15 +53,27 @@ const CurrentAssignments: React.FC = () => {
     setError(null);
     try {
       const response = await getCurrentAssignments(page + 1, rowsPerPage);
-      if (!response || !response.success || !response.data) {
-        // Handle the case where the API returns no data
+
+      // Log the response for debugging
+      console.log("API Response:", response);
+
+      // Check if the response is valid and has the expected structure
+      if (!response) {
         setAssignments(null);
-        setError("No assignment data received from server");
+        setError("No response received from server");
         return;
       }
-      // Now TypeScript knows response.data is not undefined
-      setAssignments(response.data);
+
+      if (!response.success) {
+        setAssignments(null);
+        setError(response.message || "API request was not successful");
+        return;
+      }
+
+      // Set the assignments from the data property
+      setAssignments(response.data ?? null);
     } catch (err) {
+      console.error("Error fetching assignments:", err);
       setError(
         err instanceof Error
           ? err.message
@@ -95,13 +110,13 @@ const CurrentAssignments: React.FC = () => {
             {error}
           </Alert>
         )}
-        {loading && !assignments ? (
+        {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 5 }}>
             <CircularProgress />
           </Box>
         ) : (
           <>
-            {assignments?.items.length === 0 ? (
+            {!assignments || assignments.items.length === 0 ? (
               <EmptyStateContainer elevation={0}>
                 <Box sx={{ p: 3 }}>
                   <InventoryIcon
@@ -121,7 +136,7 @@ const CurrentAssignments: React.FC = () => {
             ) : (
               <>
                 <Grid container spacing={3}>
-                  {assignments?.items.map((assignment) => (
+                  {assignments.items.map((assignment) => (
                     <Grid
                       size={{ xs: 12, md: 6, lg: 4 }}
                       key={assignment.assignmentId}
@@ -132,8 +147,8 @@ const CurrentAssignments: React.FC = () => {
                             <StatusChip
                               label={
                                 assignment.completedDate
-                                  ? "Completed"
-                                  : "In Progress"
+                                  ? "Hoàn thành"
+                                  : "Đang thực hiện"
                               }
                               status={
                                 assignment.completedDate
@@ -143,10 +158,13 @@ const CurrentAssignments: React.FC = () => {
                               size="small"
                             />
                             <TimeAgo>
-                              Assigned{" "}
+                              Được phân{" "}
                               {formatDistanceToNow(
                                 new Date(assignment.assignedDate),
-                                { addSuffix: true }
+                                {
+                                  addSuffix: true,
+                                  locale: vi, // Use Vietnamese locale
+                                }
                               )}
                             </TimeAgo>
                           </AssignmentHeader>
@@ -194,13 +212,10 @@ const CurrentAssignments: React.FC = () => {
                           <InfoItem>
                             <EventIcon />
                             <InfoText>
-                              Expected Return:{" "}
-                              {format(
-                                new Date(
-                                  assignment.expectedReturnDate || new Date()
-                                ),
-                                "MMM dd, yyyy"
-                              )}
+                              Ngày trả hàng dự kiến:{" "}
+                              {assignment.expectedReturnDate
+                                ? formatDate(assignment.expectedReturnDate)
+                                : "Not specified"}
                             </InfoText>
                           </InfoItem>
                           {assignment.vehicleId && (
@@ -222,7 +237,7 @@ const CurrentAssignments: React.FC = () => {
                 >
                   <TablePagination
                     component="div"
-                    count={assignments?.totalCount || 0}
+                    count={assignments.totalCount || 0}
                     page={page}
                     onPageChange={handleChangePage}
                     rowsPerPage={rowsPerPage}

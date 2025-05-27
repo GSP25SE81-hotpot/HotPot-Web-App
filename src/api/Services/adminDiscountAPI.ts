@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { create } from "@mui/material/styles/createTransitions";
 import axiosClient from "../axiosInstance";
 
 const adminDiscountApi = {

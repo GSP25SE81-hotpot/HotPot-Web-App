@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { DiscountType } from "../../types/discountType";
 import CTable from "../../components/table/CTable";
@@ -57,7 +59,7 @@ const DiscountTable = () => {
     { id: "pointCost", label: "Điểm mua ưu đãi" },
     { id: "discountPercentage", label: "Tỷ lệ giảm(%)" },
     { id: "date", label: "Hiệu lực", format: "date" },
-    { id: "duration", label: "kết thúc", format: "date" },
+    { id: "duration", label: "kết thúc", format: "dateTimeDiscount" },
     { id: "isActive", label: "Trạng thái", format: "statusDiscount" },
   ];
 

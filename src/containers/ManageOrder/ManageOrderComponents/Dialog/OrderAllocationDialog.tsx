@@ -331,7 +331,7 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
                           <BuildIcon fontSize="small" color="info" />
                           <Typography>{staffMember.name}</Typography>
                         </Box>
-                        {staffMember.assignmentCount > 0 && (
+                        {staffMember.assignmentCount >= 0 && (
                           <Box
                             component="span"
                             sx={{
@@ -522,7 +522,7 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
                             />
                           )}
                         </Box>
-                        {staffMember.assignmentCount > 0 && (
+                        {staffMember.assignmentCount >= 0 && (
                           <Box
                             component="span"
                             sx={{

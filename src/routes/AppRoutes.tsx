@@ -46,7 +46,6 @@ import { AssignmentDetailPage } from "../pages/Staff/ManageAssignemt/AssignmetDe
 import { ManageAssignmentStaffPage } from "../pages/Staff/ManageAssignemt/ManageAssigmentStaffPage";
 import { PickupRentalPage } from "../pages/Staff/PickupRental/PickupRentalPage";
 import { RecordReturnPage } from "../pages/Staff/PickupRental/RecordReturnPage";
-import { RentalDetailPage } from "../pages/Staff/PickupRental/RentalDetailPage";
 import ShippingListPage from "../pages/Staff/Shipping/ShippingListPage";
 import { ManageVehiclePage } from "../pages/Manager/ManageVehicle/ManageVehiclePage";
 import DiscountPage from "../pages/Admin/Discount/DiscountPage";
@@ -56,6 +55,10 @@ import { EquipmentAvailabilityPage } from "../pages/Manager/ManageEquipmentStock
 import NotificationCenter from "../pages/Global/Notification/NotificationsPage";
 import { StaffAssignmentHistoryPage } from "../pages/Manager/StaffAssignmentHistory/StaffAssignmentHistoryPage";
 import { ManageRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManageRentalReturnPage";
+import TableBatchPage from "../pages/Admin/TableBatch/TableBatchPage";
+import TableBatchDetailPage from "../pages/Admin/TableBatchDetail/TableBatchDetailPage";
+import UpdateComboPage from "../pages/Admin/UpdateCombo/UpdateComboPage";
+import UpdateComboCustomPage from "../pages/Admin/UpdateCombo/UpdateComboCustomPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -246,11 +249,32 @@ const AppRoute: React.FC = () => {
           path={config.adminRoutes.DetailHotpotType}
           element={<TableHotpotDetailPage />}
         />
-
         <Route
           key="importProducts"
           path={config.adminRoutes.importProduct}
           element={<ImportProductPage />}
+        />
+        <Route
+          key="manageBatch"
+          path={config.adminRoutes.manageBatch}
+          element={<TableBatchPage />}
+        />
+        <Route
+          key="manageBatchDetail"
+          path={config.adminRoutes.manageBatchDetail}
+          element={<TableBatchDetailPage />}
+        />
+
+        <Route
+          key="updateCombo"
+          path={config.adminRoutes.updateCombo}
+          element={<UpdateComboPage />}
+        />
+
+        <Route
+          key="updateCombo"
+          path={config.adminRoutes.updateComboCustom}
+          element={<UpdateComboCustomPage />}
         />
       </Route>
 
@@ -276,10 +300,6 @@ const AppRoute: React.FC = () => {
           element={<OrderHistoryPage />}
         />
 
-        <Route
-          path={config.staffRoutes.rentalDetail}
-          element={<RentalDetailPage />}
-        />
         <Route
           path={config.staffRoutes.recordReturn}
           element={<RecordReturnPage />}

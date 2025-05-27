@@ -3,29 +3,6 @@ export interface Ingredient {
   quantity: number;
 }
 
-export interface CreateHotPotFormSchema {
-  name: string;
-  description: string;
-  imageURLs: (string | undefined)[] | undefined;
-  size: number;
-  tutorialVideo: {
-    name: string;
-    description: string;
-  };
-  ingredients: Ingredient[] | undefined;
-}
-export interface CreateHotPotSchema {
-  name: string;
-  material: string;
-  size: string;
-  description: string;
-  imageURLs: (string | undefined)[] | undefined;
-  price: number;
-  basePrice: number;
-  status: boolean;
-  seriesNumbers: (string | undefined)[] | undefined;
-}
-
 export const SizeData = [
   {
     id: "S",
@@ -40,6 +17,39 @@ export const SizeData = [
     name: "size L",
   },
 ];
+export interface CreateHotPotFormSchema {
+  name: string;
+  description: string;
+  imageURLs: (string | undefined)[] | undefined;
+  size: number;
+  tutorialVideo: {
+    name: string;
+    description: string;
+  };
+  ingredients: Ingredient[] | undefined;
+}
+
+export interface updateComboSchema {
+  name: string;
+  description: string;
+  imageURLs: (string | undefined)[] | undefined;
+  size: number;
+  turtorialVideoID: number;
+  groupIdentifier?: string;
+  ingredients: Ingredient[] | undefined;
+}
+
+export interface CreateHotPotSchema {
+  name: string;
+  material: string;
+  size: string;
+  description: string;
+  imageURLs: (string | undefined)[] | undefined;
+  price: number;
+  basePrice: number;
+  status: boolean;
+  seriesNumbers: (string | undefined)[] | undefined;
+}
 
 export interface CreateHotPotCustomFormSchema {
   name: string;
@@ -56,4 +66,14 @@ export interface CreateHotPotCustomFormSchema {
 export interface IngredientTypeProps {
   ingredientTypeId: number;
   minQuantity: number;
+  ingredientTypeName?: string;
+}
+
+export interface updateComboCustomSchema {
+  name: string;
+  imageURLs: (string | undefined)[] | undefined;
+  size: number;
+  turtorialVideoID: number;
+  groupIdentifier?: string;
+  ingredients: IngredientTypeProps[] | undefined;
 }

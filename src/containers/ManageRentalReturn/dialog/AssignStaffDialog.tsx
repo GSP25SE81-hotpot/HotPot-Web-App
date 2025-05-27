@@ -32,6 +32,7 @@ import { allocateStaffForPickup } from "../../../api/Services/rentalService";
 import staffService from "../../../api/Services/staffService";
 import vehicleService from "../../../api/Services/vehicleService";
 import { format } from "date-fns";
+import { formatDate } from "../../../utils/formatters";
 
 interface AssignStaffDialogProps {
   open: boolean;
@@ -109,28 +110,27 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
       setError("Please select a staff member");
       return;
     }
-
     if (!selectedDetailId) {
       setError("No equipment item selected");
       return;
     }
-
     setLoading(true);
     setError(null);
-
     try {
       const request: PickupAssignmentRequestDto = {
         staffId: selectedStaffId as number,
         rentOrderDetailId: selectedDetailId,
         notes: notes || undefined,
       };
-
       // Add vehicle ID if selected
       if (selectedVehicleId !== "") {
         request.vehicleId = selectedVehicleId as number;
       }
 
+      // Wait for the API call to complete
       await allocateStaffForPickup(request);
+
+      // Call onSuccess only after the API call is successful
       onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to assign staff");
@@ -166,7 +166,7 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
             </Typography>
             <Typography variant="body2">
               <strong>Ngày trả dự kiến:</strong>{" "}
-              {format(new Date(pickup.expectedReturnDate), "MMM dd, yyyy")}
+              {formatDate(pickup.expectedReturnDate)}
             </Typography>
             <Typography variant="body2">
               <strong>Địa chỉ:</strong>{" "}
@@ -261,7 +261,7 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
               ) : (
                 vehicles.map((vehicle) => (
                   <MenuItem key={vehicle.vehicleId} value={vehicle.vehicleId}>
-                    {vehicle.name} ({vehicle.type})
+                    {vehicle.name}
                   </MenuItem>
                 ))
               )}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/services/rentalService.ts
 import {
   ApiResponse,
@@ -16,10 +17,13 @@ export const getUnassignedPickups = async (
   pageSize = 10
 ): Promise<ApiResponse<PagedResult<RentOrderDetailResponse>>> => {
   try {
-    const response = await axiosClient.get(
+    const response = await axiosClient.get<
+      any,
+      ApiResponse<PagedResult<RentOrderDetailResponse>>
+    >(
       `${API_URL}/unassigned-pickups?pageNumber=${pageNumber}&pageSize=${pageSize}`
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error fetching unassigned pickups:", error);
     throw error;
@@ -48,18 +52,21 @@ export const allocateStaffForPickup = async (
 };
 
 // Get current assignments
-export async function getCurrentAssignments(
-  pageNumber = 1,
-  pageSize = 10
-): Promise<ApiResponse<PagedResult<StaffPickupAssignmentDto>>> {
+export const getCurrentAssignments = async (
+  pageNumber: number = 1,
+  pageSize: number = 10
+): Promise<ApiResponse<PagedResult<StaffPickupAssignmentDto>>> => {
   try {
-    const response = await axiosClient.get(
+    const response = await axiosClient.get<
+      any,
+      ApiResponse<PagedResult<StaffPickupAssignmentDto>>
+    >(
       `${API_URL}/current-assignments?pageNumber=${pageNumber}&pageSize=${pageSize}`
     );
 
-    return response.data;
+    return response;
   } catch (error) {
-    console.error("Error fetching current assignments:", error);
+    console.error("Error in getCurrentAssignments:", error);
     throw error;
   }
-}
+};

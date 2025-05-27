@@ -8,6 +8,7 @@ export interface EquipmentItem {
 }
 
 export interface RentOrderDetailResponse {
+  orderCode: string;
   orderId: number;
   rentalStartDate: string;
   expectedReturnDate: string;

@@ -4,6 +4,7 @@ import AppRoute from "./routes/AppRoutes";
 import { AuthProvider } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { NavigationProvider } from "./utils/navigationUtils";
 
 const App: React.FC = () => {
   return (
@@ -11,7 +12,9 @@ const App: React.FC = () => {
       <AuthProvider>
         <ErrorBoundary>
           <NotificationProvider>
-            <AppRoute />
+            <NavigationProvider>
+              <AppRoute />
+            </NavigationProvider>
           </NotificationProvider>
         </ErrorBoundary>
       </AuthProvider>

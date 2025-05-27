@@ -1,3 +1,4 @@
+// src/pages/Staff/CheckDeviceAfterReturn/MyAssignments/MyAssignments.tsx
 import {
   Box,
   FormControlLabel,
@@ -62,12 +63,8 @@ const MyAssignments: React.FC = () => {
     setPage(0);
   };
 
-  const handleViewDetail = (id: number) => {
-    navigate(`/rentals/${id}`);
-  };
-
   const handleRecordReturn = (assignment: StaffPickupAssignment) => {
-    navigate("/rentals/record-return", {
+    navigate("/staff/rentals/record-return", {
       state: {
         assignmentId: assignment.assignmentId,
         rentOrderId: assignment.orderId,
@@ -79,23 +76,8 @@ const MyAssignments: React.FC = () => {
   };
 
   // Check if data and data.data exist before accessing
-  const assignments = data?.data.items || [];
+  const assignments = data?.data?.items || [];
   const hasAssignments = assignments.length > 0;
-
-  useEffect(() => {
-    console.log("Fetching assignments with params:", {
-      pendingOnly,
-      page,
-      rowsPerPage,
-    });
-    execute(pendingOnly, page + 1, rowsPerPage)
-      .then((response) => {
-        console.log("API Response:", response);
-      })
-      .catch((error) => {
-        console.error("API Error:", error);
-      });
-  }, [execute, pendingOnly, page, rowsPerPage]);
 
   return (
     <Box>
@@ -196,16 +178,6 @@ const MyAssignments: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           <ActionButtonsContainer>
-                            <AnimatedButton
-                              variant="outlined"
-                              size="small"
-                              onClick={() =>
-                                handleViewDetail(assignment.orderId)
-                              }
-                              sx={{ minWidth: "80px" }}
-                            >
-                              Xem
-                            </AnimatedButton>
                             {!assignment.completedDate && (
                               <AnimatedButton
                                 variant="contained"
@@ -224,7 +196,6 @@ const MyAssignments: React.FC = () => {
                   </TableBody>
                 </StyledTable>
               </StyledTableContainer>
-
               <StyledTablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 count={data?.data?.totalCount || 0}

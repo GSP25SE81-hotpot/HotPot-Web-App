@@ -36,4 +36,5 @@ export interface ChatMessageDto {
   chatSessionId: number;
   message: string;
   createdAt: string;
+  isBroadcast: boolean;
 }

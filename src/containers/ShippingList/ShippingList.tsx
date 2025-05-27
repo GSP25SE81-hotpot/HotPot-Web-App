@@ -17,12 +17,14 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import staffGetOrderApi from "../../api/staffGetOrderAPI";
-import useAuth from "../../hooks/useAuth";
+// import useAuth from "../../hooks/useAuth";
 import { ShippingOrderType } from "../../types/shippingOrder";
 import ConfirmationDialog from "./Popup/Confirm";
+import { AssignOrderType } from "../../types/assignOrder";
+import Detail from "./Popup/Detail";
 
 const ShippingList = () => {
   //Declare
@@ -31,9 +33,10 @@ const ShippingList = () => {
   );
   const [openConfirm, setOpenConfirm] = React.useState(false);
   const [itemToUpdateStatus, setItemToUpdateStatus] = React.useState<any>(null);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<number>();
+  const [orders, setOrders] = useState<AssignOrderType[]>([]);
   const theme = useTheme();
-  const { auth } = useAuth();
-  const id = auth?.user?.id;
 
   //Call api
   const getShippingList = async () => {
@@ -147,8 +150,22 @@ const ShippingList = () => {
     }
   };
 
+  //handle open detail
+  const handleOpenDetail = (orderId: number) => {
+    setSelectedOrderId(orderId);
+    setOpenDetail(true);
+  };
+  const handleCloseDetail = () => {
+    setOpenDetail(false);
+  };
+
   return (
     <Box>
+      <Detail
+        onOpen={openDetail}
+        onClose={handleCloseDetail}
+        orderId={selectedOrderId}
+      />
       <ConfirmationDialog
         open={openConfirm}
         onClose={handleCloseConfirm}
@@ -176,7 +193,18 @@ const ShippingList = () => {
             <TableBody>
               {shippingList.map((row, index) => (
                 <TableRow key={index}>
-                  <TableCell align="left">{row?.orderCode}</TableCell>
+                  <TableCell
+                    align="left"
+                    onClick={() => handleOpenDetail(row?.orderId)}
+                    sx={{
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      color: theme.palette.primary.main,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {row?.orderCode}
+                  </TableCell>
                   <TableCell align="left">{row?.customerName}</TableCell>
                   <TableCell align="left">{row?.shippingAddress}</TableCell>
                   <TableCell align="left">

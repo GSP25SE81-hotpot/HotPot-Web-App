@@ -77,21 +77,21 @@ const TableCombo = () => {
     }
   }, [dataCombo, isCustomizable]);
 
+  const getListCombo = async () => {
+    try {
+      const res: any = await adminComboAPI.getListCombo({
+        pageNumber: page + 1,
+        pageSize: size,
+        isCustomizable,
+      });
+      setDataCombo(res?.items || []);
+      setTotal(res?.totalCount || 0);
+    } catch (error: any) {
+      console.error("Error fetching combos:", error?.message);
+    }
+  };
   // Fetch combos
   useEffect(() => {
-    const getListCombo = async () => {
-      try {
-        const res: any = await adminComboAPI.getListCombo({
-          pageNumber: page + 1,
-          pageSize: size,
-          isCustomizable,
-        });
-        setDataCombo(res?.items || []);
-        setTotal(res?.totalCount || 0);
-      } catch (error: any) {
-        console.error("Error fetching combos:", error?.message);
-      }
-    };
     getListCombo();
   }, [page, size, isCustomizable]);
 
@@ -123,9 +123,7 @@ const TableCombo = () => {
   const tableHeader = [
     { id: "name", label: "Tên món lẩu", align: "center" },
     { id: "imageURLs", label: "Hình ảnh", align: "center" },
-    { id: "isCustomizable", label: "Tự tạo mới", align: "center" },
-    { id: "appliedDiscountPercentage", label: "Giảm giá", align: "center" },
-    { id: "createdAt", label: "Ngày tạo", align: "center", format: "date" },
+    { id: "size", label: "Số khẩu phần", align: "center" },
   ];
 
   // Pagination
@@ -179,6 +177,9 @@ const TableCombo = () => {
     );
   };
 
+  const onFetch = () => {
+    getListCombo();
+  };
   // Custom table renderer for grouped data
   const CustomGroupedTable = () => {
     return (
@@ -228,6 +229,8 @@ const TableCombo = () => {
                   <MenuActionTableCombo
                     hotpotData={selectedData}
                     onOpenDetail={selecteData}
+                    onOpenDelete={selecteData}
+                    onFetch={onFetch}
                   />
                 }
                 eventAction={
@@ -254,7 +257,7 @@ const TableCombo = () => {
     return (
       <Box display="flex" alignItems="center" gap={2}>
         <FormControl size="small" sx={{ minWidth: 180 }}>
-          <InputLabel>Lọc theo tùy chỉnh</InputLabel>
+          <InputLabel>Loại Combo</InputLabel>
           <Select
             value={isCustomizable ? "true" : "false"}
             label="Lọc theo tùy chỉnh"
@@ -263,8 +266,8 @@ const TableCombo = () => {
               setPage(0); // Reset page
             }}
           >
-            <MenuItem value="true">Tự tạo mới</MenuItem>
-            <MenuItem value="false">Không tự tạo</MenuItem>
+            <MenuItem value="true">Combo tự chọn</MenuItem>
+            <MenuItem value="false">Combo mặc định</MenuItem>
           </Select>
         </FormControl>
         {isCustomizable && (

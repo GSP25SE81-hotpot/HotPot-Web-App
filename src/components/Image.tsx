@@ -89,7 +89,7 @@ export default function Image({
         wrapperClassName="wrapper"
         effect={disabledEffect ? undefined : effect}
         placeholderSrc="/assets/placeholder.svg"
-        sx={{ width: 1, height: 1, objectFit: "contain" }}
+        sx={{ width: 1, height: 1, objectFit: "cover" }}
         {...other}
       />
     </Box>

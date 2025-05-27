@@ -1,74 +1,124 @@
+// src/components/Chat/ChatList.tsx
 import React from "react";
-import { Box, List, TextField, Typography } from "@mui/material";
-import ChatListItem from "./ChatListItem";
+import {
+  Box,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  Badge,
+  Typography,
+} from "@mui/material";
 import { ChatSessionDto } from "../../../types/chat";
 
 interface ChatListProps {
-  chatSessions: ChatSessionDto[];
+  chats: ChatSessionDto[];
   selectedChatId: number | null;
-  onChatSelect: (chatId: number) => void;
+  onSelectChat: (chatId: number) => void;
+  unreadChats: Set<number>;
 }
 
 const ChatList: React.FC<ChatListProps> = ({
-  chatSessions,
+  chats,
   selectedChatId,
-  onChatSelect,
+  onSelectChat,
+  unreadChats,
 }) => {
+  // Sort chats: unread first, then by creation date (newest first)
+  const sortedChats = [...chats].sort((a, b) => {
+    // Unread chats first
+    const aUnread = unreadChats.has(a.chatSessionId);
+    const bUnread = unreadChats.has(b.chatSessionId);
+    if (aUnread && !bUnread) return -1;
+    if (!aUnread && bUnread) return 1;
+
+    // Then by creation date
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
   return (
-    <Box
-      sx={{
-        width: 280,
-        borderRight: "1px solid",
-        borderColor: "divider",
-        overflowY: "auto",
-        bgcolor: (theme) => theme.palette.background.paper,
-        opacity: 0.6,
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <Box
-        sx={{
-          p: 2,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          borderBottom: "1px solid",
-          borderColor: "divider",
-        }}
-      >
-        <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-          Chat
-        </Typography>
-        <TextField
-          size="small"
-          placeholder="Tìm kiếm..."
-          variant="outlined"
-          sx={{
-            width: 120,
-            "& .MuiOutlinedInput-root": {
-              borderRadius: 20,
-              height: 36,
-            },
-          }}
-        />
-      </Box>
-      <List sx={{ flex: 1, py: 0 }}>
-        {chatSessions.length > 0 ? (
-          chatSessions.map((chat) => (
-            <ChatListItem
-              key={chat.chatSessionId}
-              chat={chat}
-              isSelected={selectedChatId === chat.chatSessionId}
-              onClick={() => onChatSelect(chat.chatSessionId)}
-            />
-          ))
+    <Box sx={{ height: "100%", overflow: "auto" }}>
+      <List disablePadding>
+        {sortedChats.length > 0 ? (
+          sortedChats.map((chat) => {
+            const isSelected = chat.chatSessionId === selectedChatId;
+            const isUnread = unreadChats.has(chat.chatSessionId);
+
+            return (
+              <ListItem
+                key={chat.chatSessionId}
+                disablePadding
+                sx={{
+                  borderLeft: isUnread ? "3px solid #FFC107" : "none",
+                }}
+              >
+                <ListItemButton
+                  selected={isSelected}
+                  onClick={() => onSelectChat(chat.chatSessionId)}
+                  sx={{
+                    py: 1.5,
+                    "&.Mui-selected": {
+                      bgcolor: "rgba(0, 0, 0, 0.04)",
+                    },
+                  }}
+                >
+                  <ListItemAvatar>
+                    <Badge
+                      color="success"
+                      variant="dot"
+                      invisible={!chat.isActive}
+                      overlap="circular"
+                      anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "right",
+                      }}
+                    >
+                      <Avatar
+                        sx={{
+                          bgcolor: isUnread ? "warning.main" : "primary.main",
+                        }}
+                      >
+                        {chat.customerName?.charAt(0) || "K"}
+                      </Avatar>
+                    </Badge>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontWeight: isUnread ? "bold" : "normal",
+                          color: isUnread ? "warning.main" : "inherit",
+                        }}
+                      >
+                        {chat.customerName || "Khách hàng không xác định"}
+                      </Typography>
+                    }
+                    secondary={
+                      <Box component="span">
+                        <Typography variant="body2" noWrap>
+                          {chat.topic || "Không có chủ đề"}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {chat.isActive
+                            ? chat.managerId
+                              ? `Đã phân công`
+                              : "Chưa phân công"
+                            : "Đã kết thúc"}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                </ListItemButton>
+              </ListItem>
+            );
+          })
         ) : (
-          <Box sx={{ p: 2, textAlign: "center" }}>
-            <Typography variant="body2" color="text.secondary">
-              Không có cuộc trò chuyện nào
-            </Typography>
-          </Box>
+          <ListItem>
+            <ListItemText primary="Không có cuộc trò chuyện nào" />
+          </ListItem>
         )}
       </List>
     </Box>

@@ -71,9 +71,12 @@ import { VehicleDTO } from "../../../types/vehicle";
 import { formatCurrency } from "../../../utils/formatters";
 import { getVietnameseOrderStatusLabel } from "./utils/orderHelpers";
 import useDebounce from "../../../hooks/useDebounce";
+import { useNavigate } from "react-router-dom";
 
 const OrdersByStatusList: React.FC = () => {
   // State for active tab
+  const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState(0);
   // State for orders data
   const [orders, setOrders] = useState<OrderWithDetailsDTO[]>([]);
@@ -134,9 +137,9 @@ const OrdersByStatusList: React.FC = () => {
     OrderStatus.Processed,
     OrderStatus.Shipping,
     OrderStatus.Delivered,
-    OrderStatus.Completed,
-    OrderStatus.Cancelled,
     OrderStatus.Returning,
+    OrderStatus.Cancelled,
+    OrderStatus.Completed,
   ];
 
   // Fetch orders when dependencies change
@@ -470,7 +473,7 @@ const OrdersByStatusList: React.FC = () => {
     if (taskTypes.length === 0) {
       taskTypes.push(StaffTaskType.Preparation, StaffTaskType.Shipping);
     }
-    setSelectedTaskTypes(taskTypes);
+    setSelectedTaskTypes([StaffTaskType.Preparation]);
     // Open dialog first
     setOpenDialog(true);
     // Then fetch data with the specific order context
@@ -714,9 +717,9 @@ const OrdersByStatusList: React.FC = () => {
           <StyledTab label="Đã xử lý" />
           <StyledTab label="Đang giao" />
           <StyledTab label="Đã giao" />
-          <StyledTab label="Hoàn thành" />
-          <StyledTab label="Đã hủy" />
           <StyledTab label="Đang trả" />
+          <StyledTab label="Đã hủy" />
+          <StyledTab label="Hoàn thành" />
         </StyledTabs>
         {/* Search and filter toolbar */}
         <Box
@@ -945,12 +948,6 @@ const OrdersByStatusList: React.FC = () => {
                                 sx={{
                                   ml: 1,
                                   borderRadius: 2,
-                                  // bgcolor: "primary.main",
-                                  // color: "white", // Ensuring text/icon is white for contrast
-                                  // padding: "5px", // Slightly larger clickable area
-                                  // "&:hover": {
-                                  //   bgcolor: "primary.dark",
-                                  // },
                                 }}
                               >
                                 <AssignmentAddIcon />
@@ -963,7 +960,7 @@ const OrdersByStatusList: React.FC = () => {
                               size="small"
                               onClick={() => {
                                 // Navigate to order details - using orderCode (string) now
-                                window.location.href = `/orders/${order.orderId}`;
+                                navigate(`/orders/${order.orderId}`);
                               }}
                             >
                               <InfoIcon fontSize="small" />

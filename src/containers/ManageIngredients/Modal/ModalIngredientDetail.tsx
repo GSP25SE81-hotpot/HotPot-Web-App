@@ -22,6 +22,7 @@ import {
   TablePagination,
   Card,
   CardContent,
+  Button,
   Stack,
 } from "@mui/material";
 import React, { ReactNode, useEffect, useState } from "react";
@@ -36,12 +37,10 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import ArchiveIcon from "@mui/icons-material/Archive";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import TrendingDownIcon from "@mui/icons-material/TrendingDown";
-import HistoryIcon from "@mui/icons-material/History";
 import BusinessIcon from "@mui/icons-material/Business";
 import { colors } from "../../../styles/Color/color";
 import adminIngredientsAPI from "../../../api/Services/adminIngredientsAPI";
+import ModalViewPrice from "./ModalViewPrice";
 
 interface DetailPopupIngredientProps {
   handleOpen: boolean;
@@ -74,14 +73,6 @@ interface BatchItem {
   provideCompany?: string;
 }
 
-interface PriceHistoryItem {
-  ingredientPriceId: number;
-  price: number;
-  effectiveDate: string;
-  ingredientID: number;
-  ingredientName: string;
-}
-
 const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
   handleOpen,
   handleClose,
@@ -92,9 +83,8 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [batchPage, setBatchPage] = React.useState(0);
   const [batchRowsPerPage, setBatchRowsPerPage] = React.useState(5);
-  const [pricePage, setPricePage] = React.useState(0);
-  const [priceRowsPerPage, setPriceRowsPerPage] = React.useState(5);
 
+  const [open, setOpen] = React.useState(false);
   // Batch pagination
   const handleChangeBatchPage = (_event: unknown, newPage: number) => {
     setBatchPage(newPage);
@@ -105,18 +95,6 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
   ) => {
     setBatchRowsPerPage(parseInt(event.target.value, 10));
     setBatchPage(0);
-  };
-
-  // Price pagination
-  const handleChangePricePage = (_event: unknown, newPage: number) => {
-    setPricePage(newPage);
-  };
-
-  const handleChangePriceRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setPriceRowsPerPage(parseInt(event.target.value, 10));
-    setPricePage(0);
   };
 
   // Call API
@@ -156,34 +134,10 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
     });
   };
 
-  const formatDateTime = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   // Format currency
   const formatCurrency = (amount: number) => {
     if (amount === undefined || amount === null) return "N/A";
     return amount.toLocaleString("vi-VN") + " VND";
-  };
-
-  // Get price trend
-  const getPriceTrend = (prices: PriceHistoryItem[]) => {
-    if (!prices || prices.length < 2) return null;
-    const sortedPrices = [...prices].sort(
-      (a, b) =>
-        new Date(b.effectiveDate).getTime() -
-        new Date(a.effectiveDate).getTime()
-    );
-    const currentPrice = sortedPrices[0].price;
-    const previousPrice = sortedPrices[1].price;
-    return currentPrice - previousPrice;
   };
 
   // Get expiration status color
@@ -202,23 +156,15 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
     return `Còn ${days} ngày`;
   };
 
-  const priceTrend = detailData?.prices
-    ? getPriceTrend(detailData.prices)
-    : null;
-  const sortedPrices = detailData?.prices
-    ? [...detailData.prices].sort(
-        (a, b) =>
-          new Date(b.effectiveDate).getTime() -
-          new Date(a.effectiveDate).getTime()
-      )
-    : [];
-
   return (
     <Dialog
       open={handleOpen}
-      onClose={handleClose}
       fullWidth
       maxWidth="xl"
+      onClose={(_event, reason) => {
+        if (reason === "backdropClick") return;
+        handleClose();
+      }}
       TransitionComponent={Fade}
       transitionDuration={300}
     >
@@ -318,59 +264,6 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
                       {detailData?.name || "N/A"}
                     </Typography>
 
-                    <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-                      <Chip
-                        icon={
-                          detailData?.isLowStock ? (
-                            <WarningAmberIcon />
-                          ) : (
-                            <CheckCircleIcon />
-                          )
-                        }
-                        label={
-                          detailData?.isLowStock
-                            ? "Hàng tồn kho thấp"
-                            : "Đủ hàng"
-                        }
-                        sx={{
-                          color: detailData?.isLowStock
-                            ? colors.orange_500
-                            : colors.green_200,
-                          borderColor: detailData?.isLowStock
-                            ? colors.orange_500
-                            : colors.green_200,
-                          fontWeight: "medium",
-                        }}
-                        variant="outlined"
-                      />
-
-                      {priceTrend !== null && (
-                        <Chip
-                          icon={
-                            priceTrend > 0 ? (
-                              <TrendingUpIcon />
-                            ) : (
-                              <TrendingDownIcon />
-                            )
-                          }
-                          label={priceTrend > 0 ? "Tăng giá" : "Giảm giá"}
-                          sx={{
-                            color:
-                              priceTrend > 0
-                                ? colors.orange_500
-                                : colors.green_200,
-                            borderColor:
-                              priceTrend > 0
-                                ? colors.orange_500
-                                : colors.green_200,
-                            fontWeight: "medium",
-                          }}
-                          variant="outlined"
-                          size="small"
-                        />
-                      )}
-                    </Stack>
-
                     {/* Stock Level Indicator */}
                     <Paper
                       elevation={1}
@@ -430,6 +323,16 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
 
                 {/* Right side - Details */}
                 <Grid2 size={{ mobile: 12, desktop: 8 }}>
+                  <Stack
+                    display="flex"
+                    direction="row"
+                    justifyContent="flex-end"
+                    sx={{ mb: 2 }}
+                  >
+                    <Button variant="contained" onClick={() => setOpen(true)}>
+                      Chi tiết giá
+                    </Button>
+                  </Stack>
                   <Grid2 container spacing={2}>
                     <DetailItem
                       icon={<CategoryIcon color="primary" />}
@@ -485,7 +388,7 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
 
               {/* Summary Cards */}
               <Grid2 container spacing={2} sx={{ mb: 3 }}>
-                <Grid2 size={{ mobile: 12, tablet: 6, desktop: 3 }}>
+                <Grid2 size={{ mobile: 12, tablet: 6, desktop: 4 }}>
                   <Card elevation={2} sx={{ height: "100%" }}>
                     <CardContent>
                       <Box
@@ -507,7 +410,7 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
                   </Card>
                 </Grid2>
 
-                <Grid2 size={{ mobile: 12, tablet: 6, desktop: 3 }}>
+                <Grid2 size={{ mobile: 12, tablet: 6, desktop: 4 }}>
                   <Card elevation={2} sx={{ height: "100%" }}>
                     <CardContent>
                       <Box
@@ -533,7 +436,7 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
                   </Card>
                 </Grid2>
 
-                <Grid2 size={{ mobile: 12, tablet: 6, desktop: 3 }}>
+                <Grid2 size={{ mobile: 12, tablet: 6, desktop: 4 }}>
                   <Card elevation={2} sx={{ height: "100%" }}>
                     <CardContent>
                       <Box
@@ -559,34 +462,12 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
                     </CardContent>
                   </Card>
                 </Grid2>
-
-                <Grid2 size={{ mobile: 12, tablet: 6, desktop: 3 }}>
-                  <Card elevation={2} sx={{ height: "100%" }}>
-                    <CardContent>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", mb: 1 }}
-                      >
-                        <HistoryIcon color="primary" sx={{ mr: 1 }} />
-                        <Typography variant="body2" color="text.secondary">
-                          Lịch sử giá
-                        </Typography>
-                      </Box>
-                      <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        color="primary"
-                      >
-                        {detailData?.prices?.length || 0}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid2>
               </Grid2>
 
               {/* Tabs-like sections */}
               <Grid2 container spacing={3}>
                 {/* Batches Section */}
-                <Grid2 size={{ mobile: 12, desktop: 6 }}>
+                <Grid2 size={{ mobile: 12, desktop: 12 }}>
                   <Paper
                     elevation={2}
                     sx={{ p: 3, borderRadius: 2, height: "fit-content" }}
@@ -631,71 +512,79 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
                               </TableRow>
                             </TableHead>
                             <TableBody>
-                              {detailData.batches.map((batch: BatchItem) => (
-                                <TableRow key={batch.ingredientBatchId}>
-                                  <TableCell>
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                      }}
-                                    >
-                                      <ArchiveIcon
-                                        fontSize="small"
-                                        sx={{ mr: 1, color: colors.primary }}
-                                      />
-                                      {batch.batchNumber}
-                                    </Box>
-                                  </TableCell>
-                                  <TableCell>
-                                    {batch.initialQuantity} {batch.unit}
-                                    {batch.measurementValue
-                                      ? ` (${batch.physicalQuantity} ${batch.unit})`
-                                      : ""}
-                                  </TableCell>
-                                  <TableCell>
-                                    {batch.remainingQuantity} {batch.unit}
-                                    {batch.measurementValue
-                                      ? ` (${
-                                          batch.remainingQuantity *
-                                          batch.measurementValue
-                                        } ${batch.unit})`
-                                      : ""}
-                                  </TableCell>
-                                  <TableCell>
-                                    {formatDate(batch.receivedDate)}
-                                  </TableCell>
-                                  <TableCell>
-                                    {formatDate(batch.bestBeforeDate)}
-                                  </TableCell>
-                                  <TableCell>{batch?.provideCompany}</TableCell>
-                                  <TableCell>
-                                    <Tooltip
-                                      title={`${
-                                        batch.isExpired
-                                          ? "Đã hết hạn"
-                                          : `Còn ${batch.daysUntilExpiration} ngày`
-                                      }`}
-                                    >
-                                      <Chip
-                                        size="small"
-                                        label={getExpirationStatus(
-                                          batch.daysUntilExpiration,
-                                          batch.isExpired
-                                        )}
+                              {detailData.batches
+                                .slice(
+                                  batchPage * batchRowsPerPage,
+                                  batchPage * batchRowsPerPage +
+                                    batchRowsPerPage
+                                )
+                                .map((batch: BatchItem) => (
+                                  <TableRow key={batch.ingredientBatchId}>
+                                    <TableCell>
+                                      <Box
                                         sx={{
-                                          bgcolor: getExpirationColor(
+                                          display: "flex",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <ArchiveIcon
+                                          fontSize="small"
+                                          sx={{ mr: 1, color: colors.primary }}
+                                        />
+                                        {batch.batchNumber}
+                                      </Box>
+                                    </TableCell>
+                                    <TableCell>
+                                      {batch.initialQuantity} {batch.unit}
+                                      {batch.measurementValue
+                                        ? ` (${batch.physicalQuantity} ${batch.unit})`
+                                        : ""}
+                                    </TableCell>
+                                    <TableCell>
+                                      {batch.remainingQuantity} {batch.unit}
+                                      {batch.measurementValue
+                                        ? ` (${
+                                            batch.remainingQuantity *
+                                            batch.measurementValue
+                                          } ${batch.unit})`
+                                        : ""}
+                                    </TableCell>
+                                    <TableCell>
+                                      {formatDate(batch.receivedDate)}
+                                    </TableCell>
+                                    <TableCell>
+                                      {formatDate(batch.bestBeforeDate)}
+                                    </TableCell>
+                                    <TableCell>
+                                      {batch?.provideCompany}
+                                    </TableCell>
+                                    <TableCell>
+                                      <Tooltip
+                                        title={`${
+                                          batch.isExpired
+                                            ? "Đã hết hạn"
+                                            : `Còn ${batch.daysUntilExpiration} ngày`
+                                        }`}
+                                      >
+                                        <Chip
+                                          size="small"
+                                          label={getExpirationStatus(
                                             batch.daysUntilExpiration,
                                             batch.isExpired
-                                          ),
-                                          color: "white",
-                                          fontWeight: "medium",
-                                        }}
-                                      />
-                                    </Tooltip>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
+                                          )}
+                                          sx={{
+                                            bgcolor: getExpirationColor(
+                                              batch.daysUntilExpiration,
+                                              batch.isExpired
+                                            ),
+                                            color: "white",
+                                            fontWeight: "medium",
+                                          }}
+                                        />
+                                      </Tooltip>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
                             </TableBody>
                           </Table>
                         </TableContainer>
@@ -733,178 +622,18 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
                     )}
                   </Paper>
                 </Grid2>
-
-                {/* Price History Section */}
-                <Grid2 size={{ mobile: 12, desktop: 6 }}>
-                  <Paper
-                    elevation={2}
-                    sx={{ p: 3, borderRadius: 2, height: "fit-content" }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                      <HistoryIcon color="primary" sx={{ mr: 1 }} />
-                      <Typography variant="h6" fontWeight="bold">
-                        Lịch sử giá ({detailData?.prices?.length || 0})
-                      </Typography>
-                    </Box>
-
-                    {sortedPrices.length > 0 ? (
-                      <>
-                        <TableContainer sx={{ maxHeight: 400 }}>
-                          <Table size="small">
-                            <TableHead>
-                              <TableRow sx={{ bgcolor: "rgba(0,0,0,0.03)" }}>
-                                <TableCell
-                                  sx={{
-                                    fontWeight: "bold",
-                                    fontSize: "0.875rem",
-                                  }}
-                                >
-                                  Giá
-                                </TableCell>
-                                <TableCell
-                                  sx={{
-                                    fontWeight: "bold",
-                                    fontSize: "0.875rem",
-                                  }}
-                                >
-                                  Ngày áp dụng
-                                </TableCell>
-                                <TableCell
-                                  sx={{
-                                    fontWeight: "bold",
-                                    fontSize: "0.875rem",
-                                  }}
-                                >
-                                  Thay đổi
-                                </TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {sortedPrices
-                                .slice(
-                                  pricePage * priceRowsPerPage,
-                                  pricePage * priceRowsPerPage +
-                                    priceRowsPerPage
-                                )
-                                .map((price: PriceHistoryItem, index) => {
-                                  const prevPrice = sortedPrices[index + 1];
-                                  const priceChange = prevPrice
-                                    ? price.price - prevPrice.price
-                                    : 0;
-
-                                  return (
-                                    <TableRow
-                                      key={`${price.ingredientPriceId}-${price.effectiveDate}`}
-                                    >
-                                      <TableCell>
-                                        <Typography
-                                          variant="body2"
-                                          fontWeight="medium"
-                                        >
-                                          {formatCurrency(price.price)}
-                                        </Typography>
-                                        {index === 0 && (
-                                          <Chip
-                                            label="Hiện tại"
-                                            size="small"
-                                            color="primary"
-                                            sx={{
-                                              mt: 0.5,
-                                              fontSize: "0.7rem",
-                                              height: 20,
-                                            }}
-                                          />
-                                        )}
-                                      </TableCell>
-                                      <TableCell>
-                                        <Typography variant="body2">
-                                          {formatDateTime(price.effectiveDate)}
-                                        </Typography>
-                                      </TableCell>
-                                      <TableCell>
-                                        {priceChange !== 0 && (
-                                          <Box
-                                            sx={{
-                                              display: "flex",
-                                              alignItems: "center",
-                                            }}
-                                          >
-                                            {priceChange > 0 ? (
-                                              <TrendingUpIcon
-                                                fontSize="small"
-                                                sx={{
-                                                  color: colors.orange_500,
-                                                  mr: 0.5,
-                                                }}
-                                              />
-                                            ) : (
-                                              <TrendingDownIcon
-                                                fontSize="small"
-                                                sx={{
-                                                  color: colors.green_200,
-                                                  mr: 0.5,
-                                                }}
-                                              />
-                                            )}
-                                            <Typography
-                                              variant="body2"
-                                              sx={{
-                                                color:
-                                                  priceChange > 0
-                                                    ? colors.orange_500
-                                                    : colors.green_200,
-                                                fontWeight: "medium",
-                                              }}
-                                            >
-                                              {priceChange > 0 ? "+" : ""}
-                                              {formatCurrency(priceChange)}
-                                            </Typography>
-                                          </Box>
-                                        )}
-                                      </TableCell>
-                                    </TableRow>
-                                  );
-                                })}
-                            </TableBody>
-                          </Table>
-                        </TableContainer>
-                        <TablePagination
-                          rowsPerPageOptions={[5, 10, 25]}
-                          component="div"
-                          count={sortedPrices.length}
-                          rowsPerPage={priceRowsPerPage}
-                          page={pricePage}
-                          onPageChange={handleChangePricePage}
-                          onRowsPerPageChange={handleChangePriceRowsPerPage}
-                          labelRowsPerPage="Số hàng mỗi trang:"
-                          size="small"
-                        />
-                      </>
-                    ) : (
-                      <Box
-                        sx={{
-                          p: 3,
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          bgcolor: "rgba(0,0,0,0.02)",
-                          borderRadius: 2,
-                        }}
-                      >
-                        <HistoryIcon
-                          sx={{ fontSize: 48, color: "rgba(0,0,0,0.2)", mb: 1 }}
-                        />
-                        <Typography variant="body2" color="text.secondary">
-                          Không có lịch sử giá
-                        </Typography>
-                      </Box>
-                    )}
-                  </Paper>
-                </Grid2>
               </Grid2>
             </Box>
           </Fade>
+        )}
+        {open && (
+          <>
+            <ModalViewPrice
+              detailData={detailData}
+              onClose={() => setOpen(false)}
+              open={open}
+            />
+          </>
         )}
       </DialogContent>
     </Dialog>

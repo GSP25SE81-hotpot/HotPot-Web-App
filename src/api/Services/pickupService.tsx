@@ -3,8 +3,6 @@
 import {
   ApiResponse,
   PagedResult,
-  RentalListing,
-  RentOrderDetail,
   StaffPickupAssignment,
   UnifiedReturnRequest,
 } from "../../types/rentalPickup";
@@ -22,26 +20,6 @@ export const rentalService = {
       ApiResponse<PagedResult<StaffPickupAssignment>>
     >(
       `/staff/rentals/my-assignments?pendingOnly=${pendingOnly}&pageNumber=${pageNumber}&pageSize=${pageSize}`
-    );
-    return response;
-  },
-
-  // Get rental listings (pending or overdue)
-  getRentalListings: async (
-    type: "pending" | "overdue" = "pending",
-    pageNumber: number = 1,
-    pageSize: number = 10
-  ): Promise<PagedResult<RentalListing>> => {
-    const response = await axiosClient.get<any, PagedResult<RentalListing>>(
-      `/staff/rentals/listings?type=${type}&pageNumber=${pageNumber}&pageSize=${pageSize}`
-    );
-    return response;
-  },
-
-  // Get rent order detail
-  getRentOrder: async (id: number): Promise<RentOrderDetail> => {
-    const response = await axiosClient.get<any, RentOrderDetail>(
-      `/staff/rentals/order/${id}`
     );
     return response;
   },

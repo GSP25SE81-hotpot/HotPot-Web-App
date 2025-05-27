@@ -541,7 +541,7 @@ const ImportProduct: React.FC = () => {
                               }
                               sx={{ flex: 1 }}
                               InputProps={{
-                                inputProps: { min: 0, step: 0.1 },
+                                inputProps: { min: 0 },
                               }}
                             />
                             <TextField

@@ -19,13 +19,11 @@ class NotificationService {
   ): Promise<PaginatedNotificationsResponse> {
     try {
       const { includeRead = false, page = 1, pageSize = 20 } = params;
-
       console.log("Requesting notifications with params:", {
         includeRead,
         page,
         pageSize,
       });
-
       const config = {
         params: { includeRead, page, pageSize },
         timeout: 10000,
@@ -68,24 +66,20 @@ class NotificationService {
   async getUnreadCount(): Promise<number> {
     try {
       const response = await axiosClient.get("/notifications/count");
-
       // Handle different response structures
       if (response.data) {
         // Direct number response
         if (typeof response.data === "number") {
           return response.data;
         }
-
         // Object with count property
         if (response.data.count !== undefined) {
           return response.data.count;
         }
-
         // Object with unreadCount property
         if (response.data.unreadCount !== undefined) {
           return response.data.unreadCount;
         }
-
         // Nested data object with unreadCount
         if (
           response.data.data &&

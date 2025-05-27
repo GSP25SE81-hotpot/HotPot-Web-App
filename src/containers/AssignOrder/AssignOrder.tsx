@@ -20,6 +20,7 @@ import { toast } from "react-toastify";
 import staffGetOrderApi from "../../api/staffGetOrderAPI";
 // import useAuth from "../../hooks/useAuth";
 import { AssignOrderType } from "../../types/assignOrder";
+import ViewDetail from "./Popup/ViewDetail";
 
 const StatusChip = ({ status }: { status: string }) => {
   const theme = useTheme();
@@ -44,8 +45,8 @@ const StatusChip = ({ status }: { status: string }) => {
 const AssignOrder: React.FC = () => {
   //Declare
   const theme = useTheme();
-  // const { auth } = useAuth();
-  // const _id = auth?.user?.id;
+  const [openDetail, setOpenDetail] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<number>();
   const [orders, setOrders] = useState<AssignOrderType[]>([]);
 
   //call api
@@ -88,62 +89,88 @@ const AssignOrder: React.FC = () => {
     }
   };
 
-  return (
-    <Box
-      sx={{
-        p: 3,
-        bgcolor: theme.palette.background.default,
-        minHeight: "100vh",
-      }}
-    >
-      <Typography variant="h4" component="h1" mb={3} color="primary">
-        Quản lý đơn hàng lẩu
-      </Typography>
+  //handle open detail
+  const handleOpenDetail = (orderId: number) => {
+    setSelectedOrderId(orderId);
+    setOpenDetail(true);
+  };
+  const handleCloseDetail = () => {
+    setOpenDetail(false);
+  };
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ bgcolor: theme.palette.grey[200] }}>
-              {headerArr.map((header, _index) => (
-                <TableCell sx={{ fontWeight: 600 }}>{header}</TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {orders.map((order) => (
-              <TableRow key={order.orderId}>
-                <TableCell>{order.orderCode}</TableCell>
-                <TableCell>{order.customerName}</TableCell>
-                <TableCell>
-                  <TextField
-                    multiline
-                    rows={2}
-                    sx={{
-                      width: "300px",
-                      "& .MuiInputBase-root": {
-                        bgcolor: theme.palette.background.paper,
-                      },
-                    }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <StatusChip status={order.status} />
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleChangeStatus(order.orderId)}
-                  >
-                    Đơn hàng sẵn sàng
-                  </Button>
-                </TableCell>
+  return (
+    <>
+      <ViewDetail
+        onOpen={openDetail}
+        onClose={handleCloseDetail}
+        orderId={selectedOrderId}
+      />
+      <Box
+        sx={{
+          p: 3,
+          bgcolor: theme.palette.background.default,
+          minHeight: "100vh",
+        }}
+      >
+        <Typography variant="h4" component="h1" mb={3} color="primary">
+          Dánh sách đơn hàng cần xử lý
+        </Typography>
+
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: theme.palette.grey[200] }}>
+                {headerArr.map((header, _index) => (
+                  <TableCell sx={{ fontWeight: 600 }}>{header}</TableCell>
+                ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+            </TableHead>
+            <TableBody>
+              {orders.map((order) => (
+                <TableRow key={order.orderId}>
+                  <TableCell
+                    onClick={() => handleOpenDetail(order.orderId)}
+                    sx={{
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      color: theme.palette.primary.main,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {order.orderCode}
+                  </TableCell>
+                  <TableCell>{order.customerName}</TableCell>
+                  <TableCell>
+                    <TextField
+                      multiline
+                      rows={2}
+                      sx={{
+                        width: "300px",
+                        "& .MuiInputBase-root": {
+                          bgcolor: theme.palette.background.paper,
+                        },
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <StatusChip status={order.status} />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleChangeStatus(order.orderId)}
+                    >
+                      Đơn hàng sẵn sàng
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+    </>
   );
 };
 
