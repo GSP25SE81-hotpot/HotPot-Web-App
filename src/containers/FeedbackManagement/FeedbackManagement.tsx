@@ -215,7 +215,7 @@ const FeedbackManagement: React.FC = () => {
             <StyledCard key={feedback.feedbackId}>
               <CardContent sx={{ p: 3 }}>
                 <Stack spacing={2}>
-                  {/* Feedback Header */}
+                  {/* Feedback Header - User name */}
                   <Stack
                     direction="row"
                     justifyContent="space-between"
@@ -225,6 +225,14 @@ const FeedbackManagement: React.FC = () => {
                       {feedback.userName || "Khách hàng"}
                     </Typography>
                   </Stack>
+
+                  {/* Feedback Comment - This should be more prominent but not as large as h4 */}
+                  <Typography
+                    variant="body1"
+                    sx={{ whiteSpace: "pre-wrap", mb: 1 }}
+                  >
+                    {feedback.comment || "Không có bình luận"}
+                  </Typography>
 
                   {/* Order Information */}
                   <OrderInfoText>

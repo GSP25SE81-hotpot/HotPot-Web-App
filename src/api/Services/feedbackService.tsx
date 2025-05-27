@@ -16,6 +16,7 @@ export interface FeedbackListDto {
   userName: string;
   orderId: number;
   createdAt: Date;
+  comment: string;
 }
 
 // Updated to match backend FeedbackStats
