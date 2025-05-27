@@ -23,7 +23,6 @@ import staffGetOrderApi from "../../api/staffGetOrderAPI";
 // import useAuth from "../../hooks/useAuth";
 import { ShippingOrderType } from "../../types/shippingOrder";
 import ConfirmationDialog from "./Popup/Confirm";
-import { AssignOrderType } from "../../types/assignOrder";
 import Detail from "./Popup/Detail";
 
 const ShippingList = () => {
@@ -35,7 +34,7 @@ const ShippingList = () => {
   const [itemToUpdateStatus, setItemToUpdateStatus] = React.useState<any>(null);
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<number>();
-  
+
   const theme = useTheme();
 
   //Call api
