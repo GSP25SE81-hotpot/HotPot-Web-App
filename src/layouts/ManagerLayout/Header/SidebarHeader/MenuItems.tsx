@@ -11,7 +11,7 @@ import {
   Restaurant as HotpotIcon,
   LocalShipping as ShippingIcon,
   EventNote as ScheduleIcon,
-  Chat as ChatIcon,
+  // Chat as ChatIcon,
   Assignment as AssignmentIcon,
   DirectionsCar as VehicleIcon,
   Engineering as MaintenanceIcon,
@@ -167,11 +167,11 @@ export const menuItems: MenuItemLayout[] = [
         icon: <Feedback />,
         path: managerRoutes.feedbackManagement,
       },
-      {
-        label: "Trò chuyện với khách hàng",
-        icon: <ChatIcon />,
-        path: managerRoutes.customerChat,
-      },
+      // {
+      //   label: "Trò chuyện với khách hàng",
+      //   icon: <ChatIcon />,
+      //   path: managerRoutes.customerChat,
+      // },
       {
         label: "Lịch sử phân công nhân viên",
         icon: <AssignmentIcon />,

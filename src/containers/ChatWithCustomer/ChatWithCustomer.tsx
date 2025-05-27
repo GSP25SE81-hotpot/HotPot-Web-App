@@ -1,9 +1,12 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/Chat/ChatWithCustomer.tsx
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import { Box, Typography, Paper, CircularProgress, Alert } from "@mui/material";
 import useAuth from "../../hooks/useAuth";
-import chatService from "../../api/Services/chatService";
+// import chatService from "../../api/Services/chatService"; // chatService instance is created inside component now or imported differently if needed
+import { ChatService } from "../../api/Services/chatService"; // Import the class
+import signalRService from "../../api/Services/chatSignalRService"; // Import signalRService for direct calls
 import { ChatMessageDto, ChatSessionDto } from "../../types/chat";
 // Import components
 import ChatHeader from "./ChatHeader/ChatHeader";
@@ -19,6 +22,10 @@ const ChatWithCustomer: React.FC = () => {
   const reconnecting = useRef(false);
   const initialized = useRef(false);
   const loadingSessionsRef = useRef(false);
+
+  // Instantiate ChatService
+  const chatServiceRef = useRef(new ChatService());
+  const chatService = chatServiceRef.current; // Use this instance
 
   // State
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
@@ -400,7 +407,7 @@ const ChatWithCustomer: React.FC = () => {
 
     // Connection check interval with proper cooldown
     const intervalId = setInterval(() => {
-      const connected = chatService.isSocketConnected();
+      const connected = signalRService.isConnected(); // Use signalRService directly
       setIsConnected(connected);
 
       // Only try to reconnect if we're not already trying and user is logged in
@@ -422,10 +429,10 @@ const ChatWithCustomer: React.FC = () => {
     // Proper cleanup
     return () => {
       clearInterval(intervalId);
-      chatService.disconnect();
+      signalRService.disconnect(); // Use signalRService directly for disconnect
       initialized.current = false;
     };
-  }, [user?.id, loadChatSessions]);
+  }, [user?.id, loadChatSessions, chatService]); // Added chatService to dependency array
 
   // Trạng thái đang tải
   if (loading) {
@@ -512,8 +519,16 @@ const ChatWithCustomer: React.FC = () => {
               chat={selectedChat}
               onEndChat={handleEndChat}
               onJoinChat={() => handleJoinChat(selectedChat.chatSessionId)}
-              isManager={Number(selectedChat.managerId) === Number(user?.id)}
-              canJoin={!selectedChat.managerId && selectedChat.isActive}
+              isManager={
+                user?.role === "Manager" &&
+                Number(selectedChat.managerId) === Number(user?.id)
+              }
+              canJoin={
+                user?.role === "Manager" &&
+                selectedChat.isActive &&
+                (!selectedChat.managerId ||
+                  Number(selectedChat.managerId) === Number(user?.id))
+              }
             />
             <MessageList
               messages={selectedChatMessages}
