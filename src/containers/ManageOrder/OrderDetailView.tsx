@@ -219,10 +219,6 @@ const OrderDetailView: React.FC = () => {
     setOpenStatusDialog(true);
   };
 
-  const handleOpenAllocateDialog = () => {
-    setOpenAllocateDialog(true);
-  };
-
   const handleOpenDeliveryStatusDialog = () => {
     setOpenDeliveryStatusDialog(true);
   };
@@ -491,15 +487,7 @@ const OrderDetailView: React.FC = () => {
               >
                 Cập nhật trạng thái
               </ActionButton>
-              {!order.shippingInfo ? (
-                <ActionButton
-                  variant="contained"
-                  color="primary"
-                  onClick={handleOpenAllocateDialog}
-                >
-                  Phân công nhân viên
-                </ActionButton>
-              ) : (
+              {!order.shippingInfo ? null : (
                 <>
                   <ActionButton
                     variant="outlined"
@@ -546,26 +534,7 @@ const OrderDetailView: React.FC = () => {
         {/* Shipping Information */}
         <Grid size={{ xs: 12, md: 6 }}>
           <DetailCard>
-            <StyledCardHeader
-              title="Thông tin giao hàng"
-              action={
-                !order.shippingInfo && (
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={handleOpenAllocateDialog}
-                    sx={{
-                      borderRadius: 8,
-                      textTransform: "none",
-                      fontWeight: 600,
-                      px: 2,
-                    }}
-                  >
-                    Phân công
-                  </Button>
-                )
-              }
-            />
+            <StyledCardHeader title="Thông tin giao hàng" />
             <Divider />
             <StyledCardContent>
               {order.shippingInfo ? (
@@ -651,12 +620,6 @@ const OrderDetailView: React.FC = () => {
                   <EmptyStateText>
                     Đơn hàng này chưa được phân công cho nhân viên nào.
                   </EmptyStateText>
-                  <ActionButton
-                    variant="contained"
-                    onClick={handleOpenAllocateDialog}
-                  >
-                    Phân công nhân viên
-                  </ActionButton>
                 </EmptyStateContainer>
               )}
             </StyledCardContent>

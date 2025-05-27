@@ -93,7 +93,6 @@ export const menuItems: MenuItemLayout[] = [
         label: config.Vntext.SideBar.discount,
         path: config.adminRoutes.discountManagement,
       },
-
       {
         icon: <Feedback />,
         label: config.Vntext.SideBar.Feedback,
@@ -170,11 +169,11 @@ export const menuItems: MenuItemLayout[] = [
         icon: <Feedback />,
         path: managerRoutes.feedbackManagement,
       },
-      {
-        label: "Trò chuyện với khách hàng",
-        icon: <ChatIcon />,
-        path: managerRoutes.customerChat,
-      },
+      // {
+      //   label: "Trò chuyện với khách hàng",
+      //   icon: <ChatIcon />,
+      //   path: managerRoutes.customerChat,
+      // },
       {
         label: "Lịch sử phân công nhân viên",
         icon: <AssignmentIcon />,
@@ -184,11 +183,6 @@ export const menuItems: MenuItemLayout[] = [
         label: "Lịch sử đơn hàng",
         icon: <AssignmentIcon />,
         path: staffRoutes.orderHistory,
-      },
-      {
-        label: "Lịch sử phân công nhân viên",
-        icon: <PaymentIcon />,
-        path: managerRoutes.staffAssignmentHistory,
       },
     ],
   },

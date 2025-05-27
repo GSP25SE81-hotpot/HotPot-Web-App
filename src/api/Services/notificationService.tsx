@@ -2,13 +2,8 @@
 // notificationService.ts
 import axiosClient from "../axiosInstance";
 import {
-  Notification,
   GetNotificationsParams,
   NotificationType,
-  OrderNotificationData,
-  FeedbackNotificationData,
-  ReplacementRequestNotificationData,
-  RentalNotificationData,
   PaginatedNotificationsResponse,
 } from "../../types/notificationTypes";
 
@@ -31,33 +26,23 @@ class NotificationService {
           Accept: "application/json",
         },
       };
-
       console.log("Making request to:", "/notifications", config);
 
-      // Since axiosClient.interceptors.response.use() returns response.data directly,
-      // the 'apiData' here is already the data part, not the full axios response
       const apiData = await axiosClient.get<
         any,
         PaginatedNotificationsResponse,
         any
       >("/notifications", config);
+      console.log("API data received for notifications:", apiData);
 
-      console.log("API data received for notifications:", apiData); // Updated log message for clarity
-
-      // Return the apiData directly since it's already the PaginatedNotificationsResponse we need
-      return apiData; // <--- CORRECTED LINE
+      return apiData;
     } catch (error) {
       console.error("Error fetching notifications:", error);
-
       return {
         notifications: [],
         currentPage: params.page || 1,
         pageSize: params.pageSize || 20,
         hasPreviousPage: (params.page || 1) > 1,
-        // Consider adding other default fields from PaginatedNotificationsResponse if necessary
-        // totalPages: 0,
-        // totalCount: 0,
-        // hasNextPage: false,
       };
     }
   }
@@ -87,10 +72,8 @@ class NotificationService {
         ) {
           return response.data.data.unreadCount;
         }
-
         console.log("Unexpected count response structure:", response.data);
       }
-
       return 0;
     } catch (error) {
       console.error("Error fetching unread count:", error);
@@ -118,81 +101,6 @@ class NotificationService {
     }
   }
 
-  // Handle notification click based on type with proper type checking
-  handleNotificationClick(notification: Notification): void {
-    // Type guard function to check if data matches a specific interface
-    const hasOrderData = (data: any): data is OrderNotificationData =>
-      data && typeof data.orderId === "number";
-
-    const hasFeedbackData = (data: any): data is FeedbackNotificationData =>
-      data && typeof data.feedbackId === "number";
-
-    const hasReplacementData = (
-      data: any
-    ): data is ReplacementRequestNotificationData =>
-      data && typeof data.requestId === "number";
-
-    const hasRentalData = (data: any): data is RentalNotificationData =>
-      data && typeof data.rentalId === "number";
-
-    // Navigate or perform actions based on notification type
-    switch (notification.type as NotificationType) {
-      case NotificationType.OrderCreated:
-      case NotificationType.OrderStatusChanged:
-        if (hasOrderData(notification.data)) {
-          // Navigate to order details
-          window.location.href = `/orders/${notification.data.orderId}`;
-        }
-        break;
-
-      case NotificationType.NewFeedback:
-      case NotificationType.FeedbackApproved:
-      case NotificationType.FeedbackResponse:
-        if (hasFeedbackData(notification.data)) {
-          // Navigate to feedback details
-          window.location.href = `/feedback`;
-        }
-        break;
-
-      case NotificationType.ReplacementRequestReceived:
-      case NotificationType.ReplacementRequestStatusChanged:
-      case NotificationType.ReplacementReviewed:
-      case NotificationType.ReplacementStatusUpdate:
-      case NotificationType.ReplacementCompleted:
-      case NotificationType.EquipmentVerification:
-        if (hasReplacementData(notification.data)) {
-          // Navigate to replacement request details
-          window.location.href = `/replacement-requests/${notification.data.requestId}`;
-        }
-        break;
-
-      case NotificationType.RentalExtended:
-      case NotificationType.RentalDateAdjusted:
-      case NotificationType.RentalReturned:
-        if (hasRentalData(notification.data)) {
-          // Navigate to rental details
-          window.location.href = `/rentals/${notification.data.rentalId}`;
-        }
-        break;
-
-      case NotificationType.NewAssignment:
-      case NotificationType.StaffReplacementAssignment:
-        // Handle staff assignments
-        if (notification.data && notification.data.assignmentId) {
-          window.location.href = `/assignments/${notification.data.assignmentId}`;
-        }
-        break;
-
-      default:
-        // Default action or no action
-        console.log(
-          "No specific action for notification type:",
-          notification.type
-        );
-        break;
-    }
-  }
-
   // Format notification timestamp to a user-friendly string
   formatTimestamp(timestamp: string): string {
     const date = new Date(timestamp);
@@ -202,34 +110,23 @@ class NotificationService {
   // Get appropriate icon for notification type
   getNotificationIcon(type: string): string {
     switch (type as NotificationType) {
-      case NotificationType.OrderCreated:
-      case NotificationType.OrderStatusChanged:
+      case NotificationType.Order:
         return "shopping_cart";
-
-      case NotificationType.NewFeedback:
-      case NotificationType.FeedbackApproved:
-      case NotificationType.FeedbackResponse:
+      case NotificationType.Feedback:
         return "feedback";
-
-      case NotificationType.ReplacementRequestReceived:
-      case NotificationType.ReplacementRequestStatusChanged:
-      case NotificationType.ReplacementReviewed:
-      case NotificationType.ReplacementStatusUpdate:
-      case NotificationType.ReplacementCompleted:
-        return "swap_horiz";
-
-      case NotificationType.RentalExtended:
-      case NotificationType.RentalDateAdjusted:
-      case NotificationType.RentalReturned:
+      case NotificationType.RentOrder:
         return "event_available";
-
-      case NotificationType.NewAssignment:
-      case NotificationType.StaffReplacementAssignment:
-        return "assignment";
-
-      case NotificationType.EquipmentVerification:
-        return "verified";
-
+      case NotificationType.PrepOrder:
+        return "kitchen";
+      case NotificationType.ShipOrder:
+        return "local_shipping";
+      case NotificationType.Ingredient:
+        return "restaurant";
+      case NotificationType.EquipmentCondition:
+      case NotificationType.EquipmentStock:
+        return "inventory";
+      case NotificationType.Schedule:
+        return "calendar_today";
       default:
         return "notifications";
     }
@@ -238,27 +135,24 @@ class NotificationService {
   // Get color for notification type (for UI styling)
   getNotificationColor(type: string): string {
     switch (type as NotificationType) {
-      case NotificationType.OrderCreated:
-        return "success";
-
-      case NotificationType.OrderStatusChanged:
+      case NotificationType.Order:
         return "primary";
-
-      case NotificationType.NewFeedback:
-      case NotificationType.FeedbackApproved:
+      case NotificationType.Feedback:
         return "secondary";
-
-      case NotificationType.ReplacementRequestReceived:
-      case NotificationType.ReplacementRequestStatusChanged:
-        return "warning";
-
-      case NotificationType.ReplacementCompleted:
-        return "success";
-
-      case NotificationType.RentalExtended:
-      case NotificationType.RentalDateAdjusted:
+      case NotificationType.RentOrder:
         return "info";
-
+      case NotificationType.PrepOrder:
+        return "warning";
+      case NotificationType.ShipOrder:
+        return "success";
+      case NotificationType.EquipmentCondition:
+        return "error";
+      case NotificationType.EquipmentStock:
+        return "warning";
+      case NotificationType.Ingredient:
+        return "info";
+      case NotificationType.Schedule:
+        return "default";
       default:
         return "default";
     }

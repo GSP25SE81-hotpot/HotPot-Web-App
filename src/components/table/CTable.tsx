@@ -86,6 +86,19 @@ const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
       backgroundColor: alpha(theme.palette.primary.main, 0.04),
       borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
     },
+    // Support for custom row styling based on data attributes
+    '&[data-expired="true"]': {
+      backgroundColor: alpha(theme.palette.error.main, 0.05),
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.error.main, 0.1),
+      },
+    },
+    '&[data-expiring-soon="true"]': {
+      backgroundColor: alpha(theme.palette.warning.main, 0.05),
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.warning.main, 0.1),
+      },
+    },
   },
 
   "& .MuiTableBody-root": {

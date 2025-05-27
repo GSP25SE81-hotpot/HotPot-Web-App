@@ -35,7 +35,7 @@ const ShippingList = () => {
   const [itemToUpdateStatus, setItemToUpdateStatus] = React.useState<any>(null);
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<number>();
-  const [orders, setOrders] = useState<AssignOrderType[]>([]);
+  
   const theme = useTheme();
 
   //Call api
