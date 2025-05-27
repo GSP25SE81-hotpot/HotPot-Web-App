@@ -54,7 +54,7 @@ const CreateIngredients: React.FC = () => {
       .required("Bắt buộc nhập mức tồn kho tối thiểu")
       .min(0, "Giá trị không hợp lệ"),
     measurementValue: Yup.number()
-      .required("Bắt buộc nhập khối lượng gói")
+      .required("Bắt buộc nhập khối lượng phần")
       .min(0, "Giá trị không hợp lệ"),
     ingredientTypeID: Yup.number().required("Bắt buộc nhập loại nguyên liệu"),
     price: Yup.number()
@@ -188,7 +188,7 @@ const CreateIngredients: React.FC = () => {
                   <Grid2 size={{ desktop: 12 }}>
                     <RHFTextFieldNumber
                       name="measurementValue"
-                      label="Khối lượng một gói"
+                      label="Khối lượng một phần"
                       type="number"
                       InputProps={{
                         endAdornment: (
@@ -276,7 +276,7 @@ const CreateIngredients: React.FC = () => {
               size="large"
               loading={isSubmitting}
             >
-              Thêm nguyên liệu
+              Lưu nguyên liệu
             </LoadingButton>
           </Box>
         </Box>

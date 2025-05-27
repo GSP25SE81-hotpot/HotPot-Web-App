@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import BlockIcon from "@mui/icons-material/Block";
-import EditIcon from "@mui/icons-material/Edit";
 import InfoIcon from "@mui/icons-material/Info";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Button from "@mui/material/Button";
@@ -19,7 +17,7 @@ interface MenuActionTableMaintenanceProps {
 
 const MenuActionTableMaintenanceDetail: React.FC<
   MenuActionTableMaintenanceProps
-> = ({ hotpotData, onOpenUpdate, onOpenDetail, onOpenDelete, onFetch }) => {
+> = ({ hotpotData, onOpenDetail, onFetch }) => {
   const [anchorEl, setAnchorEl] = React.useState<any>(null);
   const [openDetail, setOpenDetail] = React.useState<boolean>(false);
   const open = Boolean(anchorEl);
@@ -29,10 +27,7 @@ const MenuActionTableMaintenanceDetail: React.FC<
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleUpdate = () => {
-    onOpenUpdate(hotpotData);
-    setAnchorEl(null);
-  };
+
   const handleDetail = () => {
     onOpenDetail(hotpotData);
     setOpenDetail(true);
@@ -41,11 +36,6 @@ const MenuActionTableMaintenanceDetail: React.FC<
 
   const handleCloseDetail = () => {
     setOpenDetail(false);
-  };
-
-  const handleDelete = () => {
-    onOpenDelete(hotpotData);
-    setAnchorEl(null);
   };
 
   const handleStatusUpdate = () => {
@@ -88,15 +78,6 @@ const MenuActionTableMaintenanceDetail: React.FC<
         <MenuItem onClick={() => handleDetail()}>
           <InfoIcon sx={{ mr: "4px" }} color="info" />
           <span>Chi Tiết Bảo Trì</span>
-        </MenuItem>
-        <MenuItem onClick={() => handleUpdate()}>
-          <EditIcon sx={{ mr: "4px", color: "#9ADE7B" }} />
-          <span>Cập nhật</span>
-        </MenuItem>
-
-        <MenuItem onClick={() => handleDelete()}>
-          <BlockIcon sx={{ mr: "4px" }} color="error" />
-          <span>Xóa</span>
         </MenuItem>
       </Menu>
 

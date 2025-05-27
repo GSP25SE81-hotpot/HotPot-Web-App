@@ -51,6 +51,8 @@ export const adminRoutes = {
   importProduct: "/dashboard/ImportProduct",
   manageBatch: "/dashboard/batch",
   manageBatchDetail: "/dashboard/batch/:batchNumber",
+  updateCombo: "/dashboard/update-combo/:comboId",
+  updateComboCustom: "/dashboard/update-combo-custom/:comboId",
 };
 
 export const staffRoutes = {

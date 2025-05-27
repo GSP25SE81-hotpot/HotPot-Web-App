@@ -11,10 +11,17 @@ const staffGetOrderApi = {
       },
     });
   },
+
+  getOrderDetailById: (id?: any) => {
+    const url = `/staff/orders/${id}`;
+    return axiosClient.get(url);
+  },
+
   shippingStatus: (id?: any, body?: any) => {
     const url = `/staff/shipping/${id}/status`;
     return axiosClient.put(url, body);
   },
+
   updateStatus: (id?: any, body?: any) => {
     const url = `/staff/orders/${id}/status`;
     return axiosClient.put(url, body);

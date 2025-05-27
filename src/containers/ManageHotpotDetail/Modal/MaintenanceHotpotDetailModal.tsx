@@ -107,7 +107,7 @@ const MaintenanceHotpotDetailModal: React.FC<MaintenanceProps> = ({
     let label = "---";
 
     switch (statusName) {
-      case "In Progress":
+      case "InProgress":
         color = "info";
         icon = <EngineeringIcon />;
         label = "Đang tiến hành";
@@ -205,7 +205,7 @@ const MaintenanceHotpotDetailModal: React.FC<MaintenanceProps> = ({
             </StatusButton>
           </>
         );
-      case "In Progress":
+      case "InProgress":
         return (
           <>
             <StatusButton

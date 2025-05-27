@@ -57,6 +57,8 @@ import { StaffAssignmentHistoryPage } from "../pages/Manager/StaffAssignmentHist
 import { ManageRentalReturnPage } from "../pages/Manager/ManagerRentalReturnPage/ManageRentalReturnPage";
 import TableBatchPage from "../pages/Admin/TableBatch/TableBatchPage";
 import TableBatchDetailPage from "../pages/Admin/TableBatchDetail/TableBatchDetailPage";
+import UpdateComboPage from "../pages/Admin/UpdateCombo/UpdateComboPage";
+import UpdateComboCustomPage from "../pages/Admin/UpdateCombo/UpdateComboCustomPage";
 
 const AppRoute: React.FC = () => {
   return (
@@ -261,6 +263,18 @@ const AppRoute: React.FC = () => {
           key="manageBatchDetail"
           path={config.adminRoutes.manageBatchDetail}
           element={<TableBatchDetailPage />}
+        />
+
+        <Route
+          key="updateCombo"
+          path={config.adminRoutes.updateCombo}
+          element={<UpdateComboPage />}
+        />
+
+        <Route
+          key="updateCombo"
+          path={config.adminRoutes.updateComboCustom}
+          element={<UpdateComboCustomPage />}
         />
       </Route>
 

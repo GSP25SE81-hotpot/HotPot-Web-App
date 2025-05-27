@@ -1,30 +1,31 @@
 import {
-  Dashboard as DashboardIcon,
-  Discount,
-  Feedback,
-  Inventory as InventoryIcon,
-  People as PeopleIcon,
-  TakeoutDining as TakeoutDiningIcon,
-  SetMeal as IngredientIcon,
-  // ListAlt as ListAltIcon,
-  ShoppingCart as OrderIcon,
-  Restaurant as HotpotIcon,
-  LocalShipping as ShippingIcon,
-  EventNote as ScheduleIcon,
-  // Chat as ChatIcon,
   Assignment as AssignmentIcon,
-  DirectionsCar as VehicleIcon,
-  Engineering as MaintenanceIcon,
-  Build as EquipmentIcon,
-  Payment as PaymentIcon,
   // Notifications as NotificationIcon,
   // Assessment as ReportIcon,
   ReceiptLong as BatchIcon,
+  Chat as ChatIcon,
+  Dashboard as DashboardIcon,
+  Discount,
+  Build as EquipmentIcon,
+  Feedback,
+  Restaurant as HotpotIcon,
+  SetMeal as IngredientIcon,
+  Inventory as InventoryIcon,
+  Engineering as MaintenanceIcon,
+  // ListAlt as ListAltIcon,
+  ShoppingCart as OrderIcon,
+  Payment as PaymentIcon,
+  People as PeopleIcon,
+  LocalMall as PickupIcon,
   // AddShoppingCart as ImportIcon,
   EventAvailable as RentalIcon,
-  LocalMall as PickupIcon,
+  EventNote as ScheduleIcon,
+  LocalShipping as ShippingIcon,
+  TakeoutDining as TakeoutDiningIcon,
+  DirectionsCar as VehicleIcon,
 } from "@mui/icons-material";
 // import Iconify from "../../../../components/Iconify";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import config from "../../../../configs";
 import { managerRoutes, staffRoutes } from "../../../../configs/routes";
 import { Role } from "../../../../routes/Roles";
@@ -86,6 +87,7 @@ export const menuItems: MenuItemLayout[] = [
           },
         ],
       },
+
       {
         icon: <Discount />,
         label: config.Vntext.SideBar.discount,

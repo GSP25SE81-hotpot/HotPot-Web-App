@@ -37,6 +37,32 @@ const adminComboAPI = {
       },
     });
   },
+
+  DeleteCombo: (id?: any) => {
+    const url = "/admin/combo/:comboId";
+    return axiosClient.delete(url.replace(":comboId", id), {
+      paramsSerializer: {
+        indexes: null, // by default: false
+      },
+    });
+  },
+
+  UpdateCombo: (id?: any, params?: any) => {
+    const url = "/admin/combo/:comboId";
+    return axiosClient.put(url.replace(":comboId", id), params, {
+      paramsSerializer: {
+        indexes: null, // by default: false
+      },
+    });
+  },
+  UpdateCustomCombo: (id?: any, params?: any) => {
+    const url = "/admin/combo/customizable/:comboId";
+    return axiosClient.put(url.replace(":comboId", id), params, {
+      paramsSerializer: {
+        indexes: null, // by default: false
+      },
+    });
+  },
 };
 
 export default adminComboAPI;

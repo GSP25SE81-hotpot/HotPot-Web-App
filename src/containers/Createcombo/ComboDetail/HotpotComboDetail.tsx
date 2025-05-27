@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -12,6 +12,8 @@ import {
   Avatar,
   Container,
   Grid2,
+  Button,
+  Stack,
 } from "@mui/material";
 import {
   People,
@@ -22,6 +24,7 @@ import {
 } from "@mui/icons-material";
 import adminComboAPI from "../../../api/Services/adminComboAPI";
 import { formatMoney } from "../../../utils/fn";
+import config from "../../../configs";
 
 interface Ingredient {
   comboIngredientId: number;
@@ -71,7 +74,7 @@ const HotpotComboDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchCombo = async () => {
       try {
@@ -89,6 +92,16 @@ const HotpotComboDetail: React.FC = () => {
     }
   }, [comboId]);
 
+  const moveToUpdate = () => {
+    if (!comboId) return;
+    if (combo !== null && combo.isCustomizable === true) {
+      navigate(
+        config.adminRoutes.updateComboCustom.replace(":comboId", comboId)
+      );
+    } else {
+      navigate(config.adminRoutes.updateCombo.replace(":comboId", comboId));
+    }
+  };
   if (loading) {
     return (
       <Box
@@ -143,411 +156,432 @@ const HotpotComboDetail: React.FC = () => {
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-        pb: 4,
-      }}
-    >
-      {/* Hero Section */}
+    <>
+      <Stack
+        display="flex"
+        direction="row"
+        justifyContent="flex-end"
+        sx={{ mb: 2 }}
+      >
+        <Button onClick={moveToUpdate} variant="contained">
+          {" "}
+          Cập nhật combo
+        </Button>
+      </Stack>
       <Box
         sx={{
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          color: "white",
-          py: 2,
-          px: 3,
-          position: "relative",
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+          pb: 4,
         }}
       >
-        <Container maxWidth="lg">
-          <Box display="flex" alignItems="center" gap={2}>
-            <Typography variant="h4" sx={{ fontWeight: 700, flex: 1 }}>
-              {combo.name}
-            </Typography>
-            {combo.isCustomizable && (
-              <Chip
-                label="Có thể tùy chỉnh"
-                sx={{
-                  bgcolor: "rgba(255,255,255,0.2)",
-                  color: "white",
-                  fontWeight: 600,
-                }}
-                icon={<LocalOffer sx={{ color: "white !important" }} />}
-              />
-            )}
-          </Box>
-        </Container>
-      </Box>
+        {/* Hero Section */}
+        <Box
+          sx={{
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            py: 2,
+            px: 3,
+            position: "relative",
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box display="flex" alignItems="center" gap={2}>
+              <Typography variant="h4" sx={{ fontWeight: 700, flex: 1 }}>
+                {combo.name}
+              </Typography>
+              {combo.isCustomizable && (
+                <Chip
+                  label="Có thể tùy chỉnh"
+                  sx={{
+                    bgcolor: "rgba(255,255,255,0.2)",
+                    color: "white",
+                    fontWeight: 600,
+                  }}
+                  icon={<LocalOffer sx={{ color: "white !important" }} />}
+                />
+              )}
+            </Box>
+          </Container>
+        </Box>
 
-      <Container maxWidth="lg" sx={{ mt: 2 }}>
-        <Grid2 container spacing={4}>
-          {/* Image Gallery */}
-          <Grid2 size={{ mobile: 12, desktop: 6 }}>
+        <Container maxWidth="lg" sx={{ mt: 2 }}>
+          <Grid2 container spacing={4}>
+            {/* Image Gallery */}
+            <Grid2 size={{ mobile: 12, desktop: 6 }}>
+              <Card
+                sx={{
+                  borderRadius: 4,
+                  overflow: "hidden",
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
+                  border: "1px solid rgba(255,255,255,0.5)",
+                }}
+              >
+                {combo.imageURLs && combo.imageURLs.length > 0 ? (
+                  <>
+                    <Box
+                      sx={{ position: "relative", backgroundColor: "#f8f9fa" }}
+                    >
+                      <img
+                        src={combo.imageURLs[selectedImageIndex]}
+                        alt={combo.name}
+                        style={{
+                          width: "100%",
+                          height: "400px",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </Box>
+                    {combo.imageURLs.length > 1 && (
+                      <Box
+                        display="flex"
+                        gap={1}
+                        p={2}
+                        sx={{ backgroundColor: "white" }}
+                      >
+                        {combo.imageURLs.map((url, index) => (
+                          <Box
+                            key={index}
+                            onClick={() => setSelectedImageIndex(index)}
+                            sx={{
+                              width: 80,
+                              height: 60,
+                              cursor: "pointer",
+                              borderRadius: 2,
+                              overflow: "hidden",
+                              border:
+                                selectedImageIndex === index
+                                  ? "3px solid #667eea"
+                                  : "2px solid transparent",
+                              transition: "all 0.3s ease",
+                              "&:hover": {
+                                transform: "scale(1.05)",
+                              },
+                            }}
+                          >
+                            <img
+                              src={url}
+                              alt={`${combo.name} - ${index}`}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                  </>
+                ) : (
+                  <Box
+                    sx={{
+                      height: 400,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: "#f8f9fa",
+                      color: "text.secondary",
+                    }}
+                  >
+                    <Typography variant="h6">Không có hình ảnh</Typography>
+                  </Box>
+                )}
+              </Card>
+            </Grid2>
+
+            {/* Details */}
+            <Grid2 size={{ mobile: 12, desktop: 6 }}>
+              <Box display="flex" flexDirection="column" gap={3}>
+                {/* Basic Info */}
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                    border: "1px solid rgba(255,255,255,0.5)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Typography
+                      variant="body1"
+                      color="text.secondary"
+                      sx={{ mb: 2, lineHeight: 1.7 }}
+                    >
+                      Mô tả: {combo.description}
+                    </Typography>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={1}
+                      sx={{
+                        backgroundColor: "#e8f5e9",
+                        px: 2,
+                        py: 1,
+                        borderRadius: 3,
+                        minWidth: "fit-content",
+                      }}
+                    >
+                      <Avatar
+                        sx={{ bgcolor: "#4caf50", width: 32, height: 32 }}
+                      >
+                        <People sx={{ fontSize: 18 }} />
+                      </Avatar>
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">
+                          Số người
+                        </Typography>
+                        <Typography variant="body1" fontWeight="600">
+                          {combo.size} người
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+
+                {/* Price Section */}
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                    border: "1px solid rgba(255,255,255,0.5)",
+                    background:
+                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    color: "white",
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Box>
+                        <Typography variant="h6" sx={{ opacity: 0.9 }}>
+                          Giá combo
+                        </Typography>
+                        <Typography variant="h3" fontWeight="700">
+                          {combo.totalPrice
+                            ? formatMoney(combo.totalPrice)
+                            : "-----"}
+                        </Typography>
+                      </Box>
+                      {combo.appliedDiscountPercentage > 0 && (
+                        <Chip
+                          label={`Giảm ${combo.appliedDiscountPercentage}%`}
+                          icon={<Percent />}
+                          sx={{
+                            bgcolor: "rgba(255,255,255,0.2)",
+                            color: "white",
+                            fontWeight: 600,
+                            "& .MuiChip-icon": { color: "white" },
+                          }}
+                        />
+                      )}
+                    </Box>
+                  </CardContent>
+                </Card>
+
+                {/* Ingredients */}
+                <Card
+                  sx={{
+                    borderRadius: 3,
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                    border: "1px solid rgba(255,255,255,0.5)",
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Typography
+                      variant="h6"
+                      fontWeight="700"
+                      sx={{ mb: 2, color: "#333" }}
+                    >
+                      Nguyên liệu trong combo
+                    </Typography>
+                    <Grid2 container spacing={2}>
+                      {combo.ingredients?.map((ingredient) => (
+                        <Grid2
+                          size={{ mobile: 12, desktop: 6 }}
+                          key={ingredient.comboIngredientId}
+                        >
+                          <Box
+                            display="flex"
+                            alignItems="center"
+                            gap={2}
+                            sx={{
+                              p: 2,
+                              borderRadius: 2,
+                              backgroundColor: "#f8f9fa",
+                              transition: "all 0.3s ease",
+                              "&:hover": {
+                                backgroundColor: "#e3f2fd",
+                                transform: "translateY(-2px)",
+                              },
+                            }}
+                          >
+                            <img
+                              src={ingredient?.imageURL}
+                              alt="Thumbnail"
+                              style={{
+                                width: 50,
+                                height: 50,
+                                borderRadius: "8px",
+                                objectFit: "cover",
+                              }}
+                            />
+                            <Box>
+                              <Typography variant="body1" fontWeight="600">
+                                {ingredient.ingredientName}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                Số lượng: {ingredient.quantity} phần
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                {formatMoney(
+                                  ingredient.totalPrice * ingredient.quantity
+                                )}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid2>
+                      ))}
+                    </Grid2>
+                  </CardContent>
+                </Card>
+
+                {/* Additional Ingredients */}
+                {combo.allowedIngredientTypes &&
+                  combo.allowedIngredientTypes.length > 0 && (
+                    <Card
+                      sx={{
+                        borderRadius: 3,
+                        boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+                        border: "1px solid rgba(255,255,255,0.5)",
+                      }}
+                    >
+                      <CardContent sx={{ p: 3 }}>
+                        <Typography
+                          variant="h6"
+                          fontWeight="700"
+                          sx={{ mb: 2, color: "#333" }}
+                        >
+                          Có thể thêm nguyên liệu
+                        </Typography>
+                        <Grid2 container spacing={2}>
+                          {combo.allowedIngredientTypes.map((type) => (
+                            <Grid2
+                              size={{ mobile: 12, desktop: 6 }}
+                              key={type.id}
+                            >
+                              <Box
+                                display="flex"
+                                alignItems="center"
+                                gap={2}
+                                sx={{
+                                  p: 2,
+                                  borderRadius: 2,
+                                  backgroundColor: "#fff3e0",
+                                  border: "1px dashed #ff9800",
+                                  transition: "all 0.3s ease",
+                                  "&:hover": {
+                                    backgroundColor: "#ffebcc",
+                                    transform: "translateY(-2px)",
+                                  },
+                                }}
+                              >
+                                <Avatar
+                                  sx={{
+                                    bgcolor: "#ff9800",
+                                    width: 40,
+                                    height: 40,
+                                  }}
+                                >
+                                  <Add />
+                                </Avatar>
+                                <Box>
+                                  <Typography variant="body1" fontWeight="600">
+                                    {type.ingredientTypeName}
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                  >
+                                    Tối thiểu: {type.minQuantity}{" "}
+                                    {type.measurementUnit}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Grid2>
+                          ))}
+                        </Grid2>
+                      </CardContent>
+                    </Card>
+                  )}
+              </Box>
+            </Grid2>
+          </Grid2>
+
+          {/* Video Section */}
+          {combo.tutorialVideo?.videoURL && (
             <Card
               sx={{
-                borderRadius: 4,
-                overflow: "hidden",
-                boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
+                mt: 4,
+                borderRadius: 3,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
                 border: "1px solid rgba(255,255,255,0.5)",
               }}
             >
-              {combo.imageURLs && combo.imageURLs.length > 0 ? (
-                <>
-                  <Box
-                    sx={{ position: "relative", backgroundColor: "#f8f9fa" }}
-                  >
-                    <img
-                      src={combo.imageURLs[selectedImageIndex]}
-                      alt={combo.name}
-                      style={{
-                        width: "100%",
-                        height: "400px",
-                        objectFit: "cover",
-                      }}
-                    />
+              <CardContent sx={{ p: 3 }}>
+                <Box display="flex" alignItems="center" gap={2} mb={3}>
+                  <Avatar sx={{ bgcolor: "#d32f2f", width: 48, height: 48 }}>
+                    <PlayCircleOutline sx={{ fontSize: 24 }} />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h5" fontWeight="700">
+                      Video hướng dẫn
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {combo.tutorialVideo.description}
+                    </Typography>
                   </Box>
-                  {combo.imageURLs.length > 1 && (
-                    <Box
-                      display="flex"
-                      gap={1}
-                      p={2}
-                      sx={{ backgroundColor: "white" }}
-                    >
-                      {combo.imageURLs.map((url, index) => (
-                        <Box
-                          key={index}
-                          onClick={() => setSelectedImageIndex(index)}
-                          sx={{
-                            width: 80,
-                            height: 60,
-                            cursor: "pointer",
-                            borderRadius: 2,
-                            overflow: "hidden",
-                            border:
-                              selectedImageIndex === index
-                                ? "3px solid #667eea"
-                                : "2px solid transparent",
-                            transition: "all 0.3s ease",
-                            "&:hover": {
-                              transform: "scale(1.05)",
-                            },
-                          }}
-                        >
-                          <img
-                            src={url}
-                            alt={`${combo.name} - ${index}`}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                            }}
-                          />
-                        </Box>
-                      ))}
-                    </Box>
-                  )}
-                </>
-              ) : (
+                </Box>
                 <Box
                   sx={{
-                    height: 400,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: "#f8f9fa",
-                    color: "text.secondary",
+                    position: "relative",
+                    paddingBottom: "56.25%",
+                    height: 0,
+                    borderRadius: 3,
+                    overflow: "hidden",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
                   }}
                 >
-                  <Typography variant="h6">Không có hình ảnh</Typography>
+                  <iframe
+                    src={combo.tutorialVideo.videoURL}
+                    title="Video hướng dẫn"
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                    }}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
                 </Box>
-              )}
+              </CardContent>
             </Card>
-          </Grid2>
-
-          {/* Details */}
-          <Grid2 size={{ mobile: 12, desktop: 6 }}>
-            <Box display="flex" flexDirection="column" gap={3}>
-              {/* Basic Info */}
-              <Card
-                sx={{
-                  borderRadius: 3,
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-                  border: "1px solid rgba(255,255,255,0.5)",
-                  overflow: "hidden",
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    sx={{ mb: 2, lineHeight: 1.7 }}
-                  >
-                    Mô tả: {combo.description}
-                  </Typography>
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    gap={1}
-                    sx={{
-                      backgroundColor: "#e8f5e9",
-                      px: 2,
-                      py: 1,
-                      borderRadius: 3,
-                      minWidth: "fit-content",
-                    }}
-                  >
-                    <Avatar sx={{ bgcolor: "#4caf50", width: 32, height: 32 }}>
-                      <People sx={{ fontSize: 18 }} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">
-                        Số người
-                      </Typography>
-                      <Typography variant="body1" fontWeight="600">
-                        {combo.size} người
-                      </Typography>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-
-              {/* Price Section */}
-              <Card
-                sx={{
-                  borderRadius: 3,
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-                  border: "1px solid rgba(255,255,255,0.5)",
-                  background:
-                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  color: "white",
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Box>
-                      <Typography variant="h6" sx={{ opacity: 0.9 }}>
-                        Giá combo
-                      </Typography>
-                      <Typography variant="h3" fontWeight="700">
-                        {combo.totalPrice
-                          ? formatMoney(combo.totalPrice)
-                          : "-----"}
-                      </Typography>
-                    </Box>
-                    {combo.appliedDiscountPercentage > 0 && (
-                      <Chip
-                        label={`Giảm ${combo.appliedDiscountPercentage}%`}
-                        icon={<Percent />}
-                        sx={{
-                          bgcolor: "rgba(255,255,255,0.2)",
-                          color: "white",
-                          fontWeight: 600,
-                          "& .MuiChip-icon": { color: "white" },
-                        }}
-                      />
-                    )}
-                  </Box>
-                </CardContent>
-              </Card>
-
-              {/* Ingredients */}
-              <Card
-                sx={{
-                  borderRadius: 3,
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-                  border: "1px solid rgba(255,255,255,0.5)",
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Typography
-                    variant="h6"
-                    fontWeight="700"
-                    sx={{ mb: 2, color: "#333" }}
-                  >
-                    Nguyên liệu trong combo
-                  </Typography>
-                  <Grid2 container spacing={2}>
-                    {combo.ingredients?.map((ingredient) => (
-                      <Grid2
-                        size={{ mobile: 12, desktop: 6 }}
-                        key={ingredient.comboIngredientId}
-                      >
-                        <Box
-                          display="flex"
-                          alignItems="center"
-                          gap={2}
-                          sx={{
-                            p: 2,
-                            borderRadius: 2,
-                            backgroundColor: "#f8f9fa",
-                            transition: "all 0.3s ease",
-                            "&:hover": {
-                              backgroundColor: "#e3f2fd",
-                              transform: "translateY(-2px)",
-                            },
-                          }}
-                        >
-                          <img
-                            src={ingredient?.imageURL}
-                            alt="Thumbnail"
-                            style={{
-                              width: 50,
-                              height: 50,
-                              borderRadius: "8px",
-                              objectFit: "cover",
-                            }}
-                          />
-                          <Box>
-                            <Typography variant="body1" fontWeight="600">
-                              {ingredient.ingredientName}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              Số lượng: {ingredient.quantity} phần
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {formatMoney(
-                                ingredient.totalPrice * ingredient.quantity
-                              )}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Grid2>
-                    ))}
-                  </Grid2>
-                </CardContent>
-              </Card>
-
-              {/* Additional Ingredients */}
-              {combo.allowedIngredientTypes &&
-                combo.allowedIngredientTypes.length > 0 && (
-                  <Card
-                    sx={{
-                      borderRadius: 3,
-                      boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-                      border: "1px solid rgba(255,255,255,0.5)",
-                    }}
-                  >
-                    <CardContent sx={{ p: 3 }}>
-                      <Typography
-                        variant="h6"
-                        fontWeight="700"
-                        sx={{ mb: 2, color: "#333" }}
-                      >
-                        Có thể thêm nguyên liệu
-                      </Typography>
-                      <Grid2 container spacing={2}>
-                        {combo.allowedIngredientTypes.map((type) => (
-                          <Grid2
-                            size={{ mobile: 12, desktop: 6 }}
-                            key={type.id}
-                          >
-                            <Box
-                              display="flex"
-                              alignItems="center"
-                              gap={2}
-                              sx={{
-                                p: 2,
-                                borderRadius: 2,
-                                backgroundColor: "#fff3e0",
-                                border: "1px dashed #ff9800",
-                                transition: "all 0.3s ease",
-                                "&:hover": {
-                                  backgroundColor: "#ffebcc",
-                                  transform: "translateY(-2px)",
-                                },
-                              }}
-                            >
-                              <Avatar
-                                sx={{
-                                  bgcolor: "#ff9800",
-                                  width: 40,
-                                  height: 40,
-                                }}
-                              >
-                                <Add />
-                              </Avatar>
-                              <Box>
-                                <Typography variant="body1" fontWeight="600">
-                                  {type.ingredientTypeName}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  Tối thiểu: {type.minQuantity}{" "}
-                                  {type.measurementUnit}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Grid2>
-                        ))}
-                      </Grid2>
-                    </CardContent>
-                  </Card>
-                )}
-            </Box>
-          </Grid2>
-        </Grid2>
-
-        {/* Video Section */}
-        {combo.tutorialVideo?.videoURL && (
-          <Card
-            sx={{
-              mt: 4,
-              borderRadius: 3,
-              boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-              border: "1px solid rgba(255,255,255,0.5)",
-            }}
-          >
-            <CardContent sx={{ p: 3 }}>
-              <Box display="flex" alignItems="center" gap={2} mb={3}>
-                <Avatar sx={{ bgcolor: "#d32f2f", width: 48, height: 48 }}>
-                  <PlayCircleOutline sx={{ fontSize: 24 }} />
-                </Avatar>
-                <Box>
-                  <Typography variant="h5" fontWeight="700">
-                    Video hướng dẫn
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {combo.tutorialVideo.description}
-                  </Typography>
-                </Box>
-              </Box>
-              <Box
-                sx={{
-                  position: "relative",
-                  paddingBottom: "56.25%",
-                  height: 0,
-                  borderRadius: 3,
-                  overflow: "hidden",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-                }}
-              >
-                <iframe
-                  src={combo.tutorialVideo.videoURL}
-                  title="Video hướng dẫn"
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                  }}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </Box>
-            </CardContent>
-          </Card>
-        )}
-      </Container>
-    </Box>
+          )}
+        </Container>
+      </Box>
+    </>
   );
 };
 
