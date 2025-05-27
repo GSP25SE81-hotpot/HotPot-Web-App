@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Close,
   LocationOn,
@@ -6,14 +8,13 @@ import {
   Receipt,
   StickyNote2,
 } from "@mui/icons-material";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import {
   Avatar,
   Box,
-  Button,
   Chip,
   CircularProgress,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
@@ -28,7 +29,6 @@ import React, { useEffect } from "react";
 import staffGetOrderApi from "../../../api/staffGetOrderAPI";
 import { colors } from "../../../styles/Color/color";
 import { StaffOrderDetailType } from "../../../types/staffOrderDetailType";
-import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 
 interface ViewDetailProps {
   orderId?: number;

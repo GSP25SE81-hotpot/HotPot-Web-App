@@ -3,7 +3,6 @@ import {
   // Notifications as NotificationIcon,
   // Assessment as ReportIcon,
   ReceiptLong as BatchIcon,
-  Chat as ChatIcon,
   Dashboard as DashboardIcon,
   Discount,
   Build as EquipmentIcon,
@@ -25,7 +24,6 @@ import {
   DirectionsCar as VehicleIcon,
 } from "@mui/icons-material";
 // import Iconify from "../../../../components/Iconify";
-import AssessmentIcon from "@mui/icons-material/Assessment";
 import config from "../../../../configs";
 import { managerRoutes, staffRoutes } from "../../../../configs/routes";
 import { Role } from "../../../../routes/Roles";
