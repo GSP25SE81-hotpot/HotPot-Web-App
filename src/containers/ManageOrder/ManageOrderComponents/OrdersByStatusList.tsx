@@ -473,7 +473,7 @@ const OrdersByStatusList: React.FC = () => {
     if (taskTypes.length === 0) {
       taskTypes.push(StaffTaskType.Preparation, StaffTaskType.Shipping);
     }
-    setSelectedTaskTypes(taskTypes);
+    setSelectedTaskTypes([StaffTaskType.Preparation]);
     // Open dialog first
     setOpenDialog(true);
     // Then fetch data with the specific order context
