@@ -5,7 +5,6 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
 import { OrderSizeDTO, VehicleType } from "../../../types/orderManagement";
 import { VehicleDTO } from "../../../types/vehicle";
-import { getVietnameseOrderSizeLabel } from "./utils/orderHelpers";
 import {
   VehicleSelectionContainer,
   StyledFormControl,
@@ -16,8 +15,6 @@ import {
   VehicleTypeHeader,
   VehicleButtonsContainer,
   VehicleButton,
-  OrderSizeContainer,
-  SuggestionChip,
 } from "./utils/GroupedVehicleSelectionStyles";
 import { InputLabel, Typography } from "@mui/material";
 
@@ -33,7 +30,6 @@ const GroupedVehicleSelection: React.FC<GroupedVehicleSelectionProps> = ({
   vehicles,
   selectedVehicleId,
   onVehicleChange,
-  orderSize,
   disabled = false,
 }) => {
   // Local state to track selection
@@ -168,34 +164,6 @@ const GroupedVehicleSelection: React.FC<GroupedVehicleSelectionProps> = ({
             ))}
           </VehicleButtonsContainer>
         </VehicleButtonsContainer>
-      )}
-
-      {orderSize && (
-        <OrderSizeContainer>
-          <Typography variant="caption">
-            Kích thước đơn hàng:{" "}
-            <strong>{getVietnameseOrderSizeLabel(orderSize.size)}</strong>
-          </Typography>
-          {orderSize.suggestedVehicleType && (
-            <SuggestionChip
-              icon={
-                orderSize.suggestedVehicleType === VehicleType.Car ? (
-                  <DirectionsCarIcon fontSize="small" />
-                ) : (
-                  <TwoWheelerIcon fontSize="small" />
-                )
-              }
-              label={`Đề xuất: ${
-                orderSize.suggestedVehicleType === VehicleType.Car
-                  ? "Ô tô"
-                  : "Xe máy"
-              }`}
-              size="small"
-              color="success"
-              variant="outlined"
-            />
-          )}
-        </OrderSizeContainer>
       )}
     </VehicleSelectionContainer>
   );

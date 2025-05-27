@@ -90,13 +90,13 @@ const OrderAllocationDialog: React.FC<OrderAllocationDialogProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
+      maxWidth="md"
       slotProps={{
         paper: {
           sx: {
             borderRadius: 3,
             boxShadow: "0 8px 32px 0 rgba(0,0,0,0.1)",
             padding: 1,
-            maxWidth: 450,
           },
         },
       }}
