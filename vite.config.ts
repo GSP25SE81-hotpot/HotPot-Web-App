@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     port: 5000,
   },
-  base: "./",
+  base: "/",
   build: {
     outDir: "dist",
     sourcemap: true, // Helps debugging
