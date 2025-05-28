@@ -50,7 +50,7 @@ const OrderTable = () => {
   }, []);
 
   const tableOrderHeader = [
-    { id: "orderId", label: "Mã đơn hàng", align: "center" },
+    { id: "orderCode", label: "Mã đơn hàng", align: "center" },
     { id: "user.name", label: "khách hàng", align: "center" },
     { id: "user.phoneNumber", label: "Điện thoại", align: "center" },
     { id: "address", label: "Địa chỉ giao", align: "center" },
