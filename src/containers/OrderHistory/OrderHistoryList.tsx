@@ -71,19 +71,11 @@ const OrderHistoryList: React.FC<OrderHistoryListProps> = ({
   const fetchOrderHistory = async () => {
     try {
       setLoading(true);
-
-      // Add excludeStatus parameter to your existing filter
-      const filterWithoutCart = {
-        ...filter,
-        excludeStatus: "Cart", // Or however your API expects this parameter
-      };
-
-      const result = await orderHistoryService.getOrderHistory(
-        filterWithoutCart
-      );
+      const result = await orderHistoryService.getOrderHistory(filter);
       setOrderHistory(result);
     } catch (error) {
       console.error("Không thể tải lịch sử đơn hàng:", error);
+      // Xử lý lỗi (hiển thị thông báo, v.v.)
     } finally {
       setLoading(false);
     }
