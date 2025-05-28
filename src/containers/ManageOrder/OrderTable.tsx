@@ -38,8 +38,12 @@ const OrderTable = () => {
   const getOrderListData = async () => {
     try {
       const res: any = await orderManagementAPI.getOrder();
-      setOrderData(res?.items);
-      console.log("dtaa: ", res);
+      // Filter out orders with status "cart"
+      const filteredOrders = res?.items.filter(
+        (order: IOrder) => order.status !== "Cart"
+      );
+      setOrderData(filteredOrders);
+      console.log("filtered data: ", filteredOrders);
     } catch (error: any) {
       console.log("Error: ", error);
     }
@@ -50,7 +54,7 @@ const OrderTable = () => {
   }, []);
 
   const tableOrderHeader = [
-    { id: "orderId", label: "Mã đơn hàng", align: "center" },
+    { id: "orderCode", label: "Mã đơn hàng", align: "center" },
     { id: "user.name", label: "khách hàng", align: "center" },
     { id: "user.phoneNumber", label: "Điện thoại", align: "center" },
     { id: "address", label: "Địa chỉ giao", align: "center" },
