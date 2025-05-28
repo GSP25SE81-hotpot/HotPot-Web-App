@@ -292,11 +292,12 @@ const CTable: React.FC<CTableProps> = ({
       const statusMap: { [key: string]: string } = {
         Pending: "Đang chờ",
         Processing: "Đang xử lý",
-        Shipping: "Đang giao hàng",
         Processed: "Đã xử lý",
+        Shipping: "Đang giao hàng",
         Delivered: "Đã giao",
         Cancelled: "Đã huỷ",
-        Complete: "Hoàn thành",
+        Returning: "Đang trả hàng",
+        Completed: "Hoàn thành",
       };
       return statusMap[value] || "-";
     }
