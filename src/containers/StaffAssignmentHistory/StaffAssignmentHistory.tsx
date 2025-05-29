@@ -362,11 +362,11 @@ const StaffAssignmentHistory: React.FC = () => {
                     $isEven={index % 2 === 0}
                   >
                     <TableCell>
-                      <Tooltip title="Xem chi tiết đơn hàng" arrow>
-                        <OrderCodeText>
-                          {assignment.orderCode || "N/A"}
-                        </OrderCodeText>
-                      </Tooltip>
+                      {/* <Tooltip title="Xem chi tiết đơn hàng" arrow> */}
+                      <OrderCodeText>
+                        {assignment.orderCode || "N/A"}
+                      </OrderCodeText>
+                      {/* </Tooltip> */}
                     </TableCell>
 
                     <TableCell>
