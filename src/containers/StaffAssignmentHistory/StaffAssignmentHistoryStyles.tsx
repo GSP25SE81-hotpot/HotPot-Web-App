@@ -1,222 +1,336 @@
-// StaffAssignmentHistoryStyles.tsx
 import {
+  Alert,
   Box,
-  Card,
-  Typography,
-  TableHead,
-  TableRow,
-  Chip,
   Button,
+  Card,
+  Chip,
+  ChipProps,
+  Container,
+  Paper,
   TableCell,
+  TableHead,
+  TablePagination,
+  TablePaginationProps,
+  TableRow,
+  Typography,
+  TypographyProps,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
 import { StaffTaskType } from "../../types/orderManagement";
 
-// Styled Components
-export const PageContainer = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
+// Page container
+export const PageContainer = styled(Container)(({ theme }) => ({
+  padding: theme.spacing(4),
   maxWidth: "100%",
-  overflow: "hidden",
 }));
 
-export const PageTitle = styled(Typography)(({ theme }) => ({
+// Page title
+export const PageTitle = styled(Typography)<TypographyProps>(({ theme }) => ({
+  fontSize: "1.8rem",
+  fontWeight: 700,
   marginBottom: theme.spacing(3),
-  fontWeight: 600,
+  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
   display: "flex",
   alignItems: "center",
-  color: theme.palette.primary.main,
 }));
 
-export const FilterContainer = styled(Box)(({ theme }) => ({
+// Filter container
+export const FilterContainer = styled(Paper)(({ theme }) => ({
+  background: `linear-gradient(135deg, ${alpha(
+    theme.palette.background.paper,
+    0.9
+  )}, ${alpha(theme.palette.background.default, 0.95)})`,
+  backdropFilter: "blur(10px)",
+  borderRadius: 24,
+  boxShadow: `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.08)}`,
   padding: theme.spacing(3),
-  marginBottom: theme.spacing(3),
-  backgroundColor: theme.palette.background.paper,
-  borderRadius: theme.shape.borderRadius,
-  boxShadow: theme.shadows[2],
-  position: "relative",
+  marginBottom: theme.spacing(4),
 }));
 
+// Filter title
 export const FilterTitle = styled(Typography)(({ theme }) => ({
+  fontSize: "1.2rem",
+  fontWeight: 600,
   marginBottom: theme.spacing(1),
-  fontWeight: 500,
   color: theme.palette.text.primary,
 }));
 
+// Filter actions container
 export const FilterActions = styled(Box)(({ theme }) => ({
   display: "flex",
   justifyContent: "flex-end",
   gap: theme.spacing(2),
-  marginTop: theme.spacing(2),
+  marginTop: theme.spacing(3),
 }));
 
+// Search button
 export const SearchButton = styled(Button)(({ theme }) => ({
+  borderRadius: 12,
+  padding: "8px 24px",
+  textTransform: "none",
+  fontWeight: 600,
+  transition: "all 0.2s ease-in-out",
   backgroundColor: theme.palette.primary.main,
   "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
     backgroundColor: theme.palette.primary.dark,
   },
 }));
 
+// Reset button
 export const ResetButton = styled(Button)(({ theme }) => ({
-  borderColor: theme.palette.grey[400],
-  color: theme.palette.text.primary,
+  borderRadius: 12,
+  padding: "8px 24px",
+  textTransform: "none",
+  fontWeight: 600,
+  transition: "all 0.2s ease-in-out",
+  borderColor: alpha(theme.palette.primary.main, 0.5),
+  color: theme.palette.primary.main,
   "&:hover": {
-    backgroundColor: theme.palette.grey[100],
+    transform: "translateY(-2px)",
+    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.1)}`,
+    borderColor: theme.palette.primary.main,
+    backgroundColor: alpha(theme.palette.primary.main, 0.05),
   },
 }));
 
-export const ResultsContainer = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  borderRadius: theme.shape.borderRadius,
-  boxShadow: theme.shadows[2],
+// Loading container
+export const LoadingContainer = styled(Box)(() => ({
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  height: 200,
+  width: "100%",
+}));
+
+// Results container
+export const ResultsContainer = styled(Paper)(({ theme }) => ({
+  background: `linear-gradient(135deg, ${alpha(
+    theme.palette.background.paper,
+    0.9
+  )}, ${alpha(theme.palette.background.default, 0.95)})`,
+  backdropFilter: "blur(10px)",
+  borderRadius: 24,
+  boxShadow: `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.08)}`,
   overflow: "hidden",
 }));
 
+// Table title container
 export const TableTitle = styled(Box)(({ theme }) => ({
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  padding: theme.spacing(2, 2, 1, 2),
+  padding: theme.spacing(2, 3),
 }));
 
+// Table summary text
 export const TableSummary = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
   fontSize: "0.875rem",
+  color: theme.palette.text.secondary,
 }));
 
+// Styled table head
 export const StyledTableHead = styled(TableHead)(({ theme }) => ({
-  backgroundColor: theme.palette.grey[50],
-  "& th": {
+  "& .MuiTableCell-head": {
+    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+    color: theme.palette.primary.main,
     fontWeight: 600,
-    color: theme.palette.text.primary,
+    padding: theme.spacing(1.5, 2),
   },
 }));
 
-interface StyledTableRowProps {
-  $isEven: boolean;
-}
+// Styled table row
+export const StyledTableRow = styled(TableRow)<{ $isEven: boolean }>(
+  ({ theme, $isEven }) => ({
+    backgroundColor: $isEven
+      ? alpha(theme.palette.background.default, 0.5)
+      : alpha(theme.palette.background.paper, 0.8),
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.primary.main, 0.04),
+    },
+    "& .MuiTableCell-body": {
+      padding: theme.spacing(1.5, 2),
+      borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+    },
+  })
+);
 
-export const StyledTableRow = styled(TableRow, {
-  shouldForwardProp: (prop) => prop !== "$isEven",
-})<StyledTableRowProps>(({ theme, $isEven }) => ({
-  backgroundColor: $isEven
-    ? theme.palette.grey[50]
-    : theme.palette.background.paper,
-  "&:hover": {
-    backgroundColor: theme.palette.action.hover,
-  },
-  transition: "background-color 0.2s",
-}));
-
-export const LoadingContainer = styled(Box)(({ theme }) => ({
-  display: "flex",
-  justifyContent: "center",
-  margin: theme.spacing(8, 0),
-}));
-
+// Staff info container
 export const StaffInfoContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  gap: theme.spacing(0),
+  gap: theme.spacing(0.5),
 }));
 
-export const StaffName = styled(Typography)(() => ({
+// Staff name
+export const StaffName = styled(Typography)(({ theme }) => ({
   fontWeight: 500,
-  fontSize: "0.875rem",
-}));
-
-export const AdditionalStaffContainer = styled(Box)(({ theme }) => ({
-  gap: theme.spacing(0),
-}));
-
-export const AdditionalStaffChip = styled(Chip)(() => ({
-  fontSize: "0.75rem",
-  height: 24,
-}));
-
-export const DateCell = styled(TableCell)(({ theme }) => ({
-  fontSize: "0.875rem",
+  fontSize: "0.9rem",
   color: theme.palette.text.primary,
-  height: "100%",
-  verticalAlign: "middle", // Căn giữa theo chiều dọc
-  padding: theme.spacing(1.5),
 }));
 
-interface StatusChipProps {
-  $isActive: boolean;
-}
-
-export const StatusChip = styled(Chip, {
-  shouldForwardProp: (prop) => prop !== "$isActive",
-})<StatusChipProps>(({ theme, $isActive }) => ({
-  backgroundColor: $isActive
-    ? theme.palette.success.main
-    : theme.palette.grey[600],
-  color: theme.palette.common.white,
-  fontWeight: 500,
-  "& .MuiChip-label": {
-    padding: "0 10px",
-  },
-  border: `1px solid ${
-    $isActive ? theme.palette.success.dark : theme.palette.grey[700]
-  }`,
-  boxShadow: `0 1px 2px ${
-    theme.palette.mode === "light" ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)"
-  }`,
-  height: 26,
-  transition: "all 0.2s ease",
-  "&:hover": {
-    opacity: 0.9,
-  },
+// Additional staff container
+export const AdditionalStaffContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  gap: theme.spacing(0.5),
+  paddingLeft: theme.spacing(1),
+  borderLeft: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+  marginTop: theme.spacing(0.5),
 }));
 
-interface TaskTypeChipProps {
-  $taskType: StaffTaskType;
-}
+// Date cell
+export const DateCell = styled(TableCell)(({ theme }) => ({
+  fontSize: "0.85rem",
+  color: theme.palette.text.secondary,
+}));
 
-export const TaskTypeChip = styled(Chip, {
-  shouldForwardProp: (prop) => prop !== "$taskType",
-})<TaskTypeChipProps>(({ theme, $taskType }) => {
-  let backgroundColor, textColor;
+// Status chip
+export const StatusChip = styled(Chip)<ChipProps & { $isActive: boolean }>(
+  ({ theme, $isActive }) => ({
+    borderRadius: 12,
+    fontWeight: 500,
+    backgroundColor: $isActive
+      ? alpha(theme.palette.primary.main, 0.1)
+      : alpha(theme.palette.success.main, 0.1),
+    color: $isActive ? theme.palette.primary.main : theme.palette.success.main,
+    border: `1px solid ${
+      $isActive
+        ? alpha(theme.palette.primary.main, 0.3)
+        : alpha(theme.palette.success.main, 0.3)
+    }`,
+  })
+);
 
-  switch ($taskType) {
-    case StaffTaskType.Preparation:
-      backgroundColor = theme.palette.primary.main;
-      textColor = theme.palette.common.white;
-      break;
-    case StaffTaskType.Shipping:
-      backgroundColor = theme.palette.secondary.main;
-      textColor = theme.palette.common.white;
-      break;
-    case StaffTaskType.Pickup:
-      backgroundColor = theme.palette.success.main;
-      textColor = theme.palette.common.white;
-      break;
-    default:
-      backgroundColor = theme.palette.grey[300];
-      textColor = theme.palette.text.primary;
-  }
+// Task type chip
+export const TaskTypeChip = styled(Chip)<
+  ChipProps & { $taskType: StaffTaskType }
+>(({ theme, $taskType }) => {
+  const getTaskTypeColor = () => {
+    switch ($taskType) {
+      case StaffTaskType.Preparation:
+        return theme.palette.primary.main;
+      case StaffTaskType.Shipping:
+        return theme.palette.secondary.main;
+      case StaffTaskType.Pickup:
+        return theme.palette.success.main;
+      default:
+        return theme.palette.grey[500];
+    }
+  };
 
   return {
-    backgroundColor,
-    color: textColor,
+    borderRadius: 12,
     fontWeight: 500,
-    "& .MuiChip-label": {
-      padding: "0 8px",
-    },
-    border: `5px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius,
-    transition: "background-color 0.2s ease-in-out",
+    backgroundColor: alpha(getTaskTypeColor(), 0.1),
+    color: getTaskTypeColor(),
+    border: `1px solid ${alpha(getTaskTypeColor(), 0.3)}`,
   };
 });
 
+// Empty result card
 export const EmptyResultCard = styled(Card)(({ theme }) => ({
-  margin: theme.spacing(2, 0),
+  background: `linear-gradient(145deg, ${alpha(
+    theme.palette.background.paper,
+    0.8
+  )}, ${alpha(theme.palette.background.default, 0.9)})`,
+  backdropFilter: "blur(8px)",
+  borderRadius: 16,
+  transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
   padding: theme.spacing(4),
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  backgroundColor: theme.palette.grey[50],
-  border: `1px dashed ${theme.palette.grey[300]}`,
-  boxShadow: "none",
+  textAlign: "center",
+  boxShadow: `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.05)}`,
+}));
+
+// Styled form controls
+export const StyledFormControl = styled(Box)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 12,
+    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.background.paper, 0.95),
+    },
+    "&.Mui-focused": {
+      backgroundColor: theme.palette.background.paper,
+      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.1)}`,
+    },
+  },
+  "& .MuiInputLabel-root": {
+    fontSize: "0.9rem",
+  },
+}));
+
+export const StyledTablePagination = styled(
+  TablePagination
+)<TablePaginationProps>(({ theme }) => ({
+  borderTop: `1px solid ${theme.palette.divider}`,
+  ".MuiTablePagination-toolbar": {
+    display: "flex",
+    justifyContent: "flex-end",
+    width: "100%",
+    padding: theme.spacing(0, 2),
+  },
+  ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
+    margin: 0,
+  },
+  ".MuiTablePagination-select": {
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  ".MuiTablePagination-actions": {
+    "& .MuiIconButton-root": {
+      padding: 8,
+      borderRadius: 8,
+      transition: "all 0.2s",
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+      },
+    },
+  },
+}));
+
+// Order code text
+export const OrderCodeText = styled(Typography)(({ theme }) => ({
+  fontWeight: 600,
+  fontSize: "0.9rem",
+  color: theme.palette.primary.main,
+  cursor: "pointer",
+  transition: "color 0.2s ease-in-out",
+  "&:hover": {
+    color: theme.palette.primary.dark,
+    textDecoration: "underline",
+  },
+}));
+
+// Customer name text
+export const CustomerNameText = styled(Typography)(({ theme }) => ({
+  fontSize: "0.9rem",
+  color: theme.palette.text.primary,
+}));
+
+// Error alert
+export const StyledErrorAlert = styled(Alert)(({ theme }) => ({
+  borderRadius: 16,
+  boxShadow: `0 4px 12px ${alpha(theme.palette.error.main, 0.1)}`,
+  marginBottom: theme.spacing(3),
+}));
+
+// Date picker wrapper
+export const DatePickerWrapper = styled(Box)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 12,
+    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.background.paper, 0.95),
+    },
+    "&.Mui-focused": {
+      backgroundColor: theme.palette.background.paper,
+      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.1)}`,
+    },
+  },
 }));

@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog, DialogActions, DialogContent } from "@mui/material";
+import { DialogContent, DialogActions, Dialog } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import {
   Receipt as ReceiptIcon,
@@ -19,7 +19,7 @@ import {
   InfoLabel,
   InfoValue,
   PrintButton,
-} from "../../../components/staff/styles/paymentReceiptDialogStyles";
+} from "./PaymentStyle";
 
 interface PaymentReceiptDialogProps {
   open: boolean;

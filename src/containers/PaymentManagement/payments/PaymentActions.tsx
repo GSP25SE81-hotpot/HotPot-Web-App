@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
-// src/pages/payments/PaymentActions.tsx
+import { Receipt as ReceiptIcon } from "@mui/icons-material";
 import React from "react";
-import { Box, IconButton, Tooltip } from "@mui/material";
 import {
-  Receipt as ReceiptIcon,
-  Visibility as VisibilityIcon,
-} from "@mui/icons-material";
+  ActionIconButton,
+  ActionsContainer,
+  StyledTooltip,
+} from "./PaymentStyle";
 
 interface PaymentActionsProps {
   status: string;
@@ -19,9 +19,9 @@ interface PaymentActionsProps {
 const PaymentActions: React.FC<PaymentActionsProps> = ({
   status,
   paymentId,
-  orderId = 0,
+  // orderId = 0,
   onGenerateReceipt,
-  onViewOrderPayments,
+  // onViewOrderPayments,
   stopPropagation = true,
 }) => {
   const handleAction = (callback: Function, e?: React.MouseEvent) => {
@@ -32,29 +32,28 @@ const PaymentActions: React.FC<PaymentActionsProps> = ({
   };
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center" }}>
+    <ActionsContainer>
       {status === "Success" && (
-        <Tooltip title="In hóa đơn">
-          <IconButton
+        <StyledTooltip title="In hóa đơn" arrow>
+          <ActionIconButton
             color="secondary"
             onClick={(e) => handleAction(() => onGenerateReceipt(paymentId), e)}
           >
             <ReceiptIcon />
-          </IconButton>
-        </Tooltip>
+          </ActionIconButton>
+        </StyledTooltip>
       )}
-
-      {orderId && onViewOrderPayments && (
-        <Tooltip title="View Order Payments">
-          <IconButton
+      {/* {orderId && onViewOrderPayments && (
+        <StyledTooltip title="View Order Payments" arrow>
+          <ActionIconButton
             color="primary"
             onClick={(e) => handleAction(() => onViewOrderPayments(orderId), e)}
           >
             <VisibilityIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Box>
+          </ActionIconButton>
+        </StyledTooltip>
+      )} */}
+    </ActionsContainer>
   );
 };
 

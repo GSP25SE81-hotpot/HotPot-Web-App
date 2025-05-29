@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Alert,
+  Box,
   CardContent,
   CircularProgress,
+  Divider,
   FormControl,
   InputLabel,
   MenuItem,
@@ -12,19 +16,17 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TablePagination,
   TableRow,
   TextField,
-  Typography,
-  Button,
   Tooltip,
-  Divider,
-  Box,
+  Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
 import React, { useEffect, useState } from "react";
 import staffAssignmentService from "../../api/Services/staffAssignmentService";
 import { StaffTaskType } from "../../types/orderManagement";
@@ -34,32 +36,33 @@ import {
   StaffAssignmentHistoryFilterRequest,
 } from "../../types/staffAssignment";
 import {
+  AdditionalStaffContainer,
+  CustomerNameText,
+  DateCell,
+  DatePickerWrapper,
+  EmptyResultCard,
+  FilterActions,
+  FilterContainer,
+  FilterTitle,
+  LoadingContainer,
+  OrderCodeText,
   PageContainer,
   PageTitle,
-  FilterContainer,
-  LoadingContainer,
-  ResultsContainer,
-  StaffInfoContainer,
-  AdditionalStaffContainer,
-  EmptyResultCard,
-  FilterTitle,
-  FilterActions,
-  StyledTableHead,
-  StyledTableRow,
-  StaffName,
-  DateCell,
-  StatusChip,
-  TaskTypeChip,
-  SearchButton,
   ResetButton,
-  TableTitle,
+  ResultsContainer,
+  SearchButton,
+  StaffInfoContainer,
+  StaffName,
+  StatusChip,
+  StyledErrorAlert,
+  StyledFormControl,
+  StyledTableHead,
+  StyledTablePagination,
+  StyledTableRow,
   TableSummary,
+  TableTitle,
+  TaskTypeChip,
 } from "./StaffAssignmentHistoryStyles";
-import SearchIcon from "@mui/icons-material/Search";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
 
 const StaffAssignmentHistory: React.FC = () => {
   const [assignments, setAssignments] =
@@ -87,7 +90,6 @@ const StaffAssignmentHistory: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchAssignments();
   }, [filter]);
 
@@ -135,19 +137,6 @@ const StaffAssignmentHistory: React.FC = () => {
     }
   };
 
-  const getTaskTypeColor = (taskType: StaffTaskType) => {
-    switch (taskType) {
-      case StaffTaskType.Preparation:
-        return "primary";
-      case StaffTaskType.Shipping:
-        return "secondary";
-      case StaffTaskType.Pickup:
-        return "success";
-      default:
-        return "default";
-    }
-  };
-
   const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: vi });
@@ -163,124 +152,145 @@ const StaffAssignmentHistory: React.FC = () => {
         Lịch sử Phân công Nhân viên
       </PageTitle>
 
-      {/* Phần Bộ lọc */}
+      {/* Filter Section */}
       <FilterContainer>
         <FilterTitle variant="h6">Bộ lọc tìm kiếm</FilterTitle>
         <Divider sx={{ mb: 2 }} />
 
         <Grid container spacing={2} alignItems="center">
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <TextField
-              fullWidth
-              label="Tên nhân viên"
-              variant="outlined"
-              value={filter.staffName || ""}
-              onChange={(e) =>
-                handleFilterChange({ staffName: e.target.value })
-              }
-              placeholder="Nhập tên nhân viên..."
-              size="small"
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <TextField
-              fullWidth
-              label="Mã đơn hàng"
-              variant="outlined"
-              value={filter.orderCode || ""}
-              onChange={(e) =>
-                handleFilterChange({ orderCode: e.target.value })
-              }
-              placeholder="Nhập mã đơn hàng..."
-              size="small"
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Loại nhiệm vụ</InputLabel>
-              <Select
-                value={filter.taskType || ""}
-                label="Loại nhiệm vụ"
+            <StyledFormControl sx={{ width: "100%" }}>
+              <TextField
+                fullWidth
+                label="Tên nhân viên"
+                variant="outlined"
+                value={filter.staffName || ""}
                 onChange={(e) =>
-                  handleFilterChange({
-                    taskType: e.target.value as StaffTaskType,
-                  })
+                  handleFilterChange({ staffName: e.target.value })
                 }
-              >
-                <MenuItem value="">Tất cả</MenuItem>
-                <MenuItem value={StaffTaskType.Preparation}>Chuẩn bị</MenuItem>
-                <MenuItem value={StaffTaskType.Shipping}>Vận chuyển</MenuItem>
-                <MenuItem value={StaffTaskType.Pickup}>Lấy hàng</MenuItem>
-              </Select>
-            </FormControl>
+                placeholder="Nhập tên nhân viên..."
+                size="small"
+              />
+            </StyledFormControl>
           </Grid>
+
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Trạng thái</InputLabel>
-              <Select
-                value={
-                  filter.isActive === undefined
-                    ? ""
-                    : filter.isActive
-                    ? "active"
-                    : "completed"
+            <StyledFormControl sx={{ width: "100%" }}>
+              <TextField
+                fullWidth
+                label="Mã đơn hàng"
+                variant="outlined"
+                value={filter.orderCode || ""}
+                onChange={(e) =>
+                  handleFilterChange({ orderCode: e.target.value })
                 }
-                label="Trạng thái"
-                onChange={(e) => {
-                  if (e.target.value === "") {
-                    handleFilterChange({ isActive: undefined });
-                  } else {
+                placeholder="Nhập mã đơn hàng..."
+                size="small"
+              />
+            </StyledFormControl>
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <StyledFormControl sx={{ width: "100%" }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Loại nhiệm vụ</InputLabel>
+                <Select
+                  value={filter.taskType || ""}
+                  label="Loại nhiệm vụ"
+                  onChange={(e) =>
                     handleFilterChange({
-                      isActive: e.target.value === "active",
-                    });
+                      taskType: e.target.value as StaffTaskType,
+                    })
                   }
-                }}
-              >
-                <MenuItem value="">Tất cả</MenuItem>
-                <MenuItem value="active">Đang hoạt động</MenuItem>
-                <MenuItem value="completed">Đã hoàn thành</MenuItem>
-              </Select>
-            </FormControl>
+                >
+                  <MenuItem value="">Tất cả</MenuItem>
+                  <MenuItem value={StaffTaskType.Preparation}>
+                    Chuẩn bị
+                  </MenuItem>
+                  <MenuItem value={StaffTaskType.Shipping}>Vận chuyển</MenuItem>
+                  <MenuItem value={StaffTaskType.Pickup}>Lấy hàng</MenuItem>
+                </Select>
+              </FormControl>
+            </StyledFormControl>
           </Grid>
+
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Ngày bắt đầu"
-                value={filter.startDate ? new Date(filter.startDate) : null}
-                onChange={(date) =>
-                  handleFilterChange({
-                    startDate: date ? date.toISOString() : undefined,
-                  })
-                }
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    size: "small",
-                    placeholder: "Chọn ngày bắt đầu",
-                  },
-                }}
-              />
-            </LocalizationProvider>
+            <StyledFormControl sx={{ width: "100%" }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Trạng thái</InputLabel>
+                <Select
+                  value={
+                    filter.isActive === undefined
+                      ? ""
+                      : filter.isActive
+                      ? "active"
+                      : "completed"
+                  }
+                  label="Trạng thái"
+                  onChange={(e) => {
+                    if (e.target.value === "") {
+                      handleFilterChange({ isActive: undefined });
+                    } else {
+                      handleFilterChange({
+                        isActive: e.target.value === "active",
+                      });
+                    }
+                  }}
+                >
+                  <MenuItem value="">Tất cả</MenuItem>
+                  <MenuItem value="active">Đang hoạt động</MenuItem>
+                  <MenuItem value="completed">Đã hoàn thành</MenuItem>
+                </Select>
+              </FormControl>
+            </StyledFormControl>
           </Grid>
+
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Ngày kết thúc"
-                value={filter.endDate ? new Date(filter.endDate) : null}
-                onChange={(date) =>
-                  handleFilterChange({
-                    endDate: date ? date.toISOString() : undefined,
-                  })
-                }
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    size: "small",
-                    placeholder: "Chọn ngày kết thúc",
-                  },
-                }}
-              />
-            </LocalizationProvider>
+            <StyledFormControl sx={{ width: "100%" }}>
+              <DatePickerWrapper>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DatePicker
+                    label="Ngày bắt đầu"
+                    value={filter.startDate ? new Date(filter.startDate) : null}
+                    onChange={(date) =>
+                      handleFilterChange({
+                        startDate: date ? date.toISOString() : undefined,
+                      })
+                    }
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        size: "small",
+                        placeholder: "Chọn ngày bắt đầu",
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+              </DatePickerWrapper>
+            </StyledFormControl>
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <StyledFormControl sx={{ width: "100%" }}>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Ngày kết thúc"
+                  value={filter.endDate ? new Date(filter.endDate) : null}
+                  onChange={(date) =>
+                    handleFilterChange({
+                      endDate: date ? date.toISOString() : undefined,
+                    })
+                  }
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      size: "small",
+                      placeholder: "Chọn ngày kết thúc",
+                    },
+                  }}
+                />
+              </LocalizationProvider>
+            </StyledFormControl>
           </Grid>
         </Grid>
 
@@ -302,14 +312,16 @@ const StaffAssignmentHistory: React.FC = () => {
         </FilterActions>
       </FilterContainer>
 
-      {/* Phần Kết quả */}
+      {/* Results Section */}
       {loading ? (
         <LoadingContainer>
           <CircularProgress />
         </LoadingContainer>
       ) : error ? (
-        <Alert severity="error" sx={{ my: 2 }}>
-          {error}
+        <Alert severity="error" sx={{ my: 2, borderRadius: 2 }}>
+          {error && (
+            <StyledErrorAlert severity="error">{error}</StyledErrorAlert>
+          )}
         </Alert>
       ) : assignments && assignments.items.length > 0 ? (
         <ResultsContainer>
@@ -342,6 +354,7 @@ const StaffAssignmentHistory: React.FC = () => {
                   <TableCell>Trạng thái</TableCell>
                 </TableRow>
               </StyledTableHead>
+
               <TableBody>
                 {assignments.items.map((assignment, index) => (
                   <StyledTableRow
@@ -350,23 +363,27 @@ const StaffAssignmentHistory: React.FC = () => {
                   >
                     <TableCell>
                       <Tooltip title="Xem chi tiết đơn hàng" arrow>
-                        <Typography
-                          variant="body2"
-                          sx={{ fontWeight: "medium", cursor: "pointer" }}
-                        >
+                        <OrderCodeText>
                           {assignment.orderCode || "N/A"}
-                        </Typography>
+                        </OrderCodeText>
                       </Tooltip>
                     </TableCell>
-                    <TableCell>{assignment.customerName || "N/A"}</TableCell>
+
+                    <TableCell>
+                      <CustomerNameText>
+                        {assignment.customerName || "N/A"}
+                      </CustomerNameText>
+                    </TableCell>
+
                     <TableCell>
                       <TaskTypeChip
                         label={getTaskTypeLabel(assignment.taskType)}
-                        color={getTaskTypeColor(assignment.taskType) as any}
+                        color="default"
                         size="small"
                         $taskType={assignment.taskType}
                       />
                     </TableCell>
+
                     <TableCell>
                       <StaffInfoContainer>
                         <StaffName>{assignment.staffName || "N/A"}</StaffName>
@@ -374,8 +391,8 @@ const StaffAssignmentHistory: React.FC = () => {
                           assignment.additionalPreparationStaff.length > 0 && (
                             <AdditionalStaffContainer>
                               {assignment.additionalPreparationStaff.map(
-                                (staff) => (
-                                  <StaffName>
+                                (staff, idx) => (
+                                  <StaffName key={idx}>
                                     {staff.staffName || "N/A"}
                                   </StaffName>
                                 )
@@ -384,6 +401,7 @@ const StaffAssignmentHistory: React.FC = () => {
                           )}
                       </StaffInfoContainer>
                     </TableCell>
+
                     <DateCell>
                       <Tooltip
                         title={formatDate(assignment.assignedDate)}
@@ -392,6 +410,7 @@ const StaffAssignmentHistory: React.FC = () => {
                         <span>{formatDate(assignment.assignedDate)}</span>
                       </Tooltip>
                     </DateCell>
+
                     <TableCell>
                       <StatusChip
                         label={
@@ -408,9 +427,10 @@ const StaffAssignmentHistory: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25, 50]}
+
+          <StyledTablePagination
             component="div"
+            rowsPerPageOptions={[5, 10, 25]}
             count={assignments.totalCount}
             rowsPerPage={filter.pageSize || 10}
             page={(filter.pageNumber || 1) - 1}
@@ -438,13 +458,13 @@ const StaffAssignmentHistory: React.FC = () => {
               bạn. Vui lòng thử lại với các bộ lọc khác.
             </Typography>
             <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-              <Button
+              <ResetButton
                 variant="outlined"
                 startIcon={<RestartAltIcon />}
                 onClick={handleReset}
               >
                 Đặt lại bộ lọc
-              </Button>
+              </ResetButton>
             </Box>
           </CardContent>
         </EmptyResultCard>
