@@ -300,10 +300,10 @@ export const OrderCodeText = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.main,
   cursor: "pointer",
   transition: "color 0.2s ease-in-out",
-  "&:hover": {
-    color: theme.palette.primary.dark,
-    textDecoration: "underline",
-  },
+  // "&:hover": {
+  //   color: theme.palette.primary.dark,
+  //   textDecoration: "underline",
+  // },
 }));
 
 // Customer name text

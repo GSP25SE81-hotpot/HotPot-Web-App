@@ -1,69 +1,66 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  Box,
-  Button,
-  Chip,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Table, TableBody, TableCell, useTheme } from "@mui/material";
 import { toast } from "react-toastify";
 import staffGetOrderApi from "../../api/staffGetOrderAPI";
-// import useAuth from "../../hooks/useAuth";
 import { AssignOrderType } from "../../types/assignOrder";
 import ViewDetail from "./Popup/ViewDetail";
+import {
+  PageContainer,
+  PageTitle,
+  StyledTableContainer,
+  StyledTableHead,
+  HeaderCell,
+  StyledTableRow,
+  OrderCodeCell,
+  CustomerNameCell,
+  NotesCell,
+  StatusCell,
+  ActionsCell,
+  NotesTextField,
+  StyledStatusChip,
+  ActionButton,
+  EmptyStateContainer,
+  EmptyStateText,
+} from "./AssignOrderStyles";
+
+// Status translation function
+const translateOrderStatus = (status: string): string => {
+  const statusTranslations: Record<string, string> = {
+    Processing: "Đang xử lý",
+  };
+
+  return statusTranslations[status] || status;
+};
 
 const StatusChip = ({ status }: { status: string }) => {
   const theme = useTheme();
+
+  // Translate the status to Vietnamese
+  const translatedStatus = translateOrderStatus(status);
+
+  // Map for status colors (using translated status values)
   const statusColors: Record<string, string> = {
-    "Chờ xác nhận": theme.palette.warning.main,
-    "Đã xác nhận": theme.palette.success.main,
-    "Đã hủy": theme.palette.error.main,
+    "Đang xử lý": theme.palette.info.main,
   };
 
   return (
-    <Chip
+    <StyledStatusChip
       label={status}
       size="small"
-      sx={{
-        backgroundColor: statusColors[status] || theme.palette.grey[500],
-        color: theme.palette.common.white,
-      }}
+      statuscolor={statusColors[translatedStatus] || theme.palette.grey[500]}
     />
   );
 };
 
 const AssignOrder: React.FC = () => {
-  //Declare
-  const theme = useTheme();
+  // Declare
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<number>();
   const [orders, setOrders] = useState<AssignOrderType[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  //call api
-  const getAssignOrderByStaffId = async () => {
-    try {
-      const res = await staffGetOrderApi.getAssignOrderByStaffId();
-      setOrders(res?.data);
-    } catch (error: any) {
-      console.log(error?.message);
-    }
-  };
-
-  React.useEffect(() => {
-    getAssignOrderByStaffId();
-  }, []);
-
-  //Header arr
+  // Header array
   const headerArr = [
     "Mã đơn hàng",
     "Tên khách hàng",
@@ -72,28 +69,47 @@ const AssignOrder: React.FC = () => {
     "Thao tác",
   ];
 
+  // API call
+  const getAssignOrderByStaffId = async () => {
+    setLoading(true);
+    try {
+      const res = await staffGetOrderApi.getAssignOrderByStaffId();
+      setOrders(res?.data);
+    } catch (error: any) {
+      console.log(error?.message);
+      toast.error("Không thể tải danh sách đơn hàng");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getAssignOrderByStaffId();
+  }, []);
+
   const body = {
     status: "Processed",
   };
 
-  //handle
+  // Handle status change
   const handleChangeStatus = async (orderId: any) => {
-    console.log("log id: ", orderId);
     try {
       const res = await staffGetOrderApi.updateStatus(orderId, body);
+      console.log(res);
       toast.success("Cập nhật trạng thái đơn hàng thành công!");
       getAssignOrderByStaffId();
-      console.log(res);
     } catch (error: any) {
+      toast.error("Không thể cập nhật trạng thái đơn hàng");
       console.log(error?.message);
     }
   };
 
-  //handle open detail
+  // Handle detail view
   const handleOpenDetail = (orderId: number) => {
     setSelectedOrderId(orderId);
     setOpenDetail(true);
   };
+
   const handleCloseDetail = () => {
     setOpenDetail(false);
   };
@@ -105,71 +121,69 @@ const AssignOrder: React.FC = () => {
         onClose={handleCloseDetail}
         orderId={selectedOrderId}
       />
-      <Box
-        sx={{
-          p: 3,
-          bgcolor: theme.palette.background.default,
-          minHeight: "100vh",
-        }}
-      >
-        <Typography variant="h4" component="h1" mb={3} color="primary">
-          Dánh sách đơn hàng cần xử lý
-        </Typography>
+      <PageContainer>
+        <PageTitle variant="h4" component="h1">
+          Danh sách đơn hàng cần xử lý
+        </PageTitle>
 
-        <TableContainer component={Paper}>
+        <StyledTableContainer>
           <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: theme.palette.grey[200] }}>
-                {headerArr.map((header, _index) => (
-                  <TableCell sx={{ fontWeight: 600 }}>{header}</TableCell>
+            <StyledTableHead>
+              <StyledTableRow>
+                {headerArr.map((header, index) => (
+                  <HeaderCell key={index}>{header}</HeaderCell>
                 ))}
-              </TableRow>
-            </TableHead>
+              </StyledTableRow>
+            </StyledTableHead>
             <TableBody>
-              {orders.map((order) => (
-                <TableRow key={order.orderId}>
-                  <TableCell
-                    onClick={() => handleOpenDetail(order.orderId)}
-                    sx={{
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                      color: theme.palette.primary.main,
-                      fontWeight: 600,
-                    }}
-                  >
-                    {order.orderCode}
-                  </TableCell>
-                  <TableCell>{order.customerName}</TableCell>
-                  <TableCell>
-                    <TextField
-                      multiline
-                      rows={2}
-                      sx={{
-                        width: "300px",
-                        "& .MuiInputBase-root": {
-                          bgcolor: theme.palette.background.paper,
-                        },
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <StatusChip status={order.status} />
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleChangeStatus(order.orderId)}
+              {orders.length > 0 ? (
+                orders.map((order) => (
+                  <StyledTableRow key={order.orderId}>
+                    <OrderCodeCell
+                      onClick={() => handleOpenDetail(order.orderId)}
                     >
-                      Đơn hàng sẵn sàng
-                    </Button>
+                      {order.orderCode}
+                    </OrderCodeCell>
+                    <CustomerNameCell>{order.customerName}</CustomerNameCell>
+                    <NotesCell>
+                      <NotesTextField
+                        multiline
+                        rows={2}
+                        placeholder="Nhập ghi chú đặc biệt..."
+                      />
+                    </NotesCell>
+                    <StatusCell>
+                      <StatusChip status={order.status} />
+                    </StatusCell>
+                    <ActionsCell>
+                      <ActionButton
+                        variant="contained"
+                        onClick={() => handleChangeStatus(order.orderId)}
+                      >
+                        Đơn hàng sẵn sàng
+                      </ActionButton>
+                    </ActionsCell>
+                  </StyledTableRow>
+                ))
+              ) : (
+                <StyledTableRow>
+                  <TableCell colSpan={5}>
+                    <EmptyStateContainer>
+                      {loading ? (
+                        <EmptyStateText>Đang tải dữ liệu...</EmptyStateText>
+                      ) : (
+                        <EmptyStateText>
+                          Không có đơn hàng nào cần xử lý
+                        </EmptyStateText>
+                      )}
+                    </EmptyStateContainer>
                   </TableCell>
-                </TableRow>
-              ))}
+                </StyledTableRow>
+              )}
             </TableBody>
           </Table>
-        </TableContainer>
-      </Box>
+        </StyledTableContainer>
+      </PageContainer>
     </>
   );
 };
