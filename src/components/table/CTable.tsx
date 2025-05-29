@@ -1,26 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Box,
-  Card,
-  CardContent,
-  CardHeader,
   Chip,
+  CircularProgress,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  useTheme,
-  CircularProgress,
-  Alert,
-  TablePagination,
 } from "@mui/material";
-import { alpha, styled } from "@mui/material/styles";
-import React, { ReactNode } from "react";
 import moment from "moment"; // Import moment.js for date formatting
-import { colors } from "../../styles/Color/color";
+import React, { ReactNode } from "react";
+import {
+  ActionButtonsContainer,
+  HeaderContainer,
+  LoadingOverlay,
+  SearchToolsContainer,
+  StyledActionCell,
+  StyledAlert,
+  StyledCard,
+  StyledCardContent,
+  StyledCardHeader,
+  StyledCardTitle,
+  StyledHeaderCell,
+  StyledImageContainer,
+  StyledIndexCell,
+  StyledTableCell,
+  StyledTableContainer,
+  StyledTablePagination,
+} from "./CTableStyles";
 
 interface CTableProps {
   tableHeaderTitle?: any;
@@ -47,152 +55,6 @@ interface CTableProps {
   selectedRow?: any;
 }
 
-// Styled Components
-const StyledCard = styled(Card)(({ theme }) => ({
-  background: `linear-gradient(135deg, ${alpha(
-    theme.palette.background.paper,
-    0.9
-  )}, ${alpha(theme.palette.background.default, 0.95)})`,
-  backdropFilter: "blur(10px)",
-  borderRadius: 16,
-  boxShadow: `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.08)}`,
-  border: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
-}));
-
-const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-  maxHeight: "70vh",
-  overflow: "auto",
-
-  "& .MuiTable-root": {
-    minWidth: 650,
-  },
-
-  "& .MuiTableCell-root": {
-    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-    padding: theme.spacing(1.5),
-    fontSize: "0.875rem",
-  },
-
-  "& .MuiTableHead-root": {
-    backgroundColor: alpha(theme.palette.primary.main, 1),
-    position: "sticky",
-    top: 0,
-    zIndex: 10,
-
-    "& .MuiTableCell-head": {
-      fontWeight: 600,
-      fontSize: "0.875rem",
-      color: colors.white,
-      backgroundColor: alpha(theme.palette.primary.main, 0.04),
-      borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-    },
-    // Support for custom row styling based on data attributes
-    '&[data-expired="true"]': {
-      backgroundColor: alpha(theme.palette.error.main, 0.05),
-      "&:hover": {
-        backgroundColor: alpha(theme.palette.error.main, 0.1),
-      },
-    },
-    '&[data-expiring-soon="true"]': {
-      backgroundColor: alpha(theme.palette.warning.main, 0.05),
-      "&:hover": {
-        backgroundColor: alpha(theme.palette.warning.main, 0.1),
-      },
-    },
-  },
-
-  "& .MuiTableBody-root": {
-    "& .MuiTableRow-root": {
-      transition: "all 0.2s ease-in-out",
-      cursor: "default",
-
-      "&:hover": {
-        backgroundColor: alpha(theme.palette.primary.main, 0.06),
-        transform: "translateY(-1px)",
-        boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.08)}`,
-      },
-
-      "&.clickable": {
-        cursor: "pointer",
-      },
-
-      "&.selected": {
-        backgroundColor: alpha(theme.palette.primary.main, 0.12),
-
-        "&:hover": {
-          backgroundColor: alpha(theme.palette.primary.main, 0.16),
-        },
-      },
-
-      // Custom row styling based on data attributes
-      '&[data-expired="true"]': {
-        backgroundColor: alpha(theme.palette.error.main, 0.05),
-
-        "&:hover": {
-          backgroundColor: alpha(theme.palette.error.main, 0.1),
-        },
-      },
-
-      '&[data-expiring-soon="true"]': {
-        backgroundColor: alpha(theme.palette.warning.main, 0.05),
-
-        "&:hover": {
-          backgroundColor: alpha(theme.palette.warning.main, 0.1),
-        },
-      },
-    },
-    // Support for custom row styling based on data attributes
-    '&[data-expired="true"]': {
-      backgroundColor: alpha(theme.palette.error.main, 0.05),
-      "&:hover": {
-        backgroundColor: alpha(theme.palette.error.main, 0.1),
-      },
-    },
-    '&[data-expiring-soon="true"]': {
-      backgroundColor: alpha(theme.palette.warning.main, 0.05),
-      "&:hover": {
-        backgroundColor: alpha(theme.palette.warning.main, 0.1),
-      },
-    },
-  },
-  // "& .MuiTableHead-root": {
-  //   "& .MuiTableCell-head": {
-  //     fontWeight: "bold",
-  //     fontSize: "0.875rem",
-  //   },
-  // },
-}));
-
-// const StyledTablePagination = styled(TablePagination)(({ theme }) => ({
-//   borderTop: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
-//   backgroundColor: alpha(theme.palette.background.default, 0.5),
-
-//   "& .MuiTablePagination-toolbar": {
-//     paddingLeft: theme.spacing(2),
-//     paddingRight: theme.spacing(2),
-//   },
-
-//   "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
-//     fontSize: "0.875rem",
-//     color: theme.palette.text.secondary,
-//   },
-// }));
-
-const LoadingOverlay = styled(Box)(({ theme }) => ({
-  position: "absolute",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: alpha(theme.palette.background.paper, 0.8),
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 2,
-  backdropFilter: "blur(2px)",
-  borderRadius: "inherit",
-}));
-
 const CTable: React.FC<CTableProps> = ({
   data,
   tableHeaderTitle,
@@ -212,8 +74,6 @@ const CTable: React.FC<CTableProps> = ({
   onRowClick,
   selectedRow,
 }) => {
-  const theme = useTheme();
-
   function getNestedValue(obj: any, path: any) {
     return path
       .split(".")
@@ -225,7 +85,6 @@ const CTable: React.FC<CTableProps> = ({
     if (column.render && typeof column.render === "function") {
       return column.render(value, row);
     }
-
     // Handle null/undefined values early
     if (value === null || value === undefined) {
       // Special cases for date formats
@@ -237,19 +96,16 @@ const CTable: React.FC<CTableProps> = ({
       }
       return "-";
     }
-
     // Date formatting
     if (column.format === "date") {
       return value ? moment(value).format("DD/MM/YYYY") : "-";
     }
-
     // DateTime formatting
     if (column.format === "datetime") {
       return value
         ? moment(value).format("DD/MM/YYYY HH:mm")
         : "không có thời hạn";
     }
-
     // DateTime discount formatting
     if (column.format === "dateTimeDiscount") {
       if (!value || value === "") {
@@ -257,17 +113,14 @@ const CTable: React.FC<CTableProps> = ({
       }
       return moment(value).format("DD/MM/YYYY");
     }
-
     // Number formatting
     if (column.format === "number") {
       return typeof value === "number" ? value.toLocaleString("vi-VN") : "-";
     }
-
     // Boolean formatting
     if (column.format === "boolean") {
       return value ? "Có" : "Không";
     }
-
     // Array formatting
     if (column.format === "array") {
       if (Array.isArray(value)) {
@@ -275,7 +128,6 @@ const CTable: React.FC<CTableProps> = ({
       }
       return value || "-";
     }
-
     // Role formatting
     if (column.format === "role") {
       const roleMap: { [key: string]: string } = {
@@ -286,7 +138,6 @@ const CTable: React.FC<CTableProps> = ({
       };
       return roleMap[value] || "-";
     }
-
     // Status formatting
     if (column.format === "status") {
       const statusMap: { [key: string]: string } = {
@@ -301,7 +152,6 @@ const CTable: React.FC<CTableProps> = ({
       };
       return statusMap[value] || "-";
     }
-
     // Status discount formatting
     if (column.format === "statusDiscount") {
       if (value === true) {
@@ -335,7 +185,6 @@ const CTable: React.FC<CTableProps> = ({
         />
       );
     }
-
     // Status hotpot formatting
     if (column.format === "statusHotpot") {
       const statusConfig: { [key: string]: { label: string; color: any } } = {
@@ -344,7 +193,6 @@ const CTable: React.FC<CTableProps> = ({
         "In Progress": { label: "Đang tiến hành", color: "info" },
         Cancelled: { label: "Huỷ", color: "error" },
       };
-
       const config = statusConfig[value] || { label: "-", color: "default" };
       return (
         <Chip
@@ -356,7 +204,6 @@ const CTable: React.FC<CTableProps> = ({
         />
       );
     }
-
     // Status detail hotpot formatting
     if (column.format === "statusDetailHopot") {
       const statusConfig: { [key: string]: { label: string; color: any } } = {
@@ -364,7 +211,6 @@ const CTable: React.FC<CTableProps> = ({
         Damaged: { label: "Bị hư", color: "error" },
         Rented: { label: "Đang Cho thuê", color: "primary" },
       };
-
       const config = statusConfig[value] || { label: "-", color: "default" };
       return (
         <Chip
@@ -376,7 +222,6 @@ const CTable: React.FC<CTableProps> = ({
         />
       );
     }
-
     // Price formatting
     if (column.format === "price") {
       if (typeof value === "number") {
@@ -384,7 +229,6 @@ const CTable: React.FC<CTableProps> = ({
       }
       return "N/A";
     }
-
     return value;
   }
 
@@ -395,43 +239,23 @@ const CTable: React.FC<CTableProps> = ({
     <Box sx={{ minWidth: "600px", mx: "auto", p: 2, ...sx }}>
       <StyledCard>
         {/* Header Section */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 2,
-          }}
-        >
+        <HeaderContainer>
           {title && (
-            <CardHeader
-              title={
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 700,
-                    background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                  }}
-                >
-                  {title}
-                </Typography>
-              }
-              sx={{ pb: 0 }}
+            <StyledCardHeader
+              title={<StyledCardTitle variant="h5">{title}</StyledCardTitle>}
             />
           )}
           {eventAction && (
-            <Box sx={{ pr: 2, display: "flex", gap: 1 }}>{eventAction}</Box>
+            <ActionButtonsContainer>{eventAction}</ActionButtonsContainer>
           )}
-        </Box>
+        </HeaderContainer>
 
         {/* Search Tool Section */}
-        {searchTool && <Box sx={{ px: 2, pb: 1 }}>{searchTool}</Box>}
+        {searchTool && (
+          <SearchToolsContainer>{searchTool}</SearchToolsContainer>
+        )}
 
-        <CardContent sx={{ pt: 1 }}>
+        <StyledCardContent>
           <Box sx={{ position: "relative" }}>
             {/* Loading Overlay */}
             {loading && (
@@ -444,32 +268,21 @@ const CTable: React.FC<CTableProps> = ({
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: "bold", minWidth: "60px" }}>
-                      #
-                    </TableCell>
+                    <StyledTableCell>#</StyledTableCell>
                     {tableHeaderTitle?.map((column: any) => (
-                      <TableCell
+                      <StyledHeaderCell
                         key={column.id}
                         align={column.align || "left"}
                         sx={{
-                          fontWeight: "bold",
                           minWidth: column.minWidth || "auto",
                           maxWidth: column.maxWidth || "none",
                         }}
                       >
                         {column.label}
-                      </TableCell>
+                      </StyledHeaderCell>
                     ))}
                     {menuAction && (
-                      <TableCell
-                        sx={{
-                          fontWeight: "bold",
-                          minWidth: "100px",
-                          textAlign: "center",
-                        }}
-                      >
-                        Thao tác
-                      </TableCell>
+                      <StyledActionCell>Thao tác</StyledActionCell>
                     )}
                   </TableRow>
                 </TableHead>
@@ -483,16 +296,9 @@ const CTable: React.FC<CTableProps> = ({
                         align="center"
                         sx={{ py: 6 }}
                       >
-                        <Alert
-                          severity="info"
-                          sx={{
-                            border: "none",
-                            bgcolor: "transparent",
-                            justifyContent: "center",
-                          }}
-                        >
+                        <StyledAlert severity="info">
                           {emptyMessage}
-                        </Alert>
+                        </StyledAlert>
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -502,17 +308,17 @@ const CTable: React.FC<CTableProps> = ({
                         data-expired={row["data-expired"]}
                         data-expiring-soon={row["data-expiring-soon"]}
                         className={`
-                          ${isClickableRow ? "clickable" : ""}
-                          ${selectedRow === row ? "selected" : ""}
-                        `.trim()}
+                            ${isClickableRow ? "clickable" : ""}
+                            ${selectedRow === row ? "selected" : ""}
+                          `.trim()}
                         onClick={() => {
                           if (onRowClick) onRowClick(row);
                           if (selectedData) selectedData(row);
                         }}
                       >
-                        <TableCell sx={{ fontWeight: "medium" }}>
+                        <StyledIndexCell>
                           {page * size + index + 1}
-                        </TableCell>
+                        </StyledIndexCell>
                         {tableHeaderTitle?.map((column: any) => (
                           <TableCell
                             key={column.id}
@@ -524,43 +330,37 @@ const CTable: React.FC<CTableProps> = ({
                             }}
                           >
                             {column.id === "imageURL" ? (
-                              <Box
-                                component="img"
-                                src={getNestedValue(row, column.id)}
-                                alt="Thumbnail"
-                                sx={{
-                                  width: 50,
-                                  height: 50,
-                                  borderRadius: 2,
-                                  objectFit: "cover",
-                                  border: `1px solid ${alpha(
-                                    theme.palette.divider,
-                                    0.2
-                                  )}`,
-                                }}
-                                onError={(e: any) => {
-                                  e.target.style.display = "none";
-                                }}
-                              />
+                              <StyledImageContainer>
+                                <Box
+                                  component="img"
+                                  src={getNestedValue(row, column.id)}
+                                  alt="Thumbnail"
+                                  sx={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                  }}
+                                  onError={(e: any) => {
+                                    e.target.style.display = "none";
+                                  }}
+                                />
+                              </StyledImageContainer>
                             ) : column.id === "imageURLs" ? (
-                              <Box
-                                component="img"
-                                src={getNestedValue(row, column.id)?.[0]}
-                                alt="Thumbnail"
-                                sx={{
-                                  width: 50,
-                                  height: 50,
-                                  borderRadius: 2,
-                                  objectFit: "cover",
-                                  border: `1px solid ${alpha(
-                                    theme.palette.divider,
-                                    0.2
-                                  )}`,
-                                }}
-                                onError={(e: any) => {
-                                  e.target.style.display = "none";
-                                }}
-                              />
+                              <StyledImageContainer>
+                                <Box
+                                  component="img"
+                                  src={getNestedValue(row, column.id)?.[0]}
+                                  alt="Thumbnail"
+                                  sx={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                  }}
+                                  onError={(e: any) => {
+                                    e.target.style.display = "none";
+                                  }}
+                                />
+                              </StyledImageContainer>
                             ) : (
                               formatValue(
                                 getNestedValue(row, column.id),
@@ -571,15 +371,18 @@ const CTable: React.FC<CTableProps> = ({
                           </TableCell>
                         ))}
                         {menuAction && (
-                          <TableCell align="center">{menuAction}</TableCell>
+                          <TableCell align="center">
+                            {typeof menuAction === "function"
+                              ? menuAction(row)
+                              : menuAction}
+                          </TableCell>
                         )}
                       </TableRow>
                     ))
                   )}
                 </TableBody>
               </Table>
-
-              <TablePagination
+              <StyledTablePagination
                 rowsPerPageOptions={[10, 25, 50, 100]}
                 component="div"
                 count={total ?? 0}
@@ -598,7 +401,7 @@ const CTable: React.FC<CTableProps> = ({
               />
             </StyledTableContainer>
           </Box>
-        </CardContent>
+        </StyledCardContent>
       </StyledCard>
     </Box>
   );
