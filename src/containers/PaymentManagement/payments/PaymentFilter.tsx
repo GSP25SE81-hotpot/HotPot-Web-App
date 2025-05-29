@@ -1,4 +1,3 @@
-// src/components/payments/PaymentFilter.tsx
 import React, { useState } from "react";
 import {
   InputLabel,
@@ -26,7 +25,8 @@ import {
   ButtonsContainer,
   SearchButton,
   ResetButton,
-} from "../../../components/staff/styles/paymentFilterStyles";
+  DatePickerWrapper,
+} from "./PaymentStyle";
 
 // Define payment status enum to match backend
 enum PaymentStatus {
@@ -102,24 +102,28 @@ const PaymentFilter: React.FC<PaymentFilterProps> = ({
             </FilterFormControl>
           </Grid>
           <Grid size={{ xs: 12, sm: 3 }}>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Từ ngày"
-                value={fromDate}
-                onChange={(newValue) => setFromDate(newValue)}
-                slotProps={{ textField: { size: "small", fullWidth: true } }}
-              />
-            </LocalizationProvider>
+            <DatePickerWrapper>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Từ ngày"
+                  value={fromDate}
+                  onChange={(newValue) => setFromDate(newValue)}
+                  slotProps={{ textField: { size: "small", fullWidth: true } }}
+                />
+              </LocalizationProvider>
+            </DatePickerWrapper>
           </Grid>
           <Grid size={{ xs: 12, sm: 3 }}>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Đến ngày"
-                value={toDate}
-                onChange={(newValue) => setToDate(newValue)}
-                slotProps={{ textField: { size: "small", fullWidth: true } }}
-              />
-            </LocalizationProvider>
+            <DatePickerWrapper>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Đến ngày"
+                  value={toDate}
+                  onChange={(newValue) => setToDate(newValue)}
+                  slotProps={{ textField: { size: "small", fullWidth: true } }}
+                />
+              </LocalizationProvider>
+            </DatePickerWrapper>
           </Grid>
           <Grid size={{ xs: 12, sm: 3 }}>
             <ButtonsContainer>

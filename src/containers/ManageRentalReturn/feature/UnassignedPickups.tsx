@@ -12,6 +12,7 @@ import {
   Tooltip,
   Chip,
   Stack,
+  Snackbar,
 } from "@mui/material";
 import { getUnassignedPickups } from "../../../api/Services/rentalService";
 import {
@@ -68,21 +69,39 @@ const UnassignedPickups: React.FC = () => {
   const [selectedPickup, setSelectedPickup] =
     useState<RentOrderDetailResponse | null>(null);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const fetchPickups = async () => {
+    console.log(
+      "fetchPickups được gọi với page =",
+      page,
+      "rowsPerPage =",
+      rowsPerPage
+    );
     setLoading(true);
     setError(null);
+
     try {
-      const data = await getUnassignedPickups(page + 1, rowsPerPage);
-      setPickups(data.data as PagedResult<RentOrderDetailResponse>);
-      return data; // Return the data for promise chaining
+      const response = await getUnassignedPickups(page + 1, rowsPerPage);
+      console.log("Dữ liệu nhận được từ API:", response);
+
+      if (response && response.data) {
+        setPickups(response.data as PagedResult<RentOrderDetailResponse>);
+        console.log("State pickups đã được cập nhật:", response.data);
+      } else {
+        console.error("Định dạng dữ liệu không hợp lệ:", response);
+        setError("Định dạng dữ liệu không hợp lệ");
+      }
+
+      return response;
     } catch (err) {
+      console.error("Lỗi khi tải dữ liệu:", err);
       const errorMessage =
         err instanceof Error
           ? err.message
           : "An error occurred while fetching pickups";
       setError(errorMessage);
-      throw err; // Rethrow to allow catching in the calling function
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -109,19 +128,28 @@ const UnassignedPickups: React.FC = () => {
   };
 
   const handleAssignSuccess = async () => {
+    console.log("handleAssignSuccess được gọi");
     try {
-      // First close the dialog and reset the selected pickup
+      // Đóng dialog và reset pickup đã chọn
       setAssignDialogOpen(false);
       setSelectedPickup(null);
 
-      // Then fetch the updated data
-      await fetchPickups();
+      // Hiển thị trạng thái đang tải
+      setLoading(true);
+
+      console.log("Bắt đầu tải lại dữ liệu...");
+      // Sau đó tải lại dữ liệu
+      const result = await fetchPickups();
+      console.log("Dữ liệu đã được tải lại:", result);
     } catch (error) {
+      console.error("Lỗi khi tải lại dữ liệu:", error);
       setError(
         error instanceof Error
           ? error.message
-          : "An error occurred while refreshing pickup data"
+          : "Đã xảy ra lỗi khi làm mới dữ liệu"
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -251,6 +279,10 @@ const UnassignedPickups: React.FC = () => {
                   page={page}
                   onPageChange={handleChangePage}
                   onRowsPerPageChange={handleChangeRowsPerPage}
+                  labelRowsPerPage="Số dòng mỗi trang:"
+                  labelDisplayedRows={({ from, to, count }) =>
+                    `${from}-${to} của ${count !== -1 ? count : `hơn ${to}`}`
+                  }
                   sx={{
                     borderRadius: 2,
                     "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
@@ -270,6 +302,18 @@ const UnassignedPickups: React.FC = () => {
             pickup={selectedPickup}
             onSuccess={handleAssignSuccess}
           />
+        )}
+        {successMessage && (
+          <Snackbar
+            open={Boolean(successMessage)}
+            autoHideDuration={5000}
+            onClose={() => setSuccessMessage(null)}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <Alert onClose={() => setSuccessMessage(null)} severity="success">
+              {successMessage}
+            </Alert>
+          </Snackbar>
         )}
       </Box>
     </StyledContainer>

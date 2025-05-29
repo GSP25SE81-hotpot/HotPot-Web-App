@@ -1,10 +1,11 @@
 import React from "react";
-import { Dialog, DialogActions, DialogContent } from "@mui/material";
+import { DialogContent, DialogActions } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { PaymentListItemDto } from "../../../types/staffPayment";
 import PaymentStatusChip from "./PaymentStatusChip";
 import { formatCurrency, formatDate } from "../../../utils/formatters";
 import {
+  StyledDialog,
   StyledDialogTitle,
   InfoSection,
   SectionTitle,
@@ -13,7 +14,7 @@ import {
   InfoValue,
   ActionButton,
   StyledDivider,
-} from "../../../components/staff/styles/paymentDetailDialogStyles";
+} from "./PaymentStyle";
 
 // Translation functions for payment and order status
 const translatePaymentStatus = (status: string): string => {
@@ -30,6 +31,7 @@ const translatePaymentStatus = (status: string): string => {
       return status;
   }
 };
+
 const translatePaymentType = (type: string): string => {
   switch (type) {
     case "Cash":
@@ -87,10 +89,10 @@ const PaymentDetailDialog: React.FC<PaymentDetailDialogProps> = ({
   const translatedOrderStatus = payment.orderStatus
     ? translateOrderStatus(payment.orderStatus)
     : "N/A";
-
   payment.paymentType = translatePaymentType(payment.paymentType);
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <StyledDialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <StyledDialogTitle>
         Chi tiết thanh toán
         <PaymentStatusChip
@@ -110,13 +112,7 @@ const PaymentDetailDialog: React.FC<PaymentDetailDialogProps> = ({
             </InfoItem>
             <InfoItem>
               <InfoLabel>Loại thanh toán</InfoLabel>
-              <InfoValue>
-                {
-                  (payment.paymentType = translatePaymentType(
-                    payment.paymentType
-                  ))
-                }
-              </InfoValue>
+              <InfoValue>{payment.paymentType}</InfoValue>
             </InfoItem>
             <InfoItem>
               <InfoLabel>Số tiền</InfoLabel>
@@ -170,7 +166,7 @@ const PaymentDetailDialog: React.FC<PaymentDetailDialogProps> = ({
         )}
         <ActionButton onClick={onClose}>Đóng</ActionButton>
       </DialogActions>
-    </Dialog>
+    </StyledDialog>
   );
 };
 

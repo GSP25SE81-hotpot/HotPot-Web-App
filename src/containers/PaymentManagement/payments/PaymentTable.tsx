@@ -27,7 +27,13 @@ import {
   PageSizeSelector,
   PageSizeLabel,
   PageSizeControl,
-} from "../../../components/staff/styles/paymentTableStyles";
+  IdCell,
+  TransactionCodeCell,
+  CustomerNameCell,
+  AmountCell,
+  OrderCodeCell,
+  DateCell,
+} from "./PaymentStyle";
 
 // Status translation function
 const translatePaymentStatus = (status: string): string => {
@@ -68,6 +74,7 @@ const PaymentTable: React.FC<PaymentTableProps> = ({
   onPageSizeChange,
   onRowClick,
   onGenerateReceipt,
+  onViewOrderPayments,
 }) => {
   return (
     <TableWrapper>
@@ -103,26 +110,29 @@ const PaymentTable: React.FC<PaymentTableProps> = ({
                   hover
                   onClick={() => onRowClick(payment)}
                 >
-                  <TableCell>{payment.paymentId}</TableCell>
-                  <TableCell>{payment.transactionCode}</TableCell>
-                  <TableCell>{payment.customerName}</TableCell>
-                  <TableCell align="right">
+                  <IdCell>{payment.paymentId}</IdCell>
+                  <TransactionCodeCell>
+                    {payment.transactionCode}
+                  </TransactionCodeCell>
+                  <CustomerNameCell>{payment.customerName}</CustomerNameCell>
+                  <AmountCell align="right">
                     {formatCurrency(payment.price)}
-                  </TableCell>
+                  </AmountCell>
                   <TableCell>
                     <PaymentStatusChip
                       status={payment.status}
                       translatedLabel={translatePaymentStatus(payment.status)}
                     />
                   </TableCell>
-                  <TableCell>{payment.orderCode || "N/A"}</TableCell>
-                  <TableCell>{formatDate(payment.createdAt)}</TableCell>
+                  <OrderCodeCell>{payment.orderCode || "N/A"}</OrderCodeCell>
+                  <DateCell>{formatDate(payment.createdAt)}</DateCell>
                   <TableCell align="center">
                     <PaymentActions
                       status={payment.status}
                       paymentId={payment.paymentId}
                       orderId={payment.orderId}
                       onGenerateReceipt={onGenerateReceipt}
+                      onViewOrderPayments={onViewOrderPayments}
                     />
                   </TableCell>
                 </ClickableRow>
@@ -131,7 +141,7 @@ const PaymentTable: React.FC<PaymentTableProps> = ({
           </TableBody>
         </Table>
       </StyledTableContainer>
-      {/* Phân trang */}
+      {/* Pagination */}
       <PaginationContainer>
         <PaginationInfo variant="body2">
           Hiển thị {payments.length > 0 ? (page - 1) * pageSize + 1 : 0} -{" "}

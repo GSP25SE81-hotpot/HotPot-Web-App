@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/pages/Staff/RecordReturn/RecordReturn.tsx
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
@@ -127,11 +126,13 @@ const RecordReturn: React.FC = () => {
 
       // Call the API
       const response = await execute(returnRequest);
+      console.log("API response:", response);
 
       if (response && response.success) {
+        // Luôn sử dụng thông báo tiếng Việt
         setSnackbar({
           open: true,
-          message: response.message || "Đã ghi nhận trả thành công",
+          message: "Đã ghi nhận trả thiết bị thành công",
           severity: "success",
         });
 
@@ -142,14 +143,30 @@ const RecordReturn: React.FC = () => {
       } else {
         setSnackbar({
           open: true,
-          message: response?.message || "Không thể ghi nhận trả",
+          message: "Không thể ghi nhận trả thiết bị. Vui lòng thử lại.",
           severity: "error",
         });
       }
     } catch (err) {
+      console.error("Error:", err);
+
+      // Xử lý thông báo lỗi cụ thể
+      let errorMessage = "Không thể ghi nhận trả thiết bị. Vui lòng thử lại.";
+
+      if (error) {
+        // Kiểm tra các lỗi phổ biến và dịch sang tiếng Việt
+        if (error.includes("network")) {
+          errorMessage = "Lỗi kết nối mạng. Vui lòng kiểm tra kết nối của bạn.";
+        } else if (error.includes("timeout")) {
+          errorMessage = "Yêu cầu đã hết thời gian. Vui lòng thử lại.";
+        } else if (error.includes("not found")) {
+          errorMessage = "Không tìm thấy thiết bị hoặc đơn hàng.";
+        }
+      }
+
       setSnackbar({
         open: true,
-        message: error || "Không thể ghi nhận trả",
+        message: errorMessage,
         severity: "error",
       });
     }
