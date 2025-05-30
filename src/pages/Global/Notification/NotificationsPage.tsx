@@ -323,6 +323,9 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
       case "HotPotDamage":
         navigate("/equipment-condition-log");
         break;
+      case "ReturnOrder":
+        navigate("/unassigned-pickups");
+        break;
       default:
         console.log(
           "No specific action for notification type:",

@@ -243,26 +243,26 @@ export const LoadingWrapper = styled(Box)({
 });
 
 // Staff item styling for the dropdown
-export const StaffMenuItem = styled(MenuItem)<{ isAvailable?: boolean }>(
-  ({ theme, isAvailable }) => ({
-    display: "flex",
-    alignItems: "center",
-    padding: theme.spacing(1.5, 2),
-    "& .staff-status": {
-      marginLeft: theme.spacing(1),
-      fontSize: "0.75rem",
-      fontWeight: 500,
-      padding: theme.spacing(0.25, 1),
-      borderRadius: 12,
-      backgroundColor: isAvailable
-        ? alpha(theme.palette.success.main, 0.1)
-        : alpha(theme.palette.warning.main, 0.1),
-      color: isAvailable
-        ? theme.palette.success.main
-        : theme.palette.warning.main,
-    },
-  })
-);
+export const StaffMenuItem = styled(MenuItem, {
+  shouldForwardProp: (prop) => prop !== "isAvailable",
+})<{ isAvailable?: boolean }>(({ theme, isAvailable }) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: theme.spacing(1.5, 2),
+  "& .staff-status": {
+    marginLeft: theme.spacing(1),
+    fontSize: "0.75rem",
+    fontWeight: 500,
+    padding: theme.spacing(0.25, 1),
+    borderRadius: 12,
+    backgroundColor: isAvailable
+      ? alpha(theme.palette.success.main, 0.1)
+      : alpha(theme.palette.warning.main, 0.1),
+    color: isAvailable
+      ? theme.palette.success.main
+      : theme.palette.warning.main,
+  },
+}));
 
 // Vehicle item styling for the dropdown
 export const VehicleMenuItem = styled(MenuItem)(({ theme }) => ({

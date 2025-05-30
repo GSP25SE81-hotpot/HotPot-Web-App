@@ -158,21 +158,20 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
         notes: notes.trim(),
       };
 
-      // Thêm ID phương tiện nếu được chọn
       if (selectedVehicleId !== "") {
         request.vehicleId = selectedVehicleId as number;
       }
 
-      // Đợi API call hoàn thành
-      const response = await allocateStaffForPickup(request);
-      console.log("Phân công thành công:", response);
-
-      // Gọi onSuccess chỉ sau khi API call thành công
-      onSuccess();
+      await allocateStaffForPickup(request);
+      onSuccess(); // Just call onSuccess - let parent handle the rest
+      onClose(); // Close the dialog
     } catch (err) {
-      console.error("Lỗi khi phân công:", err);
+      console.error("Assignment error:", err);
+      // Improved error message extraction
       setError(
-        err instanceof Error ? err.message : "Không thể phân công nhân viên"
+        err instanceof Error
+          ? err.message
+          : "Không thể phân công nhân viên. Vui lòng thử lại sau."
       );
     } finally {
       setLoading(false);
@@ -313,9 +312,21 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
           onClick={handleSubmit}
           variant="contained"
           color="primary"
-          disabled={loading || selectedStaffId === "" || !selectedDetailId}
+          disabled={
+            loading ||
+            selectedStaffId === "" ||
+            !selectedDetailId ||
+            !notes.trim()
+          }
         >
-          {loading ? <CircularProgress size={24} /> : "Phân công nhân viên"}
+          {loading ? (
+            <>
+              <CircularProgress size={20} sx={{ mr: 1 }} />
+              Đang xử lý...
+            </>
+          ) : (
+            "Phân công nhân viên"
+          )}
         </SubmitButton>
       </StyledDialogActions>
     </StyledDialog>

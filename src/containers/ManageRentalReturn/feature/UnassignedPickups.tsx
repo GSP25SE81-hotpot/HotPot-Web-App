@@ -1,19 +1,18 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from "react";
 import {
+  Alert,
   Box,
+  Chip,
+  CircularProgress,
+  Stack,
   Table,
   TableBody,
   TableHead,
-  TableRow,
   TablePagination,
-  CircularProgress,
-  Alert,
+  TableRow,
   Tooltip,
-  Chip,
-  Stack,
-  Snackbar,
 } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import { getUnassignedPickups } from "../../../api/Services/rentalService";
 import {
   PagedResult,
@@ -27,17 +26,17 @@ import {
 } from "../../../components/StyledComponents";
 // Import unassigned pickups specific styled components
 import {
-  PageTitle,
-  StyledTableContainer,
-  HeaderTableCell,
+  AssignButton,
   BodyTableCell,
-  StyledTableRow,
   CustomerName,
   CustomerPhone,
-  StatusChip,
-  AssignButton,
   EmptyMessage,
+  HeaderTableCell,
   LoadingContainer,
+  PageTitle,
+  StatusChip,
+  StyledTableContainer,
+  StyledTableRow,
 } from "../../../components/manager/styles/UnassignedPickupsStyles";
 import { formatDate } from "../../../utils/formatters";
 
@@ -69,39 +68,18 @@ const UnassignedPickups: React.FC = () => {
   const [selectedPickup, setSelectedPickup] =
     useState<RentOrderDetailResponse | null>(null);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // Add this refresh trigger
 
   const fetchPickups = async () => {
-    console.log(
-      "fetchPickups được gọi với page =",
-      page,
-      "rowsPerPage =",
-      rowsPerPage
-    );
     setLoading(true);
     setError(null);
 
     try {
       const response = await getUnassignedPickups(page + 1, rowsPerPage);
-      console.log("Dữ liệu nhận được từ API:", response);
-
-      if (response && response.data) {
-        setPickups(response.data as PagedResult<RentOrderDetailResponse>);
-        console.log("State pickups đã được cập nhật:", response.data);
-      } else {
-        console.error("Định dạng dữ liệu không hợp lệ:", response);
-        setError("Định dạng dữ liệu không hợp lệ");
-      }
-
-      return response;
+      setPickups(response.data as PagedResult<RentOrderDetailResponse>);
     } catch (err) {
-      console.error("Lỗi khi tải dữ liệu:", err);
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "An error occurred while fetching pickups";
-      setError(errorMessage);
-      throw err;
+      console.error("Error fetching pickups:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch pickups");
     } finally {
       setLoading(false);
     }
@@ -109,7 +87,7 @@ const UnassignedPickups: React.FC = () => {
 
   useEffect(() => {
     fetchPickups();
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, refreshTrigger]); // Add refreshTrigger to dependencies
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -127,30 +105,10 @@ const UnassignedPickups: React.FC = () => {
     setAssignDialogOpen(true);
   };
 
-  const handleAssignSuccess = async () => {
-    console.log("handleAssignSuccess được gọi");
-    try {
-      // Đóng dialog và reset pickup đã chọn
-      setAssignDialogOpen(false);
-      setSelectedPickup(null);
-
-      // Hiển thị trạng thái đang tải
-      setLoading(true);
-
-      console.log("Bắt đầu tải lại dữ liệu...");
-      // Sau đó tải lại dữ liệu
-      const result = await fetchPickups();
-      console.log("Dữ liệu đã được tải lại:", result);
-    } catch (error) {
-      console.error("Lỗi khi tải lại dữ liệu:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Đã xảy ra lỗi khi làm mới dữ liệu"
-      );
-    } finally {
-      setLoading(false);
-    }
+  const handleAssignSuccess = () => {
+    setAssignDialogOpen(false);
+    setSelectedPickup(null);
+    setRefreshTrigger((prev) => prev + 1); // This will trigger a refetch
   };
 
   return (
@@ -302,18 +260,6 @@ const UnassignedPickups: React.FC = () => {
             pickup={selectedPickup}
             onSuccess={handleAssignSuccess}
           />
-        )}
-        {successMessage && (
-          <Snackbar
-            open={Boolean(successMessage)}
-            autoHideDuration={5000}
-            onClose={() => setSuccessMessage(null)}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          >
-            <Alert onClose={() => setSuccessMessage(null)} severity="success">
-              {successMessage}
-            </Alert>
-          </Snackbar>
         )}
       </Box>
     </StyledContainer>

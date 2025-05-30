@@ -2,6 +2,7 @@
 import {
   Box,
   FormControlLabel,
+  LabelDisplayedRowsArgs,
   Switch,
   TableBody,
   TableCell,
@@ -204,9 +205,11 @@ const MyAssignments: React.FC = () => {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 labelRowsPerPage="Số hàng mỗi trang:"
-                labelDisplayedRows={({ from, to, count }) =>
-                  `${from}-${to} của ${count}`
-                }
+                labelDisplayedRows={({
+                  from,
+                  to,
+                  count,
+                }: LabelDisplayedRowsArgs) => `${from}-${to} của ${count}`}
               />
             </>
           )}

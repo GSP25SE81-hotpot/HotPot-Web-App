@@ -19,6 +19,7 @@ import {
   TableContainer,
   TablePagination,
   Stack,
+  TablePaginationProps,
 } from "@mui/material";
 import { ReplacementRequestStatus } from "../types/replacement";
 import { alpha, styled } from "@mui/material/styles";
@@ -368,25 +369,39 @@ export const OverdueChip = styled(Chip)<{
   };
 });
 
-export const StyledTablePagination = styled(TablePagination)(({ theme }) => ({
-  ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
-    margin: 0,
-  },
-  ".MuiTablePagination-select": {
-    paddingTop: 8,
-    paddingBottom: 8,
-  },
-  ".MuiTablePagination-actions": {
-    "& .MuiIconButton-root": {
-      padding: 8,
-      borderRadius: 8,
-      transition: "all 0.2s",
-      "&:hover": {
-        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+export interface LabelDisplayedRowsArgs {
+  from: number;
+  to: number;
+  count: number;
+  page: number;
+}
+
+const BaseTablePagination = (props: TablePaginationProps) => (
+  <TablePagination component="div" {...props} />
+);
+
+// Style the base component
+export const StyledTablePagination = styled(BaseTablePagination)(
+  ({ theme }) => ({
+    ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
+      margin: 0,
+    },
+    ".MuiTablePagination-select": {
+      paddingTop: 8,
+      paddingBottom: 8,
+    },
+    ".MuiTablePagination-actions": {
+      "& .MuiIconButton-root": {
+        padding: 8,
+        borderRadius: 8,
+        transition: "all 0.2s",
+        "&:hover": {
+          backgroundColor: alpha(theme.palette.primary.main, 0.1),
+        },
       },
     },
-  },
-}));
+  })
+);
 
 export const EquipmentCell = styled(Box)(() => ({
   display: "flex",
