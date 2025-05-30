@@ -14,11 +14,11 @@ class NotificationService {
   ): Promise<PaginatedNotificationsResponse> {
     try {
       const { includeRead = false, page = 1, pageSize = 20 } = params;
-      console.log("Requesting notifications with params:", {
-        includeRead,
-        page,
-        pageSize,
-      });
+      // console.log("Requesting notifications with params:", {
+      //   includeRead,
+      //   page,
+      //   pageSize,
+      // });
       const config = {
         params: { includeRead, page, pageSize },
         timeout: 10000,
@@ -26,14 +26,14 @@ class NotificationService {
           Accept: "application/json",
         },
       };
-      console.log("Making request to:", "/notifications", config);
+      // console.log("Making request to:", "/notifications", config);
 
       const apiData = await axiosClient.get<
         any,
         PaginatedNotificationsResponse,
         any
       >("/notifications", config);
-      console.log("API data received for notifications:", apiData);
+      // console.log("API data received for notifications:", apiData);
 
       return apiData;
     } catch (error) {

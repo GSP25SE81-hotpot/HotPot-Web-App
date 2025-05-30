@@ -1,45 +1,30 @@
-// import React from "react";
-// import { Navigate, Outlet, useLocation } from "react-router-dom";
-// import { useAuthContext } from "../context/AuthContext";
-// import config from "../configs";
-// import { Role } from "./Roles";
-// import LoadingScreen from "../components/LoadingScreen";
+import { useLocation, Navigate, Outlet } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
-// const CheckRoute: React.FC = () => {
-//   const { role, isLoading } = useAuthContext();
-//   const location = useLocation();
-//   let redirectTo: string | null = config.routes.home;
+const CheckRoute = () => {
+  const { auth } = useAuth();
+  console.log("CheckRoute auth:", auth);
+  const location = useLocation();
 
-//   if (isLoading) {
-//     return (
-//       <div>
-//         <LoadingScreen />
-//       </div>
-//     );
-//   }
+  // Check routing condition
+  const routing = () => {
+    switch (auth?.user?.role) {
+      case "Admin":
+        return <Navigate to="/dashboard" state={{ from: location }} replace />;
+      case "Staff":
+        return (
+          <Navigate to="/assign-order" state={{ from: location }} replace />
+        );
+      case "Manager":
+        return (
+          <Navigate to="/manage-order" state={{ from: location }} replace />
+        );
+      default:
+        break;
+    }
+  };
 
-//   if (role) {
-//     switch (role) {
-//       case Role.User:
-//         redirectTo = config.routes.home;
-//         break;
-//       case Role.Admin:
-//       case Role.Manager:
-//         redirectTo = config.adminRoutes.dashboard;
-//         break;
-//       case Role.Sale:
-//         redirectTo = config.adminRoutes.user;
-//         break;
-//       default:
-//         break;
-//     }
-//   }
+  return auth?.accessToken ? routing() : <Outlet />;
+};
 
-//   if (location.pathname === redirectTo) {
-//     return <Outlet />;
-//   } else {
-//     return <Navigate to={redirectTo} state={{ from: location }} replace />;
-//   }
-// };
-
-// export default CheckRoute;
+export default CheckRoute;

@@ -86,9 +86,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   useEffect(() => {
     // Wait for both accessToken and userId to be available
     if (!auth?.accessToken || !auth?.user?.id) {
-      console.log(
-        "User not authenticated or userId missing, not connecting to SignalR"
-      );
+      // console.log(
+      //   "User not authenticated or userId missing, not connecting to SignalR"
+      // );
       return;
     }
 
@@ -140,7 +140,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         // Only start if the connection is disconnected
         if (connection.state === signalR.HubConnectionState.Disconnected) {
           await connection.start();
-          console.log("SignalR Connected");
+          // console.log("SignalR Connected");
           setConnectionState("connected");
           if (auth?.user?.id) {
             await connection.invoke("RegisterConnection");
@@ -149,10 +149,10 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
             throw new Error("User ID not available for SignalR connection");
           }
         } else {
-          console.log(
-            "SignalR connection is not in 'Disconnected' state, current state:",
-            connection.state
-          );
+          // console.log(
+          //   "SignalR connection is not in 'Disconnected' state, current state:",
+          //   connection.state
+          // );
         }
       } catch (err) {
         const errorMessage =

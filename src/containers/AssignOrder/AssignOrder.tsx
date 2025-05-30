@@ -68,6 +68,15 @@ const AssignOrder: React.FC = () => {
     "Trạng thái",
     "Thao tác",
   ];
+  // Format status
+  const formatStatus = (status: string) => {
+    switch (status) {
+      case "Processing":
+        return "Đang xử lý";
+      default:
+        return status;
+    }
+  };
 
   // API call
   const getAssignOrderByStaffId = async () => {
@@ -153,7 +162,7 @@ const AssignOrder: React.FC = () => {
                       />
                     </NotesCell>
                     <StatusCell>
-                      <StatusChip status={order.status} />
+                      <StatusChip status={formatStatus(order.status)} />
                     </StatusCell>
                     <ActionsCell>
                       <ActionButton

@@ -59,15 +59,19 @@ import TableBatchPage from "../pages/Admin/TableBatch/TableBatchPage";
 import TableBatchDetailPage from "../pages/Admin/TableBatchDetail/TableBatchDetailPage";
 import UpdateComboPage from "../pages/Admin/UpdateCombo/UpdateComboPage";
 import UpdateComboCustomPage from "../pages/Admin/UpdateCombo/UpdateComboCustomPage";
+import CheckRoute from "./CheckRoute";
 
 const AppRoute: React.FC = () => {
   return (
     <Routes>
-      <Route
-        key={"Login"}
-        path={config.managerRoutes.home}
-        element={<AuthenticatePage />}
-      />
+      <Route element={<CheckRoute />}>
+        <Route
+          key={"Login"}
+          path={config.managerRoutes.home}
+          element={<AuthenticatePage />}
+        />
+      </Route>
+
       <Route
         key={"Notification"}
         path={config.authRoutes.notification}

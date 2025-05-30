@@ -22,13 +22,13 @@ import {
   Select,
   SelectChangeEvent,
   Snackbar,
-  TextField,
-  Typography,
   Table,
+  TableBody,
+  TableCell,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
+  TextField,
+  Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
@@ -44,10 +44,8 @@ import {
   ActionButtonsContainer,
   BackButton,
   CustomerName,
-  DeliveryChip,
   DetailCard,
   DetailPageContainer,
-  EmptyStateContainer,
   EmptyStateText,
   ErrorContainer,
   HeaderContainer,
@@ -73,8 +71,8 @@ import {
   DeliveryTimeUpdateRequest,
   OrderDetailDTO,
   OrderStatus,
-  VehicleType,
   StaffTaskType,
+  VehicleType,
 } from "../../types/orderManagement";
 import { StaffAvailabilityDto } from "../../types/staff";
 import { VehicleDTO } from "../../types/vehicle";
@@ -508,231 +506,412 @@ const OrderDetailView: React.FC = () => {
             </ActionButtonsContainer>
           </HeaderPaper>
         </Grid>
-        {/* Customer Information */}
-        <Grid size={{ xs: 12, md: 6 }}>
-          <DetailCard>
-            <StyledCardHeader title="Thông tin khách hàng" />
-            <Divider />
-            <StyledCardContent>
-              <SectionTitle>Tên khách hàng</SectionTitle>
-              <CustomerName>
-                {order.userName || "Khách hàng không xác định"}
-              </CustomerName>
-              <SectionTitle>Số Điện thoại</SectionTitle>
-              <SectionValue>0{order.userPhone}</SectionValue>
-              <SectionTitle>Địa chỉ giao hàng</SectionTitle>
-              <SectionValue>{order.address || "Không có địa chỉ"}</SectionValue>
-              {order.notes && (
-                <>
-                  <SectionTitle>Ghi chú đơn hàng</SectionTitle>
-                  <SectionValue>{order.notes}</SectionValue>
-                </>
-              )}
-            </StyledCardContent>
-          </DetailCard>
-        </Grid>
-        {/* Shipping Information */}
-        <Grid size={{ xs: 12, md: 6 }}>
-          <DetailCard>
-            <StyledCardHeader title="Thông tin giao hàng" />
-            <Divider />
-            <StyledCardContent>
-              {order.shippingInfo ? (
-                <>
-                  <SectionTitle>Nhân viên phụ trách</SectionTitle>
-                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                    {order.shippingInfo.staffName || "Nhân viên không xác định"}
-                  </Typography>
-                  {/* Vehicle Information - New Section */}
-                  {order.vehicleInfo && (
-                    <>
-                      <SectionTitle>Phương tiện giao hàng</SectionTitle>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          mb: 2,
-                          gap: 1,
-                        }}
-                      >
-                        {getVehicleIcon(order.vehicleInfo.vehicleType)}
-                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                          {order.vehicleInfo.vehicleName} -{" "}
-                          {order.vehicleInfo.licensePlate}
-                        </Typography>
-                        <Chip
-                          label={getVehicleTypeName(
-                            order.vehicleInfo.vehicleType
-                          )}
-                          size="small"
-                          color={
-                            order.vehicleInfo.vehicleType === VehicleType.Car
-                              ? "primary"
-                              : "secondary"
-                          }
-                          sx={{ ml: 1, fontWeight: 500 }}
-                        />
-                      </Box>
-                    </>
-                  )}
-                  <SectionTitle>Trạng thái giao hàng</SectionTitle>
-                  <DeliveryChip
-                    label={
-                      order.shippingInfo.isDelivered
-                        ? "Đã giao"
-                        : "Đang chờ giao"
-                    }
-                    delivered={order.shippingInfo.isDelivered}
-                  />
-                  <SectionTitle>Thời gian giao hàng dự kiến</SectionTitle>
-                  <SectionValue>
-                    {order.shippingInfo.deliveryTime
-                      ? formatDetailDate(order.shippingInfo.deliveryTime)
-                      : "Chưa lên lịch"}
-                  </SectionValue>
-                  {order.shippingInfo.deliveryNotes && (
-                    <>
-                      <SectionTitle>Ghi chú giao hàng</SectionTitle>
-                      <SectionValue>
-                        {order.shippingInfo.deliveryNotes}
-                      </SectionValue>
-                    </>
-                  )}
-                  <ActionButtonsContainer>
-                    <ActionButton
-                      variant="outlined"
-                      size="small"
-                      onClick={handleOpenDeliveryStatusDialog}
-                    >
-                      Cập nhật trạng thái
-                    </ActionButton>
-                    <ActionButton
-                      variant="outlined"
-                      size="small"
-                      onClick={handleOpenDeliveryTimeDialog}
-                    >
-                      Đặt thời gian
-                    </ActionButton>
-                  </ActionButtonsContainer>
-                </>
-              ) : (
-                <EmptyStateContainer>
-                  <EmptyStateText>
-                    Đơn hàng này chưa được phân công cho nhân viên nào.
-                  </EmptyStateText>
-                </EmptyStateContainer>
-              )}
-            </StyledCardContent>
-          </DetailCard>
-        </Grid>
-        {/* Order Items */}
+
+        {/* Combined Order Details and Customer Information - Side by Side */}
         <Grid size={{ xs: 12 }}>
           <DetailCard>
-            <StyledCardHeader title="Chi tiết đơn hàng" />
+            <StyledCardHeader title="Thông tin đơn hàng" />
             <Divider />
             <StyledCardContent>
-              <OrderItemsContainer>
-                {/* Display order items */}
-                {order.orderItems.length > 0 ? (
+              <Grid container spacing={3}>
+                {/* Order Items - Left Side */}
+                <Grid size={{ xs: 12, md: 7 }}>
+                  <SectionTitle>Chi tiết đơn hàng</SectionTitle>
+                  <OrderItemsContainer>
+                    {/* Display order items */}
+                    {order.orderItems.length > 0 ? (
+                      <Box sx={{ mb: 3 }}>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell sx={{ fontWeight: 600 }}>
+                                Sản phẩm
+                              </TableCell>
+                              <TableCell sx={{ fontWeight: 600 }}>
+                                Loại
+                              </TableCell>
+                              <TableCell sx={{ fontWeight: 600 }}>
+                                Số lượng
+                              </TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {order.orderItems.map((item) => (
+                              <TableRow key={item.orderDetailId}>
+                                <TableCell>{item.itemName}</TableCell>
+                                <TableCell>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1,
+                                    }}
+                                  >
+                                    <Chip
+                                      label={
+                                        getItemTypeDisplay(item.itemType).label
+                                      }
+                                      color={
+                                        getItemTypeDisplay(item.itemType)
+                                          .color as any
+                                      }
+                                      size="small"
+                                    />
+                                  </Box>
+                                </TableCell>
+                                <TableCell>{item.quantity}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </Box>
+                    ) : (
+                      <Typography
+                        variant="body1"
+                        sx={{ fontStyle: "italic", color: "text.secondary" }}
+                      >
+                        Không có mặt hàng nào trong đơn hàng này.
+                      </Typography>
+                    )}
+                    {/* Display rental information if available */}
+                    {order.hasRentItems && order.rentalInfo && (
+                      <Box
+                        sx={{
+                          mt: 3,
+                          p: 2,
+                          bgcolor: (theme) =>
+                            alpha(theme.palette.secondary.light, 0.1),
+                          borderRadius: 2,
+                        }}
+                      >
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: 600, mb: 1 }}
+                        >
+                          Thông tin thuê
+                        </Typography>
+                        <Grid container spacing={2}>
+                          <Grid size={{ xs: 12, sm: 7 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              Ngày bắt đầu thuê
+                            </Typography>
+                            <Typography
+                              variant="body1"
+                              sx={{ fontWeight: 500 }}
+                            >
+                              {formatDate(order.rentalInfo.rentalStartDate)}
+                            </Typography>
+                          </Grid>
+                          <Grid size={{ xs: 12, sm: 7 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              Ngày dự kiến trả
+                            </Typography>
+                            <Typography
+                              variant="body1"
+                              sx={{ fontWeight: 500 }}
+                            >
+                              {formatDate(order.rentalInfo.expectedReturnDate)}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    )}
+                    {/* Order Summary */}
+                    <OrderTotalContainer>
+                      <OrderTotal>
+                        Tổng cộng: {formatCurrency(order.totalPrice)}
+                      </OrderTotal>
+                    </OrderTotalContainer>
+                  </OrderItemsContainer>
+                </Grid>
+
+                {/* Vertical Divider between sections */}
+                <Grid
+                  size={{ xs: 12, md: "auto" }}
+                  sx={{ display: { xs: "none", md: "block" } }}
+                >
+                  <Divider orientation="vertical" sx={{ height: "100%" }} />
+                </Grid>
+                <Grid
+                  size={{ xs: 12, md: "auto" }}
+                  sx={{ display: { xs: "block", md: "none" } }}
+                >
+                  <Divider sx={{ my: 3 }} />
+                </Grid>
+
+                {/* Customer Information - Right Side */}
+                <Grid size={{ xs: 12, md: 4 }}>
+                  {/* <SectionTitle>Thông tin khách hàng</SectionTitle> */}
                   <Box sx={{ mb: 3 }}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell sx={{ fontWeight: 600 }}>
-                            Sản phẩm
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: 600 }}>Loại</TableCell>
-                          <TableCell sx={{ fontWeight: 600 }}>
-                            Số lượng
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {order.orderItems.map((item) => (
-                          <TableRow key={item.orderDetailId}>
-                            <TableCell>{item.itemName}</TableCell>
-                            <TableCell>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1,
-                                }}
+                    <SectionTitle>Tên khách hàng</SectionTitle>
+                    <CustomerName>
+                      {order.userName || "Khách hàng không xác định"}
+                    </CustomerName>
+                    <SectionTitle>Số Điện thoại</SectionTitle>
+                    <SectionValue>0{order.userPhone}</SectionValue>
+                    <SectionTitle>Địa chỉ giao hàng</SectionTitle>
+                    <SectionValue>
+                      {order.address || "Không có địa chỉ"}
+                    </SectionValue>
+                    {order.notes && (
+                      <>
+                        <SectionTitle>Ghi chú đơn hàng</SectionTitle>
+                        <SectionValue>{order.notes}</SectionValue>
+                      </>
+                    )}
+                  </Box>
+                </Grid>
+              </Grid>
+            </StyledCardContent>
+          </DetailCard>
+        </Grid>
+
+        {/* Combined Preparation and Shipping Information - Side by Side */}
+        <Grid size={{ xs: 12 }}>
+          <DetailCard>
+            <StyledCardHeader title="Thông tin xử lý đơn hàng" />
+            <Divider />
+            <StyledCardContent>
+              <Grid container spacing={3}>
+                {/* Preparation Staff Information - Left Side */}
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <SectionTitle>Nhân viên chuẩn bị</SectionTitle>
+                  {order.preparationAssignments &&
+                  order.preparationAssignments.length > 0 ? (
+                    <>
+                      {order.preparationAssignments.map((assignment, index) => (
+                        <Box
+                          key={assignment.assignmentId}
+                          sx={{
+                            mb:
+                              index < order.preparationAssignments!.length - 1
+                                ? 2
+                                : 0,
+                          }}
+                        >
+                          <Typography
+                            variant="h6"
+                            sx={{ mb: 1, fontWeight: 600 }}
+                          >
+                            {assignment.staffName || "Nhân viên không xác định"}
+                          </Typography>
+
+                          {/* Side by side time information */}
+                          <Grid container spacing={2} sx={{ mb: 1 }}>
+                            <Grid size={{ xs: 6 }}>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
                               >
-                                <Chip
-                                  label={
-                                    getItemTypeDisplay(item.itemType).label
-                                  }
-                                  color={
-                                    getItemTypeDisplay(item.itemType)
-                                      .color as any
-                                  }
-                                  size="small"
-                                />
-                              </Box>
-                            </TableCell>
-                            <TableCell>{item.quantity}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </Box>
-                ) : (
-                  <Typography
-                    variant="body1"
-                    sx={{ fontStyle: "italic", color: "text.secondary" }}
-                  >
-                    Không có mặt hàng nào trong đơn hàng này.
-                  </Typography>
-                )}
-                {/* Display rental information if available */}
-                {order.hasRentItems && order.rentalInfo && (
-                  <Box
-                    sx={{
-                      mt: 3,
-                      p: 2,
-                      bgcolor: (theme) =>
-                        alpha(theme.palette.secondary.light, 0.1),
-                      borderRadius: 2,
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ fontWeight: 600, mb: 1 }}
-                    >
-                      Thông tin thuê
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid size={{ xs: 12, sm: 6 }}>
-                        <Typography variant="body2" color="text.secondary">
-                          Ngày bắt đầu thuê
-                        </Typography>
-                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                          {formatDate(order.rentalInfo.rentalStartDate)}
-                        </Typography>
+                                Thời gian giao nhiệm vụ:
+                              </Typography>
+                              <Typography variant="body1" fontWeight={500}>
+                                {formatDetailDate(assignment.assignedDate)}
+                              </Typography>
+                            </Grid>
+                            <Grid size={{ xs: 6 }}>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                Thời gian hoàn thành:
+                              </Typography>
+                              <Typography
+                                variant="body1"
+                                fontWeight={500}
+                                color={
+                                  assignment.completedDate
+                                    ? "success.main"
+                                    : "text.primary"
+                                }
+                              >
+                                {assignment.completedDate
+                                  ? formatDetailDate(assignment.completedDate)
+                                  : "Chưa hoàn thành"}
+                              </Typography>
+                            </Grid>
+                          </Grid>
+
+                          {/* <StatusChip
+                            label={
+                              assignment.completedDate
+                                ? "Đã hoàn thành"
+                                : "Đang xử lý"
+                            }
+                            status={
+                              assignment.completedDate
+                                ? OrderStatus.Completed
+                                : OrderStatus.Processing
+                            }
+                            sx={{ mt: 1 }}
+                          /> */}
+                          {index < order.preparationAssignments!.length - 1 && (
+                            <Divider sx={{ my: 2 }} />
+                          )}
+                        </Box>
+                      ))}
+                    </>
+                  ) : (
+                    <EmptyStateText>
+                      Đơn hàng này chưa được phân công cho nhân viên chuẩn bị.
+                    </EmptyStateText>
+                  )}
+                </Grid>
+
+                {/* Vertical Divider between sections */}
+                <Grid
+                  size={{ xs: 12, md: "auto" }}
+                  sx={{ display: { xs: "none", md: "block" } }}
+                >
+                  <Divider orientation="vertical" sx={{ height: "100%" }} />
+                </Grid>
+                <Grid
+                  size={{ xs: 12, md: "auto" }}
+                  sx={{ display: { xs: "block", md: "none" } }}
+                >
+                  <Divider sx={{ my: 3 }} />
+                </Grid>
+
+                {/* Shipping Staff Information - Right Side */}
+                <Grid size={{ xs: 12, md: 5 }}>
+                  <SectionTitle>Nhân viên giao hàng</SectionTitle>
+                  {order.shippingInfo ? (
+                    <>
+                      <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                        {order.shippingInfo.staffName ||
+                          "Nhân viên không xác định"}
+                      </Typography>
+
+                      {/* Shipping Assignment Details - Side by side */}
+                      {order.shippingAssignment && (
+                        <Grid container spacing={2} sx={{ mb: 2 }}>
+                          <Grid size={{ xs: 6 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              Thời gian giao nhiệm vụ:
+                            </Typography>
+                            <Typography variant="body1" fontWeight={500}>
+                              {formatDetailDate(
+                                order.shippingAssignment.assignedDate
+                              )}
+                            </Typography>
+                          </Grid>
+                          <Grid size={{ xs: 6 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              Thời gian hoàn thành:
+                            </Typography>
+                            <Typography variant="body1" fontWeight={500}>
+                              {order.shippingAssignment.completedDate
+                                ? formatDetailDate(
+                                    order.shippingAssignment.completedDate
+                                  )
+                                : "Chưa hoàn thành"}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      )}
+
+                      {/* Vehicle Information */}
+                      {order.vehicleInfo && (
+                        <>
+                          <SectionTitle>Phương tiện giao hàng</SectionTitle>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              mb: 2,
+                              gap: 1,
+                            }}
+                          >
+                            {getVehicleIcon(order.vehicleInfo.vehicleType)}
+                            <Typography
+                              variant="body1"
+                              sx={{ fontWeight: 500 }}
+                            >
+                              {order.vehicleInfo.vehicleName} -{" "}
+                              {order.vehicleInfo.licensePlate}
+                            </Typography>
+                            <Chip
+                              label={getVehicleTypeName(
+                                order.vehicleInfo.vehicleType
+                              )}
+                              size="small"
+                              color={
+                                order.vehicleInfo.vehicleType ===
+                                VehicleType.Car
+                                  ? "primary"
+                                  : "secondary"
+                              }
+                              sx={{ ml: 1, fontWeight: 500 }}
+                            />
+                          </Box>
+                        </>
+                      )}
+
+                      {/* Delivery Status and Time - Side by side */}
+                      <Grid container spacing={2} sx={{ mb: 2 }}>
+                        {/* <Grid size={{ xs: 6 }}>
+                          <SectionTitle>Trạng thái giao hàng</SectionTitle>
+                          <DeliveryChip
+                            label={
+                              order.shippingInfo.isDelivered
+                                ? "Đã giao"
+                                : "Đang chờ giao"
+                            }
+                            delivered={order.shippingInfo.isDelivered}
+                          />
+                        </Grid> */}
+                        {/* <Grid size={{ xs: 6 }}>
+                          <SectionTitle>
+                            Thời gian giao hàng dự kiến
+                          </SectionTitle>
+                          <SectionValue>
+                            {order.shippingInfo.deliveryTime
+                              ? formatDetailDate(
+                                  order.shippingInfo.deliveryTime
+                                )
+                              : "Chưa lên lịch"}
+                          </SectionValue>
+                        </Grid> */}
                       </Grid>
-                      <Grid size={{ xs: 12, sm: 6 }}>
-                        <Typography variant="body2" color="text.secondary">
-                          Ngày dự kiến trả
-                        </Typography>
-                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                          {formatDate(order.rentalInfo.expectedReturnDate)}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                )}
-                {/* Order Summary */}
-                <OrderTotalContainer>
-                  <OrderTotal>
-                    Tổng cộng: {formatCurrency(order.totalPrice)}
-                  </OrderTotal>
-                </OrderTotalContainer>
-              </OrderItemsContainer>
+
+                      {order.shippingInfo.deliveryNotes && (
+                        <>
+                          <SectionTitle>Ghi chú giao hàng</SectionTitle>
+                          <SectionValue>
+                            {order.shippingInfo.deliveryNotes}
+                          </SectionValue>
+                        </>
+                      )}
+
+                      {/* <ActionButtonsContainer>
+                        <ActionButton
+                          variant="outlined"
+                          size="small"
+                          onClick={handleOpenDeliveryStatusDialog}
+                        >
+                          Cập nhật trạng thái
+                        </ActionButton>
+                        <ActionButton
+                          variant="outlined"
+                          size="small"
+                          onClick={handleOpenDeliveryTimeDialog}
+                        >
+                          Đặt thời gian
+                        </ActionButton>
+                      </ActionButtonsContainer> */}
+                    </>
+                  ) : (
+                    <EmptyStateText>
+                      Đơn hàng này chưa được phân công cho nhân viên giao hàng.
+                    </EmptyStateText>
+                  )}
+                </Grid>
+              </Grid>
             </StyledCardContent>
           </DetailCard>
         </Grid>
       </Grid>
+
       {/* Update Status Dialog */}
       <Dialog
         open={openStatusDialog}
@@ -1191,18 +1370,27 @@ const OrderDetailView: React.FC = () => {
 };
 
 // Hàm trợ giúp để dịch trạng thái đơn hàng sang tiếng Việt
-const getVietnameseOrderStatusLabel = (status: any): string => {
-  const statusMap: Record<string, string> = {
-    Pending: "Chờ xử lý",
-    Processing: "Đang xử lý",
-    Shipping: "Đang giao",
-    Delivered: "Đã giao",
-    Completed: "Hoàn thành",
-    Cancelled: "Đã hủy",
-    Returning: "Đang trả",
-  };
-  const statusString = typeof status === "string" ? status : String(status);
-  return statusMap[statusString] || statusString;
+const getVietnameseOrderStatusLabel = (status: OrderStatus): string => {
+  switch (status) {
+    case OrderStatus.Pending:
+      return "Chờ xử lý";
+    case OrderStatus.Processing:
+      return "Đang xử lý";
+    case OrderStatus.Processed:
+      return "Đã xử lý";
+    case OrderStatus.Shipping:
+      return "Đang giao";
+    case OrderStatus.Delivered:
+      return "Đã giao";
+    case OrderStatus.Completed:
+      return "Hoàn thành";
+    case OrderStatus.Cancelled:
+      return "Đã hủy";
+    case OrderStatus.Returning:
+      return "Đang trả";
+    default:
+      return `Trạng thái #${status}`;
+  }
 };
 
 export default OrderDetailView;

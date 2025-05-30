@@ -81,7 +81,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
     fetchUnreadCount();
 
     if (!auth.accessToken) {
-      console.warn("No access token available for SignalR connection");
+      // console.warn("No access token available for SignalR connection");
       setError("Authentication required for notifications");
       return;
     }
@@ -103,18 +103,18 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
           .join("")
       );
       const tokenData = JSON.parse(jsonPayload);
-      console.log("Token claims:", tokenData);
+      // console.log("Token claims:", tokenData);
       if (!tokenData.id) {
         setError(
           "Your authentication token is missing required claims for notifications"
         );
       } else {
-        console.log("ID claim type:", typeof tokenData.id);
-        console.log("ID claim value:", tokenData.id);
+        // console.log("ID claim type:", typeof tokenData.id);
+        // console.log("ID claim value:", tokenData.id);
         if (typeof tokenData.id === "string" && /^\d+$/.test(tokenData.id)) {
-          console.log("ID is a numeric string, should be parseable as int");
+          // console.log("ID is a numeric string, should be parseable as int");
         } else {
-          console.warn("ID might not be parseable as int in C#");
+          // console.warn("ID might not be parseable as int in C#");
           setError(
             "Your user ID format is not compatible with the notification system"
           );
@@ -152,19 +152,19 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
       connection
         .start()
         .then(() => {
-          console.log("Connected to notification hub");
+          // console.log("Connected to notification hub");
           connection.invoke("RegisterConnection").catch((err: Error) => {
             console.error("Error registering connection:", err);
             setError("Failed to register for notifications");
           });
           connection.on("ReceiveNotification", (rawNotification: any) => {
-            console.log("Raw notification from server:", rawNotification);
+            // console.log("Raw notification from server:", rawNotification);
             const notification = normalizeCasing(rawNotification);
             if (notification.type === "ConnectionRegistered") {
-              console.log(
-                "SignalR connection registered successfully:",
-                notification.message
-              );
+              // console.log(
+              //   "SignalR connection registered successfully:",
+              //   notification.message
+              // );
               setError(null);
               return;
             }
@@ -183,10 +183,10 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
               setNotifications((prev) => [notification, ...prev]);
               setUnreadCount((prev) => prev + 1);
             } else {
-              console.warn(
-                "Received notification with invalid or missing ID:",
-                notification
-              );
+              // console.warn(
+              //   "Received notification with invalid or missing ID:",
+              //   notification
+              // );
             }
           });
         })
@@ -210,7 +210,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
         pageSize: 20,
       });
 
-      console.log("Paginated response from service:", paginatedResponse);
+      // console.log("Paginated response from service:", paginatedResponse);
 
       if (paginatedResponse && Array.isArray(paginatedResponse.notifications)) {
         const itemsToProcess = paginatedResponse.notifications; // <--- CORRECTED TO LOWERCASE 'notifications'
@@ -218,13 +218,13 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
           normalizeCasing(notificationItem)
         );
 
-        console.log("Setting notifications:", finalNotifications);
+        // console.log("Setting notifications:", finalNotifications);
         setNotifications(finalNotifications);
       } else {
-        console.warn(
-          "Expected 'notifications' array (lowercase) in paginatedResponse, or paginatedResponse was null/undefined. Received:",
-          paginatedResponse
-        );
+        // console.warn(
+        //   "Expected 'notifications' array (lowercase) in paginatedResponse, or paginatedResponse was null/undefined. Received:",
+        //   paginatedResponse
+        // );
         setNotifications([]);
       }
 
@@ -241,7 +241,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
     try {
       const count = await notificationService.getUnreadCount(); // Assuming getUnreadCount is also fixed
       setUnreadCount(typeof count === "number" && !isNaN(count) ? count : 0);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching unread count:", error);
       setUnreadCount(0);
     }
@@ -323,11 +323,14 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
       case "HotPotDamage":
         navigate("/equipment-condition-log");
         break;
+      case "ReturnOrder":
+        navigate("/unassigned-pickups");
+        break;
       default:
-        console.log(
-          "No specific action for notification type:",
-          notification.type
-        );
+        // console.log(
+        //   "No specific action for notification type:",
+        //   notification.type
+        // );
         break;
     }
 

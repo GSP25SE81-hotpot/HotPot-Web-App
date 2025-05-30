@@ -1,19 +1,18 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from "react";
 import {
+  Alert,
   Box,
+  Chip,
+  CircularProgress,
+  Stack,
   Table,
   TableBody,
   TableHead,
-  TableRow,
   TablePagination,
-  CircularProgress,
-  Alert,
+  TableRow,
   Tooltip,
-  Chip,
-  Stack,
   Snackbar,
 } from "@mui/material";
+import React, { useEffect, useState, useCallback } from "react";
 import { getUnassignedPickups } from "../../../api/Services/rentalService";
 import {
   PagedResult,
@@ -27,17 +26,17 @@ import {
 } from "../../../components/StyledComponents";
 // Import unassigned pickups specific styled components
 import {
-  PageTitle,
-  StyledTableContainer,
-  HeaderTableCell,
+  AssignButton,
   BodyTableCell,
-  StyledTableRow,
   CustomerName,
   CustomerPhone,
-  StatusChip,
-  AssignButton,
   EmptyMessage,
+  HeaderTableCell,
   LoadingContainer,
+  PageTitle,
+  StatusChip,
+  StyledTableContainer,
+  StyledTableRow,
 } from "../../../components/manager/styles/UnassignedPickupsStyles";
 import { formatDate } from "../../../utils/formatters";
 
@@ -64,52 +63,33 @@ const UnassignedPickups: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
-  // Changed default rowsPerPage to match one of the options in rowsPerPageOptions
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedPickup, setSelectedPickup] =
     useState<RentOrderDetailResponse | null>(null);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const fetchPickups = async () => {
-    console.log(
-      "fetchPickups được gọi với page =",
-      page,
-      "rowsPerPage =",
-      rowsPerPage
-    );
+  // Success/Error notification states
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const fetchPickups = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
       const response = await getUnassignedPickups(page + 1, rowsPerPage);
-      console.log("Dữ liệu nhận được từ API:", response);
-
-      if (response && response.data) {
-        setPickups(response.data as PagedResult<RentOrderDetailResponse>);
-        console.log("State pickups đã được cập nhật:", response.data);
-      } else {
-        console.error("Định dạng dữ liệu không hợp lệ:", response);
-        setError("Định dạng dữ liệu không hợp lệ");
-      }
-
-      return response;
+      setPickups(response.data as PagedResult<RentOrderDetailResponse>);
     } catch (err) {
-      console.error("Lỗi khi tải dữ liệu:", err);
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "An error occurred while fetching pickups";
-      setError(errorMessage);
-      throw err;
+      console.error("Error fetching pickups:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch pickups");
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, rowsPerPage]);
 
   useEffect(() => {
     fetchPickups();
-  }, [page, rowsPerPage]);
+  }, [fetchPickups]);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -118,45 +98,50 @@ const UnassignedPickups: React.FC = () => {
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
     setPage(0);
   };
 
   const handleAssignClick = (pickup: RentOrderDetailResponse) => {
     setSelectedPickup(pickup);
     setAssignDialogOpen(true);
+    // Clear any previous error messages
+    setError(null);
   };
 
-  const handleAssignSuccess = async () => {
-    console.log("handleAssignSuccess được gọi");
-    try {
-      // Đóng dialog và reset pickup đã chọn
-      setAssignDialogOpen(false);
-      setSelectedPickup(null);
+  const handleAssignSuccess = (staffName: string, customerName: string) => {
+    // Close dialog first
+    setAssignDialogOpen(false);
+    setSelectedPickup(null);
 
-      // Hiển thị trạng thái đang tải
-      setLoading(true);
+    // Show success message
+    setSuccessMessage(
+      `Đã phân công thành công nhân viên ${staffName} cho khách hàng ${customerName}`
+    );
+    setShowSuccess(true);
 
-      console.log("Bắt đầu tải lại dữ liệu...");
-      // Sau đó tải lại dữ liệu
-      const result = await fetchPickups();
-      console.log("Dữ liệu đã được tải lại:", result);
-    } catch (error) {
-      console.error("Lỗi khi tải lại dữ liệu:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Đã xảy ra lỗi khi làm mới dữ liệu"
-      );
-    } finally {
-      setLoading(false);
-    }
+    // Refresh the data
+    fetchPickups();
   };
+
+  const handleDialogClose = () => {
+    setAssignDialogOpen(false);
+    setSelectedPickup(null);
+  };
+
+  const handleCloseSuccessSnackbar = () => {
+    setShowSuccess(false);
+    setSuccessMessage(null);
+  };
+
+  const isTableEmpty = !pickups?.items || pickups.items.length === 0;
 
   return (
     <StyledContainer maxWidth="xl">
       <Box sx={{ p: 3 }}>
         <PageTitle variant="h4">Phân công thu hồi</PageTitle>
+
         {error && (
           <Alert
             severity="error"
@@ -167,12 +152,14 @@ const UnassignedPickups: React.FC = () => {
                 alignItems: "center",
               },
             }}
+            onClose={() => setError(null)}
           >
             {error}
           </Alert>
         )}
+
         <StyledPaper elevation={0}>
-          {loading && !pickups ? (
+          {loading ? (
             <LoadingContainer>
               <CircularProgress />
             </LoadingContainer>
@@ -191,7 +178,7 @@ const UnassignedPickups: React.FC = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {pickups?.items.length === 0 ? (
+                    {isTableEmpty ? (
                       <StyledTableRow key="empty-row">
                         <BodyTableCell colSpan={6}>
                           <EmptyMessage>
@@ -200,7 +187,7 @@ const UnassignedPickups: React.FC = () => {
                         </BodyTableCell>
                       </StyledTableRow>
                     ) : (
-                      pickups?.items.map((pickup) => (
+                      pickups.items.map((pickup) => (
                         <StyledTableRow key={pickup.orderId}>
                           <BodyTableCell>{pickup.orderCode}</BodyTableCell>
                           <BodyTableCell>
@@ -260,6 +247,7 @@ const UnassignedPickups: React.FC = () => {
                               color="primary"
                               size="small"
                               onClick={() => handleAssignClick(pickup)}
+                              disabled={loading}
                             >
                               Phân công
                             </AssignButton>
@@ -270,51 +258,60 @@ const UnassignedPickups: React.FC = () => {
                   </TableBody>
                 </Table>
               </StyledTableContainer>
-              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                <TablePagination
-                  rowsPerPageOptions={[5, 10, 25]}
-                  component="div"
-                  count={pickups?.totalCount || 0}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  onPageChange={handleChangePage}
-                  onRowsPerPageChange={handleChangeRowsPerPage}
-                  labelRowsPerPage="Số dòng mỗi trang:"
-                  labelDisplayedRows={({ from, to, count }) =>
-                    `${from}-${to} của ${count !== -1 ? count : `hơn ${to}`}`
-                  }
-                  sx={{
-                    borderRadius: 2,
-                    "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
-                      {
-                        fontWeight: 500,
-                      },
-                  }}
-                />
-              </Box>
+
+              {!isTableEmpty && (
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={pickups?.totalCount || 0}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    labelRowsPerPage="Số dòng mỗi trang:"
+                    labelDisplayedRows={({ from, to, count }) =>
+                      `${from}-${to} của ${count !== -1 ? count : `hơn ${to}`}`
+                    }
+                    sx={{
+                      borderRadius: 2,
+                      "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+                        {
+                          fontWeight: 500,
+                        },
+                    }}
+                  />
+                </Box>
+              )}
             </>
           )}
         </StyledPaper>
+
+        {/* Assignment Dialog */}
         {selectedPickup && (
           <AssignStaffDialog
             open={assignDialogOpen}
-            onClose={() => setAssignDialogOpen(false)}
+            onClose={handleDialogClose}
             pickup={selectedPickup}
             onSuccess={handleAssignSuccess}
           />
         )}
-        {successMessage && (
-          <Snackbar
-            open={Boolean(successMessage)}
-            autoHideDuration={5000}
-            onClose={() => setSuccessMessage(null)}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+
+        {/* Success Notification */}
+        <Snackbar
+          open={showSuccess}
+          autoHideDuration={6000}
+          onClose={handleCloseSuccessSnackbar}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        >
+          <Alert
+            onClose={handleCloseSuccessSnackbar}
+            severity="success"
+            sx={{ width: "100%" }}
           >
-            <Alert onClose={() => setSuccessMessage(null)} severity="success">
-              {successMessage}
-            </Alert>
-          </Snackbar>
-        )}
+            {successMessage}
+          </Alert>
+        </Snackbar>
       </Box>
     </StyledContainer>
   );

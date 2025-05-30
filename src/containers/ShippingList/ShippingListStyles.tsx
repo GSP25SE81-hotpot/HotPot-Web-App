@@ -117,36 +117,36 @@ export const ActionsCell = styled(TableCell)(({ theme }) => ({
 
 // Status chip
 interface StatusChipProps extends Omit<ChipProps, "color"> {
-  statusType: "shipping" | "processed";
+  statustype: "shipping" | "processed"; // Changed to lowercase to avoid React warning
 }
 
-export const StatusChip = styled(Chip)<StatusChipProps>(
-  ({ theme, statusType }) => {
-    const colors = {
-      shipping: {
-        border: theme.palette.warning.main,
-        color: theme.palette.warning.main,
-        background: alpha(theme.palette.warning.main, 0.1),
-      },
-      processed: {
-        border: theme.palette.primary.main,
-        color: theme.palette.primary.main,
-        background: alpha(theme.palette.primary.main, 0.1),
-      },
-    };
+export const StatusChip = styled(Chip, {
+  shouldForwardProp: (prop) => prop !== "statustype",
+})<StatusChipProps>(({ theme, statustype }) => {
+  const colors = {
+    shipping: {
+      border: theme.palette.warning.main,
+      color: theme.palette.warning.main,
+      background: alpha(theme.palette.warning.main, 0.1),
+    },
+    processed: {
+      border: theme.palette.primary.main,
+      color: theme.palette.primary.main,
+      background: alpha(theme.palette.primary.main, 0.1),
+    },
+  };
 
-    return {
-      minWidth: 90,
-      borderColor: colors[statusType].border,
-      color: colors[statusType].color,
-      backgroundColor: colors[statusType].background,
-      fontWeight: 500,
-      "& .MuiChip-label": {
-        padding: "0 8px",
-      },
-    };
-  }
-);
+  return {
+    minWidth: 90,
+    borderColor: colors[statustype].border,
+    color: colors[statustype].color,
+    backgroundColor: colors[statustype].background,
+    fontWeight: 500,
+    "& .MuiChip-label": {
+      padding: "0 8px",
+    },
+  };
+});
 
 // Direction button
 export const DirectionButton = styled(Button)(({ theme }) => ({

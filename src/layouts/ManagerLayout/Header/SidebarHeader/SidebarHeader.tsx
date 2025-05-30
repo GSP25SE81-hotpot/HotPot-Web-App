@@ -107,10 +107,11 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
 
     // For non-root paths, check if current path starts with menu path
     // but ensure we're matching complete path segments
-    if (menuPath !== "/" && menuPath.length > 1) {
+    if (menuPath !== "/" && menuPath.length > 1 && menuPath != "/dashboard") {
       const pathSegments = menuPath.split("/").filter(Boolean);
       const currentSegments = currentPath.split("/").filter(Boolean);
-
+      // console.log(pathSegments);
+      // console.log(currentSegments);
       // Must have at least as many segments as the menu path
       if (currentSegments.length < pathSegments.length) return false;
 

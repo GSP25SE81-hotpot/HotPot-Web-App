@@ -123,7 +123,7 @@ const ShippingList = () => {
             label="Đang giao hàng"
             variant="outlined"
             size="small"
-            statusType="shipping"
+            statustype="shipping"
           />
         );
       case "Processed":
@@ -132,7 +132,7 @@ const ShippingList = () => {
             label="Chờ giao hàng"
             variant="outlined"
             size="small"
-            statusType="processed"
+            statustype="processed"
           />
         );
       default:
