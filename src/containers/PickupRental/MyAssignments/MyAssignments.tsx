@@ -75,7 +75,11 @@ const MyAssignments: React.FC = () => {
       },
     });
   };
-
+  const getGoogleMapsUrl = (address: string): string => {
+    // Encode the address for use in a URL
+    const encodedAddress = encodeURIComponent(address);
+    return `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+  };
   // Check if data and data.data exist before accessing
   const assignments = data?.data?.items || [];
   const hasAssignments = assignments.length > 0;
@@ -124,19 +128,19 @@ const MyAssignments: React.FC = () => {
                 <StyledTable>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Mã nhiệm vụ</TableCell>
                       <TableCell>Mã đơn hàng</TableCell>
                       <TableCell>Khách hàng</TableCell>
+                      <TableCell>Địa chỉ</TableCell>
                       <TableCell>Thiết bị</TableCell>
+                      <TableCell>Phương tiện</TableCell>
                       <TableCell>Ngày trả dự kiến</TableCell>
                       <TableCell>Trạng thái</TableCell>
-                      <TableCell>Hành động</TableCell>
+                      <TableCell></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {assignments.map((assignment) => (
                       <TableRow key={assignment.assignmentId}>
-                        <TableCell>#{assignment.assignmentId}</TableCell>
                         <TableCell>{assignment.orderCode}</TableCell>
                         <TableCell>
                           <CustomerCell>
@@ -149,10 +153,47 @@ const MyAssignments: React.FC = () => {
                           </CustomerCell>
                         </TableCell>
                         <TableCell>
+                          {assignment.customerAddress ? (
+                            <Typography
+                              component="a"
+                              href={getGoogleMapsUrl(
+                                assignment.customerAddress
+                              )}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              sx={{
+                                color: "primary.main",
+                                textDecoration: "none",
+                                "&:hover": {
+                                  textDecoration: "underline",
+                                  cursor: "pointer",
+                                },
+                                display: "block",
+                                maxWidth: "200px",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                              title={`Mở Google Maps: ${assignment.customerAddress}`}
+                            >
+                              {assignment.customerAddress}
+                            </Typography>
+                          ) : (
+                            <Typography color="text.secondary">N/A</Typography>
+                          )}
+                        </TableCell>
+                        <TableCell>
                           <Typography fontWeight={500}>
                             {assignment.equipmentSummary}
                           </Typography>
                         </TableCell>
+                        <TableCell>
+                          <Typography>
+                            {assignment.vehicleName || "N/A"} (
+                            {assignment.licensePlate || "N/A"})
+                          </Typography>
+                        </TableCell>
+
                         <TableCell>
                           <Typography fontWeight={500}>
                             {assignment.expectedReturnDate

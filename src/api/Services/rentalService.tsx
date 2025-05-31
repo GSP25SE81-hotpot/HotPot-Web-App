@@ -35,33 +35,18 @@ export const allocateStaffForPickup = async (
   request: PickupAssignmentRequestDto
 ): Promise<ApiResponse<StaffPickupAssignmentDto>> => {
   try {
-    console.log("Sending pickup allocation request:", request); // Debug log
+    // console.log("Sending pickup allocation request:", request); // Debug log
 
     const response = await axiosClient.post(
       `${API_URL}/allocate-pickup`,
       request
     );
 
-    console.log("API Response:", response); // Debug log
+    // console.log("API Response:", response); // Debug log
 
     return response.data;
   } catch (error: any) {
     console.error("Error allocating staff for pickup:", error);
-
-    // Enhanced error logging
-    if (error.response) {
-      // Server responded with error status
-      console.error("Response status:", error.response.status);
-      console.error("Response data:", error.response.data);
-      console.error("Response headers:", error.response.headers);
-    } else if (error.request) {
-      // Request was made but no response received
-      console.error("No response received:", error.request);
-    } else {
-      // Something else happened
-      console.error("Error message:", error.message);
-    }
-
     throw error;
   }
 };
