@@ -32,7 +32,7 @@ import {
 } from "../../../components/StyledComponents";
 import { useApi } from "../../../hooks/useApi";
 import { StaffPickupAssignment } from "../../../types/rentalPickup";
-import { formatDate } from "../../../utils/formatters";
+// import { formatDate } from "../../../utils/formatters";
 
 const MyAssignments: React.FC = () => {
   const navigate = useNavigate();
@@ -133,7 +133,7 @@ const MyAssignments: React.FC = () => {
                       <TableCell>Địa chỉ</TableCell>
                       <TableCell>Thiết bị</TableCell>
                       <TableCell>Phương tiện</TableCell>
-                      <TableCell>Ngày trả dự kiến</TableCell>
+                      {/* <TableCell>Ngày trả dự kiến</TableCell> */}
                       <TableCell>Trạng thái</TableCell>
                       <TableCell></TableCell>
                     </TableRow>
@@ -194,13 +194,13 @@ const MyAssignments: React.FC = () => {
                           </Typography>
                         </TableCell>
 
-                        <TableCell>
+                        {/* <TableCell>
                           <Typography fontWeight={500}>
                             {assignment.expectedReturnDate
                               ? formatDate(assignment.expectedReturnDate)
                               : "N/A"}{" "}
                           </Typography>
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell>
                           <StatusContainer>
                             <AssignmentChip
