@@ -443,9 +443,7 @@ const HotpotComboDetail: React.FC = () => {
                                 variant="body2"
                                 color="text.secondary"
                               >
-                                {formatMoney(
-                                  ingredient.totalPrice * ingredient.quantity
-                                )}
+                                {formatMoney(ingredient.totalPrice)}
                               </Typography>
                             </Box>
                           </Box>

@@ -73,8 +73,7 @@ const ChatWithCustomer: React.FC = () => {
 
       loadingSessionsRef.current = false;
       return true;
-    } catch (err) {
-      console.error("Không thể tải danh sách cuộc trò chuyện:", err);
+    } catch {
       setError("Không thể tải danh sách cuộc trò chuyện");
       loadingSessionsRef.current = false;
       return false;
@@ -95,11 +94,8 @@ const ChatWithCustomer: React.FC = () => {
             [sessionId]: msgResponse.data || [],
           }));
         }
-      } catch (err) {
-        console.error(
-          `Không thể tải tin nhắn cho cuộc trò chuyện ${sessionId}:`,
-          err
-        );
+      } catch {
+        // Ignore errors
       }
     },
     [messages]
@@ -163,8 +159,7 @@ const ChatWithCustomer: React.FC = () => {
             };
           });
         }
-      } catch (error) {
-        console.error("Gửi tin nhắn thất bại:", error);
+      } catch {
         // Mark message as failed
         setMessages((prev) => {
           const currentMessages = prev[selectedChatId] || [];
@@ -201,8 +196,7 @@ const ChatWithCustomer: React.FC = () => {
           return true;
         }
         return false;
-      } catch (error) {
-        console.error("Tham gia cuộc trò chuyện thất bại:", error);
+      } catch {
         return false;
       }
     },
@@ -229,15 +223,14 @@ const ChatWithCustomer: React.FC = () => {
         return true;
       }
       return false;
-    } catch (error) {
-      console.error("Kết thúc cuộc trò chuyện thất bại:", error);
+    } catch {
       return false;
     }
   }, [selectedChatId]);
 
   // SignalR event handlers - memoized with minimal dependencies
   const handleNewChat = useCallback((data: any) => {
-    console.log("Nhận cuộc trò chuyện mới:", data);
+    // console.log("Nhận cuộc trò chuyện mới:", data);
 
     // Add to our list if it's not already there
     setChatSessions((prev) => {
@@ -267,7 +260,7 @@ const ChatWithCustomer: React.FC = () => {
 
   const handleNewMessage = useCallback(
     (data: any) => {
-      console.log("Nhận tin nhắn mới:", data);
+      // console.log("Nhận tin nhắn mới:", data);
 
       const sessionId = data.sessionId;
 
@@ -314,7 +307,7 @@ const ChatWithCustomer: React.FC = () => {
   );
 
   const handleChatAccepted = useCallback((data: any) => {
-    console.log("Cuộc trò chuyện được chấp nhận:", data);
+    // console.log("Cuộc trò chuyện được chấp nhận:", data);
 
     // Update the chat in our list
     setChatSessions((prev) =>
@@ -331,7 +324,7 @@ const ChatWithCustomer: React.FC = () => {
   }, []);
 
   const handleChatEnded = useCallback((data: any) => {
-    console.log("Cuộc trò chuyện kết thúc:", data);
+    // console.log("Cuộc trò chuyện kết thúc:", data);
 
     // Update the chat in our list
     setChatSessions((prev) =>
@@ -395,9 +388,8 @@ const ChatWithCustomer: React.FC = () => {
             setError("Không thể kết nối đến dịch vụ trò chuyện");
           }
         }
-      } catch (err) {
+      } catch {
         setError("Không thể khởi tạo dịch vụ trò chuyện");
-        console.error(err);
       }
       setLoading(false);
     };
@@ -413,12 +405,12 @@ const ChatWithCustomer: React.FC = () => {
       // Only try to reconnect if we're not already trying and user is logged in
       if (!connected && user?.id && !reconnecting.current) {
         reconnecting.current = true;
-        console.log("Attempting to reconnect...");
+        // console.log("Attempting to reconnect...");
 
         chatService.initialize(user.id, "Manager").then((success) => {
           reconnecting.current = false;
           if (success) {
-            console.log("Đã kết nối lại thành công");
+            // console.log("Đã kết nối lại thành công");
             // Reload data after reconnection
             loadChatSessions();
           }

@@ -27,6 +27,7 @@ export interface StaffPickupAssignment {
   expectedReturnDate: string | null;
   equipmentSummary: string;
   vehicleId?: number;
+  licensePlate: string;
   vehicleName?: string;
   vehicleType?: string;
 }
