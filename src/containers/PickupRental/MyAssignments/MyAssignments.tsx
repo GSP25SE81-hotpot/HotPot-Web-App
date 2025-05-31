@@ -36,7 +36,7 @@ import { StaffPickupAssignment } from "../../../types/rentalPickup";
 
 const MyAssignments: React.FC = () => {
   const navigate = useNavigate();
-  const [pendingOnly, setPendingOnly] = useState(false);
+  const [pendingOnly, setPendingOnly] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
