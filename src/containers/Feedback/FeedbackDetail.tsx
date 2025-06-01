@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import {
@@ -5,10 +6,10 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
-  Button,
+  Grid2,
+  // Button,
   Paper,
-  Chip,
+  // Chip,
   IconButton,
   Skeleton,
   Tooltip,
@@ -28,9 +29,9 @@ import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import FeedbackIcon from "@mui/icons-material/Feedback";
 import CommentIcon from "@mui/icons-material/Comment";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
-import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+// import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+// import CancelIcon from "@mui/icons-material/Cancel";
+// import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
 
@@ -76,18 +77,18 @@ const InfoItem = styled(Box)(({ theme }) => ({
   },
 }));
 
-const StatusChip = styled(Chip)(({ theme }) => ({
-  fontWeight: "bold",
-  padding: theme.spacing(0.5, 0),
-}));
+// const StatusChip = styled(Chip)(({ theme }) => ({
+//   fontWeight: "bold",
+//   padding: theme.spacing(0.5, 0),
+// }));
 
-const ActionButton = styled(Button)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius * 1.5,
-  padding: theme.spacing(1, 3),
-  textTransform: "none",
-  fontWeight: "bold",
-  boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-}));
+// const ActionButton = styled(Button)(({ theme }) => ({
+//   borderRadius: theme.shape.borderRadius * 1.5,
+//   padding: theme.spacing(1, 3),
+//   textTransform: "none",
+//   fontWeight: "bold",
+//   boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+// }));
 
 const FeedbackDetail: React.FC = () => {
   const { feedbackId } = useParams<{ feedbackId: string }>();
@@ -118,39 +119,39 @@ const FeedbackDetail: React.FC = () => {
     getListFeedback();
   };
 
-  const getStatusChip = (status: string) => {
-    switch (status) {
-      case "Approved":
-      case "1":
-        return (
-          <StatusChip
-            icon={<CheckCircleIcon />}
-            label="Đã duyệt"
-            color="success"
-            variant="filled"
-          />
-        );
-      case "Rejected":
-      case "2":
-        return (
-          <StatusChip
-            icon={<CancelIcon />}
-            label="Từ chối"
-            color="error"
-            variant="filled"
-          />
-        );
-      default:
-        return (
-          <StatusChip
-            icon={<HourglassEmptyIcon />}
-            label="Chưa xử lí"
-            color="warning"
-            variant="filled"
-          />
-        );
-    }
-  };
+  // const getStatusChip = (status: string) => {
+  //   switch (status) {
+  //     case "Approved":
+  //     case "1":
+  //       return (
+  //         <StatusChip
+  //           icon={<CheckCircleIcon />}
+  //           label="Đã duyệt"
+  //           color="success"
+  //           variant="filled"
+  //         />
+  //       );
+  //     case "Rejected":
+  //     case "2":
+  //       return (
+  //         <StatusChip
+  //           icon={<CancelIcon />}
+  //           label="Từ chối"
+  //           color="error"
+  //           variant="filled"
+  //         />
+  //       );
+  //     default:
+  //       return (
+  //         <StatusChip
+  //           icon={<HourglassEmptyIcon />}
+  //           label="Chưa xử lí"
+  //           color="warning"
+  //           variant="filled"
+  //         />
+  //       );
+  //   }
+  // };
 
   return (
     <Box sx={{ maxWidth: 1200, margin: "0 auto" }}>
@@ -169,9 +170,9 @@ const FeedbackDetail: React.FC = () => {
             Chi tiết phản hồi #{feedbackId}
           </Typography>
         </Box>
-        {!loading && dataFeedback && (
+        {/* {!loading && dataFeedback && (
           <Box>{getStatusChip(dataFeedback?.approvalStatus)}</Box>
-        )}
+        )} */}
       </HeaderPaper>
 
       <StyledCard>
@@ -202,8 +203,8 @@ const FeedbackDetail: React.FC = () => {
                     borderRadius: 2,
                   }}
                 >
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
+                  <Grid2 container spacing={2}>
+                    <Grid2 size={{ xs: 12, md: 6 }}>
                       <InfoItem>
                         <PersonIcon />
                         <Typography>
@@ -211,8 +212,8 @@ const FeedbackDetail: React.FC = () => {
                           {dataFeedback?.userName || "Không có thông tin"}
                         </Typography>
                       </InfoItem>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, md: 6 }}>
                       <InfoItem>
                         <PhoneIcon />
                         <Typography>
@@ -220,8 +221,8 @@ const FeedbackDetail: React.FC = () => {
                           {dataFeedback?.phoneNumber || "Không có thông tin"}
                         </Typography>
                       </InfoItem>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, md: 6 }}>
                       <InfoItem>
                         <EmailIcon />
                         <Typography>
@@ -229,8 +230,8 @@ const FeedbackDetail: React.FC = () => {
                           {dataFeedback?.email || "Không có thông tin"}
                         </Typography>
                       </InfoItem>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, md: 6 }}>
                       <InfoItem>
                         <ShoppingBasketIcon />
                         <Typography>
@@ -238,8 +239,8 @@ const FeedbackDetail: React.FC = () => {
                           {dataFeedback?.orderId || "Không có thông tin"}
                         </Typography>
                       </InfoItem>
-                    </Grid>
-                  </Grid>
+                    </Grid2>
+                  </Grid2>
                 </Paper>
               </Box>
 
@@ -256,8 +257,8 @@ const FeedbackDetail: React.FC = () => {
                     borderRadius: 2,
                   }}
                 >
-                  <Grid container spacing={3}>
-                    <Grid item xs={12}>
+                  <Grid2 container spacing={3}>
+                    <Grid2 size={{ xs: 12 }}>
                       <InfoItem>
                         <FeedbackIcon />
                         <Typography>
@@ -265,8 +266,8 @@ const FeedbackDetail: React.FC = () => {
                           {dataFeedback?.title || "Không có thông tin"}
                         </Typography>
                       </InfoItem>
-                    </Grid>
-                    <Grid item xs={12}>
+                    </Grid2>
+                    <Grid2 size={{ xs: 12 }}>
                       <InfoItem alignItems="flex-start">
                         <CommentIcon sx={{ mt: 0.5 }} />
                         <Typography>
@@ -279,8 +280,8 @@ const FeedbackDetail: React.FC = () => {
                           </Box>
                         </Typography>
                       </InfoItem>
-                    </Grid>
-                    <Grid item xs={12}>
+                    </Grid2>
+                    <Grid2 size={{ xs: 12 }}>
                       <InfoItem>
                         <AccessTimeIcon />
                         <Typography>
@@ -292,13 +293,13 @@ const FeedbackDetail: React.FC = () => {
                             : "Không có thông tin"}
                         </Typography>
                       </InfoItem>
-                    </Grid>
-                  </Grid>
+                    </Grid2>
+                  </Grid2>
                 </Paper>
               </Box>
 
               {/* Trạng thái xử lý */}
-              <Box sx={{ mb: 4 }}>
+              {/* <Box sx={{ mb: 4 }}>
                 <SectionTitle variant="h6" fontWeight="bold">
                   Trạng thái xử lý
                 </SectionTitle>
@@ -310,18 +311,18 @@ const FeedbackDetail: React.FC = () => {
                     borderRadius: 2,
                   }}
                 >
-                  <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} sm={6}>
+                  <Grid2 container spacing={2} alignItems="center">
+                    <Grid2 item xs={12} sm={6}>
                       <Box display="flex" alignItems="center">
                         <Typography sx={{ mr: 2 }}>
                           <strong>Trạng thái:</strong>
                         </Typography>
                         {getStatusChip(dataFeedback?.approvalStatus)}
                       </Box>
-                    </Grid>
+                    </Grid2>
 
                     {dataFeedback?.responseDate && (
-                      <Grid item xs={12} sm={6}>
+                      <Grid2 item xs={12} sm={6}>
                         <InfoItem>
                           <AccessTimeIcon />
                           <Typography>
@@ -331,11 +332,11 @@ const FeedbackDetail: React.FC = () => {
                             )}
                           </Typography>
                         </InfoItem>
-                      </Grid>
+                      </Grid2>
                     )}
 
                     {dataFeedback?.approvalDate && (
-                      <Grid item xs={12} sm={6}>
+                      <Grid2 item xs={12} sm={6}>
                         <InfoItem>
                           <AccessTimeIcon />
                           <Typography>
@@ -345,14 +346,14 @@ const FeedbackDetail: React.FC = () => {
                             )}
                           </Typography>
                         </InfoItem>
-                      </Grid>
+                      </Grid2>
                     )}
-                  </Grid>
+                  </Grid2>
                 </Paper>
-              </Box>
+              </Box> */}
 
               {/* Actions */}
-              <Box
+              {/* <Box
                 sx={{
                   display: "flex",
                   gap: 2,
@@ -388,7 +389,7 @@ const FeedbackDetail: React.FC = () => {
                 >
                   Từ chối phản hồi
                 </ActionButton>
-              </Box>
+              </Box> */}
             </>
           ) : (
             <Box sx={{ textAlign: "center", py: 5 }}>

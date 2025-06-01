@@ -60,7 +60,12 @@ const OrderTable = () => {
     { id: "address", label: "Địa chỉ giao", align: "center" },
     { id: "notes", label: "Ghi chú", align: "center" },
     { id: "createdAt", label: "Đặt lúc", align: "center", format: "date" },
-    { id: "totalPrice", label: "Tổng tiền", align: "center" },
+    {
+      id: "totalPrice",
+      label: "Tổng tiền",
+      align: "center",
+      format: "price",
+    },
     { id: "status", label: "Trạng thái", align: "center", format: "status" },
   ];
 
