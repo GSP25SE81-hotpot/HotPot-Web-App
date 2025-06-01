@@ -242,7 +242,7 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
       const request: PickupAssignmentRequestDto = {
         staffId: selectedStaffId as number,
         rentOrderDetailId: selectedDetailId!,
-        notes: notes.trim() ? notes.trim() : "Không có note",
+        notes: notes.trim() ? notes.trim() : "Không có Ghi Chú",
       };
 
       if (selectedVehicleId !== "") {
