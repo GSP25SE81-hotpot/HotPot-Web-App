@@ -224,10 +224,10 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
       setError("Vui lòng chọn thiết bị");
       return;
     }
-    if (!notes.trim()) {
-      setError("Vui lòng nhập ghi chú cho nhân viên");
-      return;
-    }
+    // if (!notes.trim()) {
+    //   setError("Vui lòng nhập ghi chú cho nhân viên");
+    //   return;
+    // }
 
     // Show confirmation dialog
     setShowConfirmation(true);
@@ -242,7 +242,7 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
       const request: PickupAssignmentRequestDto = {
         staffId: selectedStaffId as number,
         rentOrderDetailId: selectedDetailId!,
-        notes: notes.trim(),
+        notes: notes.trim() ? notes.trim() : "Không có note",
       };
 
       if (selectedVehicleId !== "") {
@@ -288,8 +288,7 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
     (v) => v.vehicleId === selectedVehicleId
   );
 
-  const isFormValid =
-    selectedStaffId !== "" && selectedDetailId && notes.trim();
+  const isFormValid = selectedStaffId !== "" && selectedDetailId;
 
   return (
     <>
@@ -418,7 +417,7 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
             </StyledFormControlSelect>
 
             <StyledNotesField
-              label="Ghi chú cho nhân viên *"
+              label="Ghi chú cho nhân viên"
               multiline
               rows={3}
               fullWidth
