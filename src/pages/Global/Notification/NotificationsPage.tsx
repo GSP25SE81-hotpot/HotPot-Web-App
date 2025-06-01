@@ -390,83 +390,117 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
           },
           paper: {
             style: {
+              display: "flex",
+              flexDirection: "column",
               maxHeight: 400,
               width: 320,
             },
           },
         }}
       >
-        {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
-            <CircularProgress size={24} />
-          </Box>
-        ) : error ? (
-          <MenuItem disabled>
-            <Typography
-              color="error"
-              sx={{ p: 1, textAlign: "center", whiteSpace: "normal" }}
-            >
-              {error}
-            </Typography>
-          </MenuItem>
-        ) : notifications.length === 0 ? (
-          <MenuItem disabled>
-            <Typography sx={{ p: 1, textAlign: "center" }}>
-              Không có thông báo mới
-            </Typography>
-          </MenuItem>
-        ) : (
-          <>
-            {notifications.map((notification) => (
-              <MenuItem
-                key={notification.id}
-                onClick={() => handleNotificationClick(notification)}
-                sx={{
-                  backgroundColor: notification.isRead
-                    ? "transparent"
-                    : "rgba(25, 118, 210, 0.08)", // Example unread background
-                  padding: "10px 15px",
-                  borderBottom: "1px solid #eee", // Separator for items
-                  "&:last-child": {
-                    borderBottom: "none",
-                  },
-                }}
+        {/* Scrollable notifications container */}
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: "auto",
+            maxHeight: "calc(100% - 48px)", // Reserve space for the sticky footer
+          }}
+        >
+          {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : error ? (
+            <MenuItem disabled>
+              <Typography
+                color="error"
+                sx={{ p: 1, textAlign: "center", whiteSpace: "normal" }}
               >
-                <Box sx={{ width: "100%" }}>
-                  <Typography variant="subtitle2" fontWeight="bold" noWrap>
-                    {notification.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      whiteSpace: "normal",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      minHeight: "2.5em", // Ensure space for two lines
-                    }}
-                  >
-                    {notification.message}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ mt: 0.5, display: "block" }}
-                  >
-                    {safeFormatDate(notification.timestamp)}
-                  </Typography>
-                </Box>
-              </MenuItem>
-            ))}
-            <Divider />
-            <MenuItem onClick={markAllAsRead} sx={{ justifyContent: "center" }}>
-              Đánh dấu tất cả đã đọc
+                {error}
+              </Typography>
             </MenuItem>
-          </>
-        )}
+          ) : notifications.length === 0 ? (
+            <MenuItem disabled>
+              <Typography sx={{ p: 1, textAlign: "center" }}>
+                Không có thông báo mới
+              </Typography>
+            </MenuItem>
+          ) : (
+            <>
+              {notifications.map((notification) => (
+                <MenuItem
+                  key={notification.id}
+                  onClick={() => handleNotificationClick(notification)}
+                  sx={{
+                    backgroundColor: notification.isRead
+                      ? "transparent"
+                      : "rgba(25, 118, 210, 0.08)",
+                    padding: "10px 15px",
+                    borderBottom: "1px solid #eee",
+                    "&:last-child": {
+                      borderBottom: "none",
+                    },
+                  }}
+                >
+                  <Box sx={{ width: "100%" }}>
+                    <Typography variant="subtitle2" fontWeight="bold" noWrap>
+                      {notification.title}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        whiteSpace: "normal",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        minHeight: "2.5em",
+                      }}
+                    >
+                      {notification.message}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ mt: 0.5, display: "block" }}
+                    >
+                      {safeFormatDate(notification.timestamp)}
+                    </Typography>
+                  </Box>
+                </MenuItem>
+              ))}
+            </>
+          )}
+        </Box>
+
+        {/* Sticky footer with "Mark all as read" button */}
+        <Box
+          sx={{
+            position: "sticky",
+            bottom: 0,
+            backgroundColor: "background.paper",
+            zIndex: 1,
+            borderTop: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Divider />
+          <MenuItem
+            onClick={markAllAsRead}
+            sx={{
+              justifyContent: "center",
+              backgroundColor: "background.paper",
+              "&:hover": {
+                backgroundColor: "action.hover",
+              },
+            }}
+          >
+            Đánh dấu tất cả đã đọc
+          </MenuItem>
+        </Box>
       </Menu>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

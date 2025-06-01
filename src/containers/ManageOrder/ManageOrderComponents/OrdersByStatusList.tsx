@@ -18,7 +18,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ClearIcon from "@mui/icons-material/Clear";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import InfoIcon from "@mui/icons-material/Info";
@@ -159,6 +159,12 @@ const OrdersByStatusList: React.FC = () => {
     // console.log("selectedVehicleId state changed to:", selectedVehicleId);
   }, [selectedVehicleId]);
 
+  useEffect(() => {
+    if (openDialog) {
+      fetchStaffMembers();
+    }
+  }, [selectedTaskTypes, openDialog]);
+
   // Function to fetch orders with current filters
   const fetchOrders = async () => {
     try {
@@ -256,39 +262,36 @@ const OrdersByStatusList: React.FC = () => {
   };
 
   // Fetch staff members for both task types
-  const fetchStaffMembers = async () => {
+  const fetchStaffMembers = useCallback(async () => {
     try {
-      // Fetch preparation staff if that task type is selected
       if (selectedTaskTypes.includes(StaffTaskType.Preparation)) {
         const prepStaffData = await staffService.getAvailableStaff(
           StaffTaskType.Preparation
         );
         const availablePrepStaff = Array.isArray(prepStaffData)
           ? prepStaffData.filter(
-              (staff) => staff.isAvailable === true && staff.isEligible === true
+              (staff) => staff.isAvailable && staff.isEligible
             )
           : [];
         setPrepStaff(availablePrepStaff);
       }
-      // Fetch shipping staff if that task type is selected
+
       if (selectedTaskTypes.includes(StaffTaskType.Shipping) && selectedOrder) {
-        // Pass the orderCode to get context-specific availability for shipping
         const shippingStaffData = await staffService.getAvailableStaff(
           StaffTaskType.Shipping
         );
         const availableShippingStaff = Array.isArray(shippingStaffData)
           ? shippingStaffData.filter(
-              (staff) => staff.isAvailable === true && staff.isEligible === true
+              (staff) => staff.isAvailable && staff.isEligible
             )
           : [];
-        // Sort the shipping staff to prioritize staff who prepared this order
+
         availableShippingStaff.sort((a, b) => {
-          // Staff who prepared this order should be at the top
           if (a.preparedThisOrder && !b.preparedThisOrder) return -1;
           if (!a.preparedThisOrder && b.preparedThisOrder) return 1;
-          // Then sort by assignment count (less busy staff first)
           return a.assignmentCount - b.assignmentCount;
         });
+
         setShippingStaff(availableShippingStaff);
       }
     } catch (err) {
@@ -298,13 +301,12 @@ const OrdersByStatusList: React.FC = () => {
       if (openDialog) {
         setSnackbar({
           open: true,
-          message:
-            "Không thể tải dữ liệu khả dụng của nhân viên. Vui lòng thử lại sau.",
+          message: "Không thể tải dữ liệu nhân viên. Vui lòng thử lại sau.",
           severity: "error",
         });
       }
     }
-  };
+  }, [selectedTaskTypes, selectedOrder, openDialog]); // Add dependencies
 
   // Fetch available vehicles
   const fetchAvailableVehicles = async () => {
@@ -391,24 +393,13 @@ const OrdersByStatusList: React.FC = () => {
   // Handle task type selection (checkboxes)
   const handleTaskTypeChange = (taskType: StaffTaskType) => {
     setSelectedTaskTypes((prev) => {
-      if (prev.includes(taskType)) {
-        // Remove task type if already selected
-        const result = prev.filter((type) => type !== taskType);
-        // Reset the corresponding staff selection
-        if (taskType === StaffTaskType.Preparation) {
-          setSelectedPrepStaffIds([]); // Changed from 0 to empty array
-        } else if (taskType === StaffTaskType.Shipping) {
-          setSelectedShippingStaffId(0);
-          setSelectedVehicleId(null);
-        }
-        return result.length > 0 ? result : [taskType]; // Ensure at least one task type is selected
-      } else {
-        // Add task type if not already selected
-        return [...prev, taskType];
-      }
+      const newTypes = prev.includes(taskType)
+        ? prev.filter((type) => type !== taskType) // Remove if exists
+        : [...prev, taskType]; // Add if not exists
+
+      // Ensure at least one task type is selected
+      return newTypes.length > 0 ? newTypes : [taskType];
     });
-    // Fetch staff for the updated task types
-    fetchStaffMembers();
   };
 
   // Handle preparation staff selection
