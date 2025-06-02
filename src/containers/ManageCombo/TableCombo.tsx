@@ -35,7 +35,7 @@ const TableCombo = () => {
   const [page, setPage] = useState<number>(0);
   const [dataCombo, setDataCombo] = useState<any[]>([]);
   const [groupedData, setGroupedData] = useState<GroupData[]>([]);
-  const [isCustomizable, setIsCustomizable] = useState<boolean>(true); // Default: true
+  const [isCustomizable, setIsCustomizable] = useState<boolean>(false); // Default: true
   const [displayMode, setDisplayMode] = useState<"flat" | "grouped">("flat");
   const navigate = useNavigate();
 
