@@ -7,7 +7,6 @@ import {
   Collapse,
   IconButton,
   InputAdornment,
-  Snackbar,
   Table,
   TableBody,
   TableHead,
@@ -72,6 +71,7 @@ import { formatCurrency } from "../../../utils/formatters";
 import { getVietnameseOrderStatusLabel } from "./utils/orderHelpers";
 import useDebounce from "../../../hooks/useDebounce";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const OrdersByStatusList: React.FC = () => {
   // State for active tab
@@ -122,12 +122,7 @@ const OrdersByStatusList: React.FC = () => {
   // Order size state
   const [orderSize, setOrderSize] = useState<OrderSizeDTO | null>(null);
   const [estimatingSize, setEstimatingSize] = useState(false);
-  // Snackbar state
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
+
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Map tab index to order status
@@ -256,11 +251,6 @@ const OrdersByStatusList: React.FC = () => {
     setShowFilters(!showFilters);
   };
 
-  // Handle close snackbar
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
-
   // Fetch staff members for both task types
   const fetchStaffMembers = useCallback(async () => {
     try {
@@ -299,11 +289,7 @@ const OrdersByStatusList: React.FC = () => {
       setPrepStaff([]);
       setShippingStaff([]);
       if (openDialog) {
-        setSnackbar({
-          open: true,
-          message: "Không thể tải dữ liệu nhân viên. Vui lòng thử lại sau.",
-          severity: "error",
-        });
+        toast.error("Không thể tải dữ liệu nhân viên. Vui lòng thử lại sau.");
       }
     }
   }, [selectedTaskTypes, selectedOrder, openDialog]); // Add dependencies
@@ -317,12 +303,9 @@ const OrdersByStatusList: React.FC = () => {
       console.error("Error fetching available vehicles:", err);
       setVehicles([]);
       if (openDialog) {
-        setSnackbar({
-          open: true,
-          message:
-            "Không thể tải dữ liệu phương tiện khả dụng. Vui lòng thử lại sau.",
-          severity: "error",
-        });
+        toast.error(
+          "Không thể tải dữ liệu phương tiện khả dụng. Vui lòng thử lại sau."
+        );
       }
     }
   };
@@ -378,12 +361,9 @@ const OrdersByStatusList: React.FC = () => {
       }
     } catch (err) {
       console.error("Error estimating order size:", err);
-      setSnackbar({
-        open: true,
-        message:
-          "Không thể ước tính kích thước đơn hàng. Vui lòng thử lại sau.",
-        severity: "error",
-      });
+      toast.error(
+        "Không thể ước tính kích thước đơn hàng. Vui lòng thử lại sau."
+      );
       setOrderSize(null);
     } finally {
       setEstimatingSize(false);
@@ -492,11 +472,7 @@ const OrdersByStatusList: React.FC = () => {
       (selectedTaskTypes.includes(StaffTaskType.Shipping) &&
         !selectedShippingStaffId)
     ) {
-      setSnackbar({
-        open: true,
-        message: "Vui lòng chọn nhân viên cho tất cả các nhiệm vụ đã chọn",
-        severity: "error",
-      });
+      toast.error("Vui lòng chọn nhân viên cho tất cả các nhiệm vụ đã chọn");
       return;
     }
 
@@ -524,11 +500,9 @@ const OrdersByStatusList: React.FC = () => {
           vehicleId: selectedVehicleId || undefined,
         };
         await orderManagementService.assignMultipleStaffToOrder(multiRequest);
-        setSnackbar({
-          open: true,
-          message: `Đơn hàng #${selectedOrder.orderId} đã được phân công chuẩn bị và giao hàng thành công`,
-          severity: "success",
-        });
+        toast.success(
+          `Đơn hàng #${selectedOrder.orderId} đã được phân công chuẩn bị và giao hàng thành công`
+        );
       }
       // If only preparation is selected
       else if (prepSelected) {
@@ -539,11 +513,9 @@ const OrdersByStatusList: React.FC = () => {
           vehicleId: undefined,
         };
         await orderManagementService.assignMultipleStaffToOrder(multiRequest);
-        setSnackbar({
-          open: true,
-          message: `Đơn hàng #${selectedOrder.orderId} đã được phân công chuẩn bị thành công`,
-          severity: "success",
-        });
+        toast.success(
+          `Đơn hàng #${selectedOrder.orderId} đã được phân công chuẩn bị thành công`
+        );
       }
       // If only shipping is selected
       else if (shippingSelected) {
@@ -554,11 +526,9 @@ const OrdersByStatusList: React.FC = () => {
           vehicleId: selectedVehicleId || undefined,
         };
         await orderManagementService.assignMultipleStaffToOrder(multiRequest);
-        setSnackbar({
-          open: true,
-          message: `Đơn hàng #${selectedOrder.orderId} đã được phân công giao hàng thành công`,
-          severity: "success",
-        });
+        toast.success(
+          `Đơn hàng #${selectedOrder.orderId} đã được phân công giao hàng thành công`
+        );
       }
 
       // Refresh the data after allocation
@@ -566,13 +536,11 @@ const OrdersByStatusList: React.FC = () => {
       handleCloseDialog();
     } catch (err) {
       console.error("Error allocating order:", err);
-      setSnackbar({
-        open: true,
-        message: `Không thể phân công đơn hàng: ${
+      toast.error(
+        `Không thể phân công đơn hàng: ${
           err instanceof Error ? err.message : "Lỗi không xác định"
-        }`,
-        severity: "error",
-      });
+        }`
+      );
     } finally {
       setAllocating(false);
     }
@@ -993,7 +961,6 @@ const OrdersByStatusList: React.FC = () => {
       </StyledPaper>
 
       {/* Allocation Dialog */}
-      {/* Allocation Dialog */}
       <OrderAllocationDialog
         open={openDialog}
         onClose={handleCloseDialog}
@@ -1015,27 +982,6 @@ const OrdersByStatusList: React.FC = () => {
         onAllocate={handleAllocateOrder}
         allocating={allocating}
       />
-
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{
-            width: "100%",
-            borderRadius: 2,
-            boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-            fontWeight: 500,
-          }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </OrdersListContainer>
   );
 };

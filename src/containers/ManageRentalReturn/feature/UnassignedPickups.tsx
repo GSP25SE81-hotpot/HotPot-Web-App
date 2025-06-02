@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  Alert,
   Box,
   Chip,
   CircularProgress,
@@ -11,9 +10,8 @@ import {
   TablePagination,
   TableRow,
   Tooltip,
-  Snackbar,
 } from "@mui/material";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { getUnassignedPickups } from "../../../api/Services/rentalService";
 import {
   PagedResult,
@@ -26,6 +24,7 @@ import {
   StyledPaper,
 } from "../../../components/StyledComponents";
 // Import unassigned pickups specific styled components
+import { toast } from "react-toastify";
 import {
   AssignButton,
   BodyTableCell,
@@ -80,27 +79,23 @@ const UnassignedPickups: React.FC = () => {
   const [pickups, setPickups] =
     useState<PagedResult<RentOrderDetailResponse> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedPickup, setSelectedPickup] =
     useState<RentOrderDetailResponse | null>(null);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
 
-  // Success/Error notification states
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-
   const fetchPickups = useCallback(async () => {
     setLoading(true);
-    setError(null);
 
     try {
       const response = await getUnassignedPickups(page + 1, rowsPerPage);
       setPickups(response.data as PagedResult<RentOrderDetailResponse>);
     } catch (err) {
       console.error("Error fetching pickups:", err);
-      setError(err instanceof Error ? err.message : "Failed to fetch pickups");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to fetch pickups"
+      );
     } finally {
       setLoading(false);
     }
@@ -125,8 +120,6 @@ const UnassignedPickups: React.FC = () => {
   const handleAssignClick = (pickup: RentOrderDetailResponse) => {
     setSelectedPickup(pickup);
     setAssignDialogOpen(true);
-    // Clear any previous error messages
-    setError(null);
   };
 
   const handleAssignSuccess = (staffName: string, customerName: string) => {
@@ -134,11 +127,9 @@ const UnassignedPickups: React.FC = () => {
     setAssignDialogOpen(false);
     setSelectedPickup(null);
 
-    // Show success message
-    setSuccessMessage(
+    toast.success(
       `Đã phân công thành công nhân viên ${staffName} cho khách hàng ${customerName}`
     );
-    setShowSuccess(true);
 
     // Refresh the data
     fetchPickups();
@@ -149,33 +140,12 @@ const UnassignedPickups: React.FC = () => {
     setSelectedPickup(null);
   };
 
-  const handleCloseSuccessSnackbar = () => {
-    setShowSuccess(false);
-    setSuccessMessage(null);
-  };
-
   const isTableEmpty = !pickups?.items || pickups.items.length === 0;
 
   return (
     <StyledContainer maxWidth="xl">
       <Box sx={{ p: 3 }}>
         <PageTitle variant="h4">Phân công thu hồi</PageTitle>
-
-        {error && (
-          <Alert
-            severity="error"
-            sx={{
-              mb: 3,
-              borderRadius: 2,
-              "& .MuiAlert-icon": {
-                alignItems: "center",
-              },
-            }}
-            onClose={() => setError(null)}
-          >
-            {error}
-          </Alert>
-        )}
 
         <StyledPaper elevation={0}>
           {loading ? (
@@ -327,22 +297,6 @@ const UnassignedPickups: React.FC = () => {
             onSuccess={handleAssignSuccess}
           />
         )}
-
-        {/* Success Notification */}
-        <Snackbar
-          open={showSuccess}
-          autoHideDuration={6000}
-          onClose={handleCloseSuccessSnackbar}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        >
-          <Alert
-            onClose={handleCloseSuccessSnackbar}
-            severity="success"
-            sx={{ width: "100%" }}
-          >
-            {successMessage}
-          </Alert>
-        </Snackbar>
       </Box>
     </StyledContainer>
   );

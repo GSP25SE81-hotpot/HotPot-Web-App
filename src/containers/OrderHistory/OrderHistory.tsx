@@ -1,13 +1,14 @@
 // src/pages/OrderHistoryPage.tsx
+import { Box, Collapse, Typography } from "@mui/material";
 import React, { useState } from "react";
-import { Box, Typography, Collapse, Snackbar, Alert } from "@mui/material";
-import OrderHistoryList from "./OrderHistoryList";
-import OrderHistoryFilter from "./OrderHistoryFilter";
-import OrderHistoryQuickActions from "./OrderHistoryQuickActions";
-import { OrderHistoryFilterRequest } from "../../types/orderHistory";
-import { StyledContainer } from "../../components/StyledComponents";
 import { orderHistoryService } from "../../api/Services/orderHistoryService";
+import { StyledContainer } from "../../components/StyledComponents";
+import { OrderHistoryFilterRequest } from "../../types/orderHistory";
 import { exportOrdersToExcel } from "../../utils/excelExport";
+import OrderHistoryFilter from "./OrderHistoryFilter";
+import OrderHistoryList from "./OrderHistoryList";
+import OrderHistoryQuickActions from "./OrderHistoryQuickActions";
+import { toast } from "react-toastify";
 
 const OrderHistory: React.FC = () => {
   const [filter, setFilter] = useState<OrderHistoryFilterRequest>({
@@ -18,15 +19,6 @@ const OrderHistory: React.FC = () => {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(true);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isExporting, setIsExporting] = useState(false);
-  const [notification, setNotification] = useState<{
-    open: boolean;
-    message: string;
-    severity: "success" | "error" | "info" | "warning";
-  }>({
-    open: false,
-    message: "",
-    severity: "info",
-  });
 
   const handleFilterChange = (newFilter: OrderHistoryFilterRequest) => {
     setFilter({
@@ -54,11 +46,7 @@ const OrderHistory: React.FC = () => {
   const handleExport = async () => {
     try {
       setIsExporting(true);
-      setNotification({
-        open: true,
-        message: "Đang chuẩn bị xuất dữ liệu...",
-        severity: "info",
-      });
+      toast.info("Đang chuẩn bị xuất dữ liệu...");
 
       // Create a filter for export that gets all records
       const exportFilter: OrderHistoryFilterRequest = {
@@ -77,18 +65,11 @@ const OrderHistory: React.FC = () => {
       // Export to Excel
       await exportOrdersToExcel(result.items, fileName);
 
-      setNotification({
-        open: true,
-        message: "Xuất dữ liệu thành công!",
-        severity: "success",
-      });
+      toast.success("Xuất dữ liệu thành công!");
     } catch (error) {
       console.error("Lỗi khi xuất dữ liệu:", error);
-      setNotification({
-        open: true,
-        message: "Có lỗi xảy ra khi xuất dữ liệu",
-        severity: "error",
-      });
+
+      toast.error("Có lỗi xảy ra khi xuất dữ liệu");
     } finally {
       setIsExporting(false);
     }
@@ -100,13 +81,6 @@ const OrderHistory: React.FC = () => {
 
   const toggleFilterPanel = () => {
     setIsFilterPanelOpen(!isFilterPanelOpen);
-  };
-
-  const handleCloseNotification = () => {
-    setNotification((prev) => ({
-      ...prev,
-      open: false,
-    }));
   };
 
   return (
@@ -156,22 +130,6 @@ const OrderHistory: React.FC = () => {
           />
         </Box>
       </Box>
-
-      <Snackbar
-        open={notification.open}
-        autoHideDuration={6000}
-        onClose={handleCloseNotification}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleCloseNotification}
-          severity={notification.severity}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {notification.message}
-        </Alert>
-      </Snackbar>
     </StyledContainer>
   );
 };

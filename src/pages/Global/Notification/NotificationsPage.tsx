@@ -15,8 +15,6 @@ import {
   Divider,
   Typography,
   Box,
-  Snackbar,
-  Alert,
   CircularProgress,
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -28,6 +26,7 @@ import {
 import { formatDetailDate } from "../../../utils/formatters";
 import useAuth from "../../../hooks/useAuth";
 import { useAppNavigate } from "../../../utils/navigationUtils";
+import toast, { Toaster } from "react-hot-toast";
 
 const NotificationCenter: React.FC<NotificationCenterProps> = () => {
   const navigate = useAppNavigate(); // Use the context-based navigation
@@ -38,13 +37,6 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    notification: Notification | null;
-  }>({
-    open: false,
-    notification: null,
-  });
 
   const open = Boolean(anchorEl);
 
@@ -270,10 +262,26 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
   };
 
   const showNotificationToast = (notification: Notification): void => {
-    setSnackbar({
-      open: true,
-      notification,
-    });
+    toast(
+      (t: any) => (
+        <Box
+          onClick={() => {
+            handleNotificationClick(notification);
+            toast.dismiss(t.id);
+          }}
+          sx={{ cursor: "pointer", minWidth: 250 }}
+        >
+          <Typography variant="subtitle2" fontWeight="bold">
+            {notification.title}
+          </Typography>
+          <Typography variant="body2">{notification.message}</Typography>
+        </Box>
+      ),
+      {
+        duration: 6000,
+        position: "top-right",
+      }
+    );
   };
 
   const handleNotificationClick = (notification: Notification): void => {
@@ -287,29 +295,24 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
         navigate("/work-assignment");
         break;
       case "Order":
-        if (notification.data && notification.data.orderId) {
-          navigate(`/manage-order`);
-        }
+        navigate(`/manage-order`);
+
         break;
       case "Feedback":
-        if (notification.data && notification.data.feedbackId) {
-          navigate("/feedback");
-        }
+        navigate("/feedback");
+
         break;
       case "RentOrder":
-        if (notification.data && notification.data.rentalId) {
-          navigate(`/pickup-rental`);
-        }
+        navigate(`/pickup-rental`);
+
         break;
       case "PrepOrder":
-        if (notification.data && notification.data.orderId) {
-          navigate(`/assign-order`);
-        }
+        navigate(`/assign-order`);
+
         break;
       case "ShipOrder":
-        if (notification.data && notification.data.orderId) {
-          navigate(`/shipping`);
-        }
+        navigate(`/shipping`);
+
         break;
       case "Ingredient":
         navigate("/dashboard/listIngredients");
@@ -348,25 +351,9 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
     setAnchorEl(null);
   };
 
-  const handleSnackbarClose = (): void => {
-    setSnackbar({
-      ...snackbar,
-      open: false,
-    });
-  };
-
-  const handleSnackbarClick = (): void => {
-    if (snackbar.notification) {
-      if (!snackbar.notification.isRead) {
-        markAsRead(snackbar.notification.id);
-      }
-      handleNotificationClick(snackbar.notification);
-      handleSnackbarClose();
-    }
-  };
-
   return (
     <>
+      <Toaster />
       <IconButton
         color="inherit"
         aria-label="notifications"
@@ -500,29 +487,6 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
           </MenuItem>
         </Box>
       </Menu>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        {snackbar.notification ? (
-          <Alert
-            onClose={handleSnackbarClose}
-            severity="info" // Or dynamic based on notification type
-            sx={{ width: "100%", cursor: "pointer" }}
-            onClick={handleSnackbarClick}
-          >
-            <Typography variant="subtitle2" fontWeight="bold">
-              {snackbar.notification.title}
-            </Typography>
-            <Typography variant="body2">
-              {snackbar.notification.message}
-            </Typography>
-          </Alert>
-        ) : undefined}
-      </Snackbar>
     </>
   );
 };

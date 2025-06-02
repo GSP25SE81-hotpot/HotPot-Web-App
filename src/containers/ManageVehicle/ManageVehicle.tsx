@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-  Alert,
   Box,
   InputLabel,
   MenuItem,
   Select,
-  Snackbar,
   TableBody,
   TableCell,
   TablePagination,
@@ -48,6 +46,7 @@ import {
   UpdateVehicleRequest,
   VehicleDTO,
 } from "../../types/vehicle";
+import { toast } from "react-toastify";
 
 const defaultForm: CreateVehicleRequest = {
   name: "",
@@ -68,11 +67,6 @@ const ManageVehicle: React.FC = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editVehicle, setEditVehicle] = useState<VehicleDTO | null>(null);
   const [form, setForm] = useState<CreateVehicleRequest>(defaultForm);
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: "success" | "error";
-  }>({ open: false, message: "", severity: "success" });
   const [_loading, setLoading] = useState(false);
 
   const fetchVehicles = async () => {
@@ -91,11 +85,7 @@ const ManageVehicle: React.FC = () => {
       console.error("Error fetching vehicles:", error);
       setVehicles([]);
       setTotal(0);
-      setSnackbar({
-        open: true,
-        message: "Có lỗi khi tải dữ liệu phương tiện!",
-        severity: "error",
-      });
+      toast.error("Có lỗi khi tải dữ liệu phương tiện!");
     } finally {
       setLoading(false);
     }
@@ -147,19 +137,11 @@ const ManageVehicle: React.FC = () => {
       success = !!created;
     }
     if (success) {
-      setSnackbar({
-        open: true,
-        message: "Lưu phương tiện thành công!",
-        severity: "success",
-      });
+      toast.success("Lưu phương tiện thành công!");
       fetchVehicles();
       handleCloseDialog();
     } else {
-      setSnackbar({
-        open: true,
-        message: "Có lỗi khi lưu phương tiện!",
-        severity: "error",
-      });
+      toast.error("Có lỗi khi lưu phương tiện!");
     }
   };
 
@@ -167,18 +149,10 @@ const ManageVehicle: React.FC = () => {
     if (!window.confirm("Bạn có chắc muốn xóa phương tiện này?")) return;
     const success = await vehicleService.deleteVehicle(vehicleId);
     if (success) {
-      setSnackbar({
-        open: true,
-        message: "Xóa phương tiện thành công!",
-        severity: "success",
-      });
+      toast.success("Xóa phương tiện thành công!");
       fetchVehicles();
     } else {
-      setSnackbar({
-        open: true,
-        message: "Có lỗi khi xóa phương tiện!",
-        severity: "error",
-      });
+      toast.error("Có lỗi khi xóa phương tiện!");
     }
   };
 
@@ -484,26 +458,6 @@ const ManageVehicle: React.FC = () => {
           </SaveButton>
         </StyledDialogActions>
       </StyledDialog>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          severity={snackbar.severity}
-          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
-          sx={{
-            width: "100%",
-            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-            borderRadius: "8px",
-            fontWeight: 500,
-          }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </PageContainer>
   );
 };

@@ -1,10 +1,8 @@
 import {
-  Alert,
   CardContent,
   Chip,
   CircularProgress,
   Pagination,
-  Snackbar,
   Stack,
   Typography,
 } from "@mui/material";
@@ -36,8 +34,6 @@ const FeedbackManagement: React.FC = () => {
 
   // State for UI
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   // State for pagination
   const [pageNumber, setPageNumber] = useState<number>(1);
@@ -55,7 +51,7 @@ const FeedbackManagement: React.FC = () => {
   // Fetch feedback based on current filter
   const fetchFeedback = useCallback(async () => {
     setLoading(true);
-    setError(null);
+    toast.dismiss();
     try {
       console.log(`Fetching feedback with filter: ${filterType}`);
 
@@ -89,7 +85,6 @@ const FeedbackManagement: React.FC = () => {
       console.error("Full fetch error:", err);
       const errorMessage =
         err instanceof Error ? err.message : "Unknown error occurred";
-      setError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -128,12 +123,6 @@ const FeedbackManagement: React.FC = () => {
     setPageNumber(value);
   };
 
-  // Close alert messages
-  const handleCloseAlert = () => {
-    setError(null);
-    setSuccess(null);
-  };
-
   return (
     <FeedbackContainer>
       <FeedbackTitle variant="h4">Quản lý Phản hồi Khách hàng</FeedbackTitle>
@@ -167,35 +156,6 @@ const FeedbackManagement: React.FC = () => {
           sx={{ px: 2, borderRadius: "10px" }}
         />
       </FilterContainer>
-
-      {/* Error and Success Messages */}
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={handleCloseAlert}
-      >
-        <Alert
-          onClose={handleCloseAlert}
-          severity="error"
-          sx={{ width: "100%" }}
-        >
-          {error}
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        open={!!success}
-        autoHideDuration={6000}
-        onClose={handleCloseAlert}
-      >
-        <Alert
-          onClose={handleCloseAlert}
-          severity="success"
-          sx={{ width: "100%" }}
-        >
-          {success}
-        </Alert>
-      </Snackbar>
 
       {/* Loading Indicator */}
       {loading && (
