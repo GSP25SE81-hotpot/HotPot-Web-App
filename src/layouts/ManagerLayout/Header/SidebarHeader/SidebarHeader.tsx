@@ -5,7 +5,7 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
-import PersonIcon from "@mui/icons-material/Person";
+// import PersonIcon from "@mui/icons-material/Person";
 import {
   AppBar,
   Avatar,
@@ -241,10 +241,10 @@ const SidebarDrawer: React.FC<SidebarDrawerProps> = ({ open, setOpen }) => {
               anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
             >
               <MenuItem onClick={handleUserMenuClose}>
-                <ListItemIcon>
+                {/* <ListItemIcon>
                   <PersonIcon fontSize="small" />
                 </ListItemIcon>
-                <ListItemText>Thông tin cá nhân</ListItemText>
+                <ListItemText>Thông tin cá nhân</ListItemText> */}
               </MenuItem>
               <MenuItem onClick={handleLogout}>
                 <ListItemIcon>

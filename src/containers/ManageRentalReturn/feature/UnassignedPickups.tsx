@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Alert,
   Box,
@@ -55,6 +56,24 @@ const translateStatus = (status: string): string => {
     default:
       return status;
   }
+};
+
+// Helper function to group equipment items by name and count quantities
+const groupEquipmentItems = (items: any[]) => {
+  const grouped: { [key: string]: number } = {};
+
+  items.forEach((item) => {
+    if (grouped[item.name]) {
+      grouped[item.name] += 1;
+    } else {
+      grouped[item.name] = 1;
+    }
+  });
+
+  return Object.entries(grouped).map(([name, quantity]) => ({
+    name,
+    quantity,
+  }));
 };
 
 const UnassignedPickups: React.FC = () => {
@@ -187,73 +206,85 @@ const UnassignedPickups: React.FC = () => {
                         </BodyTableCell>
                       </StyledTableRow>
                     ) : (
-                      pickups.items.map((pickup) => (
-                        <StyledTableRow key={pickup.orderId}>
-                          <BodyTableCell>{pickup.orderCode}</BodyTableCell>
-                          <BodyTableCell>
-                            <CustomerName variant="body2">
-                              {pickup.customerName}
-                            </CustomerName>
-                            <CustomerPhone variant="caption">
-                              {pickup.customerPhone}
-                            </CustomerPhone>
-                          </BodyTableCell>
-                          <BodyTableCell>
-                            <Stack direction="column" spacing={1}>
-                              {pickup.equipmentItems.slice(0, 2).map((item) => (
-                                <Tooltip
-                                  key={item.detailId}
-                                  title={`${item.type} - ID: ${item.id}`}
-                                >
-                                  <Chip
-                                    label={item.name}
-                                    size="small"
-                                    variant="outlined"
-                                  />
-                                </Tooltip>
-                              ))}
-                              {pickup.equipmentItems.length > 2 && (
-                                <Tooltip
-                                  title={pickup.equipmentItems
-                                    .slice(2)
-                                    .map((item) => item.name)
-                                    .join(", ")}
-                                >
-                                  <Chip
-                                    label={`+${
-                                      pickup.equipmentItems.length - 2
-                                    } more`}
-                                    size="small"
-                                    variant="outlined"
-                                    color="primary"
-                                  />
-                                </Tooltip>
-                              )}
-                            </Stack>
-                          </BodyTableCell>
-                          <BodyTableCell>
-                            {formatDate(pickup.expectedReturnDate)}
-                          </BodyTableCell>
-                          <BodyTableCell>
-                            <StatusChip
-                              label={translateStatus(pickup.status)}
-                              status={pickup.status.toLowerCase()}
-                              size="small"
-                            />
-                          </BodyTableCell>
-                          <BodyTableCell>
-                            <AssignButton
-                              variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={() => handleAssignClick(pickup)}
-                              disabled={loading}
-                            >
-                              Phân công
-                            </AssignButton>
-                          </BodyTableCell>
-                        </StyledTableRow>
-                      ))
+                      pickups.items.map((pickup) => {
+                        // Group equipment items by name
+                        const groupedItems = groupEquipmentItems(
+                          pickup.equipmentItems
+                        );
+
+                        return (
+                          <StyledTableRow key={pickup.orderId}>
+                            <BodyTableCell>{pickup.orderCode}</BodyTableCell>
+                            <BodyTableCell>
+                              <CustomerName variant="body2">
+                                {pickup.customerName}
+                              </CustomerName>
+                              <CustomerPhone variant="caption">
+                                {pickup.customerPhone}
+                              </CustomerPhone>
+                            </BodyTableCell>
+
+                            <BodyTableCell>
+                              <Stack direction="column" spacing={1}>
+                                {groupedItems
+                                  .slice(0, 2)
+                                  .map((item: any, index: any) => (
+                                    <Tooltip
+                                      key={index}
+                                      title={`${item.name} (${item.quantity} cái)`}
+                                    >
+                                      <Chip
+                                        label={`${item.name} x ${item.quantity}`}
+                                        size="small"
+                                        variant="outlined"
+                                      />
+                                    </Tooltip>
+                                  ))}
+                                {groupedItems.length > 2 && (
+                                  <Tooltip
+                                    title={groupedItems
+                                      .slice(2)
+                                      .map(
+                                        (item) =>
+                                          `${item.name} x ${item.quantity}`
+                                      )
+                                      .join(", ")}
+                                  >
+                                    <Chip
+                                      label={`+${groupedItems.length - 2} more`}
+                                      size="small"
+                                      variant="outlined"
+                                      color="primary"
+                                    />
+                                  </Tooltip>
+                                )}
+                              </Stack>
+                            </BodyTableCell>
+
+                            <BodyTableCell>
+                              {formatDate(pickup.expectedReturnDate)}
+                            </BodyTableCell>
+                            <BodyTableCell>
+                              <StatusChip
+                                label={translateStatus(pickup.status)}
+                                status={pickup.status.toLowerCase()}
+                                size="small"
+                              />
+                            </BodyTableCell>
+                            <BodyTableCell>
+                              <AssignButton
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                onClick={() => handleAssignClick(pickup)}
+                                disabled={loading}
+                              >
+                                Phân công
+                              </AssignButton>
+                            </BodyTableCell>
+                          </StyledTableRow>
+                        );
+                      })
                     )}
                   </TableBody>
                 </Table>
