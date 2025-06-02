@@ -371,7 +371,6 @@ const EquipmentConditionDetails: React.FC = () => {
             >
               <Tab icon={<InfoIcon />} label="Chi tiết thiết bị" />
               <Tab icon={<HistoryIcon />} label="Lịch sử bảo trì" />
-              <Tab icon={<BuildIcon />} label="Vấn đề liên quan" />
             </Tabs>
             {/* Tab Chi tiết thiết bị */}
             <TabPanel value={tabValue} index={0}>
