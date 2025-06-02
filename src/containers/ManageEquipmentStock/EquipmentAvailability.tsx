@@ -6,7 +6,6 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import InfoIcon from "@mui/icons-material/Info";
 import {
-  Alert,
   Box,
   Button,
   CircularProgress,
@@ -20,14 +19,12 @@ import {
   Radio,
   RadioGroup,
   Select,
-  Snackbar,
   Stack,
   TablePagination,
   Typography,
   useTheme,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import stockService from "../../api/Services/stockService";
 import {
@@ -46,6 +43,7 @@ import {
   StyledCardContent,
 } from "../../components/manager/styles/EquipmentAvailabilityStyles";
 import { HotPotInventoryDto, HotpotStatus } from "../../types/stock";
+import toast, { Toaster } from "react-hot-toast";
 
 // Updated Equipment interface for hotpots only
 interface Equipment {
@@ -59,15 +57,6 @@ interface Equipment {
 const EquipmentAvailability: React.FC = () => {
   const theme = useTheme();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const [notification, setNotification] = useState<{
-    open: boolean;
-    message: string;
-    severity: "success" | "error" | "info" | "warning";
-  }>({
-    open: false,
-    message: "",
-    severity: "info",
-  });
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(
     null
   );
@@ -273,30 +262,17 @@ const EquipmentAvailability: React.FC = () => {
           )
         );
 
-        // Show notification
-        setNotification({
-          open: true,
-          message: `Tình trạng của ${selectedEquipment.name} đã cập nhật thành ${selectedCondition}`,
-          severity: "success",
-        });
-
+        toast.success(
+          `Tình trạng của ${selectedEquipment.name} đã cập nhật thành ${selectedCondition}`
+        );
         setConditionDialogOpen(false);
       } catch (error) {
         console.error("Error updating equipment condition:", error);
-        setNotification({
-          open: true,
-          message: "Không thể cập nhật tình trạng thiết bị",
-          severity: "error",
-        });
+        toast.error("Không thể cập nhật tình trạng thiết bị");
       } finally {
         setLoading(false);
       }
     }
-  };
-
-  // Function to handle notification close
-  const handleNotificationClose = () => {
-    setNotification({ ...notification, open: false });
   };
 
   // Check if equipment is available
@@ -338,7 +314,7 @@ const EquipmentAvailability: React.FC = () => {
 
   return (
     <EquipmentContainer>
-      <ToastContainer position="top-right" autoClose={5000} />
+      <Toaster position="top-right" />
       <Stack spacing={4}>
         <HeaderContainer>
           <PageTitle variant="h4" component="h1">
@@ -408,9 +384,9 @@ const EquipmentAvailability: React.FC = () => {
         )}
 
         {error && (
-          <Alert severity="error" sx={{ my: 2 }}>
+          <Typography variant="body2" color="error" sx={{ my: 2 }}>
             {error}
-          </Alert>
+          </Typography>
         )}
 
         {!loading && !error && getCurrentPageEquipment().length === 0 && (
@@ -638,26 +614,6 @@ const EquipmentAvailability: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Notification Snackbar */}
-      <Snackbar
-        open={notification.open}
-        autoHideDuration={6000}
-        onClose={handleNotificationClose}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleNotificationClose}
-          severity={notification.severity}
-          sx={{
-            width: "100%",
-            borderRadius: (theme) => theme.shape.borderRadius * 2,
-            boxShadow: (theme) => theme.shadows[3],
-          }}
-        >
-          {notification.message}
-        </Alert>
-      </Snackbar>
     </EquipmentContainer>
   );
 };

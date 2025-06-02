@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Box,
   CircularProgress,
@@ -64,6 +65,24 @@ interface ConfirmationDialogProps {
   notes: string;
   vehicleName?: string;
 }
+
+// Helper function to group equipment items by name
+const groupEquipmentItems = (items: any[]) => {
+  const grouped: { [key: string]: number } = {};
+
+  items.forEach((item) => {
+    if (grouped[item.name]) {
+      grouped[item.name] += 1;
+    } else {
+      grouped[item.name] = 1;
+    }
+  });
+
+  return Object.entries(grouped).map(([name, quantity]) => ({
+    name,
+    quantity,
+  }));
+};
 
 const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   open,
@@ -133,6 +152,9 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
 
   // Confirmation dialog state
   const [showConfirmation, setShowConfirmation] = useState(false);
+
+  // Group equipment items
+  const groupedEquipment = groupEquipmentItems(pickup.equipmentItems);
 
   // Reset form when dialog opens
   useEffect(() => {
@@ -207,11 +229,6 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
   const handleNotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNotes(event.target.value);
     setError(null); // Clear error when user types
-  };
-
-  const handleDetailSelect = (detailId: number) => {
-    setSelectedDetailId(detailId);
-    setError(null); // Clear error when user selects equipment
   };
 
   const handleAssignClick = () => {
@@ -325,19 +342,11 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
 
             <SectionTitle>Thiết bị cần lấy</SectionTitle>
             <EquipmentList>
-              {pickup.equipmentItems.map((item) => (
-                <EquipmentListItem
-                  key={item.detailId}
-                  disablePadding
-                  selected={selectedDetailId === item.detailId}
-                >
-                  <EquipmentListItemButton
-                    selected={selectedDetailId === item.detailId}
-                    onClick={() => handleDetailSelect(item.detailId)}
-                  >
+              {groupedEquipment.map((item) => (
+                <EquipmentListItem key={item.name} disablePadding>
+                  <EquipmentListItemButton>
                     <EquipmentListItemText
-                      primary={item.name}
-                      secondary={`Loại: ${item.type} | ID: ${item.id}`}
+                      primary={`${item.name} x ${item.quantity}`}
                     />
                   </EquipmentListItemButton>
                 </EquipmentListItem>

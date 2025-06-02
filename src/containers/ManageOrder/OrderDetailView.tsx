@@ -21,7 +21,6 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
-  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -82,6 +81,7 @@ import {
   formatDate,
   formatDetailDate,
 } from "../../utils/formatters";
+import { toast } from "react-toastify";
 
 // Helper function to get vehicle icon based on type
 const getVehicleIcon = (type?: VehicleType) => {
@@ -151,11 +151,6 @@ const OrderDetailView: React.FC = () => {
 
   // Action states
   const [updating, setUpdating] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -270,21 +265,16 @@ const OrderDetailView: React.FC = () => {
         newStatus
       );
       setOrder({ ...order, ...updatedOrder });
-      setSnackbar({
-        open: true,
-        message: `Trạng thái đơn hàng đã được cập nhật thành công`,
-        severity: "success",
-      });
+
+      toast.success(`Trạng thái đơn hàng đã được cập nhật thành công`);
       handleCloseStatusDialog();
     } catch (err) {
       console.error("Error updating order status:", err);
-      setSnackbar({
-        open: true,
-        message: `Không thể cập nhật trạng thái đơn hàng: ${
+      toast.error(
+        `Không thể cập nhật trạng thái đơn hàng: ${
           err instanceof Error ? err.message : "Lỗi không xác định"
-        }`,
-        severity: "error",
-      });
+        }`
+      );
     } finally {
       setUpdating(false);
     }
@@ -292,11 +282,7 @@ const OrderDetailView: React.FC = () => {
 
   const handleAllocateOrder = async () => {
     if (!order || !selectedStaffId) {
-      setSnackbar({
-        open: true,
-        message: "Vui lòng chọn một nhân viên",
-        severity: "error",
-      });
+      toast.error("Vui lòng chọn một nhân viên");
       return;
     }
     try {
@@ -312,21 +298,16 @@ const OrderDetailView: React.FC = () => {
         await orderManagementService.allocateOrderToStaffWithVehicle(request);
       // Update the order with the new shipping info
       setOrder({ ...order, shippingInfo: shippingOrder });
-      setSnackbar({
-        open: true,
-        message: `Đơn hàng đã được phân công cho nhân viên thành công`,
-        severity: "success",
-      });
+      toast.success(`Đơn hàng đã được phân công cho nhân viên thành công`);
       handleCloseAllocateDialog();
     } catch (err) {
       console.error("Error allocating order:", err);
-      setSnackbar({
-        open: true,
-        message: `Không thể phân công đơn hàng: ${
+
+      toast.error(
+        `Không thể phân công đơn hàng: ${
           err instanceof Error ? err.message : "Lỗi không xác định"
-        }`,
-        severity: "error",
-      });
+        }`
+      );
     } finally {
       setUpdating(false);
     }
@@ -356,21 +337,16 @@ const OrderDetailView: React.FC = () => {
       };
       // Update the order with the merged shipping info
       setOrder({ ...order, shippingInfo: updatedShippingInfo });
-      setSnackbar({
-        open: true,
-        message: `Trạng thái giao hàng đã được cập nhật thành công`,
-        severity: "success",
-      });
+      toast.success(`Trạng thái giao hàng đã được cập nhật thành công`);
       handleCloseDeliveryStatusDialog();
     } catch (err) {
       console.error("Error updating delivery status:", err);
-      setSnackbar({
-        open: true,
-        message: `Không thể cập nhật trạng thái giao hàng: ${
+
+      toast.error(
+        `Không thể cập nhật trạng thái giao hàng: ${
           err instanceof Error ? err.message : "Lỗi không xác định"
-        }`,
-        severity: "error",
-      });
+        }`
+      );
     } finally {
       setUpdating(false);
     }
@@ -396,28 +372,18 @@ const OrderDetailView: React.FC = () => {
       };
       // Update the order with the merged shipping info
       setOrder({ ...order, shippingInfo: updatedShippingInfo });
-      setSnackbar({
-        open: true,
-        message: `Thời gian giao hàng đã được cập nhật thành công`,
-        severity: "success",
-      });
+      toast.success(`Thời gian giao hàng đã được cập nhật thành công`);
       handleCloseDeliveryTimeDialog();
     } catch (err) {
       console.error("Error updating delivery time:", err);
-      setSnackbar({
-        open: true,
-        message: `Không thể cập nhật thời gian giao hàng: ${
+      toast.error(
+        `Không thể cập nhật thời gian giao hàng: ${
           err instanceof Error ? err.message : "Lỗi không xác định"
-        }`,
-        severity: "error",
-      });
+        }`
+      );
     } finally {
       setUpdating(false);
     }
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
   };
   // Group hot pot items by name
   const groupedItems = useMemo(() => {
@@ -1374,26 +1340,6 @@ const OrderDetailView: React.FC = () => {
           </DialogActions>
         </Dialog>
       </LocalizationProvider>
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{
-            width: "100%",
-            borderRadius: 2,
-            boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-            fontWeight: 500,
-          }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </DetailPageContainer>
   );
 };

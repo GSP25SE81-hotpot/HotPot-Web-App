@@ -1,7 +1,6 @@
 // src/pages/Staff/RecordReturn/RecordReturn.tsx
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
-  Alert,
   Box,
   Button,
   FormHelperText,
@@ -9,8 +8,8 @@ import {
   InputAdornment,
   InputLabel,
   MenuItem,
-  Snackbar,
   Typography,
+  Alert,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import React, { useState } from "react";
@@ -31,6 +30,7 @@ import {
 import { useApi } from "../../../hooks/useApi";
 import { formatDate } from "../../../utils/formatters";
 import { UnifiedReturnRequest } from "../../../types/rentalPickup";
+import { toast } from "react-toastify";
 
 interface LocationState {
   assignmentId?: number;
@@ -55,11 +55,6 @@ const RecordReturn: React.FC = () => {
     returnCondition?: string;
     damageFee?: string;
   }>({});
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
 
   const { loading, error, execute } = useApi(rentalService.recordReturn);
 
@@ -130,22 +125,15 @@ const RecordReturn: React.FC = () => {
 
       if (response && response.success) {
         // Luôn sử dụng thông báo tiếng Việt
-        setSnackbar({
-          open: true,
-          message: "Đã ghi nhận trả thiết bị thành công",
-          severity: "success",
-        });
+
+        toast.success("Đã ghi nhận trả thiết bị thành công");
 
         // Navigate back after a short delay
         setTimeout(() => {
           navigate(-1);
         }, 2000);
       } else {
-        setSnackbar({
-          open: true,
-          message: "Không thể ghi nhận trả thiết bị. Vui lòng thử lại.",
-          severity: "error",
-        });
+        toast.error("Không thể ghi nhận trả thiết bị. Vui lòng thử lại.");
       }
     } catch (err) {
       console.error("Error:", err);
@@ -163,17 +151,8 @@ const RecordReturn: React.FC = () => {
           errorMessage = "Không tìm thấy thiết bị hoặc đơn hàng.";
         }
       }
-
-      setSnackbar({
-        open: true,
-        message: errorMessage,
-        severity: "error",
-      });
+      toast.error(errorMessage);
     }
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
   };
 
   return (
@@ -351,20 +330,6 @@ const RecordReturn: React.FC = () => {
           </Box>
         </StyledPaper>
       </Box>
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </StyledContainer>
   );
 };
