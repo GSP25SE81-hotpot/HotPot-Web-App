@@ -44,7 +44,7 @@ type RoleTranslations = {
 const roleTranslations: RoleTranslations = {
   Staff: "Nhân viên",
   Manager: "Quản lý",
-  Admin: "Quản trị viên",
+  Admin: "Chủ sỡ hữu",
 };
 
 const translateRole = (role: string | undefined): string => {
