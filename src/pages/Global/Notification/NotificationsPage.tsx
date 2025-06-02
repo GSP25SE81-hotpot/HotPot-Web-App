@@ -299,8 +299,11 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
 
         break;
       case "Feedback":
-        navigate("/feedback");
-
+        if (auth?.user?.role === "Admin") {
+          navigate("/dashboard/feedback");
+        } else {
+          navigate("/feedback");
+        }
         break;
       case "RentOrder":
         navigate(`/pickup-rental`);
