@@ -73,7 +73,7 @@ const TableMaintenanceHotpot = () => {
       <CTable
         data={dataCombo}
         tableHeaderTitle={tableHeader}
-        title="Bảng Nổi  Lẩu"
+        title="Bảng Nồi Lẩu"
         selectedData={selecteData}
         menuAction={
           <MenuActionTableHotpotDetail

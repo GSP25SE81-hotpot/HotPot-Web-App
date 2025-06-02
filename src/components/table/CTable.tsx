@@ -190,6 +190,7 @@ const CTable: React.FC<CTableProps> = ({
       const statusConfig: { [key: string]: { label: string; color: any } } = {
         Pending: { label: "Đang chờ", color: "warning" },
         Completed: { label: "Hoàn thành", color: "success" },
+        InProgress: { label: "Đang tiến hành", color: "info" },
         "In Progress": { label: "Đang tiến hành", color: "info" },
         Cancelled: { label: "Huỷ", color: "error" },
       };

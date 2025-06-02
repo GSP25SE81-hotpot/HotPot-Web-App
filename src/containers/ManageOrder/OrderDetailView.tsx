@@ -34,7 +34,7 @@ import Grid from "@mui/material/Grid2";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { orderManagementService } from "../../api/Services/orderManagementService";
 import staffService from "../../api/Services/staffService";
@@ -70,6 +70,7 @@ import {
   DeliveryStatusUpdateRequest,
   DeliveryTimeUpdateRequest,
   OrderDetailDTO,
+  OrderItemDTO,
   OrderStatus,
   StaffTaskType,
   VehicleType,
@@ -418,6 +419,34 @@ const OrderDetailView: React.FC = () => {
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
+  // Group hot pot items by name
+  const groupedItems = useMemo(() => {
+    if (!order || !order.orderItems) return [];
+
+    const itemsMap = new Map<string, OrderItemDTO>();
+
+    order.orderItems.forEach((item) => {
+      if (item.itemType === "Hotpot") {
+        const existing = itemsMap.get(item.itemName);
+        if (existing) {
+          // Sum quantities for hot pots with same name
+          itemsMap.set(item.itemName, {
+            ...existing,
+            quantity: existing.quantity + item.quantity,
+          });
+        } else {
+          // Add new hot pot entry
+          itemsMap.set(item.itemName, { ...item });
+        }
+      } else {
+        // Non-hotpot items remain as-is
+        const key = `${item.itemType}-${item.itemId}`;
+        itemsMap.set(key, { ...item });
+      }
+    });
+
+    return Array.from(itemsMap.values());
+  }, [order]);
 
   if (loading) {
     return (
@@ -519,7 +548,7 @@ const OrderDetailView: React.FC = () => {
                   <SectionTitle>Chi tiết đơn hàng</SectionTitle>
                   <OrderItemsContainer>
                     {/* Display order items */}
-                    {order.orderItems.length > 0 ? (
+                    {groupedItems.length > 0 ? (
                       <Box sx={{ mb: 3 }}>
                         <Table>
                           <TableHead>
@@ -536,8 +565,8 @@ const OrderDetailView: React.FC = () => {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {order.orderItems.map((item) => (
-                              <TableRow key={item.orderDetailId}>
+                            {groupedItems.map((item) => (
+                              <TableRow key={`${item.itemType}-${item.itemId}`}>
                                 <TableCell>{item.itemName}</TableCell>
                                 <TableCell>
                                   <Box
