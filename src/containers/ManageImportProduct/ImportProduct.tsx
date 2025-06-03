@@ -84,6 +84,18 @@ const ImportProduct: React.FC = () => {
     batches: [],
   });
 
+  // Helper function to get unit options for an ingredient
+  const getUnitOptions = (ingredientId: number) => {
+    const ingredient = ingredients.find(
+      (i: any) => i.ingredientId === ingredientId
+    );
+    if (!ingredient) return [{ value: "g", label: "g" }];
+
+    // Create options based on the ingredient's unit
+    const baseUnit = ingredient.unit;
+    const options = [{ value: baseUnit, label: baseUnit }];
+    return options;
+  };
   //debounce
   const debounce = useDebounce(searchTerm, 500);
 
@@ -224,13 +236,16 @@ const ImportProduct: React.FC = () => {
   const addSelectedBatches = () => {
     if (selectedIngredients.length === 0) return;
 
-    const newBatches = selectedIngredients.map((id) => ({
-      ingredientId: id,
-      totalAmount: 100,
-      bestBeforeDate: new Date().toISOString(),
-      unit: "g", // Default unit
-      provideCompany: "", // Initialize with empty string
-    }));
+    const newBatches = selectedIngredients.map((id) => {
+      const ingredient = ingredients.find((i) => i.ingredientId === id);
+      return {
+        ingredientId: id,
+        totalAmount: 100,
+        bestBeforeDate: new Date().toISOString(),
+        unit: ingredient?.unit || "g", // Use ingredient's unit as default
+        provideCompany: "",
+      };
+    });
 
     setModel({
       ...model,
@@ -477,6 +492,8 @@ const ImportProduct: React.FC = () => {
                   .map((batch, displayIndex) => {
                     const actualIndex =
                       (batchesPage - 1) * batchesPerPage + displayIndex;
+                    const unitOptions = getUnitOptions(batch.ingredientId);
+
                     return (
                       <Paper
                         key={actualIndex}
@@ -547,14 +564,20 @@ const ImportProduct: React.FC = () => {
                             <TextField
                               select
                               size="small"
-                              value={batch.unit || "g"}
+                              value={batch.unit}
                               onChange={(e) =>
                                 updateBatch(actualIndex, "unit", e.target.value)
                               }
                               sx={{ minWidth: 80 }}
                             >
-                              <MenuItem value="g">g</MenuItem>
-                              <MenuItem value="kg">kg</MenuItem>
+                              {unitOptions.map((option) => (
+                                <MenuItem
+                                  key={option.value}
+                                  value={option.value}
+                                >
+                                  {option.label}
+                                </MenuItem>
+                              ))}
                             </TextField>
                           </Box>
 
