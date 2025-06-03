@@ -94,6 +94,16 @@ const ImportProduct: React.FC = () => {
     // Create options based on the ingredient's unit
     const baseUnit = ingredient.unit;
     const options = [{ value: baseUnit, label: baseUnit }];
+
+    // Add kg option if the unit is g
+    if (baseUnit === "g") {
+      options.push({ value: "kg", label: "kg" });
+    }
+    // Add l option if the unit is ml
+    else if (baseUnit === "ml") {
+      options.push({ value: "l", label: "l" });
+    }
+
     return options;
   };
   //debounce
