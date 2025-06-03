@@ -49,7 +49,10 @@ const CreateIngredients: React.FC = () => {
       .required("Bắt buộc có mô tả")
       .min(10, "Tối thiểu 10 kí tự"),
     imageURL: Yup.string().min(1, "Bắt buộc có hình"),
-    unit: Yup.string().trim().required("Bắt buộc nhập đơn vị đo lường"),
+    unit: Yup.string()
+      .trim()
+      .matches(/^[^0-9]+$/, "Đơn vị đo lường không được chứa số")
+      .required("Bắt buộc nhập đơn vị đo lường"),
     minStockLevel: Yup.number()
       .required("Bắt buộc nhập mức tồn kho tối thiểu")
       .min(0, "Giá trị không hợp lệ"),
