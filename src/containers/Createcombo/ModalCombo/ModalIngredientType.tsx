@@ -289,7 +289,7 @@ const IngredientsTypeSelectorModal: React.FC<IngredientsTypeSelectorProps> = ({
                   Chọn
                 </TableCell>
                 <TableCell>Tên Nguyên Liệu</TableCell>
-                <TableCell align="center">Số lượng</TableCell>
+                <TableCell align="center">Số loại nguyên liệu</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
