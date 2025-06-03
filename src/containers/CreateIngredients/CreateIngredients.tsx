@@ -7,6 +7,7 @@ import {
   Paper,
   Divider,
   Stack,
+  MenuItem,
 } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import * as Yup from "yup";
@@ -30,7 +31,7 @@ import { IngredientAddSchema } from "../../types/ingredients";
 const CreateIngredients: React.FC = () => {
   const [types, setTypes] = useState<any[]>([]);
   const navigate = useNavigate();
-
+  const units = ["g", "ml"];
   const defaultValues: IngredientAddSchema = {
     name: "",
     description: "",
@@ -49,7 +50,9 @@ const CreateIngredients: React.FC = () => {
       .required("Bắt buộc có mô tả")
       .min(10, "Tối thiểu 10 kí tự"),
     imageURL: Yup.string().min(1, "Bắt buộc có hình"),
-    unit: Yup.string().trim().required("Bắt buộc nhập đơn vị đo lường"),
+    unit: Yup.string()
+      .required("Bắt buộc chọn đơn vị đo lường")
+      .oneOf(units, "Đơn vị không hợp lệ"),
     minStockLevel: Yup.number()
       .required("Bắt buộc nhập mức tồn kho tối thiểu")
       .min(0, "Giá trị không hợp lệ"),
@@ -168,12 +171,6 @@ const CreateIngredients: React.FC = () => {
                   options={types || []}
                   label="Loại nguyên liệu"
                 />
-
-                <RHFTextField
-                  name="unit"
-                  label="Đơn vị đo lường"
-                  placeholder="Nhập đơn vị đo lường (g, kg, ml, etc)"
-                />
               </Stack>
 
               <Box sx={{ mt: 4 }}>
@@ -185,19 +182,37 @@ const CreateIngredients: React.FC = () => {
                 </Typography>
 
                 <Grid2 container spacing={2}>
+                  {/* Combined measurementValue and unit */}
                   <Grid2 size={{ desktop: 12 }}>
-                    <RHFTextFieldNumber
-                      name="measurementValue"
-                      label="Khối lượng một phần"
-                      type="number"
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">g</InputAdornment>
-                        ),
-                        inputProps: { min: 0 },
-                      }}
-                    />
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      Khối lượng một phần
+                    </Typography>
+                    <Grid2 container spacing={1}>
+                      <Grid2 size={{ mobile: 8, desktop: 8 }}>
+                        <RHFTextFieldNumber
+                          name="measurementValue"
+                          type="number"
+                          placeholder="Nhập khối lượng"
+                          slotProps={{
+                            input: {
+                              inputProps: { min: 0 },
+                            },
+                          }}
+                          fullWidth
+                        />
+                      </Grid2>
+                      <Grid2 size={{ mobile: 4, desktop: 4 }}>
+                        <RHFTextField name="unit" select fullWidth>
+                          {units.map((unit) => (
+                            <MenuItem key={unit} value={unit}>
+                              {unit}
+                            </MenuItem>
+                          ))}
+                        </RHFTextField>
+                      </Grid2>
+                    </Grid2>
                   </Grid2>
+
                   <Grid2 size={{ mobile: 12, desktop: 6 }}>
                     <RHFTextFieldNumber
                       name="minStockLevel"

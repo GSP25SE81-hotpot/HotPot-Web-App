@@ -5,7 +5,7 @@ export interface Ingredient {
   imageURL: string;
   minStockLevel: number;
   quantity: number;
-  measurementUnit: string;
+  unit: string;
   ingredientTypeID: number;
   ingredientTypeName: string;
   price: number;

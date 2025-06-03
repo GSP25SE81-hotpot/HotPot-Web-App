@@ -264,6 +264,20 @@ const ManageVehicle: React.FC = () => {
           setPage(0);
         }}
         rowsPerPageOptions={[5, 10, 25]}
+        labelRowsPerPage="Số hàng mỗi trang:"
+        labelDisplayedRows={({ from, to, count }) =>
+          `${from}–${to} trong ${count}`
+        }
+        slotProps={{
+          actions: {
+            previousButton: {
+              "aria-label": "Trang trước",
+            },
+            nextButton: {
+              "aria-label": "Trang sau",
+            },
+          },
+        }}
         sx={{
           marginTop: 2,
           backgroundColor: "white",
