@@ -216,12 +216,27 @@ const ImportProduct: React.FC = () => {
       setIsSaving(true);
       console.log("Saving model:", model);
 
+      // Prepare data with unit conversions
       const prepareData = model.batches.map(
-        ({ unit, totalAmount, ...rest }) => ({
-          ...rest,
-          totalAmount: unit === "kg" ? totalAmount * 1000 : totalAmount,
-        })
+        ({ unit, totalAmount, ...rest }) => {
+          let convertedAmount = totalAmount;
+
+          // Convert kg to g (1kg = 1000g)
+          if (unit === "kg") {
+            convertedAmount = totalAmount * 1000;
+          }
+          // Convert l to ml (1l = 1000ml)
+          else if (unit === "l") {
+            convertedAmount = totalAmount * 1000;
+          }
+
+          return {
+            ...rest,
+            totalAmount: convertedAmount,
+          };
+        }
       );
+
       console.log(prepareData);
       const data = { batches: prepareData };
 
@@ -375,23 +390,25 @@ const ImportProduct: React.FC = () => {
                 placeholder="Tìm kiếm theo tên nguyên liệu hoặc loại..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                  endAdornment: searchTerm && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        size="small"
-                        onClick={handleClearSearch}
-                        edge="end"
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                    endAdornment: searchTerm && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={handleClearSearch}
+                          edge="end"
+                        >
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
                 }}
               />
             </Box>
@@ -626,10 +643,14 @@ const ImportProduct: React.FC = () => {
                                 );
                               }
                             }}
-                            InputProps={{
-                              inputProps: { min: getTodayFormatted() },
+                            slotProps={{
+                              input: {
+                                inputProps: { min: getTodayFormatted() },
+                              },
+                              inputLabel: {
+                                shrink: true,
+                              },
                             }}
-                            InputLabelProps={{ shrink: true }}
                           />
                         </Box>
                       </Paper>
