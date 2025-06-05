@@ -77,6 +77,7 @@ const IngredientCard = styled(Paper)(({ theme }) => ({
   },
 }));
 
+
 const HotpotCustomComboCreate: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [videoLink, setVideoLink] = useState<string>("");
@@ -92,22 +93,26 @@ const HotpotCustomComboCreate: React.FC = () => {
     setOpenModal(true);
   };
 
-  const handleModalSubmit = (selectedMeats: any[]) => {
-    console.log(selectedMeats);
+  
 
-    const updatedIngredients = selectedMeats.map((ingredient, idx) => ({
-      id: idx,
-      ingredientTypeId: ingredient.ingredientTypeId || 0,
-      minQuantity: 1,
-      name: ingredient.name,
-    }));
-
-    console.log(updatedIngredients, "up");
-
-    setIngredients(updatedIngredients);
-    setValue("ingredients", updatedIngredients);
-    setOpenModal(false);
-  };
+const handleModalSubmit = (selectedMeats: any[]) => {
+  console.log(selectedMeats);
+  const currentSize = watch('size') || 0;
+  const minQuantity = Math.ceil(currentSize / 2) || 1; // Default to 1 if calculation is 0
+  
+  const updatedIngredients = selectedMeats.map((ingredient, idx) => ({
+    id: idx,
+    ingredientTypeId: ingredient.ingredientTypeId || 0,
+    minQuantity: minQuantity,
+    name: ingredient.name,
+  }));
+  
+  console.log(updatedIngredients, "up");
+  setIngredients(updatedIngredients);
+  setValue("ingredients", updatedIngredients);
+  setOpenModal(false);
+};
+  
 
   const defaultValues: CreateHotPotCustomFormSchema = {
     name: "",
@@ -120,6 +125,8 @@ const HotpotCustomComboCreate: React.FC = () => {
     ingredients: [],
   };
 
+
+  
   const validationSchema = Yup.object().shape({
     name: Yup.string().trim().required("Bắt buộc có tên sản phẩm"),
     size: Yup.number()
@@ -155,6 +162,32 @@ const HotpotCustomComboCreate: React.FC = () => {
   } = methods;
 
   const values = watch();
+  React.useEffect(() => {
+  // Get the current size value
+  const currentSize = watch('size');
+  const minQuantity = Math.ceil(currentSize / 2) || 1;
+  
+  // Only update if we have ingredients and a valid size
+  if (ingredients.length > 0 && currentSize > 0) {
+    // Create a copy of ingredients with updated minQuantity where needed
+    const updatedIngredients = ingredients.map(ingredient => ({
+      ...ingredient,
+      minQuantity: Math.max(ingredient.minQuantity, minQuantity)
+    }));
+    
+    // Only update if something actually changed
+    if (JSON.stringify(updatedIngredients) !== JSON.stringify(ingredients)) {
+      setIngredients(updatedIngredients);
+      
+      // Update form values
+      updatedIngredients.forEach((ingredient, index) => {
+        setValue(`ingredients.${index}.minQuantity`, ingredient.minQuantity, {
+          shouldValidate: true
+        });
+      });
+    }
+  }
+}, [watch('size'), ingredients.length]);
 
   const onSubmit = async (values: CreateHotPotCustomFormSchema) => {
     const prepareParams = {
@@ -226,6 +259,7 @@ const HotpotCustomComboCreate: React.FC = () => {
       setUploadProgress(null);
     }
   };
+  
 
   const handleRemoveIngredient = (index: number) => {
     const newIngredients = [...ingredients];
@@ -234,14 +268,18 @@ const HotpotCustomComboCreate: React.FC = () => {
     setValue("ingredients", newIngredients);
   };
 
-  const updateIngredientMinQuantity = (index: number, value: number) => {
-    const newIngredients = [...ingredients];
-    newIngredients[index].minQuantity = value;
-    setIngredients(newIngredients);
-    setValue(`ingredients.${index}.minQuantity`, value, {
-      shouldValidate: true,
-    });
-  };
+const updateIngredientMinQuantity = (index: number, value: number) => {
+  const currentSize = watch('size') || 0;
+  const minValue = Math.ceil(currentSize / 2) || 1;
+  const newValue = Math.max(value, minValue);
+  
+  const newIngredients = [...ingredients];
+  newIngredients[index].minQuantity = newValue;
+  setIngredients(newIngredients);
+  setValue(`ingredients.${index}.minQuantity`, newValue, {
+    shouldValidate: true,
+  });
+};
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -460,10 +498,11 @@ const HotpotCustomComboCreate: React.FC = () => {
                               label="Số lượng tối thiểu"
                               type="number"
                               size="small"
+                              value={ingredient.minQuantity} // Explicitly set the value
                               slotProps={{
                                 input: {
                                   inputProps: {
-                                    min: 0,
+                                    min: Math.ceil(watch('size') / 2) || 1,
                                   },
                                 },
                               }}
@@ -476,10 +515,7 @@ const HotpotCustomComboCreate: React.FC = () => {
                                 },
                               }}
                               onChange={(e) => {
-                                updateIngredientMinQuantity(
-                                  index,
-                                  Number(e.target.value)
-                                );
+                                updateIngredientMinQuantity(index, Number(e.target.value));
                               }}
                             />
                           </Box>

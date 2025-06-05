@@ -94,20 +94,22 @@ const HotpotComboCreate: React.FC = () => {
     setOpenModal(true);
   };
 
-  const handleModalSubmit = (selectedMeats: any[]) => {
-    const updatedIngredients = selectedMeats.map((ingredient) => ({
-      ingredientId: ingredient.ingredientId || 0,
-      name: ingredient.name || "",
-      quantity: 1,
-      price: ingredient.price || 0,
-      imageURL: ingredient.imageURL || "",
-    }));
-
-    setIngredients(updatedIngredients);
-    setValue("ingredients", updatedIngredients);
-    setOpenModal(false);
-  };
-
+const handleModalSubmit = (selectedMeats: any[]) => {
+  const currentSize = watch('size') || 0;
+  const minQuantity = Math.ceil(currentSize / 2) || 1; // Default to 1 if calculation is 0
+  
+  const updatedIngredients = selectedMeats.map((ingredient) => ({
+    ingredientId: ingredient.ingredientId || 0,
+    name: ingredient.name || "",
+    quantity: minQuantity, // Changed from 1 to minQuantity
+    price: ingredient.price || 0,
+    imageURL: ingredient.imageURL || "",
+  }));
+  
+  setIngredients(updatedIngredients);
+  setValue("ingredients", updatedIngredients);
+  setOpenModal(false);
+};
   const defaultValues: CreateHotPotFormSchema = {
     name: "",
     description: "",
@@ -124,8 +126,8 @@ const HotpotComboCreate: React.FC = () => {
     name: Yup.string().trim().required("Bắt buộc có tên sản phẩm"),
     description: Yup.string().trim().required("Bắt buộc có mô tả"),
     size: Yup.number()
-      .required("Bắt buộc có kích thước")
-      .min(1, "Kích thước phải lớn hơn 0"),
+      .required("Bắt buộc có số lượng")
+      .min(1, "Số lượng phải lớn hơn 0"),
     imageURLs: Yup.array().of(Yup.string()).min(1, "Bắt buộc có hình"),
     tutorialVideo: Yup.object().shape({
       name: Yup.string().required("Bắt buộc có tên video"),
@@ -156,6 +158,36 @@ const HotpotComboCreate: React.FC = () => {
   } = methods;
 
   const values = watch();
+  React.useEffect(() => {
+  const currentSize = watch('size');
+  
+  // Only update if we have ingredients and a valid size
+  if (ingredients.length > 0 && currentSize > 0) {
+    const minQuantity = Math.ceil(currentSize / 2);
+    
+    // Create a copy of ingredients with updated quantity where needed
+    const updatedIngredients = ingredients.map(ingredient => ({
+      ...ingredient,
+      quantity: Math.max(ingredient.quantity, minQuantity)
+    }));
+    
+    // Only update if something actually changed
+    const hasChanges = updatedIngredients.some(
+      (item, idx) => item.quantity !== ingredients[idx].quantity
+    );
+    
+    if (hasChanges) {
+      setIngredients(updatedIngredients);
+      
+      // Update form values
+      updatedIngredients.forEach((ingredient, index) => {
+        setValue(`ingredients.${index}.quantity`, ingredient.quantity, {
+          shouldValidate: true
+        });
+      });
+    }
+  }
+}, [watch('size')]); 
 
   const onSubmit = async (values: CreateHotPotFormSchema) => {
     const prepareParams = {
@@ -434,20 +466,20 @@ const HotpotComboCreate: React.FC = () => {
                               slotProps={{
                                 input: {
                                   inputProps: {
-                                    min: 1,
+                                    min: Math.ceil(watch('size') / 2),
                                   },
                                 },
                               }}
                               sx={{ width: 120 }}
                               onChange={(e) => {
                                 const newIngredients = [...ingredients];
-                                newIngredients[index].quantity = Number(
-                                  e.target.value
-                                );
+                                const value = Number(e.target.value);
+                                const minValue = Math.ceil(watch('size') / 2);
+                                newIngredients[index].quantity = value < minValue ? minValue : value;
                                 setIngredients(newIngredients);
                                 setValue(
                                   `ingredients.${index}.quantity`,
-                                  Number(e.target.value),
+                                  value < minValue ? minValue : value,
                                   {
                                     shouldValidate: true,
                                   }
