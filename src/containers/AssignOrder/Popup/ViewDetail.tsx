@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Close,
   LocationOn,
@@ -6,6 +8,7 @@ import {
   Receipt,
   StickyNote2,
 } from "@mui/icons-material";
+// import DirectionsCarIcon from "@mui/icons-material/DirectionsCar"; // Added import
 import {
   Avatar,
   Box,
@@ -24,7 +27,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react"; // Added useMemo
 import staffGetOrderApi from "../../../api/staffGetOrderAPI";
 import { colors } from "../../../styles/Color/color";
 import { StaffOrderDetailType } from "../../../types/staffOrderDetailType";
@@ -44,6 +47,20 @@ const ViewDetail: React.FC<ViewDetailProps> = ({
   const [orderDetails, setOrderDetails] =
     React.useState<StaffOrderDetailType>();
   const [loading, setLoading] = React.useState(false);
+
+  // Calculate total items count
+  const totalItems = useMemo(() => {
+    if (!orderDetails) return 0;
+    const foodCount = orderDetails.orderDetails.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+    const rentalCount = orderDetails.rentalDetails.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+    return foodCount + rentalCount;
+  }, [orderDetails]);
 
   //call api
   const getOrderDetailById = async () => {
@@ -269,6 +286,45 @@ const ViewDetail: React.FC<ViewDetailProps> = ({
                     </Box>
                   </Box>
                 </Box>
+
+                {/* Added vehicle information */}
+                {/* <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <Chip
+                    icon={<DirectionsCarIcon />}
+                    label="Phương tiện"
+                    size="small"
+                    sx={{
+                      minWidth: 120,
+                      bgcolor: "#e3f2fd",
+                      color: "#1565c0",
+                    }}
+                  />
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                      {orderDetails?.vehicle?.vehicleName}
+                    </Typography>
+                    <Divider orientation="vertical" flexItem />
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily: "monospace",
+                          fontWeight: 600,
+                          color: colors.gray_600,
+                          bgcolor: "#f5f5f5",
+                          px: 2,
+                          py: 0.5,
+                          borderRadius: 1,
+                          border: `1px solid ${colors.gray_300}`,
+                        }}
+                      >
+                        {orderDetails?.vehicle?.licensePlate}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box> */}
               </Stack>
             </Paper>
 
@@ -295,13 +351,14 @@ const ViewDetail: React.FC<ViewDetailProps> = ({
               >
                 <Receipt />
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Chi tiết sản phẩm ({orderDetails.orderDetails.length} món)
+                  Chi tiết sản phẩm ({totalItems} món)
                 </Typography>
               </Box>
 
               <List sx={{ p: 0 }}>
+                {/* Food Items */}
                 {orderDetails.orderDetails.map((item, index) => (
-                  <React.Fragment key={index}>
+                  <React.Fragment key={`food-${item.orderDetailId}`}>
                     <ListItem
                       sx={{
                         py: 2,
@@ -355,7 +412,73 @@ const ViewDetail: React.FC<ViewDetailProps> = ({
                         />
                       </Box>
                     </ListItem>
-                    {index < orderDetails.orderDetails.length - 1 && (
+                    {(index < orderDetails.orderDetails.length - 1 ||
+                      orderDetails.rentalDetails.length > 0) && (
+                      <Divider sx={{ mx: 3 }} />
+                    )}
+                  </React.Fragment>
+                ))}
+
+                {/* Rental Items */}
+                {orderDetails.rentalDetails.map((item, index) => (
+                  <React.Fragment key={`rental-${item.rentalDetailId}`}>
+                    <ListItem
+                      sx={{
+                        py: 2,
+                        px: 3,
+                        "&:hover": {
+                          bgcolor: "#f8f9fa",
+                        },
+                        transition: "background-color 0.2s ease",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          width: "100%",
+                          gap: 2,
+                        }}
+                      >
+                        <Avatar
+                          sx={{
+                            bgcolor: colors.primary,
+                            width: 32,
+                            height: 32,
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          {orderDetails.orderDetails.length + index + 1}
+                        </Avatar>
+
+                        <Box sx={{ flex: 1 }}>
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontWeight: 600,
+                              color: colors.gray_600,
+                              mb: 0.5,
+                            }}
+                          >
+                            {item.hotpotName}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Số series: {item.seriesNumber}
+                          </Typography>
+                        </Box>
+
+                        <Chip
+                          label={`${item.quantity}`}
+                          sx={{
+                            bgcolor: colors.primary,
+                            color: "white",
+                            fontWeight: 600,
+                            minWidth: 80,
+                          }}
+                        />
+                      </Box>
+                    </ListItem>
+                    {index < orderDetails.rentalDetails.length - 1 && (
                       <Divider sx={{ mx: 3 }} />
                     )}
                   </React.Fragment>

@@ -4,7 +4,7 @@ import axios from "axios";
 const axiosClient = axios.create({
   // baseURL: `https://hpty.vinhuser.one/api`,
   // baseURL: `https://localhost:7163/api`,
-  baseURL: `http://14.225.204.144:8888/api`,
+  baseURL: `https://hpty.nexminial.cloud/api`,
   headers: {
     "Content-Type": "application/json",
     "Access-Control-Allow-Methods": "*",

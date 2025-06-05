@@ -117,7 +117,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
     }
 
     const newConnection = new HubConnectionBuilder()
-      .withUrl("https://hpty.vinhuser.one/notificationHub", {
+      .withUrl("https://hpty.nexminial.cloud/notificationHub", {
         accessTokenFactory: () => {
           if (!auth.accessToken) {
             throw new Error("No access token available");
