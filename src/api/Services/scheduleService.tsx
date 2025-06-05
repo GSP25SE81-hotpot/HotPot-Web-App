@@ -30,8 +30,8 @@ const getShiftType = (shiftStartTime: any, shiftName?: string): string => {
     hour = shiftStartTime.hours || 0;
   }
 
-  if (hour >= 5 && hour < 12) return "Morning Shift";
-  if (hour >= 12 && hour < 15) return "Evening Shift";
+  if (hour >= 8 && hour <= 12) return "Morning Shift";
+  if (hour > 12 && hour < 15) return "Evening Shift";
   return "All Day Shift";
 };
 
