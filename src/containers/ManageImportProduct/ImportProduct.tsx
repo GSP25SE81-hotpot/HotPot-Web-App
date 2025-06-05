@@ -113,17 +113,29 @@ const ImportProduct: React.FC = () => {
   const [batchesPage, setBatchesPage] = useState<number>(1);
   const [batchesPerPage] = useState<number>(5); // Fixed size of 5
 
+    const normalizeVietnameseText = (text: string): string => {
+  if (!text) return '';
+  
+  return text.normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+    .replace(/đ/g, 'd').replace(/Đ/g, 'D'); // Replace Vietnamese đ/Đ
+  };
+
   // Filter ingredients based on search term
   useEffect(() => {
     if (!debounce) {
       setFilteredIngredients(ingredients);
     } else {
+      const normalizedSearchTerm = normalizeVietnameseText(debounce.toLowerCase());
+      
       const filtered = ingredients.filter(
-        (ingredient) =>
-          ingredient.name.toLowerCase().includes(debounce.toLowerCase()) ||
-          ingredient.ingredientTypeName
-            .toLowerCase()
-            .includes(debounce.toLowerCase())
+        (ingredient) => {
+          const normalizedName = normalizeVietnameseText(ingredient.name.toLowerCase());
+          const normalizedTypeName = normalizeVietnameseText(ingredient.ingredientTypeName.toLowerCase());
+          
+          return normalizedName.includes(normalizedSearchTerm) || 
+                normalizedTypeName.includes(normalizedSearchTerm);
+        }
       );
       setFilteredIngredients(filtered);
     }
@@ -154,6 +166,8 @@ const ImportProduct: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+
 
   // Handle checkbox selection in table
   const handleCheckboxToggle = (ingredientId: number) => {
