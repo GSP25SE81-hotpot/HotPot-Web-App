@@ -61,6 +61,19 @@ const Detail: React.FC<ViewDetailProps> = ({ orderId, onOpen, onClose }) => {
     }
   }, [orderId, onOpen]);
 
+  const totalItems = React.useMemo(() => {
+    if (!orderDetails) return 0;
+    const foodCount = orderDetails.orderDetails.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+    const rentalCount = orderDetails.rentalDetails.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+    return foodCount + rentalCount;
+  }, [orderDetails]);
+
   return (
     <Dialog
       open={onOpen}
@@ -329,11 +342,12 @@ const Detail: React.FC<ViewDetailProps> = ({ orderId, onOpen, onClose }) => {
               >
                 <Receipt />
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Chi tiết sản phẩm ({orderDetails.orderDetails.length} món)
+                  Chi tiết sản phẩm ({totalItems} món)
                 </Typography>
               </Box>
 
               <List sx={{ p: 0 }}>
+                {/* Food Items */}
                 {orderDetails.orderDetails.map((item, index) => (
                   <React.Fragment key={index}>
                     <ListItem
@@ -390,6 +404,70 @@ const Detail: React.FC<ViewDetailProps> = ({ orderId, onOpen, onClose }) => {
                       </Box>
                     </ListItem>
                     {index < orderDetails.orderDetails.length - 1 && (
+                      <Divider sx={{ mx: 3 }} />
+                    )}
+                  </React.Fragment>
+                ))}
+                {/* Rental Items */}
+                {orderDetails.rentalDetails.map((item, index) => (
+                  <React.Fragment key={`rental-${item.rentalDetailId}`}>
+                    <ListItem
+                      sx={{
+                        py: 2,
+                        px: 3,
+                        "&:hover": {
+                          bgcolor: "#f8f9fa",
+                        },
+                        transition: "background-color 0.2s ease",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          width: "100%",
+                          gap: 2,
+                        }}
+                      >
+                        <Avatar
+                          sx={{
+                            bgcolor: colors.primary,
+                            width: 32,
+                            height: 32,
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          {orderDetails.orderDetails.length + index + 1}
+                        </Avatar>
+
+                        <Box sx={{ flex: 1 }}>
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontWeight: 600,
+                              color: colors.gray_600,
+                              mb: 0.5,
+                            }}
+                          >
+                            {item.hotpotName}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Số series: {item.seriesNumber}
+                          </Typography>
+                        </Box>
+
+                        <Chip
+                          label={`${item.quantity}`}
+                          sx={{
+                            bgcolor: colors.primary,
+                            color: "white",
+                            fontWeight: 600,
+                            minWidth: 80,
+                          }}
+                        />
+                      </Box>
+                    </ListItem>
+                    {index < orderDetails.rentalDetails.length - 1 && (
                       <Divider sx={{ mx: 3 }} />
                     )}
                   </React.Fragment>
