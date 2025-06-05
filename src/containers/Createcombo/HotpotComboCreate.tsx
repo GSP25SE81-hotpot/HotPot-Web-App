@@ -278,7 +278,7 @@ const HotpotComboCreate: React.FC = () => {
                 />
                 <RHFTextField
                   name="size"
-                  label="Kích thước (khẩu phần)"
+                  label="Số lượng người ăn"
                   type="number"
                   sx={{ mb: 2 }}
                 />

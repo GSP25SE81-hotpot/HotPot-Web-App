@@ -63,13 +63,16 @@ const WorkAssignmentSchedule: React.FC = () => {
           setPersonalSchedule(mySchedule);
         }
         // Nếu người dùng là quản lý, lấy lịch của tất cả nhân viên
+        // if (isManagerRole) {
+        //   const staffSchedules = await fetchAllStaffSchedules();
+        //   if (mySchedule) {
+        //     setAllSchedules([mySchedule, ...staffSchedules]);
+        //   } else {
+        //     setAllSchedules(staffSchedules);
+        //   }
         if (isManagerRole) {
           const staffSchedules = await fetchAllStaffSchedules();
-          if (mySchedule) {
-            setAllSchedules([mySchedule, ...staffSchedules]);
-          } else {
-            setAllSchedules(staffSchedules);
-          }
+          setAllSchedules(staffSchedules);
         } else if (mySchedule) {
           // Đối với nhân viên, chỉ hiển thị lịch của họ
           setAllSchedules([mySchedule]);

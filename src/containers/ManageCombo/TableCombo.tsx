@@ -266,7 +266,7 @@ const TableCombo = () => {
               setPage(0); // Reset page
             }}
           >
-            <MenuItem value="true">Combo tự chọn</MenuItem>
+            <MenuItem value="true">Combo tùy chỉnh</MenuItem>
             <MenuItem value="false">Combo mặc định</MenuItem>
           </Select>
         </FormControl>
