@@ -2,11 +2,13 @@
 
 import InfoIcon from "@mui/icons-material/Info";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import BlockIcon from "@mui/icons-material/Block";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import * as React from "react";
 import MaintenanceHotpotTableModal from "../../../containers/ManageHotpotDetail/Modal/MaintenanceHotpotTableModal";
+import DeleteSeriHotpotModal from "../../../containers/ManageHotpotDetail/Modal/ModalDeleteSeriHotpot";
 
 interface MenuActionTableHotpotDetailProps {
   hotpotData: any;
@@ -18,13 +20,15 @@ interface MenuActionTableHotpotDetailProps {
 
 const MenuActionTableHotpotDetail: React.FC<
   MenuActionTableHotpotDetailProps
-> = ({ hotpotData, onOpenDetail, onFetch }) => {
+> = ({ hotpotData, onOpenDetail, onFetch, onOpenDelete }) => {
   const [anchorEl, setAnchorEl] = React.useState<any>(null);
   const [openDetail, setOpenDetail] = React.useState<boolean>(false);
+  const [openDelete, setOpenDelete] = React.useState<boolean>(false);
   const open = Boolean(anchorEl);
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -45,6 +49,18 @@ const MenuActionTableHotpotDetail: React.FC<
       onFetch();
     }
     handleCloseDetail();
+  };
+
+  const handleCloseDelete = () => {
+    onOpenDelete(null);
+    setOpenDelete(false);
+    setAnchorEl(null);
+  };
+
+  const handleDelete = () => {
+    onOpenDelete(hotpotData);
+    setOpenDelete(true);
+    setAnchorEl(null);
   };
   return (
     <div>
@@ -81,6 +97,10 @@ const MenuActionTableHotpotDetail: React.FC<
           <InfoIcon sx={{ mr: "4px" }} color="info" />
           <span>Chi Tiết Bảo Trì</span>
         </MenuItem>
+        <MenuItem onClick={() => handleDelete()}>
+          <BlockIcon sx={{ mr: "4px" }} color="error" />
+          <span>Xóa</span>
+        </MenuItem>
       </Menu>
 
       {openDetail && (
@@ -89,6 +109,15 @@ const MenuActionTableHotpotDetail: React.FC<
           open={openDetail}
           handleCloseModal={handleCloseDetail}
           onFetch={handleStatusUpdate}
+        />
+      )}
+
+      {openDelete && (
+        <DeleteSeriHotpotModal
+          comboName={hotpotData}
+          open={openDelete}
+          onClose={handleCloseDelete}
+          onConfirm={handleStatusUpdate}
         />
       )}
     </div>

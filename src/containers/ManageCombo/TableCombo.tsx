@@ -315,6 +315,8 @@ const TableCombo = () => {
             <MenuActionTableCombo
               hotpotData={selectedData}
               onOpenDetail={selecteData}
+              onOpenDelete={selecteData}
+              onFetch={onFetch}
             />
           }
           eventAction={<ActionCreateNewCombo />}

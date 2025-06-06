@@ -1,25 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import InfoIcon from "@mui/icons-material/Info";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import BlockIcon from "@mui/icons-material/Block";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import * as React from "react";
 import { useNavigate } from "react-router";
 import config from "../../../configs";
+import DeleteHotpotModal from "../../../containers/ManageHotpot/Modal/ModalDeleteHotpot";
 
 interface MenuActionTableHotpotDetailProps {
   hotpotData: any;
   onOpenUpdate?: any;
   onOpenDetail?: any;
   onOpenDelete?: any;
+  onFetch?: () => void;
 }
 
 const MenuActionTableHotpot: React.FC<MenuActionTableHotpotDetailProps> = ({
   hotpotData,
   onOpenDetail,
+  onOpenDelete,
+  onFetch,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<any>(null);
+  const [openDelete, setOpenDelete] = React.useState<boolean>(false);
   const navigate = useNavigate();
   const open = Boolean(anchorEl);
   const handleClick = (event: any) => {
@@ -36,6 +42,18 @@ const MenuActionTableHotpot: React.FC<MenuActionTableHotpotDetailProps> = ({
         hotpotData.hotpotId
       )
     );
+  };
+
+  const handleCloseDelete = () => {
+    onOpenDelete(null);
+    setOpenDelete(false);
+    setAnchorEl(null);
+  };
+
+  const handleDelete = () => {
+    onOpenDelete(hotpotData);
+    setOpenDelete(true);
+    setAnchorEl(null);
   };
 
   return (
@@ -73,7 +91,20 @@ const MenuActionTableHotpot: React.FC<MenuActionTableHotpotDetailProps> = ({
           <InfoIcon sx={{ mr: "4px" }} color="info" />
           <span>Chi Tiết</span>
         </MenuItem>
+        <MenuItem onClick={() => handleDelete()}>
+          <BlockIcon sx={{ mr: "4px" }} color="error" />
+          <span>Xoá</span>
+        </MenuItem>
       </Menu>
+
+      {openDelete && (
+        <DeleteHotpotModal
+          open={openDelete}
+          onClose={handleCloseDelete}
+          onConfirm={onFetch}
+          comboName={hotpotData}
+        />
+      )}
     </div>
   );
 };

@@ -164,6 +164,8 @@ const TableHotpotDetail = () => {
           <MenuActionTableHotpotDetail
             hotpotData={selectedData}
             onOpenDetail={selecteData}
+            onFetch={handleFetch}
+            onOpenDelete={selecteData}
           />
         }
         selectedData={selecteData}

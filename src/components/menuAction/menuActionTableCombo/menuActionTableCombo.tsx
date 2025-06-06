@@ -7,7 +7,7 @@ import MenuItem from "@mui/material/MenuItem";
 import * as React from "react";
 import { useNavigate } from "react-router";
 import config from "../../../configs";
-// import BlockIcon from "@mui/icons-material/Block";
+import BlockIcon from "@mui/icons-material/Block";
 import DeleteComboModal from "../../../containers/ManageCombo/Modal/DeleteComboModal";
 
 interface MenuActionTableComboProps {
@@ -21,7 +21,7 @@ interface MenuActionTableComboProps {
 const MenuActionTableCombo: React.FC<MenuActionTableComboProps> = ({
   hotpotData,
   onOpenDetail,
-  // onOpenDelete,
+  onOpenDelete,
   onFetch,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<any>(null);
@@ -41,11 +41,11 @@ const MenuActionTableCombo: React.FC<MenuActionTableComboProps> = ({
     );
   };
 
-  // const handleDelete = () => {
-  //   onOpenDelete(hotpotData);
-  //   setOpenDelete(true);
-  //   setAnchorEl(null);
-  // };
+  const handleDelete = () => {
+    onOpenDelete(hotpotData);
+    setOpenDelete(true);
+    setAnchorEl(null);
+  };
 
   const handleCloseDelete = () => {
     setOpenDelete(false);
@@ -85,10 +85,10 @@ const MenuActionTableCombo: React.FC<MenuActionTableComboProps> = ({
           <InfoIcon sx={{ mr: "4px" }} color="info" />
           <span>Chi Tiết</span>
         </MenuItem>
-        {/* <MenuItem onClick={() => handleDelete()}>
+        <MenuItem onClick={() => handleDelete()}>
           <BlockIcon sx={{ mr: "4px" }} color="error" />
           <span>Xóa</span>
-        </MenuItem> */}
+        </MenuItem>
       </Menu>
 
       {openDelete && (
