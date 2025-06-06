@@ -168,26 +168,22 @@ const TableBatchDetail = () => {
     },
     {
       id: "initialQuantity",
-      label: "SL ban đầu",
+      label: "SL ban đầu (phần)",
       align: "right" as const,
       minWidth: 90,
-      render: (value: number, row: IngredientBatchDetail) => (
+      render: (value: number, _row: IngredientBatchDetail) => (
         <Typography
           variant="body2"
           fontWeight="medium"
           sx={{ fontSize: "0.8rem" }}
         >
           {value.toLocaleString()}
-          <br />
-          <Typography component="span" variant="caption" color="text.secondary">
-            {row.unit}
-          </Typography>
         </Typography>
       ),
     },
     {
       id: "remainingQuantity",
-      label: "SL còn lại",
+      label: "SL còn lại (phần)",
       align: "right" as const,
       minWidth: 90,
       render: (value: number, row: IngredientBatchDetail) => {
@@ -214,9 +210,7 @@ const TableBatchDetail = () => {
             >
               {value.toLocaleString()}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {row.unit}
-            </Typography>
+
           </Box>
         );
       },

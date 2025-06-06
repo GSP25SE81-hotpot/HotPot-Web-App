@@ -106,21 +106,23 @@ const TableHotpot = () => {
           >
             Nồi cần bảo trì
           </Button>
-          <CartBadge
-            badgeContent={damageDevice ?? 0}
-            color="error"
-            sx={{
-              "& .MuiBadge-badge": {
-                fontSize: "14px",
-                fontWeight: "bold",
-                animation: "bounce 1.2s infinite",
-              },
-              "@keyframes bounce": {
-                "0%, 100%": { transform: "scale(1)" },
-                "50%": { transform: "scale(1.2)" },
-              },
-            }}
-          />
+          {damageDevice > 0 && (
+    <CartBadge
+      badgeContent={damageDevice}
+      color="error"
+      sx={{
+        "& .MuiBadge-badge": {
+          fontSize: "14px",
+          fontWeight: "bold",
+          animation: "bounce 1.2s infinite",
+        },
+        "@keyframes bounce": {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.2)" },
+        },
+      }}
+    />
+  )}
         </Stack>
       </Box>
     );
