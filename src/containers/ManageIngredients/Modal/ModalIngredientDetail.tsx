@@ -350,14 +350,14 @@ const DetailPopupIngredient: React.FC<DetailPopupIngredientProps> = ({
                       icon={<InventoryIcon color="primary" />}
                       label="Mức tồn kho tối thiểu"
                       value={`${detailData?.minStockLevel || 0} ${
-                        "phần"
+                        detailData?.unit || "đơn vị"
                       }`}
                     />
 
                     <DetailItem
                       icon={<BusinessIcon color="primary" />}
-                      label="khối lượng 1 phần"
-                      value={detailData?.measurementValue + " " + detailData?.unit || "N/A"}
+                      label="Đơn vị đo"
+                      value={detailData?.unit || "N/A"}
                     />
 
                     <Grid2 size={{ mobile: 12 }}>
