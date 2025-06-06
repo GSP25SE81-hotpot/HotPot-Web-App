@@ -1,31 +1,57 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import InfoIcon from "@mui/icons-material/Info";
+// import InfoIcon from "@mui/icons-material/Info";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import * as React from "react";
-// import { useNavigate } from "react-router";
-// import config from "../../../configs";
-import { Delete, Update } from "@mui/icons-material";
+import {
+  Delete,
+  // Update
+} from "@mui/icons-material";
 
 interface MenuActionTableDiscountProps {
   discountData: any;
-  onOpenUpdate?: any;
-  onOpenDetail?: any;
-  onOpenDelete?: any;
+  onOpenUpdate?: (data: any) => void;
+  onOpenDetail?: (data: any) => void;
+  onOpenDelete?: (data: any) => void;
   fetchData?: () => void;
 }
 
-const MenuActionTableDiscount: React.FC<MenuActionTableDiscountProps> = () => {
+const MenuActionTableDiscount: React.FC<MenuActionTableDiscountProps> = ({
+  discountData,
+  // onOpenUpdate,
+  // onOpenDetail,
+  onOpenDelete,
+}) => {
   const [anchorEl, setAnchorEl] = React.useState<any>(null);
-  // const navigate = useNavigate();
   const open = Boolean(anchorEl);
+
   const handleClick = (event: any) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  // const handleDetailClick = (e: React.MouseEvent) => {
+  //   e.stopPropagation();
+  //   onOpenDetail?.(discountData);
+  //   handleClose();
+  // };
+
+  // const handleUpdateClick = (e: React.MouseEvent) => {
+  //   e.stopPropagation();
+  //   onOpenUpdate?.(discountData);
+  //   handleClose();
+  // };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onOpenDelete?.(discountData);
+    handleClose();
   };
 
   return (
@@ -38,36 +64,25 @@ const MenuActionTableDiscount: React.FC<MenuActionTableDiscountProps> = () => {
         onClick={handleClick}
         sx={{ width: "20px" }}
       >
-        <MoreHorizIcon
-          sx={{
-            color: "#6464CD",
-          }}
-        />
+        <MoreHorizIcon sx={{ color: "#6464CD" }} />
       </Button>
       <Menu
         id="demo-positioned-menu"
-        aria-labelledby="demo-positioned-button"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
+        anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
-        <MenuItem>
+        {/* <MenuItem onClick={handleDetailClick}>
           <InfoIcon sx={{ mr: "4px" }} color="success" />
           <span>Chi Tiết</span>
         </MenuItem>
-        <MenuItem>
+        <MenuItem onClick={handleUpdateClick}>
           <Update sx={{ mr: "4px" }} color="info" />
           <span>Cập nhật</span>
-        </MenuItem>
-        <MenuItem>
+        </MenuItem> */}
+        <MenuItem onClick={handleDeleteClick}>
           <Delete sx={{ mr: "4px" }} color="error" />
           <span>Xóa</span>
         </MenuItem>

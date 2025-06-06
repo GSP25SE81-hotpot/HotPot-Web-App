@@ -5,10 +5,23 @@ import { DiscountType } from "../../types/discountType";
 import CTable from "../../components/table/CTable";
 import adminDiscountApi from "../../api/Services/adminDiscountAPI";
 import MenuActionTableDiscount from "../../components/menuAction/menuDiscountActionTable/menuDiscountActionTable";
-import { Box, Button, Grid2, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Grid2,
+  TextField,
+} from "@mui/material";
 import { Add } from "@mui/icons-material";
 import useDebounce from "../../hooks/useDebounce";
 import CreateNewDiscount from "./Popup/CreateNewDiscount";
+import DiscountDetail from "./Popup/DiscountDetail";
+import UpdateDiscount from "./Popup/UpdateDiscount";
+import { toast } from "react-toastify";
 
 interface searchToolInterface {
   filter: any;
@@ -47,6 +60,11 @@ const DiscountTable = () => {
     searchTerm: "",
   });
   const deBouceValue = useDebounce(filter, 500);
+  const [openDetail, setOpenDetail] = React.useState(false);
+  const [openUpdate, setOpenUpdate] = React.useState(false);
+  const [openDelete, setOpenDelete] = React.useState(false);
+  const [selectedDiscount, setSelectedDiscount] =
+    React.useState<DiscountType | null>(null);
 
   //select data
   const selecteData = (row: any) => {
@@ -122,6 +140,57 @@ const DiscountTable = () => {
     fetchDiscounts();
   }, [deBouceValue, page, size]);
 
+  // Handle discount actions
+  // const handleOpenDetail = (discount: DiscountType) => {
+  //   setSelectedDiscount(discount);
+  //   setOpenDetail(true);
+  // };
+
+  const handleOpenUpdate = (discount: DiscountType) => {
+    setSelectedDiscount(discount);
+    setOpenUpdate(true);
+  };
+
+  const handleOpenDelete = (discount: DiscountType) => {
+    setSelectedDiscount(discount);
+    setOpenDelete(true);
+  };
+
+  const handleCloseDetail = () => {
+    setOpenDetail(false);
+    setSelectedDiscount(null);
+  };
+
+  const handleCloseUpdate = () => {
+    setOpenUpdate(false);
+    setSelectedDiscount(null);
+  };
+
+  const handleCloseDelete = () => {
+    setOpenDelete(false);
+    setSelectedDiscount(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (selectedDiscount) {
+      try {
+        await adminDiscountApi.deleteDiscount(selectedDiscount.discountId);
+        fetchDiscounts();
+        handleCloseDelete();
+        toast.success("Xóa ưu đãi thành công!");
+      } catch (error: any) {
+        console.error("Error deleting discount:", error);
+
+        // Show error toast with custom message
+        if (error.response?.data?.message) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error("Có lỗi xảy ra khi xóa ưu đãi");
+        }
+      }
+    }
+  };
+
   return (
     <div>
       <CreateNewDiscount
@@ -129,6 +198,44 @@ const DiscountTable = () => {
         onClose={handleCloseAddModel}
         fetchDiscounts={fetchDiscounts}
       />
+
+      <DiscountDetail
+        open={openDetail}
+        onClose={handleCloseDetail}
+        discount={selectedDiscount}
+      />
+
+      <UpdateDiscount
+        open={openUpdate}
+        onClose={handleCloseUpdate}
+        discount={selectedDiscount}
+        fetchDiscounts={fetchDiscounts}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={openDelete}
+        onClose={handleCloseDelete}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Xác nhận xóa ưu đãi</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Bạn có chắc chắn muốn xóa ưu đãi "{selectedDiscount?.title}"? Hành
+            động này không thể hoàn tác.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDelete} color="primary">
+            Hủy
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" autoFocus>
+            Xác nhận xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <CTable
         data={discounts}
         tableHeaderTitle={tableHeader}
@@ -139,7 +246,9 @@ const DiscountTable = () => {
           <MenuActionTableDiscount
             discountData={selectedData}
             fetchData={fetchDiscounts}
-            onOpenDetail={selecteData}
+            // onOpenDetail={handleOpenDetail}
+            onOpenUpdate={handleOpenUpdate}
+            onOpenDelete={handleOpenDelete}
           />
         }
         selectedData={selecteData}
