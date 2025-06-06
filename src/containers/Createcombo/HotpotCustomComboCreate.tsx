@@ -116,7 +116,7 @@ const handleModalSubmit = (selectedMeats: any[]) => {
 
   const defaultValues: CreateHotPotCustomFormSchema = {
     name: "",
-    size: 0,
+    size: 1,
     imageURLs: [],
     tutorialVideo: {
       name: "",
@@ -127,27 +127,28 @@ const handleModalSubmit = (selectedMeats: any[]) => {
 
 
   
-  const validationSchema = Yup.object().shape({
-    name: Yup.string().trim().required("Bắt buộc có tên sản phẩm"),
-    size: Yup.number()
-      .required("Bắt buộc có kích thước")
-      .min(1, "Kích thước phải lớn hơn 0"),
-    imageURLs: Yup.array().of(Yup.string()).min(1, "Bắt buộc có hình"),
-    tutorialVideo: Yup.object().shape({
-      name: Yup.string().required("Bắt buộc có tên video"),
-      description: Yup.string().required("Bắt buộc có mô tả video"),
-    }),
-    ingredients: Yup.array()
-      .of(
-        Yup.object().shape({
-          ingredientTypeId: Yup.number().required("Thiếu loại nguyên liệu"),
-          minQuantity: Yup.number()
-            .required("Bắt buộc có số lượng tối thiểu")
-            .min(0, "Số lượng tối thiểu phải từ 0 trở lên"),
-        })
-      )
-      .min(1, "Bắt buộc có ít nhất một nguyên liệu"),
-  });
+const validationSchema = Yup.object().shape({
+  name: Yup.string().trim().required("Bắt buộc có tên sản phẩm"),
+  size: Yup.number()
+    .required("Bắt buộc có kích thước")
+    .min(1, "Kích thước phải lớn hơn 0")
+    .typeError("Kích thước phải là số"),
+  imageURLs: Yup.array().of(Yup.string()).min(1, "Bắt buộc có hình"),
+  tutorialVideo: Yup.object().shape({
+    name: Yup.string().required("Bắt buộc có tên video"),
+    description: Yup.string().required("Bắt buộc có mô tả video"),
+  }),
+  ingredients: Yup.array()
+    .of(
+      Yup.object().shape({
+        ingredientTypeId: Yup.number().required("Thiếu loại nguyên liệu"),
+        minQuantity: Yup.number()
+          .required("Bắt buộc có số lượng tối thiểu")
+          .min(1, "Số lượng tối thiểu phải từ 1 trở lên"), 
+      })
+    )
+    .min(1, "Bắt buộc có ít nhất một nguyên liệu"),
+});
 
   const methods = useForm<CreateHotPotCustomFormSchema>({
     resolver: yupResolver(validationSchema),
@@ -269,9 +270,7 @@ const handleModalSubmit = (selectedMeats: any[]) => {
   };
 
 const updateIngredientMinQuantity = (index: number, value: number) => {
-  const currentSize = watch('size') || 0;
-  const minValue = Math.ceil(currentSize / 2) || 1;
-  const newValue = Math.max(value, minValue);
+  const newValue = value < 1 ? 1 : value;
   
   const newIngredients = [...ingredients];
   newIngredients[index].minQuantity = newValue;
@@ -280,6 +279,7 @@ const updateIngredientMinQuantity = (index: number, value: number) => {
     shouldValidate: true,
   });
 };
+
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -318,6 +318,18 @@ const updateIngredientMinQuantity = (index: number, value: number) => {
                   label="Số lượng người ăn"
                   type="number"
                   sx={{ mb: 2 }}
+                  slotProps={{
+                    input: {
+                      inputProps: {
+                        min: 1, // Prevent negative values
+                      },
+                    },
+                  }}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    // Ensure value is at least 1
+                    setValue('size', value < 1 ? 1 : value);
+                  }}
                 />
 
                 <Box sx={{ mt: 3 }}>
@@ -498,11 +510,10 @@ const updateIngredientMinQuantity = (index: number, value: number) => {
                               label="Số lượng tối thiểu"
                               type="number"
                               size="small"
-                              value={ingredient.minQuantity} // Explicitly set the value
                               slotProps={{
                                 input: {
                                   inputProps: {
-                                    min: Math.ceil(watch('size') / 2) || 1,
+                                    min: 1, // Only enforce minimum of 1
                                   },
                                 },
                               }}
@@ -517,6 +528,7 @@ const updateIngredientMinQuantity = (index: number, value: number) => {
                               onChange={(e) => {
                                 updateIngredientMinQuantity(index, Number(e.target.value));
                               }}
+                              helperText={`Đề xuất: ${Math.ceil(watch('size') / 2)}`}
                             />
                           </Box>
                         </Box>

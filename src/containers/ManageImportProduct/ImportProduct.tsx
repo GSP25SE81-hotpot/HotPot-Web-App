@@ -391,7 +391,7 @@ const ImportProduct: React.FC = () => {
                   disabled={selectedIngredients.length === 0}
                   size="small"
                 >
-                  Thêm tất cả ({selectedIngredients.length})
+                  Nhập hàng({selectedIngredients.length})
                 </Button>
               </Box>
             </Box>

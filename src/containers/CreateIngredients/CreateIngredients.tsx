@@ -70,12 +70,16 @@ const CreateIngredients: React.FC = () => {
     defaultValues,
   });
 
-  const {
-    handleSubmit,
-    setValue,
-    reset,
-    formState: { isSubmitting },
-  } = methods;
+const {
+  handleSubmit,
+  setValue,
+  reset,
+  watch,
+  formState: { isSubmitting },
+} = methods;
+
+// Watch the unit field
+const selectedUnit = watch('unit');
 
   const fetchTypes = async () => {
     try {
@@ -85,6 +89,8 @@ const CreateIngredients: React.FC = () => {
       console.error("Error fetching ingredient types:", error);
     }
   };
+
+  
 
   useEffect(() => {
     fetchTypes();
@@ -219,9 +225,9 @@ const CreateIngredients: React.FC = () => {
                       label="Mức tồn kho tối thiểu"
                       type="number"
                       InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">g</InputAdornment>
-                        ),
+                        endAdornment: selectedUnit ? (
+                          <InputAdornment position="end">{selectedUnit}</InputAdornment>
+                        ) : null,
                         inputProps: { min: 0 },
                       }}
                     />

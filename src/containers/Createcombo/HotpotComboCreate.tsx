@@ -96,12 +96,12 @@ const HotpotComboCreate: React.FC = () => {
 
 const handleModalSubmit = (selectedMeats: any[]) => {
   const currentSize = watch('size') || 0;
-  const minQuantity = Math.ceil(currentSize / 2) || 1; // Default to 1 if calculation is 0
+  const suggestedQuantity = Math.ceil(currentSize / 2) || 1; // Default to 1 if calculation is 0
   
   const updatedIngredients = selectedMeats.map((ingredient) => ({
     ingredientId: ingredient.ingredientId || 0,
     name: ingredient.name || "",
-    quantity: minQuantity, // Changed from 1 to minQuantity
+    quantity: suggestedQuantity, // Set initial value to suggested quantity
     price: ingredient.price || 0,
     imageURL: ingredient.imageURL || "",
   }));
@@ -113,7 +113,7 @@ const handleModalSubmit = (selectedMeats: any[]) => {
   const defaultValues: CreateHotPotFormSchema = {
     name: "",
     description: "",
-    size: 0,
+    size: 1,
     imageURLs: [],
     tutorialVideo: {
       name: "",
@@ -126,23 +126,24 @@ const handleModalSubmit = (selectedMeats: any[]) => {
     name: Yup.string().trim().required("Bắt buộc có tên sản phẩm"),
     description: Yup.string().trim().required("Bắt buộc có mô tả"),
     size: Yup.number()
-      .required("Bắt buộc có số lượng")
-      .min(1, "Số lượng phải lớn hơn 0"),
+      .required("Bắt buộc có kích thước")
+      .min(1, "Kích thước phải lớn hơn 0")
+      .typeError("Kích thước phải là số"),
     imageURLs: Yup.array().of(Yup.string()).min(1, "Bắt buộc có hình"),
     tutorialVideo: Yup.object().shape({
       name: Yup.string().required("Bắt buộc có tên video"),
       description: Yup.string().required("Bắt buộc có mô tả video"),
     }),
     ingredients: Yup.array()
-      .of(
-        Yup.object().shape({
-          ingredientId: Yup.number().required("Thiếu ID nguyên liệu"),
-          quantity: Yup.number()
-            .required("Bắt buộc có số lượng")
-            .min(1, "Số lượng phải lớn hơn 0"),
-        })
-      )
-      .min(1, "Bắt buộc có ít nhất một nguyên liệu"),
+        .of(
+          Yup.object().shape({
+            ingredientId: Yup.number().required("Thiếu ID nguyên liệu"),
+            quantity: Yup.number()
+              .required("Bắt buộc có số lượng")
+              .min(1, "Số lượng phải lớn hơn 0"), // Only enforce minimum of 1
+          })
+        )
+        .min(1, "Bắt buộc có ít nhất một nguyên liệu"),
   });
 
   const methods = useForm<CreateHotPotFormSchema>({
@@ -313,6 +314,18 @@ const handleModalSubmit = (selectedMeats: any[]) => {
                   label="Số lượng người ăn"
                   type="number"
                   sx={{ mb: 2 }}
+                  slotProps={{
+                    input: {
+                      inputProps: {
+                        min: 1, // Prevent negative values
+                      },
+                    },
+                  }}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    // Ensure value is at least 1
+                    setValue('size', value < 1 ? 1 : value);
+                  }}
                 />
 
                 <Box sx={{ mt: 3 }}>
@@ -458,34 +471,36 @@ const handleModalSubmit = (selectedMeats: any[]) => {
                             {ingredient.name}
                           </Typography>
                           <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
-                            <RHFTextField
-                              name={`ingredients.${index}.quantity`}
-                              label="Số lượng"
-                              type="number"
-                              size="small"
-                              slotProps={{
-                                input: {
-                                  inputProps: {
-                                    min: Math.ceil(watch('size') / 2),
-                                  },
-                                },
-                              }}
-                              sx={{ width: 120 }}
-                              onChange={(e) => {
-                                const newIngredients = [...ingredients];
-                                const value = Number(e.target.value);
-                                const minValue = Math.ceil(watch('size') / 2);
-                                newIngredients[index].quantity = value < minValue ? minValue : value;
-                                setIngredients(newIngredients);
-                                setValue(
-                                  `ingredients.${index}.quantity`,
-                                  value < minValue ? minValue : value,
-                                  {
-                                    shouldValidate: true,
-                                  }
-                                );
-                              }}
-                            />
+                           <RHFTextField
+  name={`ingredients.${index}.quantity`}
+  label="Số lượng"
+  type="number"
+  size="small"
+  placeholder={`Đề xuất: ${Math.ceil(watch('size') / 2)}`}
+  slotProps={{
+    input: {
+      inputProps: {
+        min: 1, // Only enforce minimum of 1
+      },
+    },
+  }}
+  sx={{ width: 120 }}
+  onChange={(e) => {
+    const newIngredients = [...ingredients];
+    const value = Number(e.target.value);
+    // Only enforce minimum of 1, not the suggested minimum
+    newIngredients[index].quantity = value < 1 ? 1 : value;
+    setIngredients(newIngredients);
+    setValue(
+      `ingredients.${index}.quantity`,
+      value < 1 ? 1 : value,
+      {
+        shouldValidate: true,
+      }
+    );
+  }}
+  helperText={`Đề xuất: ${Math.ceil(watch('size') / 2)}`}
+/>
                             <Chip
                               label={formatMoney(
                                 ingredient?.price * ingredient.quantity

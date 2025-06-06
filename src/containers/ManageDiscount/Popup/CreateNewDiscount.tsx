@@ -115,6 +115,15 @@ const CreateNewDiscount: React.FC<CreateNewDiscountProps> = ({
               label="Phần trăm giảm giá"
               type="number"
               sx={{ mb: 2 }}
+              slotProps={{
+                input: {
+                  inputProps: {
+                    min: 1, // Prevent negative values
+                    max: 100, // Prevent values greater than 100
+                  },
+                },
+              }}
+
             />
             <RHFTextField
               name="pointCost"
