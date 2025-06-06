@@ -171,7 +171,7 @@ const TableBatchDetail = () => {
       label: "SL ban đầu (phần)",
       align: "right" as const,
       minWidth: 90,
-      render: (value: number, row: IngredientBatchDetail) => (
+      render: (value: number, _row: IngredientBatchDetail) => (
         <Typography
           variant="body2"
           fontWeight="medium"
