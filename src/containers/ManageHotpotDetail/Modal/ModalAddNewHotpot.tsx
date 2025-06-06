@@ -364,7 +364,7 @@ const ProductEditPopup: React.FC<ProductEditPopupProps> = ({
                       fontWeight="bold"
                       gutterBottom
                     >
-                      Mã Series:
+                      Thêm Nồi Lẩu
                     </Typography>
                     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                       <TextField

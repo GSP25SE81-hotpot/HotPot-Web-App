@@ -90,7 +90,7 @@ const TableHotpotDetail = () => {
           setOpenUpdate(true);
         }}
       >
-        Tạo loại nồi mới
+        Cập Nhật Nồi Lẩu
       </Button>
       <Grid2 container justifyContent="center" sx={{ mt: 4 }}>
         <Card
