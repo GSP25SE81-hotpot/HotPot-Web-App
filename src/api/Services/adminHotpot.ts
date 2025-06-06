@@ -40,6 +40,28 @@ const adminHotpot = {
       },
     });
   },
+
+  DeleteHotpot: (id: string, params: any) => {
+    const url = "/admin/hotpots/id";
+    const newUrl = url.replace("id", id);
+    return axiosClient.delete(newUrl, {
+      params,
+      paramsSerializer: {
+        indexes: null, // by default: false
+      },
+    });
+  },
+
+  DeleteHotpotSeries: (id: string, params: any) => {
+    const url = "/admin/hotpots/inventory/id";
+    const newUrl = url.replace("id", id);
+    return axiosClient.delete(newUrl, {
+      params,
+      paramsSerializer: {
+        indexes: null, // by default: false
+      },
+    });
+  },
 };
 
 export default adminHotpot;

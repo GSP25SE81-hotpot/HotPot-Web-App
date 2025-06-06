@@ -10,16 +10,16 @@ import {
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { toast } from "react-toastify";
-import adminComboAPI from "../../../api/Services/adminComboAPI";
+import adminHotpot from "../../../api/Services/adminHotpot";
 
-interface DeleteComboModalProps {
+interface DeleteSeriHotpotModalProps {
   open: boolean;
   onClose: () => void;
   onConfirm?: () => void;
   comboName?: any;
 }
 
-const DeleteComboModal: React.FC<DeleteComboModalProps> = ({
+const DeleteSeriHotpotModal: React.FC<DeleteSeriHotpotModalProps> = ({
   open,
   onClose,
   onConfirm,
@@ -32,21 +32,23 @@ const DeleteComboModal: React.FC<DeleteComboModalProps> = ({
   const handleDelete = async () => {
     setSubmitting(true);
     try {
-      await adminComboAPI.DeleteCombo(comboName.comboId);
+      await adminHotpot.DeleteHotpotSeries(comboName.hotPotInventoryId, {});
 
       if (onConfirm) {
         onConfirm();
       }
 
-      toast.success("Xóa Combo thành công");
+      toast.success("Xóa số seri nồi thành công");
       onClose();
     } catch (error: any) {
       console.error("Error deleting ingredient:", error);
       // Handle specific error cases
-      if (error.response?.status === 400) {
+      if (error.response?.status === 500) {
         toast.error(error.response.data.message);
+        onClose();
       } else {
-        toast.error("Xóa Combo thất bại");
+        toast.error("Xóa số seri nồi thất bại");
+        onClose();
       }
     } finally {
       setSubmitting(false);
@@ -54,10 +56,10 @@ const DeleteComboModal: React.FC<DeleteComboModalProps> = ({
   };
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Xác nhận xoá combo</DialogTitle>
+      <DialogTitle>Xác nhận xoá số seri nồi</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Bạn có chắc chắn muốn xoá combo{" "}
+          Bạn có chắc chắn muốn xoá số seri nồi{" "}
           <strong>{comboName.name || "này"}</strong>? Thao tác này không thể
           hoàn tác.
         </DialogContentText>
@@ -79,4 +81,4 @@ const DeleteComboModal: React.FC<DeleteComboModalProps> = ({
   );
 };
 
-export default DeleteComboModal;
+export default DeleteSeriHotpotModal;

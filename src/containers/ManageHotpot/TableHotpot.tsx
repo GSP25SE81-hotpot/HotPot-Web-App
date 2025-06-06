@@ -33,26 +33,30 @@ const TableHotpot = () => {
   };
 
   // Fetch ingredients data with pagination
+
+  const getListHotpot = async () => {
+    try {
+      const res: any = await adminHotpot.getListHotpot({
+        pageNumber: page + 1, // API expects 1-based index
+        pageSize: size,
+      });
+      setDataCombo(res?.items || []);
+
+      setDamagedevice(res?.damageDeviceCount);
+
+      setTotal(res?.totalCount || 0);
+    } catch (error: any) {
+      console.error("Error fetching ingredients:", error?.message);
+    }
+  };
+
   useEffect(() => {
-    const getListCombo = async () => {
-      try {
-        const res: any = await adminHotpot.getListHotpot({
-          pageNumber: page + 1, // API expects 1-based index
-          pageSize: size,
-        });
-        setDataCombo(res?.items || []);
-
-        setDamagedevice(res?.damageDeviceCount);
-
-        setTotal(res?.totalCount || 0);
-      } catch (error: any) {
-        console.error("Error fetching ingredients:", error?.message);
-      }
-    };
-
-    getListCombo();
+    getListHotpot();
   }, [page, size]);
 
+  const handleFetch = () => {
+    getListHotpot();
+  };
   const tableHeader = [
     { id: "name", label: "Tên nồi", align: "center" },
     { id: "material", label: "Vật liệu", align: "center" },
@@ -107,22 +111,22 @@ const TableHotpot = () => {
             Nồi cần bảo trì
           </Button>
           {damageDevice > 0 && (
-    <CartBadge
-      badgeContent={damageDevice}
-      color="error"
-      sx={{
-        "& .MuiBadge-badge": {
-          fontSize: "14px",
-          fontWeight: "bold",
-          animation: "bounce 1.2s infinite",
-        },
-        "@keyframes bounce": {
-          "0%, 100%": { transform: "scale(1)" },
-          "50%": { transform: "scale(1.2)" },
-        },
-      }}
-    />
-  )}
+            <CartBadge
+              badgeContent={damageDevice}
+              color="error"
+              sx={{
+                "& .MuiBadge-badge": {
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  animation: "bounce 1.2s infinite",
+                },
+                "@keyframes bounce": {
+                  "0%, 100%": { transform: "scale(1)" },
+                  "50%": { transform: "scale(1.2)" },
+                },
+              }}
+            />
+          )}
         </Stack>
       </Box>
     );
@@ -138,6 +142,8 @@ const TableHotpot = () => {
           <MenuActionTableHotpot
             hotpotData={selectedData}
             onOpenDetail={selecteData}
+            onOpenDelete={selecteData}
+            onFetch={handleFetch}
           />
         }
         eventAction={<EventAction />}
