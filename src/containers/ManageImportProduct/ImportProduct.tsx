@@ -313,6 +313,24 @@ const ImportProduct: React.FC = () => {
     return ingredient ? ingredient.name : `Ingredient ID: ${id}`;
   };
 
+  const getIngredientMeasurementValue = (id: number): string => {
+  const ingredient = ingredients.find((i) => i.ingredientId === id);
+  
+  // Check if the batch has a measurementValue property
+  const batch = model.batches.find(b => b.ingredientId === id);
+  if (batch && 'measurementValue' in batch) {
+    return `${(batch as any).measurementValue} ${ingredient?.unit || ''}`;
+  }
+  
+  // If not found in batch, try to get from ingredient
+  if (ingredient && 'measurementValue' in ingredient) {
+    return `${(ingredient as any).measurementValue} ${ingredient.unit}`;
+  }
+  
+  // Return just the unit if no measurement value is found
+  return ingredient ? ingredient.unit : '';
+};
+
   //get today
   const getTodayFormatted = (): string => {
     const today = new Date();
@@ -564,6 +582,10 @@ const ImportProduct: React.FC = () => {
                           >
                             Tên sản phẩm:{" "}
                             {getIngredientNameById(batch.ingredientId)}
+                            {" "}
+                            <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }}>
+                              ({getIngredientMeasurementValue(batch.ingredientId)})
+                            </Typography>
                           </Typography>
                           <IconButton
                             size="small"
