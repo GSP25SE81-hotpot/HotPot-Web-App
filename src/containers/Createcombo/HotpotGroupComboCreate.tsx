@@ -185,6 +185,15 @@ const HotpotGroupComboCreate: React.FC = () => {
     }
   }, [watch('size'), ingredients.length]);
 
+  React.useEffect(() => {
+  // Set a default name based on the group identifier
+  setValue('name', `Combo Group ${groupIdentifier || 'Default'}`);
+  
+  // Set a default image URL if needed
+  setValue('imageURLs', ['https://example.com/default-image.jpg']);
+}, [setValue, groupIdentifier]);
+
+
   const onSubmit = async (values: CreateHotPotCustomFormSchema) => {
     // Group ingredients by ingredientTypeId for the allowedIngredientTypes format
 
@@ -307,7 +316,19 @@ const HotpotGroupComboCreate: React.FC = () => {
                   Thông tin cơ bản
                 </Typography>
 
-                <RHFTextField name="name" label="Tên lẩu" sx={{ mb: 2 }} />
+                {/* Hidden fields */}
+                <div style={{ display: 'none' }}>
+                  <RHFTextField name="name" label="Tên lẩu" />
+                  <RHFUploadMultiFile
+                    name="imageURLs"
+                    label="Hình ảnh"
+                    maxSize={3145728}
+                    onDrop={handleDrop}
+                    onRemove={handleRemove}
+                    onRemoveAll={handleRemoveAll}
+                  />
+                </div>
+                {/* <RHFTextField name="name" label="Tên lẩu" sx={{ mb: 2 }} /> */}
 
                 <RHFTextField
                   name="size"
@@ -328,7 +349,7 @@ const HotpotGroupComboCreate: React.FC = () => {
                   }}
                 />
 
-                <Box sx={{ mt: 3 }}>
+                {/* <Box sx={{ mt: 3 }}>
                   <LabelStyle>Hình ảnh món lẩu</LabelStyle>
                   <RHFUploadMultiFile
                     showPreview
@@ -344,7 +365,7 @@ const HotpotGroupComboCreate: React.FC = () => {
                       {errors.imageURLs.message}
                     </Alert>
                   )}
-                </Box>
+                </Box> */}
               </StyledPaper>
             </Grid2>
 
