@@ -96,13 +96,15 @@ const HotpotGroupComboCreate: React.FC = () => {
 
   const handleModalSubmit = (selectedMeats: any[]) => {
     console.log(selectedMeats);
+    const currentSize = watch('size') || 0;
+    const minQuantity = Math.ceil(currentSize / 2) || 1;
 
-    const updatedIngredients = selectedMeats.map((ingredient, idx) => ({
-      id: idx,
-      ingredientTypeId: ingredient.ingredientTypeId || 0,
-      minQuantity: 1,
-      name: ingredient.name,
-    }));
+  const updatedIngredients = selectedMeats.map((ingredient, idx) => ({
+    id: idx,
+    ingredientTypeId: ingredient.ingredientTypeId || 0,
+    minQuantity: minQuantity,
+    name: ingredient.name,
+  }));
 
     setIngredients(updatedIngredients);
     setValue("ingredients", updatedIngredients);
@@ -111,7 +113,7 @@ const HotpotGroupComboCreate: React.FC = () => {
 
   const defaultValues: CreateHotPotCustomFormSchema = {
     name: "",
-    size: 0,
+    size: 1,
     imageURLs: [],
     tutorialVideo: {
       name: "",
@@ -124,7 +126,8 @@ const HotpotGroupComboCreate: React.FC = () => {
     name: Yup.string().trim().required("Bắt buộc có tên sản phẩm"),
     size: Yup.number()
       .required("Bắt buộc có kích thước")
-      .min(1, "Kích thước phải lớn hơn 0"),
+      .min(1, "Kích thước phải lớn hơn 0")
+      .typeError("Kích thước phải là số"),
     imageURLs: Yup.array().of(Yup.string()).min(1, "Bắt buộc có hình"),
     tutorialVideo: Yup.object().shape({
       name: Yup.string().required("Bắt buộc có tên video"),
@@ -136,7 +139,7 @@ const HotpotGroupComboCreate: React.FC = () => {
           ingredientTypeId: Yup.number().required("Thiếu loại nguyên liệu"),
           minQuantity: Yup.number()
             .required("Bắt buộc có số lượng tối thiểu")
-            .min(0, "Số lượng tối thiểu phải từ 0 trở lên"),
+            .min(1, "Số lượng tối thiểu phải từ 1 trở lên"), 
         })
       )
       .min(1, "Bắt buộc có ít nhất một nguyên liệu"),
@@ -155,6 +158,32 @@ const HotpotGroupComboCreate: React.FC = () => {
   } = methods;
 
   const values = watch();
+    React.useEffect(() => {
+    // Get the current size value
+    const currentSize = watch('size');
+    const minQuantity = Math.ceil(currentSize / 2) || 1;
+    
+    // Only update if we have ingredients and a valid size
+    if (ingredients.length > 0 && currentSize > 0) {
+      // Create a copy of ingredients with updated minQuantity where needed
+      const updatedIngredients = ingredients.map(ingredient => ({
+        ...ingredient,
+        minQuantity: Math.max(ingredient.minQuantity, minQuantity)
+      }));
+      
+      // Only update if something actually changed
+      if (JSON.stringify(updatedIngredients) !== JSON.stringify(ingredients)) {
+        setIngredients(updatedIngredients);
+        
+        // Update form values
+        updatedIngredients.forEach((ingredient, index) => {
+          setValue(`ingredients.${index}.minQuantity`, ingredient.minQuantity, {
+            shouldValidate: true
+          });
+        });
+      }
+    }
+  }, [watch('size'), ingredients.length]);
 
   const onSubmit = async (values: CreateHotPotCustomFormSchema) => {
     // Group ingredients by ingredientTypeId for the allowedIngredientTypes format
@@ -238,10 +267,12 @@ const HotpotGroupComboCreate: React.FC = () => {
   };
 
   const updateIngredientMinQuantity = (index: number, value: number) => {
+    const newValue = value < 1 ? 1 : value;
+    
     const newIngredients = [...ingredients];
-    newIngredients[index].minQuantity = value;
+    newIngredients[index].minQuantity = newValue;
     setIngredients(newIngredients);
-    setValue(`ingredients.${index}.minQuantity`, value, {
+    setValue(`ingredients.${index}.minQuantity`, newValue, {
       shouldValidate: true,
     });
   };
@@ -280,9 +311,21 @@ const HotpotGroupComboCreate: React.FC = () => {
 
                 <RHFTextField
                   name="size"
-                  label="Kích thước (khẩu phần)"
+                  label="Số lượng người ăn"
                   type="number"
                   sx={{ mb: 2 }}
+                  slotProps={{
+                    input: {
+                      inputProps: {
+                        min: 1, // Prevent negative values
+                      },
+                    },
+                  }}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    // Ensure value is at least 1
+                    setValue('size', value < 1 ? 1 : value);
+                  }}
                 />
 
                 <Box sx={{ mt: 3 }}>
@@ -466,7 +509,7 @@ const HotpotGroupComboCreate: React.FC = () => {
                               slotProps={{
                                 input: {
                                   inputProps: {
-                                    min: 0,
+                                    min: 1, // Only enforce minimum of 1
                                   },
                                 },
                               }}
@@ -479,11 +522,9 @@ const HotpotGroupComboCreate: React.FC = () => {
                                 },
                               }}
                               onChange={(e) => {
-                                updateIngredientMinQuantity(
-                                  index,
-                                  Number(e.target.value)
-                                );
+                                updateIngredientMinQuantity(index, Number(e.target.value));
                               }}
+                              helperText={`Đề xuất: ${Math.ceil(watch('size') / 2)}`}
                             />
                           </Box>
                         </Box>
