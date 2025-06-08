@@ -13,7 +13,7 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   PickupAssignmentRequestDto,
   RentOrderDetailResponse,
@@ -46,6 +46,8 @@ import {
 import staffService from "../../../api/Services/staffService";
 import vehicleService from "../../../api/Services/vehicleService";
 import { allocateStaffForPickup } from "../../../api/Services/rentalService";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
 
 interface AssignStaffDialogProps {
   open: boolean;
@@ -131,6 +133,15 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
       </DialogActions>
     </Dialog>
   );
+};
+
+const countHotPots = (items: any[]): number => {
+  return items.filter(
+    (item) =>
+      item.name.includes("Nồi Lẩu") ||
+      item.name.includes("Lẩu") ||
+      item.type === "Hotpot"
+  ).length;
 };
 
 const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
@@ -307,6 +318,26 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
 
   const isFormValid = selectedStaffId !== "" && selectedDetailId;
 
+  // Calculate hot pot count
+  const hotPotCount = countHotPots(pickup.equipmentItems);
+
+  // Sort vehicles based on hot pot count
+  const sortedVehicles = useMemo(() => {
+    const vehiclesCopy = [...vehicles];
+
+    if (hotPotCount >= 4) {
+      // Prioritize cars (type 2) when 4+ hot pots
+      return vehiclesCopy.sort((a, b) =>
+        a.type === 2 ? -1 : b.type === 2 ? 1 : 0
+      );
+    } else {
+      // Prioritize bikes (type 1) when fewer than 4 hot pots
+      return vehiclesCopy.sort((a, b) =>
+        a.type === 1 ? -1 : b.type === 1 ? 1 : 0
+      );
+    }
+  }, [vehicles, hotPotCount]);
+
   return (
     <>
       <StyledDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -413,11 +444,17 @@ const AssignStaffDialog: React.FC<AssignStaffDialogProps> = ({
                     </LoadingWrapper>
                   </MenuItem>
                 ) : (
-                  vehicles.map((vehicle) => (
+                  sortedVehicles.map((vehicle) => (
                     <VehicleMenuItem
                       key={vehicle.vehicleId}
                       value={vehicle.vehicleId}
+                      vehicleType={vehicle.type}
                     >
+                      {vehicle.type === 2 ? (
+                        <DirectionsCarIcon className="vehicle-icon" />
+                      ) : (
+                        <TwoWheelerIcon className="vehicle-icon" />
+                      )}
                       {vehicle.name}
                     </VehicleMenuItem>
                   ))
