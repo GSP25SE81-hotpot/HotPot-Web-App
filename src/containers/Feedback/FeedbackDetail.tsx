@@ -23,11 +23,11 @@ import { formatDateFunc } from "../../utils/fn";
 
 // Icons
 import PersonIcon from "@mui/icons-material/Person";
-import EmailIcon from "@mui/icons-material/Email";
-import PhoneIcon from "@mui/icons-material/Phone";
+// import EmailIcon from "@mui/icons-material/Email";
+// import PhoneIcon from "@mui/icons-material/Phone";
 import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import FeedbackIcon from "@mui/icons-material/Feedback";
+// import FeedbackIcon from "@mui/icons-material/Feedback";
 import CommentIcon from "@mui/icons-material/Comment";
 // import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 // import CancelIcon from "@mui/icons-material/Cancel";
@@ -213,7 +213,7 @@ const FeedbackDetail: React.FC = () => {
                         </Typography>
                       </InfoItem>
                     </Grid2>
-                    <Grid2 size={{ xs: 12, md: 6 }}>
+                    {/* <Grid2 size={{ xs: 12, md: 6 }}>
                       <InfoItem>
                         <PhoneIcon />
                         <Typography>
@@ -230,7 +230,7 @@ const FeedbackDetail: React.FC = () => {
                           {dataFeedback?.email || "Không có thông tin"}
                         </Typography>
                       </InfoItem>
-                    </Grid2>
+                    </Grid2> */}
                     <Grid2 size={{ xs: 12, md: 6 }}>
                       <InfoItem>
                         <ShoppingBasketIcon />
@@ -258,7 +258,7 @@ const FeedbackDetail: React.FC = () => {
                   }}
                 >
                   <Grid2 container spacing={3}>
-                    <Grid2 size={{ xs: 12 }}>
+                    {/* <Grid2 size={{ xs: 12 }}>
                       <InfoItem>
                         <FeedbackIcon />
                         <Typography>
@@ -266,7 +266,7 @@ const FeedbackDetail: React.FC = () => {
                           {dataFeedback?.title || "Không có thông tin"}
                         </Typography>
                       </InfoItem>
-                    </Grid2>
+                    </Grid2> */}
                     <Grid2 size={{ xs: 12 }}>
                       <InfoItem alignItems="flex-start">
                         <CommentIcon sx={{ mt: 0.5 }} />
