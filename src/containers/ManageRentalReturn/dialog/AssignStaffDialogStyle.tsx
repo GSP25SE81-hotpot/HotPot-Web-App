@@ -265,9 +265,27 @@ export const StaffMenuItem = styled(MenuItem, {
 }));
 
 // Vehicle item styling for the dropdown
-export const VehicleMenuItem = styled(MenuItem)(({ theme }) => ({
-  padding: theme.spacing(1.5, 2),
-}));
+export const VehicleMenuItem = styled(MenuItem)<{ vehicleType?: number }>(
+  ({ theme, vehicleType }) => ({
+    display: "flex",
+    alignItems: "center",
+    padding: theme.spacing(1.5, 2),
+    fontWeight: 500,
+    color: theme.palette.text.primary,
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.primary.main, 0.04),
+    },
+    "& .vehicle-icon": {
+      marginRight: theme.spacing(1.5),
+      color:
+        vehicleType === 2
+          ? theme.palette.primary.main
+          : theme.palette.secondary.main,
+      fontSize: "1.2rem",
+    },
+  })
+);
 
 // Loading state for the dialog
 export const DialogLoadingOverlay = styled(Box)(({ theme }) => ({
