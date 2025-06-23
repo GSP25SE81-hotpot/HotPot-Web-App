@@ -4,7 +4,7 @@ import axios from "axios";
 const axiosClient = axios.create({
   // baseURL: `https://hpty.vinhuser.one/api`,
   // baseURL: `https://localhost:7163/api`,
-  baseURL: `https://saringan25-001-site1.ktempurl.com/index.html/api`,
+  baseURL: `https://saringan25-001-site1.ktempurl.com/api`,
   // https://saringan25-001-site1.ktempurl.com/index.html
   headers: {
     "Content-Type": "application/json",
