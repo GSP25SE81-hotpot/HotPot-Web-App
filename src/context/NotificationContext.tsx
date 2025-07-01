@@ -95,7 +95,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     const connection = new signalR.HubConnectionBuilder()
       // https://localhost:7163
       // https://hpty.vinhuser.one
-      .withUrl("https://hpty.nexminial.cloud/notificationHub", {
+      .withUrl("https://saringan25-001-site1.ktempurl.com/notificationHub", {
         accessTokenFactory: () => auth.accessToken || "",
       })
       .withAutomaticReconnect()
