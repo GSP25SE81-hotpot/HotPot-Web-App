@@ -117,7 +117,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = () => {
     }
 
     const newConnection = new HubConnectionBuilder()
-      .withUrl("https://hpty.nexminial.cloud/notificationHub", {
+      .withUrl("https://saringan25-001-site1.ktempurl.com/notificationHub", {
         accessTokenFactory: () => {
           if (!auth.accessToken) {
             throw new Error("No access token available");
