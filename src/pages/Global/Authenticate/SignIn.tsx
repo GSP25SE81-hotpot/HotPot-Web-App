@@ -154,7 +154,7 @@ export const AuthenticatePage = () => {
                     toast.info(`Using tài khoản ${account.role} để Demo `);
                   }}
                 >
-                  Use Demo
+                  Demo
                 </button>
               </div>
             ))}
