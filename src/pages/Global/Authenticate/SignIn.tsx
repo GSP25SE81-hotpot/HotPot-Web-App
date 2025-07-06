@@ -15,6 +15,8 @@ import { toast } from "react-toastify";
 import authApi from "../../../api/authAPI";
 import useAuth from "../../../hooks/useAuth";
 import styles from "./authenticate.module.scss";
+import { FaUserShield } from "react-icons/fa"; 
+
 
 export const AuthenticatePage = () => {
   const navigate = useNavigate();
@@ -30,7 +32,11 @@ export const AuthenticatePage = () => {
       .required("Mật khẩu không được để trống!")
       .min(4, "Độ dài mật khẩu phải tối thiểu 4 kí tự"),
   });
-
+  const demoAccounts = [
+    { role: "Admin", phoneNumber: "987654321", password: "123456" },
+    { role: "Manager", phoneNumber: "0888888888", password: "123456" },
+    { role: "Staff", phoneNumber: "777777777", password: "123456" }
+  ];
   const formik = useFormik({
     initialValues: {
       phoneNumber: "",
@@ -123,6 +129,40 @@ export const AuthenticatePage = () => {
             Đăng nhập
           </button>
         </form>
+        
+      {/* Demo Accounts Section */}
+        <div className={cx("demo-section")}>
+          <div className={cx("demo-header")}>
+            <FaUserShield className={cx("demo-icon")} />
+            <h3>Tài khoản Demo</h3>
+          </div>
+          
+          <div className={cx("demo-accounts")}>
+            {demoAccounts.map((account, index) => (
+              <div key={index} className={cx("demo-account")}>
+                <div className={cx("account-role")}>{account.role}</div>
+                <div className={cx("account-details")}>
+                  <div><strong>Tài khoản:</strong> {account.phoneNumber}</div>
+                  <div><strong>Mật khẩu:</strong> {account.password}</div>
+                </div>
+                <button
+                  type="button"
+                  className={cx("demo-btn")}
+                  onClick={() => {
+                    formik.setFieldValue("phoneNumber", account.phoneNumber);
+                    formik.setFieldValue("password", account.password);
+                    toast.info(`Using tài khoản ${account.role} để Demo `);
+                  }}
+                >
+                  Use Demo
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className={cx("demo-note")}>
+            <p>Note: Đây là những tài khoản với những quyền truy cập khác nhau</p>
+          </div>
+        </div>
       </div>
     </div>
   );
