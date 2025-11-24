@@ -159,8 +159,10 @@ export const AuthenticatePage = () => {
               </div>
             ))}
           </div>
+
           <div className={cx("demo-note")}>
             <p>Note: Đây là những tài khoản với những quyền truy cập khác nhau</p>
+            <p>Api Backend sẽ tự tắt khi không được sử dụng, vui lòng chờ 30 giây để khởi động</p>
           </div>
         </div>
       </div>
