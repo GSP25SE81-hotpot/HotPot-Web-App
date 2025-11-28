@@ -137,4 +137,113 @@
   .register-link a:hover {
     text-decoration: underline;
   }
-  
+
+// Demo Accounts Section Styles
+.demo-section {
+  margin-top: 30px;
+  padding-top: 25px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.demo-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+  }
+}
+
+.demo-icon {
+  font-size: 20px;
+  color: #fff;
+}
+
+.demo-accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.demo-account {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px 15px;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+}
+
+.account-role {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 5px 12px;
+  border-radius: 20px;
+  min-width: 70px;
+  text-align: center;
+}
+
+.account-details {
+  flex: 1;
+  margin: 0 15px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+
+  div {
+    margin: 2px 0;
+  }
+
+  strong {
+    color: #fff;
+  }
+}
+
+.demo-btn {
+  background: #fff;
+  color: #333;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #333;
+    color: #fff;
+  }
+}
+
+.demo-note {
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  border-left: 3px solid rgba(255, 255, 255, 0.4);
+
+  p {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 5px 0;
+    line-height: 1.5;
+
+    &:first-child {
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+}
