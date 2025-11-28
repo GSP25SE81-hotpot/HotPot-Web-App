@@ -64,6 +64,7 @@ export const StyledCardContent = styled(CardContent)(({ theme }) => ({
 export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
   maxHeight: "70vh",
   overflow: "auto",
+  WebkitOverflowScrolling: "touch",
   "&::-webkit-scrollbar": {
     width: "8px",
     height: "8px",
@@ -81,11 +82,18 @@ export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
   },
   "& .MuiTable-root": {
     minWidth: 650,
+    [theme.breakpoints.down("sm")]: {
+      minWidth: 500,
+    },
   },
   "& .MuiTableCell-root": {
     borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
     padding: theme.spacing(1.5),
     fontSize: "0.875rem",
+    [theme.breakpoints.down("sm")]: {
+      padding: theme.spacing(1),
+      fontSize: "0.75rem",
+    },
   },
   "& .MuiTableHead-root": {
     backgroundColor: alpha(theme.palette.primary.main, 1),
@@ -98,6 +106,10 @@ export const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
       color: "#ffffff",
       backgroundColor: alpha(theme.palette.primary.main, 0.04),
       borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+      [theme.breakpoints.down("sm")]: {
+        fontSize: "0.75rem",
+        padding: theme.spacing(1),
+      },
     },
   },
   "& .MuiTableBody-root": {
@@ -143,10 +155,29 @@ export const StyledTablePagination = styled(TablePagination, {
   "& .MuiTablePagination-toolbar": {
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
+    flexWrap: "wrap",
+    justifyContent: "center",
+    [theme.breakpoints.down("sm")]: {
+      paddingLeft: theme.spacing(1),
+      paddingRight: theme.spacing(1),
+    },
   },
   "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
     fontSize: "0.875rem",
     color: theme.palette.text.secondary,
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "0.75rem",
+    },
+  },
+  "& .MuiTablePagination-select": {
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "0.75rem",
+    },
+  },
+  "& .MuiTablePagination-actions": {
+    [theme.breakpoints.down("sm")]: {
+      marginLeft: theme.spacing(1),
+    },
   },
 }));
 
@@ -210,6 +241,12 @@ export const HeaderContainer = styled(Box)(({ theme }) => ({
   alignItems: "center",
   flexWrap: "wrap",
   gap: theme.spacing(2),
+  padding: theme.spacing(0, 2),
+  [theme.breakpoints.down("sm")]: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: theme.spacing(1),
+  },
 }));
 
 export const StyledAlert = styled(Alert)(() => ({

@@ -237,7 +237,14 @@ const CTable: React.FC<CTableProps> = ({
   const hasData = data && data.length > 0;
 
   return (
-    <Box sx={{ minWidth: "600px", mx: "auto", p: 2, ...sx }}>
+    <Box sx={{ 
+      width: "100%",
+      minWidth: { xs: "100%", sm: "100%", md: "600px" }, 
+      mx: "auto", 
+      p: { xs: 1, sm: 2 },
+      overflowX: "auto",
+      ...sx 
+    }}>
       <StyledCard>
         {/* Header Section */}
         <HeaderContainer>

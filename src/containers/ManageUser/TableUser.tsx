@@ -33,9 +33,9 @@ const SearchTool: React.FC<searchToolInterface> = ({
   roleArray,
 }) => {
   return (
-    <Box sx={{ p: 2 }}>
-      <Grid container spacing={2}>
-        <Grid size={4}>
+    <Box sx={{ p: { xs: 1, sm: 2 } }}>
+      <Grid container spacing={{ xs: 1, sm: 2 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <TextField
             fullWidth
             size="small"
@@ -46,7 +46,7 @@ const SearchTool: React.FC<searchToolInterface> = ({
             }
           />
         </Grid>
-        <Grid size={4}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <FormControl fullWidth size="small">
             <InputLabel id="demo-simple-select-label" size="small">
               Chức vụ
@@ -68,7 +68,7 @@ const SearchTool: React.FC<searchToolInterface> = ({
             </Select>
           </FormControl>
         </Grid>
-        <Grid size={4}>
+        <Grid size={{ xs: 12, sm: 12, md: 4 }}>
           <TextField
             fullWidth
             size="small"

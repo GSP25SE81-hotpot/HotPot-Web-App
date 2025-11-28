@@ -21,6 +21,12 @@ export const DetailPageContainer = styled(Box)(({ theme }) => ({
     0.95
   )}, ${alpha(theme.palette.background.paper, 0.95)})`,
   minHeight: "100vh",
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(2),
+  },
+  [theme.breakpoints.down("xs")]: {
+    padding: theme.spacing(1),
+  },
 }));
 
 // Back button with hover effect
@@ -33,6 +39,10 @@ export const BackButton = styled(Button)(({ theme }) => ({
   "&:hover": {
     transform: "translateX(-4px)",
     backgroundColor: alpha(theme.palette.primary.main, 0.1),
+  },
+  [theme.breakpoints.down("sm")]: {
+    marginBottom: theme.spacing(2),
+    fontSize: "0.875rem",
   },
 }));
 
@@ -47,6 +57,11 @@ export const HeaderPaper = styled(Paper)(({ theme }) => ({
   )}, ${alpha(theme.palette.background.default, 0.9)})`,
   backdropFilter: "blur(8px)",
   boxShadow: `0 8px 32px 0 ${alpha(theme.palette.common.black, 0.08)}`,
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    borderRadius: 12,
+  },
 }));
 
 // Header container with flex layout
@@ -59,6 +74,7 @@ export const HeaderContainer = styled(Box)(({ theme }) => ({
     flexDirection: "column",
     alignItems: "flex-start",
     gap: theme.spacing(2),
+    marginBottom: theme.spacing(2),
   },
 }));
 
@@ -69,6 +85,9 @@ export const OrderTitle = styled(Typography)(({ theme }) => ({
   background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "1.25rem",
+  },
 }));
 
 // Status chip with dynamic color based on status
@@ -113,6 +132,11 @@ export const OrderInfoGrid = styled(Box)(({ theme }) => ({
   gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
   gap: theme.spacing(3),
   marginBottom: theme.spacing(3),
+  [theme.breakpoints.down("sm")]: {
+    gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+    gap: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+  },
 }));
 
 // Order info item
@@ -128,6 +152,9 @@ export const InfoLabel = styled(Typography)(({ theme }) => ({
   fontWeight: 500,
   color: theme.palette.text.secondary,
   marginBottom: theme.spacing(0.5),
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.7rem",
+  },
 }));
 
 // Value for order info
@@ -135,6 +162,10 @@ export const InfoValue = styled(Typography)(({ theme }) => ({
   fontSize: "1rem",
   fontWeight: 600,
   color: theme.palette.text.primary,
+  wordBreak: "break-word",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.875rem",
+  },
 }));
 
 // Action buttons container
@@ -143,6 +174,10 @@ export const ActionButtonsContainer = styled(Box)(({ theme }) => ({
   flexWrap: "wrap",
   gap: theme.spacing(2),
   marginTop: theme.spacing(3),
+  [theme.breakpoints.down("sm")]: {
+    gap: theme.spacing(1),
+    marginTop: theme.spacing(2),
+  },
 }));
 
 // Action button
@@ -155,6 +190,10 @@ export const ActionButton = styled(Button)(({ theme }) => ({
   "&:hover": {
     transform: "translateY(-2px)",
     boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
+  },
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(0.75, 1.5),
+    fontSize: "0.8rem",
   },
 }));
 
@@ -169,6 +208,9 @@ export const DetailCard = styled(Card)(({ theme }) => ({
     transform: "translateY(-4px)",
     boxShadow: `0 12px 24px 0 ${alpha(theme.palette.common.black, 0.12)}`,
   },
+  [theme.breakpoints.down("sm")]: {
+    borderRadius: 12,
+  },
 }));
 
 // Card header with gradient background
@@ -181,12 +223,21 @@ export const StyledCardHeader = styled(CardHeader)(({ theme }) => ({
     fontSize: "1.25rem",
     fontWeight: 600,
     color: theme.palette.primary.main,
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "1rem",
+    },
+  },
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(2),
   },
 }));
 
 // Card content with proper padding
 export const StyledCardContent = styled(CardContent)(({ theme }) => ({
   padding: theme.spacing(3),
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(2),
+  },
 }));
 
 // Customer name with gradient text
@@ -200,6 +251,9 @@ export const CustomerName = styled(Typography)(({ theme }) => ({
   )})`,
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "1rem",
+  },
 }));
 
 // Customer email
@@ -207,6 +261,11 @@ export const CustomerEmail = styled(Typography)(({ theme }) => ({
   fontSize: "0.9rem",
   color: theme.palette.text.secondary,
   marginBottom: theme.spacing(2),
+  wordBreak: "break-word",
+  [theme.breakpoints.down("sm")]: {
+    fontSize: "0.8rem",
+    marginBottom: theme.spacing(1),
+  },
 }));
 
 // Section title
