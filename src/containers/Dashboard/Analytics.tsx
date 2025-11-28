@@ -176,8 +176,8 @@ const Analytics: React.FC = () => {
   console.log(monthlyDatas);
 
   return (
-    <Box sx={{ width: "100%", height: "100%" }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
+    <Box sx={{ width: "100%", height: "100%", overflow: "hidden" }}>
+      <Typography variant="h4" sx={{ mb: 3, fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}>
         Thống kê cửa hàng
       </Typography>
 
@@ -199,55 +199,55 @@ const Analytics: React.FC = () => {
       </Box>
 
       {/* Overview Cards */}
-      <Grid2 container spacing={3} sx={{ mb: 4 }}>
-        <Grid2 size={{ mobile: 12, tablet: 6, desktop: 3 }}>
+      <Grid2 container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 6, lg: 3 }}>
           <Card elevation={3} sx={{ height: "100%" }}>
-            <CardContent sx={{ textAlign: "center" }}>
+            <CardContent sx={{ textAlign: "center", p: { xs: 2, sm: 3 } }}>
               <AutoAwesomeMosaicIcon
-                sx={{ fontSize: 40, color: "primary.main", mb: 1 }}
+                sx={{ fontSize: { xs: 32, sm: 40 }, color: "primary.main", mb: 1 }}
               />
-              <Typography variant="h6">Tổng số đơn hàng</Typography>
-              <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+              <Typography variant="h6" sx={{ fontSize: { xs: "0.9rem", sm: "1.25rem" } }}>Tổng số đơn hàng</Typography>
+              <Typography variant="h4" sx={{ fontWeight: "bold", fontSize: { xs: "1.5rem", sm: "2rem" } }}>
                 {dashboardData.overallMetrics.totalOrders}
               </Typography>
             </CardContent>
           </Card>
         </Grid2>
 
-        <Grid2 size={{ mobile: 12, tablet: 6, desktop: 3 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 6, lg: 3 }}>
           <Card elevation={3} sx={{ height: "100%" }}>
-            <CardContent sx={{ textAlign: "center" }}>
+            <CardContent sx={{ textAlign: "center", p: { xs: 2, sm: 3 } }}>
               <MonetizationOn
-                sx={{ fontSize: 40, color: "success.main", mb: 1 }}
+                sx={{ fontSize: { xs: 32, sm: 40 }, color: "success.main", mb: 1 }}
               />
-              <Typography variant="h6">Tổng doanh thu</Typography>
-              <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+              <Typography variant="h6" sx={{ fontSize: { xs: "0.9rem", sm: "1.25rem" } }}>Tổng doanh thu</Typography>
+              <Typography variant="h4" sx={{ fontWeight: "bold", fontSize: { xs: "1rem", sm: "1.5rem", md: "2rem" }, wordBreak: "break-word" }}>
                 {formatCurrency(dashboardData.overallMetrics.totalRevenue)}
               </Typography>
             </CardContent>
           </Card>
         </Grid2>
 
-        <Grid2 size={{ mobile: 12, tablet: 6, desktop: 3 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 6, lg: 3 }}>
           <Card elevation={3} sx={{ height: "100%" }}>
-            <CardContent sx={{ textAlign: "center" }}>
-              <People sx={{ fontSize: 40, color: "info.main", mb: 1 }} />
-              <Typography variant="h6">Tổng khách hàng</Typography>
-              <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+            <CardContent sx={{ textAlign: "center", p: { xs: 2, sm: 3 } }}>
+              <People sx={{ fontSize: { xs: 32, sm: 40 }, color: "info.main", mb: 1 }} />
+              <Typography variant="h6" sx={{ fontSize: { xs: "0.9rem", sm: "1.25rem" } }}>Tổng khách hàng</Typography>
+              <Typography variant="h4" sx={{ fontWeight: "bold", fontSize: { xs: "1.5rem", sm: "2rem" } }}>
                 {dashboardData.overallMetrics.totalCustomers}
               </Typography>
             </CardContent>
           </Card>
         </Grid2>
 
-        <Grid2 size={{ mobile: 12, tablet: 6, desktop: 3 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 6, lg: 3 }}>
           <Card elevation={3} sx={{ height: "100%" }}>
-            <CardContent sx={{ textAlign: "center" }}>
+            <CardContent sx={{ textAlign: "center", p: { xs: 2, sm: 3 } }}>
               <AttachMoney
-                sx={{ fontSize: 40, color: "warning.main", mb: 1 }}
+                sx={{ fontSize: { xs: 32, sm: 40 }, color: "warning.main", mb: 1 }}
               />
-              <Typography variant="h6">Giá trị đơn trung bình</Typography>
-              <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+              <Typography variant="h6" sx={{ fontSize: { xs: "0.9rem", sm: "1.25rem" } }}>Giá trị đơn trung bình</Typography>
+              <Typography variant="h4" sx={{ fontWeight: "bold", fontSize: { xs: "1rem", sm: "1.5rem", md: "2rem" }, wordBreak: "break-word" }}>
                 {formatCurrency(dashboardData.overallMetrics.averageOrderValue)}
               </Typography>
             </CardContent>
@@ -256,33 +256,25 @@ const Analytics: React.FC = () => {
       </Grid2>
 
       {/* Charts Section */}
-      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>
+      <Paper elevation={3} sx={{ p: { xs: 1, sm: 2, md: 3 }, mb: 4 }}>
+        <Typography variant="h5" sx={{ mb: 2, fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" } }}>
           Biểu đồ doanh thu và đơn hàng theo tháng
         </Typography>
 
-        <ResponsiveContainer width="100%" height={400}>
-          <ComposedChart
-            data={monthlyDatas}
-            margin={{ top: 15, right: 30, left: 30, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="monthName"
-              label={{
-                value: "Tháng",
-                position: "insideBottomRight",
-                offset: -20,
-              }}
-            />
+        <Box sx={{ width: "100%", overflowX: "auto" }}>
+          <ResponsiveContainer width="100%" height={350} minWidth={500}>
+            <ComposedChart
+              data={monthlyDatas}
+              margin={{ top: 15, right: 20, left: 10, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="monthName"
+                tick={{ fontSize: 10 }}
+              />
             <YAxis
               yAxisId="left"
-              label={{
-                value: "Doanh thu (VND)",
-                angle: -90,
-                position: "insideLeft",
-                dx: -30,
-              }}
+              tick={{ fontSize: 10 }}
               tickFormatter={(value) =>
                 new Intl.NumberFormat("vi-VN").format(value)
               }
@@ -290,11 +282,7 @@ const Analytics: React.FC = () => {
             <YAxis
               yAxisId="right"
               orientation="right"
-              label={{
-                value: "Số đơn hàng",
-                angle: -90,
-                position: "insideRight",
-              }}
+              tick={{ fontSize: 10 }}
             />
             <Tooltip
               formatter={(value, name) => {
@@ -318,16 +306,17 @@ const Analytics: React.FC = () => {
             />
           </ComposedChart>
         </ResponsiveContainer>
+        </Box>
       </Paper>
 
       {/* Order Status Section */}
-      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h5" sx={{ mb: 3 }}>
+      <Paper elevation={3} sx={{ p: { xs: 1, sm: 2, md: 3 }, mb: 4 }}>
+        <Typography variant="h5" sx={{ mb: 3, fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" } }}>
           Trạng thái đơn hàng
         </Typography>
 
-        <Grid2 container spacing={3}>
-          <Grid2 size={{ mobile: 12, desktop: 5 }}>
+        <Grid2 container spacing={{ xs: 2, sm: 3 }}>
+          <Grid2 size={{ xs: 12, md: 5 }}>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -335,7 +324,7 @@ const Analytics: React.FC = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  outerRadius={120}
+                  outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
                   label={renderCustomizedLabel}
@@ -359,8 +348,8 @@ const Analytics: React.FC = () => {
             </ResponsiveContainer>
           </Grid2>
 
-          <Grid2 size={{ mobile: 12, desktop: 7 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
+          <Grid2 size={{ xs: 12, md: 7 }}>
+            <Typography variant="h6" sx={{ mb: 2, fontSize: { xs: "0.9rem", sm: "1.25rem" } }}>
               Chi tiết trạng thái
             </Typography>
 
@@ -370,7 +359,7 @@ const Analytics: React.FC = () => {
                   key={index}
                   sx={{
                     mb: 2,
-                    p: 2,
+                    p: { xs: 1, sm: 2 },
                     bgcolor: "background.paper",
                     borderRadius: 1,
                   }}
@@ -380,9 +369,11 @@ const Analytics: React.FC = () => {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
+                      flexWrap: "wrap",
+                      gap: 1,
                     }}
                   >
-                    <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: "bold", fontSize: { xs: "0.875rem", sm: "1rem" } }}>
                       {status.status}
                     </Typography>
                     <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -395,7 +386,7 @@ const Analytics: React.FC = () => {
                           mr: 1,
                         }}
                       />
-                      <Typography>{status.percentage.toFixed(2)}%</Typography>
+                      <Typography sx={{ fontSize: { xs: "0.75rem", sm: "1rem" } }}>{status.percentage.toFixed(2)}%</Typography>
                     </Box>
                   </Box>
 
@@ -404,12 +395,14 @@ const Analytics: React.FC = () => {
                       display: "flex",
                       justifyContent: "space-between",
                       mt: 1,
+                      flexWrap: "wrap",
+                      gap: 1,
                     }}
                   >
-                    <Typography variant="body2">
+                    <Typography variant="body2" sx={{ fontSize: { xs: "0.7rem", sm: "0.875rem" } }}>
                       Số lượng: {status.value}
                     </Typography>
-                    <Typography variant="body2">
+                    <Typography variant="body2" sx={{ fontSize: { xs: "0.7rem", sm: "0.875rem" } }}>
                       Doanh thu: {formatCurrency(status.revenue)}
                     </Typography>
                   </Box>
@@ -421,17 +414,24 @@ const Analytics: React.FC = () => {
       </Paper>
 
       {/* Product Categories Section */}
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>
+      <Paper elevation={3} sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
+        <Typography variant="h5" sx={{ mb: 2, fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" } }}>
           Doanh thu theo loại sản phẩm
         </Typography>
 
-        <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 3 }}>
-          <Tab label="Tổng quan" />
-          <Tab label="Nguyên liệu" />
-          <Tab label="Combo" />
-          <Tab label="Đồ dùng" />
-          <Tab label="Nồi lẩu" />
+        <Tabs 
+          value={tabValue} 
+          onChange={handleTabChange} 
+          sx={{ mb: 3 }}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+        >
+          <Tab label="Tổng quan" sx={{ fontSize: { xs: "0.7rem", sm: "0.875rem" }, minWidth: { xs: 60, sm: 90 } }} />
+          <Tab label="Nguyên liệu" sx={{ fontSize: { xs: "0.7rem", sm: "0.875rem" }, minWidth: { xs: 60, sm: 90 } }} />
+          <Tab label="Combo" sx={{ fontSize: { xs: "0.7rem", sm: "0.875rem" }, minWidth: { xs: 60, sm: 90 } }} />
+          <Tab label="Đồ dùng" sx={{ fontSize: { xs: "0.7rem", sm: "0.875rem" }, minWidth: { xs: 60, sm: 90 } }} />
+          <Tab label="Nồi lẩu" sx={{ fontSize: { xs: "0.7rem", sm: "0.875rem" }, minWidth: { xs: 60, sm: 90 } }} />
         </Tabs>
 
         {tabValue === 0 && (

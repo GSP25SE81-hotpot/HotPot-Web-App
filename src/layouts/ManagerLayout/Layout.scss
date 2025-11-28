@@ -1,5 +1,6 @@
 .staff-layout {
     display: flex;
+    min-height: 100vh;
   }
   
   .main-content {
@@ -7,13 +8,21 @@
     padding: 24px;
     margin-top: 20px;
     min-height: 100vh;
-    transition: margin 0.3s ease;
+    transition: margin 0.3s ease, width 0.3s ease;
+    overflow-x: hidden;
   }
   
   @media (max-width: 768px) {
     .main-content {
-      margin-left: 0;
-      padding: 16px;
+      margin-left: 0 !important;
+      width: 100% !important;
+      padding: 12px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .main-content {
+      padding: 8px;
     }
   }
   
